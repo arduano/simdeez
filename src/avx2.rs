@@ -9,10 +9,7 @@ pub struct Avx2;
 impl Simd for Avx2 {
     type Vi32 = __m256i;
     type Vf32 = __m256;
-    #[inline(always)]
-    fn get_width_bytes() -> usize {
-        8
-    }
+    const WIDTH_BYTES: usize = 8*4;
     #[inline(always)]
     unsafe fn set_lane_ps(a: Self::Vf32, value: f32, i: usize) {
         let mut arr = mem::transmute::<__m256, [f32; 8]>(a);
@@ -25,12 +22,12 @@ impl Simd for Avx2 {
     }
     #[inline(always)]
     unsafe fn get_lane_ps(a: Self::Vf32, i: usize) -> f32 {
-        let mut arr = mem::transmute::<__m256, [f32; 8]>(a);
+        let arr = mem::transmute::<__m256, [f32; 8]>(a);
         arr[i]
     }
     #[inline(always)]
     unsafe fn get_lane_epi32(a: Self::Vi32, i: usize) -> i32 {
-        let mut arr = mem::transmute::<__m256i, [i32; 8]>(a);
+        let arr = mem::transmute::<__m256i, [i32; 8]>(a);
         arr[i]
     }
     #[inline(always)]
@@ -124,7 +121,11 @@ impl Simd for Avx2 {
     }
     #[inline(always)]
     unsafe fn loadu_ps(a: &f32) -> Self::Vf32 {
-        _mm256_loadu_ps(a)
+        _mm256_loadu_ps(a as *const f32)
+    }
+    #[inline(always)]
+    unsafe fn storeu_ps(a: &mut f32, b: Self::Vf32) {
+        _mm256_storeu_ps(a as *mut f32, b)
     }
     #[inline(always)]
     unsafe fn max_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
@@ -169,10 +170,6 @@ impl Simd for Avx2 {
     #[inline(always)]
     unsafe fn srai_epi32(a: Self::Vi32, b: i32) -> Self::Vi32 {
         _mm256_srai_epi32(a, b)
-    }
-    #[inline(always)]
-    unsafe fn storeu_ps(a: &mut f32, b: Self::Vf32) {
-        _mm256_storeu_ps(a, b)
     }
     #[inline(always)]
     unsafe fn sub_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {

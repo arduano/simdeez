@@ -15,11 +15,12 @@ use std::arch::x86::*;
 #[cfg(target_arch = "x86_64")]
 use std::arch::x86_64::*;
 
-trait Simd {
+pub trait Simd {
     type Vi32: Copy + Debug;
     type Vf32: Copy + Debug;
 
-    fn get_width_bytes() -> usize;
+    const WIDTH_BYTES: usize;
+
     unsafe fn set_lane_epi32(a: Self::Vi32, value: i32, i: usize);
     unsafe fn set_lane_ps(a: Self::Vf32, value: f32, i: usize);
     unsafe fn get_lane_epi32(a: Self::Vi32, i: usize) -> i32;
@@ -48,6 +49,7 @@ trait Simd {
     unsafe fn i32gather_epi32(arr: &[i32], index: Self::Vi32) -> Self::Vi32;
     unsafe fn i32gather_ps(arr: &[f32], index: Self::Vi32) -> Self::Vf32;
     unsafe fn loadu_ps(a: &f32) -> Self::Vf32;
+    unsafe fn storeu_ps(a: &mut f32, b: Self::Vf32);
     unsafe fn max_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn min_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn mul_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
@@ -59,7 +61,6 @@ trait Simd {
     unsafe fn setzero_ps() -> Self::Vf32;
     unsafe fn setzero_si() -> Self::Vi32;
     unsafe fn srai_epi32(a: Self::Vi32, imm8: i32) -> Self::Vi32;
-    unsafe fn storeu_ps(a: &mut f32, Self::Vf32);
     unsafe fn sub_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     unsafe fn sub_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn xor_si(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
@@ -70,28 +71,27 @@ trait Simd {
 unsafe fn sample<S: Simd>() -> f32 {
     let a = S::set1_ps(1.5);
     let b = S::set1_ps(2.5);
-    // function names mirror the intel intrinsics, minus the _mm_ part 
-    let mut c = S::add_ps(a,b);
+    // function names mirror the intel intrinsics, minus the _mm_ part
+    let mut c = S::add_ps(a, b);
     // If your SIMD instruction set doesn't have floor, SIMDEEZ handles it for you
     c = S::floor_ps(c);
     // You can get the width of the instruction set you are working with
-    let width = S::get_width_bytes();    
+    let width = S::WIDTH_BYTES / 4;
     // And set or get individual lanes with ease
-    S::get_lane(c,width-1)
+    S::get_lane_ps(c, width - 1)
 }
 
-// Make an sse2 version of sample 
-#[target_feature(enable="sse2")]
+// Make an sse2 version of sample
+#[target_feature(enable = "sse2")]
 unsafe fn sample_sse2() -> f32 {
     sample::<Sse2>()
 }
 
 // Make an avx2 version of sample
-#[target_feature(enable="avx2")]
-unsafe fn sample_avx2() -> f32{
- sample::<Avx2>()
+#[target_feature(enable = "avx2")]
+unsafe fn sample_avx2() -> f32 {
+    sample::<Avx2>()
 }
-
 
 // The target_feature attributes ensure that the compiler emits the appropriate instructions on
 // a per function basis.
