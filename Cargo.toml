@@ -1,0 +1,6 @@
+[package]
+name = "simdeez"
+version = "0.1.0"
+authors = ["Jack Mott <jack.mott@gmail.com>"]
+
+[dependencies]
