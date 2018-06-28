@@ -21,7 +21,7 @@ unsafe fn sample<S: Simd>() -> f32 {
     // You can get the width of the instruction set you are working with
     let width = S::get_width_bytes();    
     // And set or get individual lanes with ease
-    S::get_lane(c,width-1)
+    S::get_lane(c,(width/4)-1)
 }
 
 // Make an sse2 version of sample 
