@@ -1,6 +1,14 @@
 use std::fmt::Debug;
+#[macro_use]
+pub mod macros;
+
 pub mod avx2;
+pub mod sse41;
+use sse41::*;
 use avx2::*;
+use macros::*;
+
+
 
 #[cfg(target_arch = "x86")]
 use std::arch::x86::*;
@@ -20,7 +28,7 @@ trait Simd {
     unsafe fn blendv_epi32(a: Self::Vi32, b: Self::Vi32, mask: Self::Vi32) -> Self::Vi32;
     unsafe fn blendv_ps(a: Self::Vf32, b: Self::Vf32, mask:Self::Vf32) -> Self::Vf32;
     unsafe fn castps_si(a: Self::Vf32) -> Self::Vi32;
-    unsafe fn castsi_ps(a: Self::Vf32) -> Self::Vi32;
+    unsafe fn castsi_ps(a: Self::Vi32) -> Self::Vf32;
     unsafe fn cmpeq_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     unsafe fn cmpge_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn cmpgt_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
@@ -30,7 +38,7 @@ trait Simd {
     unsafe fn cvtps_epi32(a: Self::Vf32) -> Self::Vi32;
     unsafe fn floor_ps(a: Self::Vf32) -> Self::Vf32;
     unsafe fn fmadd_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32;
-    unsafe fn fnadd_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32;
+    unsafe fn fnmadd_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32;
     unsafe fn i32gather_epi32(arr: &[i32], index: Self::Vi32) -> Self::Vi32;
     unsafe fn i32gather_ps(arr: &[f32], index: Self::Vi32) -> Self::Vf32;
     unsafe fn loadu_ps(a: &f32) -> Self::Vf32;
@@ -44,20 +52,21 @@ trait Simd {
     unsafe fn set1_ps(a: f32) -> Self::Vf32;
     unsafe fn setzero_ps() -> Self::Vf32;
     unsafe fn setzero_si() -> Self::Vi32;
-    unsafe fn srai_epi32(a: Self::Vi32, b: i32) -> Self::Vi32;
+    unsafe fn srai_epi32(a: Self::Vi32, imm8: i32) -> Self::Vi32;
     unsafe fn storeu_ps(a: &mut f32, Self::Vf32);
     unsafe fn sub_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     unsafe fn sub_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn xor_si(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
 }
 
-fn testfunc<S: Simd>() -> S::Vf32 {
+#[target_feature(enable="avx2")]
+unsafe fn testfunc<S: Simd>() -> S::Vf32 {
     let a = S::set1_ps(1.0);
     a
 }
 
 fn main() {
-    let a = testfunc::<Avx2>();
+   unsafe { let a = testfunc::<Avx2>();}
 }
 
 #[cfg(test)]
