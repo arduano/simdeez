@@ -19,7 +19,7 @@ unsafe fn sample<S: Simd>() -> f32 {
     // If your SIMD instruction set doesn't have floor, SIMDEEZ handles it for you
     c = S::floor_ps(c);
     // You can get the width (as a const!)  of the instruction set you are working with
-    let width = S::WIDTH_BYTES();    
+    let width = S::WIDTH_BYTES;    
     // And set or get individual lanes with ease
     let first = S::get_lane(c,0);
     let last = S::get_lane(c,(width/4)-1);
