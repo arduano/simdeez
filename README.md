@@ -2,7 +2,7 @@ A library that abstracts over SIMD instruction sets, including ones with differi
 Implemented such that you can use it with runtime feature detection, or not!
 
 Currently in alpha, I'm implementing just the functions I need for my own projects.  If a fully featured version would be useful to you
-or your company I'd be willing to flesh this out with some kind of corporate sponsorship.
+or your company I'd be willing to flesh this out with some kind of corporate sponsorship. PRs adding more of the intrinsics are welcome, of course.
 
 Currently supports: AVX2, SSE41, SSE2
 
