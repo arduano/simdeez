@@ -18,10 +18,10 @@ unsafe fn sample<S: Simd>() -> f32 {
     let mut c = S::add_ps(a,b);
     // If your SIMD instruction set doesn't have floor, SIMDEEZ handles it for you
     c = S::floor_ps(c);
-    // You can get the width of the instruction set you are working with
-    let width = S::get_width_bytes();    
+    // You can get the width (as a const!)  of the instruction set you are working with
+    let width = S::WIDTH_BYTES();    
     // And set or get individual lanes with ease
-    S::get_lane(c,width-1)
+    S::get_lane(c,(width/4)-1)
 }
 
 // Make an sse2 version of sample 
