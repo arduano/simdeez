@@ -11,6 +11,24 @@ impl Simd for Sse41 {
     type Vi32 = __m128i;
     type Vf32 = __m128;
 
+    unsafe fn set_lane_ps(a: Self::Vf32, value: f32, i: usize) {
+        let mut arr = mem::transmute::<__m128, [f32; 4]>(a);
+        arr[i] = value;
+    }
+    unsafe fn set_lane_epi32(a: Self::Vi32, value: i32, i: usize) {
+        let mut arr = mem::transmute::<__m128i, [i32; 4]>(a);
+        arr[i] = value;
+    }
+    #[inline(always)]
+    unsafe fn get_lane_ps(a: Self::Vf32, i: usize) -> f32 {
+        let mut arr = mem::transmute::<__m128, [f32; 4]>(a);
+        arr[i]
+    }
+    #[inline(always)]
+    unsafe fn get_lane_epi32(a: Self::Vi32, i: usize) -> i32 {
+        let mut arr = mem::transmute::<__m128i, [i32; 4]>(a);
+        arr[i]
+    }
     #[inline(always)]
     fn get_width_bytes() -> usize {
         4
@@ -82,6 +100,10 @@ impl Simd for Sse41 {
     }
     #[inline(always)]
     unsafe fn floor_ps(a: Self::Vf32) -> Self::Vf32 {
+        _mm_floor_ps(a)
+    }
+    #[inline(always)]
+    unsafe fn fastfloor_ps(a: Self::Vf32) -> Self::Vf32 {
         _mm_floor_ps(a)
     }
     #[inline(always)]

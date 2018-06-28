@@ -1,10 +1,4 @@
 //! Utility macros.
-macro_rules! mm_shuffle {
-    ($z:expr, $y:expr, $x:expr, $w:expr) => {
-        ($z << 6) | ($y << 4) | ($x << 2) | $w
-    };
-}
-
 macro_rules! constify_imm8 {
     ($imm8:expr, $expand:ident) => {
         #[allow(overflowing_literals)]
@@ -363,16 +357,11 @@ macro_rules! constify_imm2 {
 
 #[cfg(test)]
 macro_rules! assert_approx_eq {
-    ($a:expr, $b:expr, $eps:expr) => {{
+    ($a:expr, $b:expr, $eps:expr) => ({
         let (a, b) = (&$a, &$b);
-        assert!(
-            (*a - *b).abs() < $eps,
-            "assertion failed: `(left !== right)` \
-             (left: `{:?}`, right: `{:?}`, expect diff: `{:?}`, real diff: `{:?}`)",
-            *a,
-            *b,
-            $eps,
-            (*a - *b).abs()
-        );
-    }};
+        assert!((*a - *b).abs() < $eps,
+                "assertion failed: `(left !== right)` \
+                           (left: `{:?}`, right: `{:?}`, expect diff: `{:?}`, real diff: `{:?}`)",
+                 *a, *b, $eps, (*a - *b).abs());
+    })
 }
