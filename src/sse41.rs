@@ -101,6 +101,10 @@ impl Simd for Sse41 {
         _mm_floor_ps(a)
     }
     #[inline(always)]
+    unsafe fn ceil_ps(a: Self::Vf32) -> Self::Vf32 {
+        _mm_ceil_ps(a)
+    }
+    #[inline(always)]
     unsafe fn fastfloor_ps(a: Self::Vf32) -> Self::Vf32 {
         _mm_floor_ps(a)
     }

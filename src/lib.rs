@@ -34,6 +34,7 @@ pub trait Simd {
     unsafe fn blendv_ps(a: Self::Vf32, b: Self::Vf32, mask: Self::Vf32) -> Self::Vf32;
     unsafe fn castps_si(a: Self::Vf32) -> Self::Vi32;
     unsafe fn castsi_ps(a: Self::Vi32) -> Self::Vf32;
+    unsafe fn ceil_ps(a: Self::Vf32) -> Self::Vf32;
     unsafe fn cmpeq_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     unsafe fn cmpge_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn cmpgt_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;

@@ -9,7 +9,7 @@ pub struct Avx2;
 impl Simd for Avx2 {
     type Vi32 = __m256i;
     type Vf32 = __m256;
-    const WIDTH_BYTES: usize = 8*4;
+    const WIDTH_BYTES: usize = 8 * 4;
     #[inline(always)]
     unsafe fn set_lane_ps(a: Self::Vf32, value: f32, i: usize) {
         let mut arr = mem::transmute::<__m256, [f32; 8]>(a);
@@ -94,6 +94,10 @@ impl Simd for Avx2 {
     #[inline(always)]
     unsafe fn cvtps_epi32(a: Self::Vf32) -> Self::Vi32 {
         _mm256_cvtps_epi32(a)
+    }
+    #[inline(always)]
+    unsafe fn ceil_ps(a: Self::Vf32) -> Self::Vf32 {
+        _mm256_ceil_ps(a)
     }
     #[inline(always)]
     unsafe fn floor_ps(a: Self::Vf32) -> Self::Vf32 {

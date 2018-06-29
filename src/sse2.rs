@@ -9,7 +9,7 @@ pub struct Sse2;
 impl Simd for Sse2 {
     type Vi32 = __m128i;
     type Vf32 = __m128;
-    const WIDTH_BYTES: usize = 4*4;
+    const WIDTH_BYTES: usize = 4 * 4;
     #[inline(always)]
     unsafe fn set_lane_ps(a: Self::Vf32, value: f32, i: usize) {
         let mut arr = mem::transmute::<__m128, [f32; 4]>(a);
@@ -96,11 +96,18 @@ impl Simd for Sse2 {
         _mm_cvtps_epi32(a)
     }
     #[inline(always)]
+    unsafe fn ceil_ps(a: Self::Vf32) -> Self::Vf32 {
+        let i = _mm_cvttps_epi32(a);
+        let fi = _mm_cvtepi32_ps(i);
+        let iga = _mm_cmplt_ps(fi, a);
+        return _mm_add_ps(fi, _mm_and_ps(iga, _mm_set1_ps(1.0)));
+    }
+    #[inline(always)]
     unsafe fn floor_ps(a: Self::Vf32) -> Self::Vf32 {
         let i = _mm_cvttps_epi32(a);
         let fi = _mm_cvtepi32_ps(i);
-        let igx = _mm_cmpgt_ps(fi, a);
-        _mm_sub_ps(fi, _mm_and_ps(igx, _mm_set1_ps(1.0)))
+        let iga = _mm_cmpgt_ps(fi, a);
+        _mm_sub_ps(fi, _mm_and_ps(iga, _mm_set1_ps(1.0)))
     }
     #[inline(always)]
     unsafe fn fastfloor_ps(a: Self::Vf32) -> Self::Vf32 {
