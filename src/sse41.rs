@@ -12,12 +12,12 @@ impl Simd for Sse41 {
     type Vf32 = __m128;
 
     const WIDTH_BYTES: usize = 4 * 4;
-    unsafe fn set_lane_ps(a: Self::Vf32, value: f32, i: usize) {
-        let mut arr = mem::transmute::<__m128, [f32; 4]>(a);
+    unsafe fn set_lane_ps(a: &mut Self::Vf32, value: f32, i: usize) {
+        let arr = mem::transmute::<&mut __m128, &mut [f32; 4]>(a);
         arr[i] = value;
     }
-    unsafe fn set_lane_epi32(a: Self::Vi32, value: i32, i: usize) {
-        let mut arr = mem::transmute::<__m128i, [i32; 4]>(a);
+    unsafe fn set_lane_epi32(a: &mut Self::Vi32, value: i32, i: usize) {
+        let arr = mem::transmute::<&mut __m128i,&mut  [i32; 4]>(a);
         arr[i] = value;
     }
     #[inline(always)]
@@ -51,6 +51,10 @@ impl Simd for Sse41 {
     #[inline(always)]
     unsafe fn andnot_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
         _mm_andnot_ps(a, b)
+    }
+    #[inline(always)]
+    unsafe fn andnot_si(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
+        _mm_andnot_si128(a, b)
     }
     #[inline(always)]
     unsafe fn blendv_epi32(a: Self::Vi32, b: Self::Vi32, mask: Self::Vi32) -> Self::Vi32 {

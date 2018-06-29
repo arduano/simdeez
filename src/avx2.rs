@@ -11,13 +11,13 @@ impl Simd for Avx2 {
     type Vf32 = __m256;
     const WIDTH_BYTES: usize = 8 * 4;
     #[inline(always)]
-    unsafe fn set_lane_ps(a: Self::Vf32, value: f32, i: usize) {
-        let mut arr = mem::transmute::<__m256, [f32; 8]>(a);
+    unsafe fn set_lane_ps(a: &mut Self::Vf32, value: f32, i: usize) {
+        let arr = mem::transmute::<&mut __m256, &mut  [f32; 8]>(a);
         arr[i] = value;
     }
     #[inline(always)]
-    unsafe fn set_lane_epi32(a: Self::Vi32, value: i32, i: usize) {
-        let mut arr = mem::transmute::<__m256i, [i32; 8]>(a);
+    unsafe fn set_lane_epi32(a: &mut Self::Vi32, value: i32, i: usize) {
+        let arr = mem::transmute::<&mut __m256i, &mut [i32; 8]>(a);
         arr[i] = value;
     }
     #[inline(always)]
@@ -50,6 +50,10 @@ impl Simd for Avx2 {
     #[inline(always)]
     unsafe fn andnot_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
         _mm256_andnot_ps(a, b)
+    }
+    #[inline(always)]
+    unsafe fn andnot_si(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
+        _mm256_andnot_si256(a, b)
     }
     #[inline(always)]
     unsafe fn blendv_epi32(a: Self::Vi32, b: Self::Vi32, mask: Self::Vi32) -> Self::Vi32 {

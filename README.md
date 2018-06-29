@@ -4,7 +4,7 @@ Implemented such that you can use it with runtime feature detection, or not!
 Currently in alpha, I'm implementing just the functions I need for my own projects.  If a fully featured version would be useful to you
 or your company I'd be willing to flesh this out with some kind of corporate sponsorship. PRs adding more of the intrinsics are welcome, of course.
 
-Currently supports: AVX2, SSE41, SSE2
+Currently supports: AVX2, SSE41, SSE2, as well as a Scalar fallback.
 
 # Examples
 
