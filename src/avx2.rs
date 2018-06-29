@@ -12,7 +12,7 @@ impl Simd for Avx2 {
     const WIDTH_BYTES: usize = 8 * 4;
     #[inline(always)]
     unsafe fn set_lane_ps(a: &mut Self::Vf32, value: f32, i: usize) {
-        let arr = mem::transmute::<&mut __m256, &mut  [f32; 8]>(a);
+        let arr = mem::transmute::<&mut __m256, &mut [f32; 8]>(a);
         arr[i] = value;
     }
     #[inline(always)]
@@ -146,6 +146,10 @@ impl Simd for Avx2 {
     #[inline(always)]
     unsafe fn mul_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
         _mm256_mul_ps(a, b)
+    }
+    #[inline(always)]
+    unsafe fn div_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
+        _mm256_div_ps(a, b)
     }
     #[inline(always)]
     unsafe fn mullo_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {

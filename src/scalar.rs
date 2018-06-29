@@ -122,6 +122,9 @@ impl Simd for Scalar {
     unsafe fn mul_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
         a * b
     }
+    unsafe fn div_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
+        a / b
+    }
     unsafe fn mullo_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         a * b
     }

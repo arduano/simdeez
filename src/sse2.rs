@@ -167,6 +167,10 @@ impl Simd for Sse2 {
         _mm_mul_ps(a, b)
     }
     #[inline(always)]
+    unsafe fn div_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
+        _mm_div_ps(a, b)
+    }
+     #[inline(always)]
     unsafe fn mullo_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         let tmp1 = _mm_mul_epu32(a, b); /* mul 2,0*/
         let tmp2 = _mm_mul_epu32(_mm_srli_si128(a, 4), _mm_srli_si128(b, 4)); /* mul 3,1 */

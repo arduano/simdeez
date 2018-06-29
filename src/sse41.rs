@@ -161,6 +161,10 @@ impl Simd for Sse41 {
         _mm_mul_ps(a, b)
     }
     #[inline(always)]
+    unsafe fn div_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
+        _mm_div_ps(a, b)
+    }
+     #[inline(always)]
     unsafe fn mullo_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         _mm_mullo_epi32(a, b)
     }

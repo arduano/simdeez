@@ -23,6 +23,7 @@ pub trait Simd {
 
     const WIDTH_BYTES: usize;
 
+    unsafe fn div_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn set_lane_epi32(a: &mut Self::Vi32, value: i32, i: usize);
     unsafe fn set_lane_ps(a: &mut Self::Vf32, value: f32, i: usize);
     unsafe fn get_lane_epi32(a: Self::Vi32, i: usize) -> i32;
@@ -46,7 +47,6 @@ pub trait Simd {
     unsafe fn cvtepi32_ps(a: Self::Vi32) -> Self::Vf32;
     unsafe fn cvtps_epi32(a: Self::Vf32) -> Self::Vi32;
     unsafe fn floor_ps(a: Self::Vf32) -> Self::Vf32;
-    // Only works on fp values that can be representined by int values
     unsafe fn fastfloor_ps(a: Self::Vf32) -> Self::Vf32;
     unsafe fn fmadd_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32;
     unsafe fn fnmadd_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32;
