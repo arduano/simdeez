@@ -132,6 +132,11 @@ impl Simd for Avx2 {
         _mm256_loadu_ps(a as *const f32)
     }
     #[inline(always)]
+    unsafe fn loadu_si(a: &i32) -> Self::Vi32 {
+        let m = mem::transmute::<&i32, &__m256i>(a);
+        _mm256_loadu_si256(m)
+    }
+    #[inline(always)]
     unsafe fn storeu_ps(a: &mut f32, b: Self::Vf32) {
         _mm256_storeu_ps(a as *mut f32, b)
     }

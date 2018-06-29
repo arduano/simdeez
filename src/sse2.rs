@@ -77,7 +77,7 @@ impl Simd for Sse2 {
     }
     #[inline(always)]
     unsafe fn cmpge_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        _mm_cmp_ps(a, b, _CMP_GE_OQ)
+        _mm_cmpge_ps(a, b)
     }
     #[inline(always)]
     unsafe fn cmpgt_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
@@ -85,11 +85,11 @@ impl Simd for Sse2 {
     }
     #[inline(always)]
     unsafe fn cmpgt_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        _mm_cmp_ps(a, b, _CMP_GT_OQ)
+        _mm_cmpgt_ps(a, b)
     }
     #[inline(always)]
     unsafe fn cmplt_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        _mm_cmp_ps(a, b, _CMP_LT_OQ)
+        _mm_cmplt_ps(a, b)
     }
     #[inline(always)]
     unsafe fn cvtepi32_ps(a: Self::Vi32) -> Self::Vf32 {
@@ -120,35 +120,40 @@ impl Simd for Sse2 {
     }
     #[inline(always)]
     unsafe fn fmadd_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32 {
-        _mm_fmadd_ps(a, b, c)
+        _mm_add_ps(_mm_mul_ps(a, b), c)
     }
     #[inline(always)]
     unsafe fn fnmadd_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32 {
-        _mm_fnmadd_ps(a, b, c)
+        _mm_add_ps(_mm_mul_ps(_mm_set1_ps(-1.0), _mm_mul_ps(a, b)), c)
     }
     #[inline(always)]
     unsafe fn i32gather_epi32(arr: &[i32], index: Self::Vi32) -> Self::Vi32 {
-        let index_as_arr = mem::transmute::<__m128i, &[i32]>(index);
+        let index_as_arr = mem::transmute::<__m128i, [i32; 4]>(index);
         _mm_set_epi32(
-            arr[index_as_arr[0] as usize],
-            arr[index_as_arr[1] as usize],
-            arr[index_as_arr[2] as usize],
             arr[index_as_arr[3] as usize],
+            arr[index_as_arr[2] as usize],
+            arr[index_as_arr[1] as usize],
+            arr[index_as_arr[0] as usize],
         )
     }
     #[inline(always)]
     unsafe fn i32gather_ps(arr: &[f32], index: Self::Vi32) -> Self::Vf32 {
-        let index_as_arr = mem::transmute::<__m128i, &[i32]>(index);
+        let index_as_arr = mem::transmute::<__m128i, [i32; 4]>(index);
         _mm_set_ps(
-            arr[index_as_arr[0] as usize],
-            arr[index_as_arr[1] as usize],
-            arr[index_as_arr[2] as usize],
             arr[index_as_arr[3] as usize],
+            arr[index_as_arr[2] as usize],
+            arr[index_as_arr[1] as usize],
+            arr[index_as_arr[0] as usize],
         )
     }
     #[inline(always)]
     unsafe fn loadu_ps(a: &f32) -> Self::Vf32 {
         _mm_loadu_ps(a as *const f32)
+    }
+    #[inline(always)]
+    unsafe fn loadu_si(a: &i32) -> Self::Vi32 {
+        let m = mem::transmute::<&i32, &__m128i>(a);
+        _mm_loadu_si128(m)
     }
     #[inline(always)]
     unsafe fn storeu_ps(a: &mut f32, b: Self::Vf32) {
@@ -170,7 +175,7 @@ impl Simd for Sse2 {
     unsafe fn div_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
         _mm_div_ps(a, b)
     }
-     #[inline(always)]
+    #[inline(always)]
     unsafe fn mullo_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         let tmp1 = _mm_mul_epu32(a, b); /* mul 2,0*/
         let tmp2 = _mm_mul_epu32(_mm_srli_si128(a, 4), _mm_srli_si128(b, 4)); /* mul 3,1 */

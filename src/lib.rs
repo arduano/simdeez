@@ -53,6 +53,7 @@ pub trait Simd {
     unsafe fn i32gather_epi32(arr: &[i32], index: Self::Vi32) -> Self::Vi32;
     unsafe fn i32gather_ps(arr: &[f32], index: Self::Vi32) -> Self::Vf32;
     unsafe fn loadu_ps(a: &f32) -> Self::Vf32;
+    unsafe fn loadu_si(a: &i32) -> Self::Vi32;
     unsafe fn storeu_ps(a: &mut f32, b: Self::Vf32);
     unsafe fn max_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn min_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
@@ -111,33 +112,50 @@ mod tests {
     }
 
     #[inline(always)]
-    unsafe fn setlanetest<S:Simd>() -> f32 {
+    unsafe fn setlanetest<S: Simd>() -> f32 {
         let mut a = S::set1_ps(1.0);
-        S::set_lane_ps(&mut a,5.0,0);
-        S::get_lane_ps(a,0)
+        S::set_lane_ps(&mut a, 5.0, 0);
+        S::get_lane_ps(a, 0)
     }
     unsafe fn setlanetest_scalar() -> f32 {
         setlanetest::<Scalar>()
-    }   
+    }
     unsafe fn setlanetest_avx2() -> f32 {
         setlanetest::<Avx2>()
     }
 
+    #[inline(always)]
+    unsafe fn gathertest_simd<S: Simd>() -> f32 {
+        let a = [4.0, 3.0, 2.0, 1.0];
+        let iarr = [0, 1, 2, 3];
 
+        let index = S::loadu_si(&iarr[0]);
+        let result = S::i32gather_ps(&a, index);
+        S::get_lane_ps(result, 0)
+    }
+    unsafe fn gathertest_sse2() -> f32 {
+        gathertest_simd::<Sse2>()
+    }
 
     #[test]
     fn consistency() {
         unsafe {
-        assert_eq!(sample_sse2(), sample_sse41());
-        assert_eq!(sample_sse41(), sample_avx2());
-        assert_eq!(sample_avx2(), sample_scalar());    
+            assert_eq!(sample_sse2(), sample_sse41());
+            assert_eq!(sample_sse41(), sample_avx2());
+            assert_eq!(sample_avx2(), sample_scalar());
         }
     }
-    #[test] 
+    #[test]
     fn setlane() {
         unsafe {
-            assert_eq!(setlanetest_avx2(),5.0);
-            assert_eq!(setlanetest_scalar(),5.0);
+            assert_eq!(setlanetest_avx2(), 5.0);
+            assert_eq!(setlanetest_scalar(), 5.0);
+        }
+    }
+    #[test]
+    fn gathertest() {
+        unsafe {
+            assert_eq!(gathertest_sse2(), 1.0);
         }
     }
 }

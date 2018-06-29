@@ -102,6 +102,9 @@ impl Simd for Scalar {
     unsafe fn loadu_ps(a: &f32) -> Self::Vf32 {
         *a
     }
+    unsafe fn loadu_si(a: &i32) -> Self::Vi32 {
+        *a
+    }
     unsafe fn storeu_ps(a: &mut f32, b: Self::Vf32) {
         *a = b;
     }
