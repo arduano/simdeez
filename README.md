@@ -2,7 +2,7 @@ A library that abstracts over SIMD instruction sets, including ones with differi
 Implemented such that you can use it with runtime feature detection, or not!
 
 Currently in alpha, I'm implementing just the functions I need for my own projects.  If a fully featured version would be useful to you
-or your company I'd be willing to flesh this out with some kind of corporate sponsorship.
+or your company I'd be willing to flesh this out with some kind of corporate sponsorship. PRs adding more of the intrinsics are welcome, of course.
 
 Currently supports: AVX2, SSE41, SSE2
 
@@ -16,12 +16,15 @@ unsafe fn sample<S: Simd>() -> f32 {
     let a = S::set1_ps(1.5);
     let b = S::set1_ps(2.5);
     let mut c = S::add_ps(a,b);
-    // If your SIMD instruction set doesn't have floor, SIMDEEZ handles it for you
+    // If your SIMD instruction set doesn't have floor, round, gather etc,  SIMDeez handles it for you
     c = S::floor_ps(c);
     // You can get the width (as a const!)  of the instruction set you are working with
-    let width = S::WIDTH_BYTES();    
+    let width = S::WIDTH_BYTES;    
     // And set or get individual lanes with ease
-    S::get_lane(c,(width/4)-1)
+    let first = S::get_lane(c,0);
+    let last = S::get_lane(c,(width/4)-1);
+    first+last
+    
 }
 
 // Make an sse2 version of sample 
