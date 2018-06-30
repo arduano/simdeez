@@ -1,13 +1,14 @@
 A library that abstracts over SIMD instruction sets, including ones with differing widths.
-Implemented such that you can use it with runtime feature detection, or not!
+Implemented such that you can use it with runtime feature detection (or not!) and with little to no performance penalty.
+
 
 Currently in alpha, I'm implementing just the functions I need for my own projects.  If a fully featured version would be useful to you
 or your company I'd be willing to flesh this out with some kind of corporate sponsorship. PRs adding more of the intrinsics are welcome, of course.
 
-Currently supports: AVX2, SSE41, SSE2, as well as a Scalar fallback.
+Currently supports: AVX2, SSE41, SSE2, as well as a Scalar fallback. The scalar fallback will sometimes be very slow compared to a hand tuned scalar imeplementation, especially if you have branches in your algorithm.
 
 SIMDeez is designed so you can easily import SIMD code from C or Rust with a few simple search/replace operations.  `%s/__m256i/S::Vi32/g`  `%s/_mm_/S::/g` etc will take
-care of 90% of the work.
+care of 90% of the work. 
 
 
 # Examples
