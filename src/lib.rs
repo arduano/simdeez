@@ -6,16 +6,6 @@ pub mod avx2;
 pub mod scalar;
 pub mod sse2;
 pub mod sse41;
-use avx2::*;
-use macros::*;
-use scalar::*;
-use sse2::*;
-use sse41::*;
-
-#[cfg(target_arch = "x86")]
-use std::arch::x86::*;
-#[cfg(target_arch = "x86_64")]
-use std::arch::x86_64::*;
 
 pub trait Simd {
     type Vi32: Copy + Debug;
@@ -77,12 +67,16 @@ pub trait Simd {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use avx2::*;
+    use scalar::*;
+    use sse2::*;
+    use sse41::*;
     // If using runtime feature detection, you will want to be sure this inlines
     #[inline(always)]
     unsafe fn sample<S: Simd>() -> f32 {
         let a = S::set1_epi32(3);
         let b = S::set1_epi32(-1);
-        let c = S::cmpgt_epi32(a,b);
+        let c = S::cmpgt_epi32(a, b);
         let width = S::WIDTH_BYTES / 4;
         // And set or get individual lanes with ease
         S::get_lane_epi32(c, width - 1) as f32
