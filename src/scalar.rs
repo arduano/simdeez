@@ -1,3 +1,6 @@
+//TODO there is a bug in here somewhere, manifesting with extremely large indexes coming
+//into the gather instruction from 2d simplex noise
+//
 use super::*;
 use std::mem;
 pub struct Scalar;
