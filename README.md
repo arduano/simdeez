@@ -6,6 +6,10 @@ or your company I'd be willing to flesh this out with some kind of corporate spo
 
 Currently supports: AVX2, SSE41, SSE2, as well as a Scalar fallback.
 
+SIMDeez is designed so you can easily import SIMD code from C or Rust with a few simple search/replace operations.  `%s/__m256i/S::Vi32/g`  `%s/_mm_/S::/g` etc will take
+care of 90% of the work.
+
+
 # Examples
 
 ```rust
