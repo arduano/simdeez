@@ -80,16 +80,12 @@ mod tests {
     // If using runtime feature detection, you will want to be sure this inlines
     #[inline(always)]
     unsafe fn sample<S: Simd>() -> f32 {
-        let a = S::set1_ps(1.5);
-        let b = S::set1_ps(2.5);
-        // function names mirror the intel intrinsics, minus the _mm_ part
-        let mut c = S::add_ps(a, b);
-        // If your SIMD instruction set doesn't have floor, SIMDEEZ handles it for you
-        c = S::floor_ps(c);
-        // You can get the width of the instruction set you are working with
+        let a = S::set1_epi32(3);
+        let b = S::set1_epi32(-1);
+        let c = S::cmpgt_epi32(a,b);
         let width = S::WIDTH_BYTES / 4;
         // And set or get individual lanes with ease
-        S::get_lane_ps(c, width - 1)
+        S::get_lane_epi32(c, width - 1) as f32
     }
 
     // Make an sse2 version of sample
@@ -155,7 +151,7 @@ mod tests {
     #[test]
     fn gathertest() {
         unsafe {
-            assert_eq!(gathertest_sse2(), 1.0);
+            assert_eq!(gathertest_sse2(), 4.0);
         }
     }
 }

@@ -122,7 +122,7 @@ impl Simd for Sse41 {
     }
     #[inline(always)]
     unsafe fn i32gather_epi32(arr: &[i32], index: Self::Vi32) -> Self::Vi32 {
-        let index_as_arr = mem::transmute::<__m128i, [i32;4]>(index);
+        let index_as_arr = mem::transmute::<__m128i, [i32; 4]>(index);
         _mm_set_epi32(
             arr[index_as_arr[3] as usize],
             arr[index_as_arr[2] as usize],
@@ -132,7 +132,7 @@ impl Simd for Sse41 {
     }
     #[inline(always)]
     unsafe fn i32gather_ps(arr: &[f32], index: Self::Vi32) -> Self::Vf32 {
-        let index_as_arr = mem::transmute::<__m128i, [i32;4]>(index);
+        let index_as_arr = mem::transmute::<__m128i, [i32; 4]>(index);
         _mm_set_ps(
             arr[index_as_arr[3] as usize],
             arr[index_as_arr[2] as usize],

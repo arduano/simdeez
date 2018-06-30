@@ -64,19 +64,19 @@ impl Simd for Scalar {
         a.ceil()
     }
     unsafe fn cmpeq_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        (a == b) as i32
+        if  a == b { -1 } else { 0 }
     }
     unsafe fn cmpge_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        mem::transmute::<i32, f32>((a >= b) as i32)
+        if a >= b { mem::transmute::<i32,f32>(-1) } else { mem::transmute::<i32,f32>(0) }
     }
     unsafe fn cmpgt_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        (a > b) as i32
+        if a > b { -1 } else { 0 } 
     }
     unsafe fn cmpgt_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        mem::transmute::<i32, f32>((a > b) as i32)
+        if a > b { mem::transmute::<i32,f32>(-1) } else { mem::transmute::<i32,f32>(0) }
     }
     unsafe fn cmplt_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        mem::transmute::<i32, f32>((a < b) as i32)
+        if a < b { mem::transmute::<i32,f32>(-1) } else { mem::transmute::<i32,f32>(0) }
     }
     unsafe fn cvtepi32_ps(a: Self::Vi32) -> Self::Vf32 {
         a as f32
