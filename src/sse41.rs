@@ -13,20 +13,24 @@ impl Simd for Sse41 {
 
     const WIDTH_BYTES: usize = 4 * 4;
     unsafe fn set_lane_ps(a: &mut Self::Vf32, value: f32, i: usize) {
+        debug_assert!(i < Self::WIDTH_BYTES / 4);
         let arr = mem::transmute::<&mut __m128, &mut [f32; 4]>(a);
         arr[i] = value;
     }
     unsafe fn set_lane_epi32(a: &mut Self::Vi32, value: i32, i: usize) {
+        debug_assert!(i < Self::WIDTH_BYTES / 4);
         let arr = mem::transmute::<&mut __m128i, &mut [i32; 4]>(a);
         arr[i] = value;
     }
     #[inline(always)]
     unsafe fn get_lane_ps(a: Self::Vf32, i: usize) -> f32 {
+        debug_assert!(i < Self::WIDTH_BYTES / 4);
         let arr = mem::transmute::<__m128, [f32; 4]>(a);
         arr[i]
     }
     #[inline(always)]
     unsafe fn get_lane_epi32(a: Self::Vi32, i: usize) -> i32 {
+        debug_assert!(i < Self::WIDTH_BYTES / 4);
         let arr = mem::transmute::<__m128i, [i32; 4]>(a);
         arr[i]
     }

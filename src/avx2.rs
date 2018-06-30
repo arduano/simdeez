@@ -12,21 +12,25 @@ impl Simd for Avx2 {
     const WIDTH_BYTES: usize = 8 * 4;
     #[inline(always)]
     unsafe fn set_lane_ps(a: &mut Self::Vf32, value: f32, i: usize) {
+        debug_assert!(i < Self::WIDTH_BYTES / 4);
         let arr = mem::transmute::<&mut __m256, &mut [f32; 8]>(a);
         arr[i] = value;
     }
     #[inline(always)]
     unsafe fn set_lane_epi32(a: &mut Self::Vi32, value: i32, i: usize) {
+        debug_assert!(i < Self::WIDTH_BYTES / 4);
         let arr = mem::transmute::<&mut __m256i, &mut [i32; 8]>(a);
         arr[i] = value;
     }
     #[inline(always)]
     unsafe fn get_lane_ps(a: Self::Vf32, i: usize) -> f32 {
+        debug_assert!(i < Self::WIDTH_BYTES / 4);
         let arr = mem::transmute::<__m256, [f32; 8]>(a);
         arr[i]
     }
     #[inline(always)]
     unsafe fn get_lane_epi32(a: Self::Vi32, i: usize) -> i32 {
+        debug_assert!(i < Self::WIDTH_BYTES / 4);
         let arr = mem::transmute::<__m256i, [i32; 8]>(a);
         arr[i]
     }

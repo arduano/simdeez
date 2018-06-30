@@ -12,15 +12,19 @@ impl Simd for Scalar {
     const WIDTH_BYTES: usize = 4;
 
     unsafe fn set_lane_epi32(a: &mut Self::Vi32, value: i32, i: usize) {
+        debug_assert!(i < Self::WIDTH_BYTES / 4);
         *a = value;
     }
     unsafe fn set_lane_ps(a: &mut Self::Vf32, value: f32, i: usize) {
+        debug_assert!(i < Self::WIDTH_BYTES / 4);
         *a = value;
     }
     unsafe fn get_lane_epi32(a: Self::Vi32, i: usize) -> i32 {
+        debug_assert!(i < Self::WIDTH_BYTES / 4);
         a
     }
     unsafe fn get_lane_ps(a: Self::Vf32, i: usize) -> f32 {
+        debug_assert!(i < Self::WIDTH_BYTES / 4);
         a
     }
     unsafe fn abs_ps(a: Self::Vf32) -> Self::Vf32 {
@@ -44,7 +48,6 @@ impl Simd for Scalar {
     unsafe fn andnot_si(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         (!a) & b
     }
-    // TODO Would an if statement perform better?
     unsafe fn blendv_epi32(a: Self::Vi32, b: Self::Vi32, mask: Self::Vi32) -> Self::Vi32 {
         ((!mask) & a) | (mask & b)
     }
@@ -64,19 +67,19 @@ impl Simd for Scalar {
         a.ceil()
     }
     unsafe fn cmpeq_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        if  a == b { -1 } else { 0 }
+        mem::transmute::<bool, i8>(a == b) as i32 * -1
     }
     unsafe fn cmpge_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        if a >= b { mem::transmute::<i32,f32>(-1) } else { mem::transmute::<i32,f32>(0) }
+        mem::transmute::<i32, f32>(mem::transmute::<bool, i8>(a >= b) as i32 * -1)
     }
     unsafe fn cmpgt_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        if a > b { -1 } else { 0 } 
+        mem::transmute::<bool, i8>(a > b) as i32 * -1
     }
     unsafe fn cmpgt_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        if a > b { mem::transmute::<i32,f32>(-1) } else { mem::transmute::<i32,f32>(0) }
+        mem::transmute::<i32, f32>(mem::transmute::<bool, i8>(a > b) as i32 * -1)
     }
     unsafe fn cmplt_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        if a < b { mem::transmute::<i32,f32>(-1) } else { mem::transmute::<i32,f32>(0) }
+        mem::transmute::<i32, f32>(mem::transmute::<bool, i8>(a < b) as i32 * -1)
     }
     unsafe fn cvtepi32_ps(a: Self::Vi32) -> Self::Vf32 {
         a as f32
@@ -153,7 +156,7 @@ impl Simd for Scalar {
         0
     }
     unsafe fn srai_epi32(a: Self::Vi32, imm8: i32) -> Self::Vi32 {
-        a << imm8
+        a >> imm8
     }
     unsafe fn sub_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         a - b
