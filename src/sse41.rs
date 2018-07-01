@@ -62,7 +62,11 @@ impl Simd for Sse41 {
     }
     #[inline(always)]
     unsafe fn blendv_epi32(a: Self::Vi32, b: Self::Vi32, mask: Self::Vi32) -> Self::Vi32 {
-        _mm_or_si128(_mm_andnot_si128(mask, a), _mm_and_si128(mask, b))
+        _mm_castps_si128(_mm_blendv_ps(
+            _mm_castsi128_ps(a),
+            _mm_castsi128_ps(b),
+            _mm_castsi128_ps(mask),
+        ))
     }
     #[inline(always)]
     unsafe fn blendv_ps(a: Self::Vf32, b: Self::Vf32, mask: Self::Vf32) -> Self::Vf32 {
