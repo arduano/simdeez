@@ -1,22 +1,102 @@
+//! SIMDeez abstracts over the various sets of SIMD instructions such that
+//! you can write a single function, and use it to produce SSE2,
+//! SSE41, AVX2, or scalar versions of that function.  This can be combined
+//! with `cfg` attributes to produce the optimum function at compile time,
+//! or with `target_feature` attributes for use with runtime selection,
+//! either automatically or letting users decide
+//! ---
+//! Support for more instructions sets such as AVX-512, and NEON can be
+//! added as Rust adds support for those intrinsics.
+//! ---
+//! SIMDeez functions follow the naming conventions of the intel intrinsics
+//! unless otherwise noted.
+//! See the [Intel Intrinsics Guide](https://software.intel.com/sites/landingpage/IntrinsicsGuide/)
+//! for documentation.
+//! ---
+//! SIMDeez is currently in an Alpha state, not all intrinsics are covered.
+//! I will be slowly adding more as time and need permits. PRs are welcome, and
+//! I would consider putting more time into the project with corporate sponsorship.
+//!
+//! # Examples
+//! ```rust
+//! use simdeez::*;
+//! use simdeez::avx2::*;
+//! use simdeez::sse2::*;
+//! use simdeez::sse41::*;
+//! use simdeez::scalar::*;
+//! // If using runtime feature detection, you will want to be sure this inlines
+//! #[inline(always)]
+//! unsafe fn sample<S: Simd>() -> f32 {
+//!     // SIMDeez names mostly follow the intel intrinsics conventions, minus the _mm_ prefix
+//!     // Use them as normal!
+//!     let a = S::set1_epi32(3);
+//!     let b = S::set1_epi32(-1);
+//!     let c = S::add_epi32(a, b);
+//!     let f = S::set1_ps(1.5);
+//!     // SSE2 doesn't have floor, ceil, round, or gather  operations, don't worry, SIMDeez handles it.
+//!     let g = S::floor_ps(f);
+//!     // The width of the lane, in bytes, is provided as a constant
+//!     // by each impl
+//!     let width = S::WIDTH_BYTES / 4;
+//!     // Set or get individual lanes with ease
+//!     S::get_lane_epi32(c, width - 1) as f32
+//! }
+//! // Make an sse2 version of sample
+//! #[target_feature(enable = "sse2")]
+//! unsafe fn sample_sse2() -> f32 {
+//!     sample::<Sse2>()
+//! }
+//! // Make an avx2 version of sample
+//! #[target_feature(enable = "avx2")]
+//! unsafe fn sample_avx2() -> f32 {
+//!     sample::<Avx2>()
+//! }
+//! // An SSE4.1 version
+//! #[target_feature(enable = "sse4.1")]
+//! unsafe fn sample_sse41() -> f32 {
+//!     sample::<Sse41>()
+//! }
+//! // Or even scalar (perf may suffer here)
+//! unsafe fn sample_scalar() -> f32 {
+//!     sample::<Scalar>()
+//! }
+//!
+//!
+//! ```
 use std::fmt::Debug;
 #[macro_use]
-pub mod macros;
-
+mod macros;
 pub mod avx2;
 pub mod scalar;
 pub mod sse2;
 pub mod sse41;
 
 pub trait Simd {
+    /// Vi32 stands for Vector of i32s.  Corresponds to __m128i when used
+    /// with the Sse impl, __m256i when used with Avx2, or a single i32
+    /// when used with Scalar.
     type Vi32: Copy + Debug;
+    /// Vf32 stands for Vector of f32s.  Corresponds to __m128 when used
+    /// with the Sse impl, __m256 when used with Avx2, or a single f32
+    /// when used with Scalar.
     type Vf32: Copy + Debug;
 
+    /// The width of the vector lane in bytes.  Necessary for creating
+    /// lane width agnostic code.
     const WIDTH_BYTES: usize;
 
     unsafe fn div_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
+    /// Equivalent to transmuting the SIMD type to an array and accessing
+    /// it at the index i.
     unsafe fn set_lane_epi32(a: &mut Self::Vi32, value: i32, i: usize);
+    /// Equivalent to transmuting the SIMD type to an array and accessing
+    /// it at the index i.
     unsafe fn set_lane_ps(a: &mut Self::Vf32, value: f32, i: usize);
+    /// Equivalent to transmuting the SIMD type to an array and accessing
+    /// it at the index i.
     unsafe fn get_lane_epi32(a: Self::Vi32, i: usize) -> i32;
+    /// Equivalent to transmuting the SIMD type to an array and accessing
+    /// it at the index i.
     unsafe fn get_lane_ps(a: Self::Vf32, i: usize) -> f32;
     unsafe fn abs_ps(a: Self::Vf32) -> Self::Vf32;
     unsafe fn add_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
@@ -24,6 +104,8 @@ pub trait Simd {
     unsafe fn and_si(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     unsafe fn andnot_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn andnot_si(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
+    /// This is provided for convenience, it uses casts and the blendv_ps
+    /// intrinsics to implement it.
     unsafe fn blendv_epi32(a: Self::Vi32, b: Self::Vi32, mask: Self::Vi32) -> Self::Vi32;
     unsafe fn blendv_ps(a: Self::Vf32, b: Self::Vf32, mask: Self::Vf32) -> Self::Vf32;
     unsafe fn castps_si(a: Self::Vf32) -> Self::Vi32;
@@ -37,10 +119,24 @@ pub trait Simd {
     unsafe fn cvtepi32_ps(a: Self::Vi32) -> Self::Vf32;
     unsafe fn cvtps_epi32(a: Self::Vf32) -> Self::Vi32;
     unsafe fn floor_ps(a: Self::Vf32) -> Self::Vf32;
+    /// When using Sse2, fastfloor uses a faster version of floor
+    /// that only works on floating point values small enough to fit in
+    /// an i32.  This is important for performance if you don't need
+    /// a complete floor.
     unsafe fn fastfloor_ps(a: Self::Vf32) -> Self::Vf32;
+    /// Actual FMA instructions will be used when Avx2 is used,
+    /// otherwise a mul and add are used to replicate it, allowing you to
+    /// just always use FMA in your code and get best perf in both cases.
     unsafe fn fmadd_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32;
+    /// Actual FMA instructions will be used when Avx2 is used,
+    /// otherwise a mul and add are used to replicate it, allowing you to
+    /// just always use FMA in your code and get best perf in both cases.
     unsafe fn fnmadd_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32;
+    /// Sse2 and Sse41 paths will simulate a gather by breaking out and
+    /// doing scalar array accesses, because gather doesn't exist until Avx2.
     unsafe fn i32gather_epi32(arr: &[i32], index: Self::Vi32) -> Self::Vi32;
+    /// Sse2 and Sse41 paths will simulate a gather by breaking out and
+    /// doing scalar array accesses, because gather doesn't exist until Avx2.
     unsafe fn i32gather_ps(arr: &[f32], index: Self::Vi32) -> Self::Vf32;
     unsafe fn loadu_ps(a: &f32) -> Self::Vf32;
     unsafe fn loadu_si(a: &i32) -> Self::Vi32;
@@ -48,13 +144,19 @@ pub trait Simd {
     unsafe fn max_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn min_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn mul_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
+    /// Mullo is implemented for Sse2 by combining other Sse2 operations.
     unsafe fn mullo_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     unsafe fn or_si(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
+    /// Round is implemented for Sse2 by combining other Sse2 operations.
     unsafe fn round_ps(a: Self::Vf32) -> Self::Vf32;
     unsafe fn set1_epi32(a: i32) -> Self::Vi32;
     unsafe fn set1_ps(a: f32) -> Self::Vf32;
     unsafe fn setzero_ps() -> Self::Vf32;
     unsafe fn setzero_si() -> Self::Vi32;
+    /// Shift operations for Sse require that imm8 be a constant,
+    /// we handle this with a macro, so if you pass a non constant
+    /// you will get a compile time error. This is necessary, the hardware
+    /// demands it. With Avx2 you are free to pass anything.
     unsafe fn srai_epi32(a: Self::Vi32, imm8: i32) -> Self::Vi32;
     unsafe fn sub_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     unsafe fn sub_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;

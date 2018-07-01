@@ -1,5 +1,10 @@
 use super::*;
 use std::mem;
+
+/// Scalar version of SIMD code will often be much slower than
+/// they would be if written by hand, especially if the logic has branches.
+/// This is provided for convenience when that performance penalty is not a 
+/// problem, or doesn't exist. 
 pub struct Scalar;
 
 impl Simd for Scalar {
