@@ -205,6 +205,14 @@ impl Simd for Avx2 {
         _mm256_sub_ps(a, b)
     }
     #[inline(always)]
+    unsafe fn sqrt_ps(a: Self::Vf32) -> Self::Vf32 {
+        _mm256_sqrt_ps(a)
+    }
+    #[inline(always)]
+    unsafe fn rsqrt_ps(a: Self::Vf32) -> Self::Vf32 {
+        _mm256_rsqrt_ps(a)
+    }
+    #[inline(always)]
     unsafe fn xor_si(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         _mm256_xor_si256(a, b)
     }

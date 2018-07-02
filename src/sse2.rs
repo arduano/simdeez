@@ -241,7 +241,15 @@ impl Simd for Sse2 {
     unsafe fn sub_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
         _mm_sub_ps(a, b)
     }
-    #[inline(always)]
+     #[inline(always)]
+    unsafe fn sqrt_ps(a: Self::Vf32) -> Self::Vf32 {
+        _mm_sqrt_ps(a)   
+    }
+     #[inline(always)]
+    unsafe fn rsqrt_ps(a: Self::Vf32) -> Self::Vf32 {
+        _mm_rsqrt_ps(a)
+    }
+     #[inline(always)]
     unsafe fn xor_si(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         _mm_xor_si128(a, b)
     }

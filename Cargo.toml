@@ -1,6 +1,6 @@
 [package]
 name = "simdeez"
-version = "0.2.2"
+version = "0.2.3"
 authors = ["Jack Mott <jack.mott@gmail.com>"]
 description = "SIMD library to abstract over different instruction sets and widths"
 license = "Apache-2.0/MIT"
@@ -9,4 +9,5 @@ readme = "README.md"
 keywords = ["SIMD", "avx2", "sse", "neon","performance"]
 repository = "https://github.com/jackmott/simdeez"
 categories = ["hardware-support","science"]
+
 
