@@ -27,20 +27,22 @@
 //! // If using runtime feature detection, you will want to be sure this inlines
 //! #[inline(always)]
 //! unsafe fn sample<S: Simd>() -> f32 {
-//!     // SIMDeez names mostly follow the intel intrinsics conventions, minus the _mm_ prefix
-//!     // Use them as normal!
-//!     let a = S::set1_epi32(3);
-//!     let b = S::set1_epi32(-1);
-//!     let c = S::add_epi32(a, b);
-//!     let f = S::set1_ps(1.5);
-//!     // SSE2 doesn't have floor, ceil, round, or gather  operations, don't worry, SIMDeez handles it.
-//!     let g = S::floor_ps(f);
-//!     // The width of the lane, in bytes, is provided as a constant
-//!     // by each impl
-//!     let width = S::WIDTH_BYTES / 4;
-//!     // Set or get individual lanes with ease
-//!     S::get_lane_epi32(c, width - 1) as f32
+//!     // function names mirror the intel intrinsics, minus the _mm_ part, call them as usual 
+//!     let a = S::set1_ps(1.5);
+//!     let b = S::set1_ps(2.5);
+//!     let mut c = S::add_ps(a,b);
+//!     // Or you can use overloaded operators when applicable:
+//!     let overloads = a*b+b-c/a;
+//!     // If your SIMD instruction set doesn't have floor, round, gather etc,  SIMDeez handles it for you
+//!     c = S::floor_ps(c);
+//!     // You can get the width (as a const!)  of the instruction set you are working with
+//!     let width = S::WIDTH_BYTES;    
+//!     // And set or get individual lanes with ease using the index operator.
+//!     let first = c[0];
+//!     let last = c[(width/4)-1];
+//!     first+last
 //! }
+//! 
 //! // Make an sse2 version of sample
 //! #[target_feature(enable = "sse2")]
 //! unsafe fn sample_sse2() -> f32 {
@@ -64,9 +66,11 @@
 //!
 //! ```
 use std::fmt::Debug;
+use std::ops::*;
 #[macro_use]
 mod macros;
 pub mod avx2;
+pub mod overloads;
 pub mod scalar;
 pub mod sse2;
 pub mod sse41;
@@ -75,11 +79,24 @@ pub trait Simd {
     /// Vi32 stands for Vector of i32s.  Corresponds to __m128i when used
     /// with the Sse impl, __m256i when used with Avx2, or a single i32
     /// when used with Scalar.
-    type Vi32: Copy + Debug;
+    type Vi32: Copy
+        + Debug
+        + Add<Self::Vi32, Output = Self::Vi32>
+        + Sub<Self::Vi32, Output = Self::Vi32>
+        + Mul<Self::Vi32, Output = Self::Vi32>
+        + Index<usize, Output = i32>
+        + IndexMut<usize>;
     /// Vf32 stands for Vector of f32s.  Corresponds to __m128 when used
     /// with the Sse impl, __m256 when used with Avx2, or a single f32
     /// when used with Scalar.
-    type Vf32: Copy + Debug;
+    type Vf32: Copy
+        + Debug
+        + Add<Self::Vf32, Output = Self::Vf32>
+        + Sub<Self::Vf32, Output = Self::Vf32>
+        + Mul<Self::Vf32, Output = Self::Vf32>
+        + Div<Self::Vf32, Output = Self::Vf32>
+        + Index<usize, Output = f32>
+        + IndexMut<usize>;
 
     /// The width of the vector lane in bytes.  Necessary for creating
     /// lane width agnostic code.
@@ -88,16 +105,6 @@ pub trait Simd {
     unsafe fn div_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     /// Equivalent to transmuting the SIMD type to an array and accessing
     /// it at the index i.
-    unsafe fn set_lane_epi32(a: &mut Self::Vi32, value: i32, i: usize);
-    /// Equivalent to transmuting the SIMD type to an array and accessing
-    /// it at the index i.
-    unsafe fn set_lane_ps(a: &mut Self::Vf32, value: f32, i: usize);
-    /// Equivalent to transmuting the SIMD type to an array and accessing
-    /// it at the index i.
-    unsafe fn get_lane_epi32(a: Self::Vi32, i: usize) -> i32;
-    /// Equivalent to transmuting the SIMD type to an array and accessing
-    /// it at the index i.
-    unsafe fn get_lane_ps(a: Self::Vf32, i: usize) -> f32;
     unsafe fn abs_ps(a: Self::Vf32) -> Self::Vf32;
     unsafe fn add_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     unsafe fn add_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
@@ -165,9 +172,6 @@ pub trait Simd {
     unsafe fn xor_si(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
 }
 
-// The target_feature attributes ensure that the compiler emits the appropriate instructions on
-// a per function basis.
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -177,39 +181,39 @@ mod tests {
     use sse41::*;
     // If using runtime feature detection, you will want to be sure this inlines
     #[inline(always)]
-    unsafe fn sample<S: Simd>() -> f32 {
+    unsafe fn sample<S: Simd>() -> i32 {
         let a = S::set1_epi32(3);
         let b = S::set1_epi32(-1);
         let c = S::cmpgt_epi32(a, b);
         let width = S::WIDTH_BYTES / 4;
-        // And set or get individual lanes with ease
-        S::get_lane_epi32(c, width - 1) as f32
+        let c = c + b;
+        c[width - 1]
     }
 
     // Make an sse2 version of sample
     #[target_feature(enable = "sse2")]
-    unsafe fn sample_sse2() -> f32 {
+    unsafe fn sample_sse2() -> i32 {
         sample::<Sse2>()
     }
 
     // Make an avx2 version of sample
     #[target_feature(enable = "avx2")]
-    unsafe fn sample_avx2() -> f32 {
+    unsafe fn sample_avx2() -> i32 {
         sample::<Avx2>()
     }
     #[target_feature(enable = "sse4.1")]
-    unsafe fn sample_sse41() -> f32 {
+    unsafe fn sample_sse41() -> i32 {
         sample::<Sse41>()
     }
-    unsafe fn sample_scalar() -> f32 {
+    unsafe fn sample_scalar() -> i32 {
         sample::<Scalar>()
     }
 
     #[inline(always)]
     unsafe fn setlanetest<S: Simd>() -> f32 {
         let mut a = S::set1_ps(1.0);
-        S::set_lane_ps(&mut a, 5.0, 0);
-        S::get_lane_ps(a, 0)
+        a[0] =  5.0;
+        a[0]
     }
     unsafe fn setlanetest_scalar() -> f32 {
         setlanetest::<Scalar>()
@@ -225,12 +229,53 @@ mod tests {
 
         let index = S::loadu_si(&iarr[0]);
         let result = S::i32gather_ps(&a, index);
-        S::get_lane_ps(result, 0)
+        result[0]
     }
     unsafe fn gathertest_sse2() -> f32 {
         gathertest_simd::<Sse2>()
     }
 
+    #[inline(always)]
+    unsafe fn overload_test<S: Simd>() -> i32 {
+        let a = S::set1_epi32(3);
+        let b = S::set1_epi32(2);
+        let c = a + b; // 5
+        let d = c * b; // 10
+        let e = d - a; // 7
+        let mut result = S::set1_epi32(9);
+        result[0] = e[0];
+        result[0]
+    }
+    unsafe fn overload_test_sse2() -> i32 {
+        overload_test::<Sse2>()
+    }
+
+    #[test]
+    fn overloads() {
+        unsafe {
+            assert_eq!(overload_test_sse2(), 7);
+        }
+    }
+    #[inline(always)]
+    unsafe fn overload_float_test<S: Simd>() -> f32 {
+        let a = S::set1_ps(3.0);
+        let b = S::set1_ps(2.0);
+        let c = a + b; // 5
+        let d = c * b; // 10
+        let e = d - a; // 7
+        let e = e / b; // 3.5
+        e[0]
+    }
+    unsafe fn overload_float_test_sse2() -> f32 {
+        overload_float_test::<Sse2>()
+    }
+
+    #[test]
+    fn overloads_float() {
+        unsafe {
+            assert_eq!(overload_float_test_sse2(), 3.5);
+        }
+    }
     #[test]
     fn consistency() {
         unsafe {

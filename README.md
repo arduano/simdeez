@@ -21,13 +21,15 @@ unsafe fn sample<S: Simd>() -> f32 {
     let a = S::set1_ps(1.5);
     let b = S::set1_ps(2.5);
     let mut c = S::add_ps(a,b);
+    // Or you can use overloaded operators when applicable:
+    let overloads = a*b+b-c/a;
     // If your SIMD instruction set doesn't have floor, round, gather etc,  SIMDeez handles it for you
     c = S::floor_ps(c);
     // You can get the width (as a const!)  of the instruction set you are working with
     let width = S::WIDTH_BYTES;    
-    // And set or get individual lanes with ease
-    let first = S::get_lane(c,0);
-    let last = S::get_lane(c,(width/4)-1);
+    // And set or get individual lanes with ease using the index operator.
+    let first = c[0];
+    let last = c[(width/4)-1];
     first+last
     
 }

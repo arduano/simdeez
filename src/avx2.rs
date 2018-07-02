@@ -1,4 +1,5 @@
 use super::*;
+use overloads::*;
 #[cfg(target_arch = "x86")]
 use std::arch::x86::*;
 #[cfg(target_arch = "x86_64")]
@@ -7,213 +8,192 @@ use std::mem;
 
 pub struct Avx2;
 impl Simd for Avx2 {
-    type Vi32 = __m256i;
-    type Vf32 = __m256;
+    type Vi32 = I32x8;
+    type Vf32 = F32x8;
     const WIDTH_BYTES: usize = 8 * 4;
-    #[inline(always)]
-    unsafe fn set_lane_ps(a: &mut Self::Vf32, value: f32, i: usize) {
-        debug_assert!(i < Self::WIDTH_BYTES / 4);
-        let arr = mem::transmute::<&mut __m256, &mut [f32; 8]>(a);
-        arr[i] = value;
-    }
-    #[inline(always)]
-    unsafe fn set_lane_epi32(a: &mut Self::Vi32, value: i32, i: usize) {
-        debug_assert!(i < Self::WIDTH_BYTES / 4);
-        let arr = mem::transmute::<&mut __m256i, &mut [i32; 8]>(a);
-        arr[i] = value;
-    }
-    #[inline(always)]
-    unsafe fn get_lane_ps(a: Self::Vf32, i: usize) -> f32 {
-        debug_assert!(i < Self::WIDTH_BYTES / 4);
-        let arr = mem::transmute::<__m256, [f32; 8]>(a);
-        arr[i]
-    }
-    #[inline(always)]
-    unsafe fn get_lane_epi32(a: Self::Vi32, i: usize) -> i32 {
-        debug_assert!(i < Self::WIDTH_BYTES / 4);
-        let arr = mem::transmute::<__m256i, [i32; 8]>(a);
-        arr[i]
-    }
-    #[inline(always)]
+   #[inline(always)]
     unsafe fn abs_ps(a: Self::Vf32) -> Self::Vf32 {
         let b = _mm256_set1_epi32(0x7fffffff);
-        _mm256_and_ps(a, _mm256_castsi256_ps(b))
+        F32x8(_mm256_and_ps(a.0, _mm256_castsi256_ps(b)))
     }
     #[inline(always)]
     unsafe fn add_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        _mm256_add_epi32(a, b)
+        I32x8(_mm256_add_epi32(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn add_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        _mm256_add_ps(a, b)
+        F32x8(_mm256_add_ps(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn and_si(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        _mm256_and_si256(a, b)
+        I32x8(_mm256_and_si256(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn andnot_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        _mm256_andnot_ps(a, b)
+        F32x8(_mm256_andnot_ps(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn andnot_si(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        _mm256_andnot_si256(a, b)
+        I32x8(_mm256_andnot_si256(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn blendv_epi32(a: Self::Vi32, b: Self::Vi32, mask: Self::Vi32) -> Self::Vi32 {
-        _mm256_castps_si256(_mm256_blendv_ps(
-            _mm256_castsi256_ps(a),
-            _mm256_castsi256_ps(b),
-            _mm256_castsi256_ps(mask),
-        ))
+        I32x8(_mm256_castps_si256(_mm256_blendv_ps(
+            _mm256_castsi256_ps(a.0),
+            _mm256_castsi256_ps(b.0),
+            _mm256_castsi256_ps(mask.0),
+        )))
     }
     #[inline(always)]
     unsafe fn blendv_ps(a: Self::Vf32, b: Self::Vf32, mask: Self::Vf32) -> Self::Vf32 {
-        _mm256_blendv_ps(a, b, mask)
+        F32x8(_mm256_blendv_ps(a.0, b.0, mask.0))
     }
     #[inline(always)]
     unsafe fn castps_si(a: Self::Vf32) -> Self::Vi32 {
-        _mm256_castps_si256(a)
+        I32x8(_mm256_castps_si256(a.0))
     }
     #[inline(always)]
     unsafe fn castsi_ps(a: Self::Vi32) -> Self::Vf32 {
-        _mm256_castsi256_ps(a)
+        F32x8(_mm256_castsi256_ps(a.0))
     }
     #[inline(always)]
     unsafe fn cmpeq_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        _mm256_cmpeq_epi32(a, b)
+        I32x8(_mm256_cmpeq_epi32(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn cmpge_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        _mm256_cmp_ps(a, b, _CMP_GE_OQ)
+        F32x8(_mm256_cmp_ps(a.0, b.0, _CMP_GE_OQ))
     }
     #[inline(always)]
     unsafe fn cmpgt_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        _mm256_cmpgt_epi32(a, b)
+        I32x8(_mm256_cmpgt_epi32(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn cmpgt_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        _mm256_cmp_ps(a, b, _CMP_GT_OQ)
+        F32x8(_mm256_cmp_ps(a.0, b.0, _CMP_GT_OQ))
     }
     #[inline(always)]
     unsafe fn cmplt_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        _mm256_cmp_ps(a, b, _CMP_LT_OQ)
+        F32x8(_mm256_cmp_ps(a.0, b.0, _CMP_LT_OQ))
     }
     #[inline(always)]
     unsafe fn cvtepi32_ps(a: Self::Vi32) -> Self::Vf32 {
-        _mm256_cvtepi32_ps(a)
+        F32x8(_mm256_cvtepi32_ps(a.0))
     }
     #[inline(always)]
     unsafe fn cvtps_epi32(a: Self::Vf32) -> Self::Vi32 {
-        _mm256_cvtps_epi32(a)
+        I32x8(_mm256_cvtps_epi32(a.0))
     }
     #[inline(always)]
     unsafe fn ceil_ps(a: Self::Vf32) -> Self::Vf32 {
-        _mm256_ceil_ps(a)
+        F32x8(_mm256_ceil_ps(a.0))
     }
     #[inline(always)]
     unsafe fn floor_ps(a: Self::Vf32) -> Self::Vf32 {
-        _mm256_floor_ps(a)
+        F32x8(_mm256_floor_ps(a.0))
     }
     #[inline(always)]
     unsafe fn fastfloor_ps(a: Self::Vf32) -> Self::Vf32 {
-        _mm256_floor_ps(a)
+        F32x8(_mm256_floor_ps(a.0))
     }
     #[inline(always)]
     unsafe fn fmadd_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32 {
-        _mm256_fmadd_ps(a, b, c)
+        F32x8(_mm256_fmadd_ps(a.0, b.0, c.0))
     }
     #[inline(always)]
     unsafe fn fnmadd_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32 {
-        _mm256_fnmadd_ps(a, b, c)
+        F32x8(_mm256_fnmadd_ps(a.0, b.0, c.0))
     }
     #[inline(always)]
     unsafe fn i32gather_epi32(arr: &[i32], index: Self::Vi32) -> Self::Vi32 {
-        _mm256_i32gather_epi32(&arr[0] as *const i32, index, 4)
+        I32x8(_mm256_i32gather_epi32(&arr[0] as *const i32, index.0, 4))
     }
     #[inline(always)]
     unsafe fn i32gather_ps(arr: &[f32], index: Self::Vi32) -> Self::Vf32 {
-        _mm256_i32gather_ps(&arr[0] as *const f32, index, 4)
+        F32x8(_mm256_i32gather_ps(&arr[0] as *const f32, index.0, 4))
     }
     #[inline(always)]
     unsafe fn loadu_ps(a: &f32) -> Self::Vf32 {
-        _mm256_loadu_ps(a as *const f32)
+        F32x8(_mm256_loadu_ps(a as *const f32))
     }
     #[inline(always)]
     unsafe fn loadu_si(a: &i32) -> Self::Vi32 {
         let m = mem::transmute::<&i32, &__m256i>(a);
-        _mm256_loadu_si256(m)
+        I32x8(_mm256_loadu_si256(m))
     }
     #[inline(always)]
     unsafe fn storeu_ps(a: &mut f32, b: Self::Vf32) {
-        _mm256_storeu_ps(a as *mut f32, b)
+        _mm256_storeu_ps(a as *mut f32, b.0);
     }
     #[inline(always)]
     unsafe fn max_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        _mm256_max_ps(a, b)
+        F32x8(_mm256_max_ps(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn min_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        _mm256_min_ps(a, b)
+        F32x8(_mm256_min_ps(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn mul_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        _mm256_mul_ps(a, b)
+        F32x8(_mm256_mul_ps(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn div_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        _mm256_div_ps(a, b)
+        F32x8(_mm256_div_ps(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn mullo_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        _mm256_mullo_epi32(a, b)
+        I32x8(_mm256_mullo_epi32(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn or_si(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        _mm256_or_si256(a, b)
+        I32x8(_mm256_or_si256(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn round_ps(a: Self::Vf32) -> Self::Vf32 {
-        _mm256_round_ps(a, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC)
+        F32x8(_mm256_round_ps(
+            a.0,
+            _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC,
+        ))
     }
     #[inline(always)]
     unsafe fn set1_epi32(a: i32) -> Self::Vi32 {
-        _mm256_set1_epi32(a)
+        I32x8(_mm256_set1_epi32(a))
     }
     #[inline(always)]
     unsafe fn set1_ps(a: f32) -> Self::Vf32 {
-        _mm256_set1_ps(a)
+        F32x8(_mm256_set1_ps(a))
     }
     #[inline(always)]
     unsafe fn setzero_ps() -> Self::Vf32 {
-        _mm256_setzero_ps()
+        F32x8(_mm256_setzero_ps())
     }
     #[inline(always)]
     unsafe fn setzero_si() -> Self::Vi32 {
-        _mm256_setzero_si256()
+        I32x8(_mm256_setzero_si256())
     }
     #[inline(always)]
     unsafe fn srai_epi32(a: Self::Vi32, b: i32) -> Self::Vi32 {
-        _mm256_srai_epi32(a, b)
+        I32x8(_mm256_srai_epi32(a.0, b))
     }
     #[inline(always)]
     unsafe fn sub_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        _mm256_sub_epi32(a, b)
+        I32x8(_mm256_sub_epi32(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn sub_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        _mm256_sub_ps(a, b)
+        F32x8(_mm256_sub_ps(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn sqrt_ps(a: Self::Vf32) -> Self::Vf32 {
-        _mm256_sqrt_ps(a)
+        F32x8(_mm256_sqrt_ps(a.0))
     }
     #[inline(always)]
     unsafe fn rsqrt_ps(a: Self::Vf32) -> Self::Vf32 {
-        _mm256_rsqrt_ps(a)
+        F32x8(_mm256_rsqrt_ps(a.0))
     }
     #[inline(always)]
     unsafe fn xor_si(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        _mm256_xor_si256(a, b)
+        I32x8(_mm256_xor_si256(a.0, b.0))
     }
 }
