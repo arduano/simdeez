@@ -12,7 +12,7 @@ impl Simd for Sse41 {
     type Vf32 = F32x4;
 
     const WIDTH_BYTES: usize = 4 * 4;
-   #[inline(always)]
+    #[inline(always)]
     unsafe fn abs_ps(a: Self::Vf32) -> Self::Vf32 {
         let b = _mm_set1_epi32(0x7fffffff);
         F32x4(_mm_and_ps(a.0, _mm_castsi128_ps(b)))

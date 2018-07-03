@@ -27,7 +27,7 @@
 //! // If using runtime feature detection, you will want to be sure this inlines
 //! #[inline(always)]
 //! unsafe fn sample<S: Simd>() -> f32 {
-//!     // function names mirror the intel intrinsics, minus the _mm_ part, call them as usual 
+//!     // function names mirror the intel intrinsics, minus the _mm_ part, call them as usual
 //!     let a = S::set1_ps(1.5);
 //!     let b = S::set1_ps(2.5);
 //!     let mut c = S::add_ps(a,b);
@@ -42,7 +42,7 @@
 //!     let last = c[(width/4)-1];
 //!     first+last
 //! }
-//! 
+//!
 //! // Make an sse2 version of sample
 //! #[target_feature(enable = "sse2")]
 //! unsafe fn sample_sse2() -> f32 {
@@ -84,6 +84,15 @@ pub trait Simd {
         + Add<Self::Vi32, Output = Self::Vi32>
         + Sub<Self::Vi32, Output = Self::Vi32>
         + Mul<Self::Vi32, Output = Self::Vi32>
+        + AddAssign<Self::Vi32>
+        + SubAssign<Self::Vi32>
+        + MulAssign<Self::Vi32>
+        + BitAnd<Self::Vi32, Output = Self::Vi32>
+        + BitOr<Self::Vi32, Output = Self::Vi32>
+        + BitXor<Self::Vi32, Output = Self::Vi32>
+        + BitAndAssign<Self::Vi32>
+        + BitOrAssign<Self::Vi32>
+        + BitXorAssign<Self::Vi32>
         + Index<usize, Output = i32>
         + IndexMut<usize>;
     /// Vf32 stands for Vector of f32s.  Corresponds to __m128 when used
@@ -95,6 +104,16 @@ pub trait Simd {
         + Sub<Self::Vf32, Output = Self::Vf32>
         + Mul<Self::Vf32, Output = Self::Vf32>
         + Div<Self::Vf32, Output = Self::Vf32>
+        + AddAssign<Self::Vf32>
+        + SubAssign<Self::Vf32>
+        + MulAssign<Self::Vf32>
+        + DivAssign<Self::Vf32>
+        + BitAnd<Self::Vf32, Output = Self::Vf32>
+        + BitOr<Self::Vf32, Output = Self::Vf32>
+        + BitXor<Self::Vf32, Output = Self::Vf32>
+        + BitAndAssign<Self::Vf32>
+        + BitOrAssign<Self::Vf32>
+        + BitXorAssign<Self::Vf32>
         + Index<usize, Output = f32>
         + IndexMut<usize>;
 
@@ -212,7 +231,7 @@ mod tests {
     #[inline(always)]
     unsafe fn setlanetest<S: Simd>() -> f32 {
         let mut a = S::set1_ps(1.0);
-        a[0] =  5.0;
+        a[0] = 5.0;
         a[0]
     }
     unsafe fn setlanetest_scalar() -> f32 {
@@ -241,7 +260,8 @@ mod tests {
         let b = S::set1_epi32(2);
         let c = a + b; // 5
         let d = c * b; // 10
-        let e = d - a; // 7
+        let mut e = d - a; // 7
+        e *= b; // 14
         let mut result = S::set1_epi32(9);
         result[0] = e[0];
         result[0]
@@ -253,7 +273,7 @@ mod tests {
     #[test]
     fn overloads() {
         unsafe {
-            assert_eq!(overload_test_sse2(), 7);
+            assert_eq!(overload_test_sse2(), 14);
         }
     }
     #[inline(always)]

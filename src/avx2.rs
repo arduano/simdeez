@@ -11,7 +11,7 @@ impl Simd for Avx2 {
     type Vi32 = I32x8;
     type Vf32 = F32x8;
     const WIDTH_BYTES: usize = 8 * 4;
-   #[inline(always)]
+    #[inline(always)]
     unsafe fn abs_ps(a: Self::Vf32) -> Self::Vf32 {
         let b = _mm256_set1_epi32(0x7fffffff);
         F32x8(_mm256_and_ps(a.0, _mm256_castsi256_ps(b)))
