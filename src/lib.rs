@@ -39,7 +39,7 @@
 //!     let width = S::WIDTH_BYTES;    
 //!     // And set or get individual lanes with ease using the index operator.
 //!     let first = c[0];
-//!     let last = c[(width/4)-1];
+//!     let last = c[S::VF32_WIDTH-1];
 //!     first+last
 //! }
 //!
@@ -117,9 +117,19 @@ pub trait Simd {
         + Index<usize, Output = f32>
         + IndexMut<usize>;
 
-    /// The width of the vector lane in bytes.  Necessary for creating
+    /// Vi64 stands for Vector of f64s.  Corresponds to __m128 when used
+    /// with the Sse impl, __m256 when used with Avx2, or a single f64
+    /// when used with Scalar.
+    type Vf64: Copy + Debug + Index<usize, Output = f64> + IndexMut<usize>
+        + Add<Self::Vf64, Output = Self::Vf64>
+        + Mul<Self::Vf64, Output = Self::Vf64>
+        + AddAssign<Self::Vf64>;
+
+    /// The width of the vector lane.  Necessary for creating
     /// lane width agnostic code.
-    const WIDTH_BYTES: usize;
+    const VF32_WIDTH: usize;
+    const VF64_WIDTH: usize;
+    const VI32_WIDTH: usize;
 
     unsafe fn div_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     /// Equivalent to transmuting the SIMD type to an array and accessing
@@ -127,6 +137,7 @@ pub trait Simd {
     unsafe fn abs_ps(a: Self::Vf32) -> Self::Vf32;
     unsafe fn add_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     unsafe fn add_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
+    unsafe fn add_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
     unsafe fn and_si(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     unsafe fn andnot_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn andnot_si(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
@@ -165,11 +176,13 @@ pub trait Simd {
     /// doing scalar array accesses, because gather doesn't exist until Avx2.
     unsafe fn i32gather_ps(arr: &[f32], index: Self::Vi32) -> Self::Vf32;
     unsafe fn loadu_ps(a: &f32) -> Self::Vf32;
+    unsafe fn loadu_pd(a: &f64) -> Self::Vf64;
     unsafe fn loadu_si(a: &i32) -> Self::Vi32;
     unsafe fn storeu_ps(a: &mut f32, b: Self::Vf32);
     unsafe fn max_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn min_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn mul_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
+    unsafe fn mul_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
     /// Mullo is implemented for Sse2 by combining other Sse2 operations.
     unsafe fn mullo_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     unsafe fn or_si(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
@@ -177,7 +190,9 @@ pub trait Simd {
     unsafe fn round_ps(a: Self::Vf32) -> Self::Vf32;
     unsafe fn set1_epi32(a: i32) -> Self::Vi32;
     unsafe fn set1_ps(a: f32) -> Self::Vf32;
+    unsafe fn set1_pd(a: f64) -> Self::Vf64;
     unsafe fn setzero_ps() -> Self::Vf32;
+    unsafe fn setzero_pd() -> Self::Vf64;
     unsafe fn setzero_si() -> Self::Vi32;
     /// Shift operations for Sse require that imm8 be a constant,
     /// we handle this with a macro, so if you pass a non constant
@@ -204,9 +219,8 @@ mod tests {
         let a = S::set1_epi32(3);
         let b = S::set1_epi32(-1);
         let c = S::cmpgt_epi32(a, b);
-        let width = S::WIDTH_BYTES / 4;
         let c = c + b;
-        c[width - 1]
+        c[S::VF32_WIDTH - 1]
     }
 
     // Make an sse2 version of sample
@@ -284,6 +298,7 @@ mod tests {
         let d = c * b; // 10
         let e = d - a; // 7
         let e = e / b; // 3.5
+        let e = e + 2.0; //7
         e[0]
     }
     unsafe fn overload_float_test_sse2() -> f32 {
@@ -293,7 +308,7 @@ mod tests {
     #[test]
     fn overloads_float() {
         unsafe {
-            assert_eq!(overload_float_test_sse2(), 3.5);
+            assert_eq!(overload_float_test_sse2(), 7.0);
         }
     }
     #[test]

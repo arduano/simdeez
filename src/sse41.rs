@@ -10,8 +10,12 @@ pub struct Sse41;
 impl Simd for Sse41 {
     type Vi32 = I32x4_41;
     type Vf32 = F32x4;
+    type Vf64 = F64x2;
 
-    const WIDTH_BYTES: usize = 4 * 4;
+    const VF32_WIDTH: usize = 4;
+    const VF64_WIDTH: usize = 2;
+    const VI32_WIDTH: usize = 4;
+
     #[inline(always)]
     unsafe fn abs_ps(a: Self::Vf32) -> Self::Vf32 {
         let b = _mm_set1_epi32(0x7fffffff);
@@ -24,6 +28,10 @@ impl Simd for Sse41 {
     #[inline(always)]
     unsafe fn add_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
         F32x4(_mm_add_ps(a.0, b.0))
+    }
+    #[inline(always)]
+    unsafe fn add_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        F64x2(_mm_add_pd(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn and_si(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
@@ -133,6 +141,10 @@ impl Simd for Sse41 {
         F32x4(_mm_loadu_ps(a as *const f32))
     }
     #[inline(always)]
+    unsafe fn loadu_pd(a: &f64) -> Self::Vf64 {
+        F64x2(_mm_loadu_pd(a as *const f64))
+    }
+    #[inline(always)]
     unsafe fn loadu_si(a: &i32) -> Self::Vi32 {
         let m = mem::transmute::<&i32, &__m128i>(a);
         I32x4_41(_mm_loadu_si128(m))
@@ -152,6 +164,10 @@ impl Simd for Sse41 {
     #[inline(always)]
     unsafe fn mul_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
         F32x4(_mm_mul_ps(a.0, b.0))
+    }
+    #[inline(always)]
+    unsafe fn mul_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        F64x2(_mm_mul_pd(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn div_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
@@ -179,6 +195,14 @@ impl Simd for Sse41 {
     #[inline(always)]
     unsafe fn set1_ps(a: f32) -> Self::Vf32 {
         F32x4(_mm_set1_ps(a))
+    }
+    #[inline(always)]
+    unsafe fn set1_pd(a: f64) -> Self::Vf64 {
+        F64x2(_mm_set1_pd(a))
+    }
+    #[inline(always)]
+    unsafe fn setzero_pd() -> Self::Vf64 {
+        F64x2(_mm_setzero_pd())
     }
     #[inline(always)]
     unsafe fn setzero_ps() -> Self::Vf32 {

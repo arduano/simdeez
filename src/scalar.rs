@@ -10,8 +10,11 @@ pub struct Scalar;
 impl Simd for Scalar {
     type Vi32 = I32x1;
     type Vf32 = F32x1;
+    type Vf64 = F64x1;
 
-    const WIDTH_BYTES: usize = 4;
+    const VF32_WIDTH: usize = 1;
+    const VF64_WIDTH: usize = 1;
+    const VI32_WIDTH: usize = 1;
 
     #[inline(always)]
     unsafe fn abs_ps(a: Self::Vf32) -> Self::Vf32 {
@@ -24,6 +27,10 @@ impl Simd for Scalar {
     #[inline(always)]
     unsafe fn add_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
         F32x1(a.0 + b.0)
+    }
+    #[inline(always)]
+    unsafe fn add_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        F64x1(a.0 + b.0)
     }
     #[inline(always)]
     unsafe fn and_si(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
@@ -126,6 +133,10 @@ impl Simd for Scalar {
         F32x1(*a)
     }
     #[inline(always)]
+    unsafe fn loadu_pd(a: &f64) -> Self::Vf64 {
+        F64x1(*a)
+    }
+    #[inline(always)]
     unsafe fn loadu_si(a: &i32) -> Self::Vi32 {
         I32x1(*a)
     }
@@ -154,6 +165,10 @@ impl Simd for Scalar {
         F32x1(a.0 * b.0)
     }
     #[inline(always)]
+    unsafe fn mul_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        F64x1(a.0 * b.0)
+    }
+    #[inline(always)]
     unsafe fn div_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
         F32x1(a.0 / b.0)
     }
@@ -176,6 +191,14 @@ impl Simd for Scalar {
     #[inline(always)]
     unsafe fn set1_ps(a: f32) -> Self::Vf32 {
         F32x1(a)
+    }
+    #[inline(always)]
+    unsafe fn set1_pd(a: f64) -> Self::Vf64 {
+        F64x1(a)
+    }
+    #[inline(always)]
+    unsafe fn setzero_pd() -> Self::Vf64 {
+        F64x1(0.0)
     }
     #[inline(always)]
     unsafe fn setzero_ps() -> Self::Vf32 {
