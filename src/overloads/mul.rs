@@ -1,12 +1,6 @@
 use super::*;
 // -- Mul
-impl Mul for I32x1 {
-    type Output = I32x1;
 
-    fn mul(self, rhs: I32x1) -> I32x1 {
-        I32x1(self.0 * rhs.0)
-    }
-}
 impl Mul for I32x4 {
     type Output = I32x4;
 
@@ -38,13 +32,7 @@ impl Mul for I32x8 {
         I32x8(unsafe { _mm256_mul_epi32(self.0, rhs.0) })
     }
 }
-impl Mul for F32x1 {
-    type Output = F32x1;
 
-    fn mul(self, rhs: F32x1) -> F32x1 {
-        F32x1(self.0 * rhs.0)
-    }
-}
 impl Mul for F32x4 {
     type Output = F32x4;
 
@@ -58,13 +46,7 @@ impl Mul for F32x8 {
         F32x8(unsafe { _mm256_mul_ps(self.0, rhs.0) })
     }
 }
-impl Mul for F64x1 {
-    type Output = F64x1;
 
-    fn mul(self, rhs: F64x1) -> F64x1 {
-        F64x1(self.0 * rhs.0)
-    }
-}
 impl Mul for F64x2 {
     type Output = F64x2;
 

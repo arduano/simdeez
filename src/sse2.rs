@@ -1,25 +1,31 @@
 use super::*;
 use overloads::*;
 #[cfg(target_arch = "x86")]
-use std::arch::x86::*;
+use core::arch::x86::*;
 #[cfg(target_arch = "x86_64")]
-use std::arch::x86_64::*;
-use std::mem;
+use core::arch::x86_64::*;
+use core::mem;
 
 pub struct Sse2;
 impl Simd for Sse2 {
     type Vi32 = I32x4;
     type Vf32 = F32x4;
     type Vf64 = F64x2;
-
+    type Vi64 = I64x2;
     const VF32_WIDTH: usize = 4;
     const VF64_WIDTH: usize = 2;
     const VI32_WIDTH: usize = 4;
+    const VI64_WIDTH: usize = 2;
 
-    #[inline(always)]
+     #[inline(always)]
     unsafe fn abs_ps(a: Self::Vf32) -> Self::Vf32 {
-        let b = _mm_set1_epi32(0x7fffffff);
-        F32x4(_mm_and_ps(a.0, _mm_castsi128_ps(b)))
+        let b = _mm_set1_ps(-0.0);
+        F32x4(_mm_andnot_ps(a.0, b))
+    }
+    #[inline(always)]
+    unsafe fn abs_pd(a: Self::Vf64) -> Self::Vf64 {
+        let b = _mm_set1_pd(-0.0);
+        F64x2(_mm_andnot_pd(a.0, b))
     }
     #[inline(always)]
     unsafe fn add_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
@@ -37,9 +43,13 @@ impl Simd for Sse2 {
     unsafe fn and_si(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         I32x4(_mm_and_si128(a.0, b.0))
     }
-    #[inline(always)]
+     #[inline(always)]
     unsafe fn andnot_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
         F32x4(_mm_andnot_ps(a.0, b.0))
+    }
+    #[inline(always)]
+    unsafe fn andnot_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        F64x2(_mm_andnot_pd(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn andnot_si(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
@@ -52,7 +62,7 @@ impl Simd for Sse2 {
             _mm_and_si128(mask.0, b.0),
         ))
     }
-    #[inline(always)]
+     #[inline(always)]
     unsafe fn blendv_ps(a: Self::Vf32, b: Self::Vf32, mask: Self::Vf32) -> Self::Vf32 {
         F32x4(_mm_or_ps(
             _mm_andnot_ps(mask.0, a.0),
@@ -60,12 +70,23 @@ impl Simd for Sse2 {
         ))
     }
     #[inline(always)]
+    unsafe fn blendv_pd(a: Self::Vf64, b: Self::Vf64, mask: Self::Vf64) -> Self::Vf64 {
+        F64x2(_mm_or_pd(
+            _mm_andnot_pd(mask.0, a.0),
+            _mm_and_pd(mask.0, b.0),
+        ))
+    }
+    #[inline(always)]
     unsafe fn castps_si(a: Self::Vf32) -> Self::Vi32 {
         I32x4(_mm_castps_si128(a.0))
     }
-    #[inline(always)]
+     #[inline(always)]
     unsafe fn castsi_ps(a: Self::Vi32) -> Self::Vf32 {
         F32x4(_mm_castsi128_ps(a.0))
+    }
+    #[inline(always)]
+    unsafe fn castsi_pd(a: Self::Vi64) -> Self::Vf64 {
+        F64x2(_mm_castsi128_pd(a.0))
     }
     #[inline(always)]
     unsafe fn cmpeq_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
@@ -97,12 +118,23 @@ impl Simd for Sse2 {
     }
     #[inline(always)]
     unsafe fn ceil_ps(a: Self::Vf32) -> Self::Vf32 {
-        let i = _mm_cvttps_epi32(a.0);
-        let fi = _mm_cvtepi32_ps(i);
-        let iga = _mm_cmplt_ps(fi, a.0);
-        F32x4(_mm_add_ps(fi, _mm_and_ps(iga, _mm_set1_ps(1.0))))
-    }
+        let t1 = _mm_getcsr();
+        let t2 = t1 | (1 << 13);
+        _mm_setcsr(t2);
+        let r = Self::round_ps(a);
+        _mm_setcsr(t1);
+        r
+   }
     #[inline(always)]
+    unsafe fn ceil_pd(a: Self::Vf64) -> Self::Vf64 {
+        let t1 = _mm_getcsr();
+        let t2 = t1 | (2 << 13);
+        _mm_setcsr(t2);
+        let r = Self::round_pd(a);
+        _mm_setcsr(t1);
+        r
+    }
+     #[inline(always)]
     unsafe fn floor_ps(a: Self::Vf32) -> Self::Vf32 {
         let i = _mm_cvttps_epi32(a.0);
         let fi = _mm_cvtepi32_ps(i);
@@ -186,6 +218,10 @@ impl Simd for Sse2 {
         F32x4(_mm_div_ps(a.0, b.0))
     }
     #[inline(always)]
+    unsafe fn div_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        F64x2(_mm_div_pd(a.0, b.0))
+    }
+    #[inline(always)]
     unsafe fn mullo_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         let tmp1 = _mm_mul_epu32(a.0, b.0); /* mul 2,0*/
         let tmp2 = _mm_mul_epu32(_mm_srli_si128(a.0, 4), _mm_srli_si128(b.0, 4)); /* mul 3,1 */
@@ -200,18 +236,23 @@ impl Simd for Sse2 {
     }
     #[inline(always)]
     unsafe fn round_ps(a: Self::Vf32) -> Self::Vf32 {
-        let v1 = _mm_cmpeq_ps(_mm_setzero_ps(), _mm_setzero_ps());
-        let i = _mm_cvttps_epi32(a.0);
-        let a_trunc = _mm_cvtepi32_ps(i); // truncate a
-        let rmd = _mm_sub_ps(a.0, a_trunc); // get remainder
-        let rmd2 = _mm_mul_ps(
-            rmd,
-            _mm_castsi128_ps(_mm_srli_epi32(_mm_castps_si128(v1), 2)),
-        ); // mul remainder by near 2 will yield the needed offset
-        let rmd2i = _mm_cvttps_epi32(rmd2); // after being truncated of course
-        let rmd2_trunc = _mm_cvtepi32_ps(rmd2i);
-        F32x4(_mm_add_ps(a_trunc, rmd2_trunc))
+        let sign_mask = _mm_set1_ps(-0.0);
+        let magic = _mm_castsi128_ps(_mm_set1_epi32(0x4B000000));
+        let sign = _mm_and_ps(a.0,sign_mask);
+        let signed_magic = _mm_or_ps(magic,sign);
+        let b = _mm_add_ps(a.0,signed_magic);
+        F32x4(_mm_sub_ps(b,signed_magic))
     }
+    #[inline(always)]
+    unsafe fn round_pd(a: Self::Vf64) -> Self::Vf64 {
+        let sign_mask = _mm_set1_pd(-0.0); 
+        let magic = _mm_castsi128_pd(_mm_set_epi32(0,0x43300000,0,0x43300000));
+        let sign = _mm_and_pd(a.0,sign_mask);
+        let signedmagic = _mm_or_pd(magic,sign);
+        let b = _mm_add_pd(a.0,signedmagic);
+        F64x2(_mm_sub_pd(b,signedmagic))
+    }
+
     #[inline(always)]
     unsafe fn set1_epi32(a: i32) -> Self::Vi32 {
         I32x4(_mm_set1_epi32(a))

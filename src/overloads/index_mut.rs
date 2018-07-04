@@ -1,25 +1,4 @@
 use super::*;
-impl IndexMut<usize> for I32x1 {
-    fn index_mut(&mut self, i: usize) -> &mut i32 {
-        debug_assert!(i == 0);
-        let arr = unsafe { mem::transmute::<&mut I32x1, &mut [i32; 1]>(self) };
-        &mut arr[i]
-    }
-}
-impl IndexMut<usize> for F32x1 {
-    fn index_mut(&mut self, i: usize) -> &mut f32 {
-        debug_assert!(i == 0);
-        let arr = unsafe { mem::transmute::<&mut F32x1, &mut [f32; 1]>(self) };
-        &mut arr[i]
-    }
-}
-impl IndexMut<usize> for F64x1 {
-    fn index_mut(&mut self, i: usize) -> &mut f64 {
-        debug_assert!(i == 0);
-        let arr = unsafe { mem::transmute::<&mut F64x1, &mut [f64; 1]>(self) };
-        &mut arr[i]
-    }
-}
 impl IndexMut<usize> for I32x4 {
     fn index_mut(&mut self, i: usize) -> &mut i32 {
         debug_assert!(i < 4);

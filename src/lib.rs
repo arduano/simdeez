@@ -1,6 +1,6 @@
 //! SIMDeez abstracts over the various sets of SIMD instructions such that
 //! you can write a single function, and use it to produce SSE2,
-//! SSE41, AVX2, or scalar versions of that function.  This can be combined
+//! SSE41, or AVX2 versions of that function.  This can be combined
 //! with `cfg` attributes to produce the optimum function at compile time,
 //! or with `target_feature` attributes for use with runtime selection,
 //! either automatically or letting users decide
@@ -23,7 +23,6 @@
 //! use simdeez::avx2::*;
 //! use simdeez::sse2::*;
 //! use simdeez::sse41::*;
-//! use simdeez::scalar::*;
 //! // If using runtime feature detection, you will want to be sure this inlines
 //! #[inline(always)]
 //! unsafe fn sample<S: Simd>() -> f32 {
@@ -35,11 +34,10 @@
 //!     let overloads = a*b+b-c/a;
 //!     // If your SIMD instruction set doesn't have floor, round, gather etc,  SIMDeez handles it for you
 //!     c = S::floor_ps(c);
-//!     // You can get the width (as a const!)  of the instruction set you are working with
-//!     let width = S::WIDTH_BYTES;    
+//!     // You can get the width (as a const!)  of the vector type you are working with
 //!     // And set or get individual lanes with ease using the index operator.
-//!     let first = c[0];
 //!     let last = c[S::VF32_WIDTH-1];
+//!     let first = c[0];
 //!     first+last
 //! }
 //!
@@ -58,20 +56,16 @@
 //! unsafe fn sample_sse41() -> f32 {
 //!     sample::<Sse41>()
 //! }
-//! // Or even scalar (perf may suffer here)
-//! unsafe fn sample_scalar() -> f32 {
-//!     sample::<Scalar>()
-//! }
 //!
 //!
 //! ```
-use std::fmt::Debug;
-use std::ops::*;
+#![no_std]
+use core::fmt::Debug;
+use core::ops::*;
 #[macro_use]
 mod macros;
 pub mod avx2;
 pub mod overloads;
-pub mod scalar;
 pub mod sse2;
 pub mod sse41;
 
@@ -120,34 +114,57 @@ pub trait Simd {
     /// Vi64 stands for Vector of f64s.  Corresponds to __m128 when used
     /// with the Sse impl, __m256 when used with Avx2, or a single f64
     /// when used with Scalar.
-    type Vf64: Copy + Debug + Index<usize, Output = f64> + IndexMut<usize>
+    type Vf64: Copy
+        + Debug
+        + Index<usize, Output = f64>
+        + IndexMut<usize>
         + Add<Self::Vf64, Output = Self::Vf64>
+        + Sub<Self::Vf64, Output = Self::Vf64>
         + Mul<Self::Vf64, Output = Self::Vf64>
-        + AddAssign<Self::Vf64>;
+        + Div<Self::Vf64, Output = Self::Vf64>
+        + AddAssign<Self::Vf64>
+        + SubAssign<Self::Vf64>
+        + MulAssign<Self::Vf64>
+        + DivAssign<Self::Vf64>
+        + BitAnd<Self::Vf64, Output = Self::Vf64>
+        + BitOr<Self::Vf64, Output = Self::Vf64>
+        + BitXor<Self::Vf64, Output = Self::Vf64>
+        + BitAndAssign<Self::Vf64>
+        + BitOrAssign<Self::Vf64>
+        + BitXorAssign<Self::Vf64>;
+
+    type Vi64: Copy + Debug;
 
     /// The width of the vector lane.  Necessary for creating
     /// lane width agnostic code.
     const VF32_WIDTH: usize;
     const VF64_WIDTH: usize;
     const VI32_WIDTH: usize;
+    const VI64_WIDTH: usize;
 
     unsafe fn div_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
+    unsafe fn div_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
     /// Equivalent to transmuting the SIMD type to an array and accessing
     /// it at the index i.
     unsafe fn abs_ps(a: Self::Vf32) -> Self::Vf32;
+    unsafe fn abs_pd(a: Self::Vf64) -> Self::Vf64;
     unsafe fn add_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     unsafe fn add_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn add_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
     unsafe fn and_si(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     unsafe fn andnot_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
+    unsafe fn andnot_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
     unsafe fn andnot_si(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     /// This is provided for convenience, it uses casts and the blendv_ps
     /// intrinsics to implement it.
     unsafe fn blendv_epi32(a: Self::Vi32, b: Self::Vi32, mask: Self::Vi32) -> Self::Vi32;
     unsafe fn blendv_ps(a: Self::Vf32, b: Self::Vf32, mask: Self::Vf32) -> Self::Vf32;
+    unsafe fn blendv_pd(a: Self::Vf64, b: Self::Vf64, mask: Self::Vf64) -> Self::Vf64;
     unsafe fn castps_si(a: Self::Vf32) -> Self::Vi32;
     unsafe fn castsi_ps(a: Self::Vi32) -> Self::Vf32;
+    unsafe fn castsi_pd(a: Self::Vi64) -> Self::Vf64;
     unsafe fn ceil_ps(a: Self::Vf32) -> Self::Vf32;
+    unsafe fn ceil_pd(a: Self::Vf64) -> Self::Vf64;
     unsafe fn cmpeq_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     unsafe fn cmpge_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn cmpgt_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
@@ -188,6 +205,7 @@ pub trait Simd {
     unsafe fn or_si(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     /// Round is implemented for Sse2 by combining other Sse2 operations.
     unsafe fn round_ps(a: Self::Vf32) -> Self::Vf32;
+    unsafe fn round_pd(a: Self::Vf64) -> Self::Vf64;
     unsafe fn set1_epi32(a: i32) -> Self::Vi32;
     unsafe fn set1_ps(a: f32) -> Self::Vf32;
     unsafe fn set1_pd(a: f64) -> Self::Vf64;
@@ -210,7 +228,6 @@ pub trait Simd {
 mod tests {
     use super::*;
     use avx2::*;
-    use scalar::*;
     use sse2::*;
     use sse41::*;
     // If using runtime feature detection, you will want to be sure this inlines
@@ -238,20 +255,13 @@ mod tests {
     unsafe fn sample_sse41() -> i32 {
         sample::<Sse41>()
     }
-    unsafe fn sample_scalar() -> i32 {
-        sample::<Scalar>()
-    }
-
     #[inline(always)]
     unsafe fn setlanetest<S: Simd>() -> f32 {
         let mut a = S::set1_ps(1.0);
         a[0] = 5.0;
         a[0]
     }
-    unsafe fn setlanetest_scalar() -> f32 {
-        setlanetest::<Scalar>()
-    }
-    unsafe fn setlanetest_avx2() -> f32 {
+   unsafe fn setlanetest_avx2() -> f32 {
         setlanetest::<Avx2>()
     }
 
@@ -298,7 +308,7 @@ mod tests {
         let d = c * b; // 10
         let e = d - a; // 7
         let e = e / b; // 3.5
-        let e = e + 2.0; //7
+        let e = e * S::set1_ps( 2.0); //7
         e[0]
     }
     unsafe fn overload_float_test_sse2() -> f32 {
@@ -316,14 +326,12 @@ mod tests {
         unsafe {
             assert_eq!(sample_sse2(), sample_sse41());
             assert_eq!(sample_sse41(), sample_avx2());
-            assert_eq!(sample_avx2(), sample_scalar());
         }
     }
     #[test]
     fn setlane() {
         unsafe {
             assert_eq!(setlanetest_avx2(), 5.0);
-            assert_eq!(setlanetest_scalar(), 5.0);
         }
     }
     #[test]

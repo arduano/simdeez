@@ -1,15 +1,13 @@
 #[cfg(target_arch = "x86")]
-use std::arch::x86::*;
+use core::arch::x86::*;
 #[cfg(target_arch = "x86_64")]
-use std::arch::x86_64::*;
-use std::mem;
-use std::ops::*;
+use core::arch::x86_64::*;
+use core::mem;
+use core::ops::*;
 
 // Newtypes for i32 vectors
 // We have to do this to allow for overloading of
-// __m128 etc
-#[derive(Copy, Debug, Clone)]
-pub struct I32x1(pub i32);
+// __m128i etc
 #[derive(Copy, Debug, Clone)]
 pub struct I32x4(pub __m128i);
 #[derive(Copy, Debug, Clone)]
@@ -17,19 +15,26 @@ pub struct I32x4_41(pub __m128i);
 #[derive(Copy, Debug, Clone)]
 pub struct I32x8(pub __m256i);
 
-// Newtypes for i32 vectors
+// Newtypes for i64 vectors
 // We have to do this to allow for overloading of
 // __m128i etc
 #[derive(Copy, Debug, Clone)]
-pub struct F32x1(pub f32);
+pub struct I64x2(pub __m128i);
+#[derive(Copy, Debug, Clone)]
+pub struct I64x2_41(pub __m128i);
+#[derive(Copy, Debug, Clone)]
+pub struct I64x4(pub __m256i);
+
+
+// Newtypes for f32 vectors
+// We have to do this to allow for overloading of
+// __m128 etc
 #[derive(Copy, Debug, Clone)]
 pub struct F32x4(pub __m128);
 #[derive(Copy, Debug, Clone)]
 pub struct F32x8(pub __m256);
 
 // Newtypes for i64 vectors
-#[derive(Copy, Debug, Clone)]
-pub struct F64x1(pub f64);
 #[derive(Copy, Debug, Clone)]
 pub struct F64x2(pub __m128d);
 #[derive(Copy, Debug, Clone)]
@@ -53,6 +58,8 @@ mod mul_assign;
 pub use self::mul_assign::*;
 mod div;
 pub use self::div::*;
+mod div_assign;
+pub use self::div_assign::*;
 mod and;
 pub use self::and::*;
 mod and_assign;

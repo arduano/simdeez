@@ -1,25 +1,32 @@
 use super::*;
-use std::mem;
+use core::mem;
 
 use overloads::*;
 #[cfg(target_arch = "x86")]
-use std::arch::x86::*;
+use core::arch::x86::*;
 #[cfg(target_arch = "x86_64")]
-use std::arch::x86_64::*;
+use core::arch::x86_64::*;
 pub struct Sse41;
 impl Simd for Sse41 {
     type Vi32 = I32x4_41;
     type Vf32 = F32x4;
     type Vf64 = F64x2;
+    type Vi64 = I64x2_41;
 
     const VF32_WIDTH: usize = 4;
     const VF64_WIDTH: usize = 2;
     const VI32_WIDTH: usize = 4;
+    const VI64_WIDTH: usize = 2;
 
-    #[inline(always)]
+     #[inline(always)]
     unsafe fn abs_ps(a: Self::Vf32) -> Self::Vf32 {
-        let b = _mm_set1_epi32(0x7fffffff);
-        F32x4(_mm_and_ps(a.0, _mm_castsi128_ps(b)))
+        let b = _mm_set1_ps(-0.0);
+        F32x4(_mm_andnot_ps(a.0, b))
+    }
+    #[inline(always)]
+    unsafe fn abs_pd(a: Self::Vf64) -> Self::Vf64 {
+        let b = _mm_set1_pd(-0.0);
+        F64x2(_mm_andnot_pd(a.0, b))
     }
     #[inline(always)]
     unsafe fn add_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
@@ -42,6 +49,10 @@ impl Simd for Sse41 {
         F32x4(_mm_andnot_ps(a.0, b.0))
     }
     #[inline(always)]
+    unsafe fn andnot_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        F64x2(_mm_andnot_pd(a.0, b.0))
+    }
+     #[inline(always)]
     unsafe fn andnot_si(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         I32x4_41(_mm_andnot_si128(a.0, b.0))
     }
@@ -58,6 +69,10 @@ impl Simd for Sse41 {
         F32x4(_mm_blendv_ps(a.0, b.0, mask.0))
     }
     #[inline(always)]
+    unsafe fn blendv_pd(a: Self::Vf64, b: Self::Vf64, mask: Self::Vf64) -> Self::Vf64 {
+        F64x2(_mm_blendv_pd(a.0, b.0, mask.0))
+    }
+     #[inline(always)]
     unsafe fn castps_si(a: Self::Vf32) -> Self::Vi32 {
         I32x4_41(_mm_castps_si128(a.0))
     }
@@ -66,6 +81,10 @@ impl Simd for Sse41 {
         F32x4(_mm_castsi128_ps(a.0))
     }
     #[inline(always)]
+    unsafe fn castsi_pd(a: Self::Vi64) -> Self::Vf64 {
+        F64x2(_mm_castsi128_pd(a.0))
+    }
+     #[inline(always)]
     unsafe fn cmpeq_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         I32x4_41(_mm_cmpeq_epi32(a.0, b.0))
     }
@@ -102,6 +121,10 @@ impl Simd for Sse41 {
         F32x4(_mm_ceil_ps(a.0))
     }
     #[inline(always)]
+    unsafe fn ceil_pd(a: Self::Vf64) -> Self::Vf64 {
+        F64x2(_mm_ceil_pd(a.0))
+    }
+     #[inline(always)]
     unsafe fn fastfloor_ps(a: Self::Vf32) -> Self::Vf32 {
         F32x4(_mm_floor_ps(a.0))
     }
@@ -174,6 +197,10 @@ impl Simd for Sse41 {
         F32x4(_mm_div_ps(a.0, b.0))
     }
     #[inline(always)]
+    unsafe fn div_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        F64x2(_mm_div_pd(a.0, b.0))
+    }
+    #[inline(always)]
     unsafe fn mullo_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         I32x4_41(_mm_mullo_epi32(a.0, b.0))
     }
@@ -188,6 +215,14 @@ impl Simd for Sse41 {
             _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC,
         ))
     }
+    #[inline(always)]
+    unsafe fn round_pd(a: Self::Vf64) -> Self::Vf64 {
+        F64x2(_mm_round_pd(
+            a.0,
+            _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC,
+        ))
+    }
+
     #[inline(always)]
     unsafe fn set1_epi32(a: i32) -> Self::Vi32 {
         I32x4_41(_mm_set1_epi32(a))
