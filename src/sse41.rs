@@ -58,11 +58,12 @@ impl Simd for Sse41 {
     }
     #[inline(always)]
     unsafe fn blendv_epi32(a: Self::Vi32, b: Self::Vi32, mask: Self::Vi32) -> Self::Vi32 {
-        I32x4_41(_mm_castps_si128(_mm_blendv_ps(
+        /*        I32x4_41(_mm_castps_si128(_mm_blendv_ps(
             _mm_castsi128_ps(a.0),
             _mm_castsi128_ps(b.0),
             _mm_castsi128_ps(mask.0),
-        )))
+        )))*/
+        I32x4_41(_mm_blendv_epi8(a.0, b.0, mask.0))
     }
     #[inline(always)]
     unsafe fn blendv_ps(a: Self::Vf32, b: Self::Vf32, mask: Self::Vf32) -> Self::Vf32 {
@@ -197,6 +198,14 @@ impl Simd for Sse41 {
     #[inline(always)]
     unsafe fn min_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
         F32x4(_mm_min_ps(a.0, b.0))
+    }
+    #[inline(always)]
+    unsafe fn max_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        F64x2(_mm_max_pd(a.0, b.0))
+    }
+    #[inline(always)]
+    unsafe fn min_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        F64x2(_mm_min_pd(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn mul_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {

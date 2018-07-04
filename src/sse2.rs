@@ -231,6 +231,14 @@ impl Simd for Sse2 {
         F32x4(_mm_min_ps(a.0, b.0))
     }
     #[inline(always)]
+    unsafe fn max_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        F64x2(_mm_max_pd(a.0, b.0))
+    }
+    #[inline(always)]
+    unsafe fn min_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        F64x2(_mm_min_pd(a.0, b.0))
+    }
+    #[inline(always)]
     unsafe fn mul_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
         F32x4(_mm_mul_ps(a.0, b.0))
     }

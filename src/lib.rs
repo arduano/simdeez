@@ -203,6 +203,8 @@ pub trait Simd {
     unsafe fn storeu_ps(a: &mut f32, b: Self::Vf32);
     unsafe fn max_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn min_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
+    unsafe fn max_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
+    unsafe fn min_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
     unsafe fn mul_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn mul_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
     /// Mullo is implemented for Sse2 by combining other Sse2 operations.
