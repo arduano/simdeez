@@ -173,6 +173,7 @@ pub trait Simd {
     unsafe fn cvtepi32_ps(a: Self::Vi32) -> Self::Vf32;
     unsafe fn cvtps_epi32(a: Self::Vf32) -> Self::Vi32;
     unsafe fn floor_ps(a: Self::Vf32) -> Self::Vf32;
+    unsafe fn floor_pd(a: Self::Vf64) -> Self::Vf64;
     /// When using Sse2, fastfloor uses a faster version of floor
     /// that only works on floating point values small enough to fit in
     /// an i32.  This is important for performance if you don't need
@@ -186,6 +187,10 @@ pub trait Simd {
     /// otherwise a mul and add are used to replicate it, allowing you to
     /// just always use FMA in your code and get best perf in both cases.
     unsafe fn fnmadd_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32;
+    /// Adds all lanes together. Distinct from h_add which adds pairs.
+    unsafe fn horizontal_add_ps(a: Self::Vf32) -> f32;
+    /// Adds all lanes together. Distinct from h_add which adds pairs.
+    unsafe fn horizontal_add_pd(a: Self::Vf64) -> f64;
     /// Sse2 and Sse41 paths will simulate a gather by breaking out and
     /// doing scalar array accesses, because gather doesn't exist until Avx2.
     unsafe fn i32gather_epi32(arr: &[i32], index: Self::Vi32) -> Self::Vi32;
@@ -203,6 +208,8 @@ pub trait Simd {
     /// Mullo is implemented for Sse2 by combining other Sse2 operations.
     unsafe fn mullo_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     unsafe fn or_si(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
+    unsafe fn or_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
+    unsafe fn or_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
     /// Round is implemented for Sse2 by combining other Sse2 operations.
     unsafe fn round_ps(a: Self::Vf32) -> Self::Vf32;
     unsafe fn round_pd(a: Self::Vf64) -> Self::Vf64;
@@ -221,7 +228,11 @@ pub trait Simd {
     unsafe fn sub_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn sqrt_ps(a: Self::Vf32) -> Self::Vf32;
     unsafe fn rsqrt_ps(a: Self::Vf32) -> Self::Vf32;
+    unsafe fn sqrt_pd(a: Self::Vf64) -> Self::Vf64;
+    unsafe fn rsqrt_pd(a: Self::Vf64) -> Self::Vf64;
     unsafe fn xor_si(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
+    unsafe fn xor_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
+    unsafe fn xor_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
 }
 
 #[cfg(test)]
@@ -235,9 +246,9 @@ mod tests {
     unsafe fn sample<S: Simd>() -> i32 {
         let a = S::set1_epi32(3);
         let b = S::set1_epi32(-1);
-        let c = S::cmpgt_epi32(a, b);
-        let c = c + b;
-        c[S::VF32_WIDTH - 1]
+        let c = a + b; //2
+                       // let d = a + 2; // 4
+        d[S::VF32_WIDTH - 1]
     }
 
     // Make an sse2 version of sample
@@ -261,7 +272,7 @@ mod tests {
         a[0] = 5.0;
         a[0]
     }
-   unsafe fn setlanetest_avx2() -> f32 {
+    unsafe fn setlanetest_avx2() -> f32 {
         setlanetest::<Avx2>()
     }
 
@@ -308,7 +319,7 @@ mod tests {
         let d = c * b; // 10
         let e = d - a; // 7
         let e = e / b; // 3.5
-        let e = e * S::set1_ps( 2.0); //7
+        let e = e * S::set1_ps(2.0); //7
         e[0]
     }
     unsafe fn overload_float_test_sse2() -> f32 {
@@ -338,6 +349,14 @@ mod tests {
     fn gathertest() {
         unsafe {
             assert_eq!(gathertest_sse2(), 4.0);
+        }
+    }
+    #[test]
+    fn overloadi32() {
+        unsafe {
+            assert_eq!(sample_sse2(), 4);
+            assert_eq!(sample_sse41(), 4);
+            assert_eq!(sample_avx2(), 4);
         }
     }
 }

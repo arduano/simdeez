@@ -1,10 +1,10 @@
 use super::*;
-use overloads::*;
 #[cfg(target_arch = "x86")]
 use core::arch::x86::*;
 #[cfg(target_arch = "x86_64")]
 use core::arch::x86_64::*;
 use core::mem;
+use overloads::*;
 
 pub struct Avx2;
 impl Simd for Avx2 {
@@ -71,11 +71,11 @@ impl Simd for Avx2 {
     unsafe fn blendv_pd(a: Self::Vf64, b: Self::Vf64, mask: Self::Vf64) -> Self::Vf64 {
         F64x4(_mm256_blendv_pd(a.0, b.0, mask.0))
     }
-     #[inline(always)]
+    #[inline(always)]
     unsafe fn castps_si(a: Self::Vf32) -> Self::Vi32 {
         I32x8(_mm256_castps_si256(a.0))
     }
-     #[inline(always)]
+    #[inline(always)]
     unsafe fn castsi_ps(a: Self::Vi32) -> Self::Vf32 {
         F32x8(_mm256_castsi256_ps(a.0))
     }
@@ -119,9 +119,13 @@ impl Simd for Avx2 {
     unsafe fn ceil_pd(a: Self::Vf64) -> Self::Vf64 {
         F64x4(_mm256_ceil_pd(a.0))
     }
-     #[inline(always)]
+    #[inline(always)]
     unsafe fn floor_ps(a: Self::Vf32) -> Self::Vf32 {
         F32x8(_mm256_floor_ps(a.0))
+    }
+    #[inline(always)]
+    unsafe fn floor_pd(a: Self::Vf64) -> Self::Vf64 {
+        F64x4(_mm256_floor_pd(a.0))
     }
     #[inline(always)]
     unsafe fn fastfloor_ps(a: Self::Vf32) -> Self::Vf32 {
@@ -134,6 +138,18 @@ impl Simd for Avx2 {
     #[inline(always)]
     unsafe fn fnmadd_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32 {
         F32x8(_mm256_fnmadd_ps(a.0, b.0, c.0))
+    }
+    // TODO: test this
+    #[inline(always)]
+    unsafe fn horizontal_add_ps(a: Self::Vf32) -> f32 {
+        let t1 = _mm256_hadd_ps(a.0, a.0);
+        let t2 = _mm256_hadd_ps(t1, t1);
+        _mm256_cvtss_f32(_mm256_hadd_ps(t2, t2))
+    }
+    #[inline(always)]
+    unsafe fn horizontal_add_pd(a: Self::Vf64) -> f64 {
+        let t1 = F64x4(_mm256_hadd_pd(a.0, a.0));
+        t1[0] + t1[2]
     }
     #[inline(always)]
     unsafe fn i32gather_epi32(arr: &[i32], index: Self::Vi32) -> Self::Vi32 {
@@ -191,6 +207,14 @@ impl Simd for Avx2 {
     #[inline(always)]
     unsafe fn or_si(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         I32x8(_mm256_or_si256(a.0, b.0))
+    }
+    #[inline(always)]
+    unsafe fn or_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
+        F32x8(_mm256_or_ps(a.0, b.0))
+    }
+    #[inline(always)]
+    unsafe fn or_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        F64x4(_mm256_or_pd(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn round_ps(a: Self::Vf32) -> Self::Vf32 {
@@ -251,7 +275,23 @@ impl Simd for Avx2 {
         F32x8(_mm256_rsqrt_ps(a.0))
     }
     #[inline(always)]
+    unsafe fn sqrt_pd(a: Self::Vf64) -> Self::Vf64 {
+        F64x4(_mm256_sqrt_pd(a.0))
+    }
+    #[inline(always)]
+    unsafe fn rsqrt_pd(a: Self::Vf64) -> Self::Vf64 {
+        F64x4(_mm256_div_pd(_mm256_set1_pd(1.0), _mm256_sqrt_pd(a.0)))
+    }
+    #[inline(always)]
     unsafe fn xor_si(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         I32x8(_mm256_xor_si256(a.0, b.0))
+    }
+    #[inline(always)]
+    unsafe fn xor_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
+        F32x8(_mm256_xor_ps(a.0, b.0))
+    }
+    #[inline(always)]
+    unsafe fn xor_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        F64x4(_mm256_xor_pd(a.0, b.0))
     }
 }

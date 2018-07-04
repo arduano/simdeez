@@ -1,6 +1,5 @@
 use super::*;
 
-
 impl Add for I32x4 {
     type Output = I32x4;
 

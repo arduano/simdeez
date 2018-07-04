@@ -1,6 +1,5 @@
 use super::*;
 
-
 impl Index<usize> for I32x4 {
     type Output = i32;
 

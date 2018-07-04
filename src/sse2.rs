@@ -1,10 +1,10 @@
 use super::*;
-use overloads::*;
 #[cfg(target_arch = "x86")]
 use core::arch::x86::*;
 #[cfg(target_arch = "x86_64")]
 use core::arch::x86_64::*;
 use core::mem;
+use overloads::*;
 
 pub struct Sse2;
 impl Simd for Sse2 {
@@ -17,7 +17,7 @@ impl Simd for Sse2 {
     const VI32_WIDTH: usize = 4;
     const VI64_WIDTH: usize = 2;
 
-     #[inline(always)]
+    #[inline(always)]
     unsafe fn abs_ps(a: Self::Vf32) -> Self::Vf32 {
         let b = _mm_set1_ps(-0.0);
         F32x4(_mm_andnot_ps(a.0, b))
@@ -43,7 +43,7 @@ impl Simd for Sse2 {
     unsafe fn and_si(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         I32x4(_mm_and_si128(a.0, b.0))
     }
-     #[inline(always)]
+    #[inline(always)]
     unsafe fn andnot_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
         F32x4(_mm_andnot_ps(a.0, b.0))
     }
@@ -62,7 +62,7 @@ impl Simd for Sse2 {
             _mm_and_si128(mask.0, b.0),
         ))
     }
-     #[inline(always)]
+    #[inline(always)]
     unsafe fn blendv_ps(a: Self::Vf32, b: Self::Vf32, mask: Self::Vf32) -> Self::Vf32 {
         F32x4(_mm_or_ps(
             _mm_andnot_ps(mask.0, a.0),
@@ -80,7 +80,7 @@ impl Simd for Sse2 {
     unsafe fn castps_si(a: Self::Vf32) -> Self::Vi32 {
         I32x4(_mm_castps_si128(a.0))
     }
-     #[inline(always)]
+    #[inline(always)]
     unsafe fn castsi_ps(a: Self::Vi32) -> Self::Vf32 {
         F32x4(_mm_castsi128_ps(a.0))
     }
@@ -119,12 +119,12 @@ impl Simd for Sse2 {
     #[inline(always)]
     unsafe fn ceil_ps(a: Self::Vf32) -> Self::Vf32 {
         let t1 = _mm_getcsr();
-        let t2 = t1 | (1 << 13);
+        let t2 = t1 | (2 << 13);
         _mm_setcsr(t2);
         let r = Self::round_ps(a);
         _mm_setcsr(t1);
         r
-   }
+    }
     #[inline(always)]
     unsafe fn ceil_pd(a: Self::Vf64) -> Self::Vf64 {
         let t1 = _mm_getcsr();
@@ -134,12 +134,23 @@ impl Simd for Sse2 {
         _mm_setcsr(t1);
         r
     }
-     #[inline(always)]
+    #[inline(always)]
     unsafe fn floor_ps(a: Self::Vf32) -> Self::Vf32 {
-        let i = _mm_cvttps_epi32(a.0);
-        let fi = _mm_cvtepi32_ps(i);
-        let iga = _mm_cmpgt_ps(fi, a.0);
-        F32x4(_mm_sub_ps(fi, _mm_and_ps(iga, _mm_set1_ps(1.0))))
+        let t1 = _mm_getcsr();
+        let t2 = t1 | (1 << 13);
+        _mm_setcsr(t2);
+        let r = Self::round_ps(a);
+        _mm_setcsr(t1);
+        r
+    }
+    #[inline(always)]
+    unsafe fn floor_pd(a: Self::Vf64) -> Self::Vf64 {
+        let t1 = _mm_getcsr();
+        let t2 = t1 | (1 << 13);
+        _mm_setcsr(t2);
+        let r = Self::round_pd(a);
+        _mm_setcsr(t1);
+        r
     }
     #[inline(always)]
     unsafe fn fastfloor_ps(a: Self::Vf32) -> Self::Vf32 {
@@ -159,6 +170,20 @@ impl Simd for Sse2 {
             _mm_mul_ps(_mm_set1_ps(-1.0), _mm_mul_ps(a.0, b.0)),
             c.0,
         ))
+    }
+    #[inline(always)]
+    unsafe fn horizontal_add_ps(a: Self::Vf32) -> f32 {
+        let t1 = _mm_movehl_ps(a.0, a.0);
+        let t2 = _mm_add_ps(a.0, t1);
+        let t3 = _mm_shuffle_ps(t2, t2, 1);
+        _mm_cvtss_f32(_mm_add_ss(t2, t3))
+    }
+    #[inline(always)]
+    unsafe fn horizontal_add_pd(a: Self::Vf64) -> f64 {
+        let t0 = _mm_castpd_ps(a.0);
+        let t1 = _mm_castps_pd(_mm_movehl_ps(t0, t0));
+        let t2 = _mm_add_sd(a.0, t1);
+        _mm_cvtsd_f64(t2)
     }
     #[inline(always)]
     unsafe fn i32gather_epi32(arr: &[i32], index: Self::Vi32) -> Self::Vi32 {
@@ -235,22 +260,30 @@ impl Simd for Sse2 {
         I32x4(_mm_or_si128(a.0, b.0))
     }
     #[inline(always)]
+    unsafe fn or_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
+        F32x4(_mm_or_ps(a.0, b.0))
+    }
+    #[inline(always)]
+    unsafe fn or_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        F64x2(_mm_or_pd(a.0, b.0))
+    }
+    #[inline(always)]
     unsafe fn round_ps(a: Self::Vf32) -> Self::Vf32 {
         let sign_mask = _mm_set1_ps(-0.0);
         let magic = _mm_castsi128_ps(_mm_set1_epi32(0x4B000000));
-        let sign = _mm_and_ps(a.0,sign_mask);
-        let signed_magic = _mm_or_ps(magic,sign);
-        let b = _mm_add_ps(a.0,signed_magic);
-        F32x4(_mm_sub_ps(b,signed_magic))
+        let sign = _mm_and_ps(a.0, sign_mask);
+        let signed_magic = _mm_or_ps(magic, sign);
+        let b = _mm_add_ps(a.0, signed_magic);
+        F32x4(_mm_sub_ps(b, signed_magic))
     }
     #[inline(always)]
     unsafe fn round_pd(a: Self::Vf64) -> Self::Vf64 {
-        let sign_mask = _mm_set1_pd(-0.0); 
-        let magic = _mm_castsi128_pd(_mm_set_epi32(0,0x43300000,0,0x43300000));
-        let sign = _mm_and_pd(a.0,sign_mask);
-        let signedmagic = _mm_or_pd(magic,sign);
-        let b = _mm_add_pd(a.0,signedmagic);
-        F64x2(_mm_sub_pd(b,signedmagic))
+        let sign_mask = _mm_set1_pd(-0.0);
+        let magic = _mm_castsi128_pd(_mm_set_epi32(0, 0x43300000, 0, 0x43300000));
+        let sign = _mm_and_pd(a.0, sign_mask);
+        let signedmagic = _mm_or_pd(magic, sign);
+        let b = _mm_add_pd(a.0, signedmagic);
+        F64x2(_mm_sub_pd(b, signedmagic))
     }
 
     #[inline(always)]
@@ -305,7 +338,23 @@ impl Simd for Sse2 {
         F32x4(_mm_rsqrt_ps(a.0))
     }
     #[inline(always)]
+    unsafe fn sqrt_pd(a: Self::Vf64) -> Self::Vf64 {
+        F64x2(_mm_sqrt_pd(a.0))
+    }
+    #[inline(always)]
+    unsafe fn rsqrt_pd(a: Self::Vf64) -> Self::Vf64 {
+        F64x2(_mm_div_pd(_mm_set1_pd(1.0), _mm_sqrt_pd(a.0)))
+    }
+    #[inline(always)]
     unsafe fn xor_si(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         I32x4(_mm_xor_si128(a.0, b.0))
+    }
+    #[inline(always)]
+    unsafe fn xor_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
+        F32x4(_mm_xor_ps(a.0, b.0))
+    }
+    #[inline(always)]
+    unsafe fn xor_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        F64x2(_mm_xor_pd(a.0, b.0))
     }
 }

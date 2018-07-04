@@ -25,7 +25,6 @@ pub struct I64x2_41(pub __m128i);
 #[derive(Copy, Debug, Clone)]
 pub struct I64x4(pub __m256i);
 
-
 // Newtypes for f32 vectors
 // We have to do this to allow for overloading of
 // __m128 etc
