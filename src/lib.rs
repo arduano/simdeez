@@ -137,7 +137,20 @@ pub trait Simd {
         + BitOrAssign<Self::Vf64>
         + BitXorAssign<Self::Vf64>;
 
-    type Vi64: Copy + Debug;
+    type Vi64: Copy
+        + Debug
+        + Index<usize, Output = i64>
+        + IndexMut<usize>
+        + Add<Self::Vi64, Output = Self::Vi64>
+        + Sub<Self::Vi64, Output = Self::Vi64>
+        + AddAssign<Self::Vi64>
+        + SubAssign<Self::Vi64>
+        + BitAnd<Self::Vi64, Output = Self::Vi64>
+        + BitOr<Self::Vi64, Output = Self::Vi64>
+        + BitXor<Self::Vi64, Output = Self::Vi64>
+        + BitAndAssign<Self::Vi64>
+        + BitOrAssign<Self::Vi64>
+        + BitXorAssign<Self::Vi64>;
 
     /// The width of the vector lane.  Necessary for creating
     /// lane width agnostic code.
@@ -155,24 +168,34 @@ pub trait Simd {
     unsafe fn add_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     unsafe fn add_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn add_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
-    unsafe fn and_si(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
+    unsafe fn and_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
+    unsafe fn and_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
     unsafe fn andnot_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn andnot_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
-    unsafe fn andnot_si(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
+    unsafe fn andnot_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
+    unsafe fn andnot_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
     /// This is provided for convenience, it uses casts and the blendv_ps
     /// intrinsics to implement it.
     unsafe fn blendv_epi32(a: Self::Vi32, b: Self::Vi32, mask: Self::Vi32) -> Self::Vi32;
     unsafe fn blendv_ps(a: Self::Vf32, b: Self::Vf32, mask: Self::Vf32) -> Self::Vf32;
     unsafe fn blendv_pd(a: Self::Vf64, b: Self::Vf64, mask: Self::Vf64) -> Self::Vf64;
-    unsafe fn castps_si(a: Self::Vf32) -> Self::Vi32;
-    unsafe fn castsi_ps(a: Self::Vi32) -> Self::Vf32;
-    unsafe fn castsi_pd(a: Self::Vi64) -> Self::Vf64;
+    unsafe fn castps_epi32(a: Self::Vf32) -> Self::Vi32;
+    unsafe fn castpd_epi64(a: Self::Vf64) -> Self::Vi64;
+    unsafe fn castepi32_ps(a: Self::Vi32) -> Self::Vf32;
+    unsafe fn castepi64_pd(a: Self::Vi64) -> Self::Vf64;
     unsafe fn ceil_ps(a: Self::Vf32) -> Self::Vf32;
     unsafe fn ceil_pd(a: Self::Vf64) -> Self::Vf64;
     unsafe fn cmpeq_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
-    unsafe fn cmpge_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
+    unsafe fn cmpneq_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
+    unsafe fn cmpge_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     unsafe fn cmpgt_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
+    unsafe fn cmple_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
+    unsafe fn cmplt_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
+    unsafe fn cmpeq_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
+    unsafe fn cmpneq_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
+    unsafe fn cmpge_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn cmpgt_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
+    unsafe fn cmple_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn cmplt_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn cvtepi32_ps(a: Self::Vi32) -> Self::Vf32;
     unsafe fn cvtps_epi32(a: Self::Vf32) -> Self::Vi32;
@@ -205,6 +228,7 @@ pub trait Simd {
     unsafe fn loadu_pd(a: &f64) -> Self::Vf64;
     unsafe fn loadu_si(a: &i32) -> Self::Vi32;
     unsafe fn storeu_ps(a: &mut f32, b: Self::Vf32);
+    unsafe fn storeu_pd(a: &mut f64, b: Self::Vf64);
     unsafe fn max_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     unsafe fn min_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     unsafe fn max_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
@@ -215,7 +239,9 @@ pub trait Simd {
     unsafe fn mul_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
     /// Mullo is implemented for Sse2 by combining other Sse2 operations.
     unsafe fn mullo_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
-    unsafe fn or_si(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
+    unsafe fn not_epi32(a: Self::Vi32) -> Self::Vi32;
+    unsafe fn or_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
+    unsafe fn or_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
     unsafe fn or_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn or_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
     /// Round is implemented for Sse2 by combining other Sse2 operations.
@@ -226,7 +252,8 @@ pub trait Simd {
     unsafe fn set1_pd(a: f64) -> Self::Vf64;
     unsafe fn setzero_ps() -> Self::Vf32;
     unsafe fn setzero_pd() -> Self::Vf64;
-    unsafe fn setzero_si() -> Self::Vi32;
+    unsafe fn setzero_epi32() -> Self::Vi32;
+    unsafe fn setzero_epi64() -> Self::Vi64;
     /// Shift operations for Sse require that imm8 be a constant,
     /// we handle this with a macro, so if you pass a non constant
     /// you will get a compile time error. This is necessary, the hardware
@@ -234,6 +261,7 @@ pub trait Simd {
     unsafe fn srai_epi32(a: Self::Vi32, imm8: i32) -> Self::Vi32;
     unsafe fn srli_epi32(a: Self::Vi32, imm8: i32) -> Self::Vi32;
     unsafe fn slli_epi32(a: Self::Vi32, imm8: i32) -> Self::Vi32;
+    // TODO can count just be an i32 or i64?
     unsafe fn sra_epi32(a: Self::Vi32, count: __m128i) -> Self::Vi32;
     unsafe fn srl_epi32(a: Self::Vi32, count: __m128i) -> Self::Vi32;
     unsafe fn sll_epi32(a: Self::Vi32, count: __m128i) -> Self::Vi32;
@@ -243,7 +271,10 @@ pub trait Simd {
     unsafe fn rsqrt_ps(a: Self::Vf32) -> Self::Vf32;
     unsafe fn sqrt_pd(a: Self::Vf64) -> Self::Vf64;
     unsafe fn rsqrt_pd(a: Self::Vf64) -> Self::Vf64;
-    unsafe fn xor_si(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
+    unsafe fn shuffle_epi32(a: Self::Vi32, imm8: i32) -> Self::Vi32;
+    unsafe fn shuffle_ps(a: Self::Vf32, Self::Vf32, imm8: i32) -> Self::Vf32;
+    unsafe fn xor_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
+    unsafe fn xor_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
     unsafe fn xor_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn xor_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
 }
@@ -257,8 +288,8 @@ mod tests {
 
     #[inline(always)]
     unsafe fn minmax_ints<S: Simd>() -> (i32, i32, i32, i32) {
-        let mut t1 = S::setzero_si();
-        let mut t2 = S::setzero_si();
+        let mut t1 = S::setzero_epi32();
+        let mut t2 = S::setzero_epi32();
         for i in 0..S::VI32_WIDTH {
             let ias32 = i as i32;
             t1[i] = ias32;

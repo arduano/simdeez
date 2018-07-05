@@ -21,6 +21,27 @@ impl Add for I32x8 {
         I32x8(unsafe { _mm256_add_epi32(self.0, rhs.0) })
     }
 }
+impl Add for I64x2 {
+    type Output = I64x2;
+
+    fn add(self, rhs: I64x2) -> I64x2 {
+        I64x2(unsafe { _mm_add_epi64(self.0, rhs.0) })
+    }
+}
+impl Add for I64x2_41 {
+    type Output = I64x2_41;
+
+    fn add(self, rhs: I64x2_41) -> I64x2_41 {
+        I64x2_41(unsafe { _mm_add_epi64(self.0, rhs.0) })
+    }
+}
+impl Add for I64x4 {
+    type Output = I64x4;
+
+    fn add(self, rhs: I64x4) -> I64x4 {
+        I64x4(unsafe { _mm256_add_epi64(self.0, rhs.0) })
+    }
+}
 
 impl Add for F32x4 {
     type Output = F32x4;

@@ -22,7 +22,27 @@ impl BitAnd for I32x8 {
         I32x8(unsafe { _mm256_and_si256(self.0, rhs.0) })
     }
 }
+impl BitAnd for I64x2 {
+    type Output = I64x2;
 
+    fn bitand(self, rhs: I64x2) -> I64x2 {
+        I64x2(unsafe { _mm_and_si128(self.0, rhs.0) })
+    }
+}
+impl BitAnd for I64x2_41 {
+    type Output = I64x2_41;
+
+    fn bitand(self, rhs: I64x2_41) -> I64x2_41 {
+        I64x2_41(unsafe { _mm_and_si128(self.0, rhs.0) })
+    }
+}
+impl BitAnd for I64x4 {
+    type Output = I64x4;
+
+    fn bitand(self, rhs: I64x4) -> I64x4 {
+        I64x4(unsafe { _mm256_and_si256(self.0, rhs.0) })
+    }
+}
 impl BitAnd for F32x4 {
     type Output = F32x4;
 

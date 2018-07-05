@@ -37,8 +37,12 @@ impl Simd for Sse41 {
         F64x2(_mm_add_pd(a.0, b.0))
     }
     #[inline(always)]
-    unsafe fn and_si(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
+    unsafe fn and_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         I32x4_41(_mm_and_si128(a.0, b.0))
+    }
+    #[inline(always)]
+    unsafe fn and_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
+        I64x2_41(_mm_and_si128(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn andnot_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
@@ -49,8 +53,12 @@ impl Simd for Sse41 {
         F64x2(_mm_andnot_pd(a.0, b.0))
     }
     #[inline(always)]
-    unsafe fn andnot_si(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
+    unsafe fn andnot_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         I32x4_41(_mm_andnot_si128(a.0, b.0))
+    }
+    #[inline(always)]
+    unsafe fn andnot_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
+        I64x2_41(_mm_andnot_si128(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn blendv_epi32(a: Self::Vi32, b: Self::Vi32, mask: Self::Vi32) -> Self::Vi32 {
@@ -70,15 +78,19 @@ impl Simd for Sse41 {
         F64x2(_mm_blendv_pd(a.0, b.0, mask.0))
     }
     #[inline(always)]
-    unsafe fn castps_si(a: Self::Vf32) -> Self::Vi32 {
+    unsafe fn castps_epi32(a: Self::Vf32) -> Self::Vi32 {
         I32x4_41(_mm_castps_si128(a.0))
     }
     #[inline(always)]
-    unsafe fn castsi_ps(a: Self::Vi32) -> Self::Vf32 {
+    unsafe fn castpd_epi64(a: Self::Vf64) -> Self::Vi64 {
+        I64x2_41(_mm_castpd_si128(a.0))
+    }
+    #[inline(always)]
+    unsafe fn castepi32_ps(a: Self::Vi32) -> Self::Vf32 {
         F32x4(_mm_castsi128_ps(a.0))
     }
     #[inline(always)]
-    unsafe fn castsi_pd(a: Self::Vi64) -> Self::Vf64 {
+    unsafe fn castepi64_pd(a: Self::Vi64) -> Self::Vf64 {
         F64x2(_mm_castsi128_pd(a.0))
     }
     #[inline(always)]
@@ -86,16 +98,44 @@ impl Simd for Sse41 {
         I32x4_41(_mm_cmpeq_epi32(a.0, b.0))
     }
     #[inline(always)]
-    unsafe fn cmpge_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        F32x4(_mm_cmpge_ps(a.0, b.0))
+    unsafe fn cmpneq_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
+        Self::not_epi32(I32x4_41(_mm_cmpeq_epi32(a.0, b.0)))
+    }
+    #[inline(always)]
+    unsafe fn cmpge_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
+        Self::not_epi32(I32x4_41(_mm_cmpgt_epi32(b.0, a.0)))
     }
     #[inline(always)]
     unsafe fn cmpgt_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         I32x4_41(_mm_cmpgt_epi32(a.0, b.0))
     }
     #[inline(always)]
+    unsafe fn cmple_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
+        Self::not_epi32(I32x4_41(_mm_cmplt_epi32(b.0, a.0)))
+    }
+    #[inline(always)]
+    unsafe fn cmplt_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
+        I32x4_41(_mm_cmplt_epi32(a.0, b.0))
+    }
+    #[inline(always)]
+    unsafe fn cmpeq_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
+        F32x4(_mm_cmpeq_ps(a.0, b.0))
+    }
+    #[inline(always)]
+    unsafe fn cmpneq_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
+        F32x4(_mm_cmpneq_ps(a.0, b.0))
+    }
+    #[inline(always)]
+    unsafe fn cmpge_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
+        F32x4(_mm_cmpge_ps(a.0, b.0))
+    }
+    #[inline(always)]
     unsafe fn cmpgt_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
         F32x4(_mm_cmpgt_ps(a.0, b.0))
+    }
+    #[inline(always)]
+    unsafe fn cmple_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
+        F32x4(_mm_cmple_ps(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn cmplt_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
@@ -188,6 +228,10 @@ impl Simd for Sse41 {
         _mm_storeu_ps(a as *mut f32, b.0);
     }
     #[inline(always)]
+    unsafe fn storeu_pd(a: &mut f64, b: Self::Vf64) {
+        _mm_storeu_pd(a as *mut f64, b.0);
+    }
+    #[inline(always)]
     unsafe fn max_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         I32x4_41(_mm_max_epi32(a.0, b.0))
     }
@@ -232,8 +276,16 @@ impl Simd for Sse41 {
         I32x4_41(_mm_mullo_epi32(a.0, b.0))
     }
     #[inline(always)]
-    unsafe fn or_si(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
+    unsafe fn not_epi32(a: Self::Vi32) -> Self::Vi32 {
+        I32x4_41(_mm_xor_si128(a.0, _mm_set1_epi32(-1)))
+    }
+    #[inline(always)]
+    unsafe fn or_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         I32x4_41(_mm_or_si128(a.0, b.0))
+    }
+    #[inline(always)]
+    unsafe fn or_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
+        I64x2_41(_mm_or_si128(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn or_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
@@ -279,8 +331,12 @@ impl Simd for Sse41 {
         F32x4(_mm_setzero_ps())
     }
     #[inline(always)]
-    unsafe fn setzero_si() -> Self::Vi32 {
+    unsafe fn setzero_epi32() -> Self::Vi32 {
         I32x4_41(_mm_setzero_si128())
+    }
+    #[inline(always)]
+    unsafe fn setzero_epi64() -> Self::Vi64 {
+        I64x2_41(_mm_setzero_si128())
     }
     #[inline(always)]
     unsafe fn srai_epi32(a: Self::Vi32, imm8: i32) -> Self::Vi32 {
@@ -344,8 +400,30 @@ impl Simd for Sse41 {
         F64x2(_mm_div_pd(_mm_set1_pd(1.0), _mm_sqrt_pd(a.0)))
     }
     #[inline(always)]
-    unsafe fn xor_si(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
+    unsafe fn shuffle_epi32(a: Self::Vi32, imm8: i32) -> Self::Vi32 {
+        macro_rules! call {
+            ($imm8:expr) => {
+                I32x4_41(_mm_shuffle_epi32(a.0, $imm8))
+            };
+        }
+        constify_imm8!(imm8, call)
+    }
+    #[inline(always)]
+    unsafe fn shuffle_ps(a: Self::Vf32, b: Self::Vf32, imm8: i32) -> Self::Vf32 {
+        macro_rules! call {
+            ($imm8:expr) => {
+                F32x4(_mm_shuffle_ps(a.0, b.0, $imm8))
+            };
+        }
+        constify_imm8!(imm8, call)
+    }
+    #[inline(always)]
+    unsafe fn xor_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         I32x4_41(_mm_xor_si128(a.0, b.0))
+    }
+    #[inline(always)]
+    unsafe fn xor_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
+        I64x2_41(_mm_xor_si128(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn xor_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
