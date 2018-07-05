@@ -222,6 +222,17 @@ impl Simd for Sse2 {
     unsafe fn storeu_ps(a: &mut f32, b: Self::Vf32) {
         _mm_storeu_ps(a as *mut f32, b.0);
     }
+//TODO test the max and min on epi32 work, blend
+#[inline(always)]
+    unsafe fn max_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
+        let gt = _mm_cmpgt_epi32(a.0, b.0);
+        Self::blendv_epi32(b, a, I32x4(gt))
+    }
+    #[inline(always)]
+    unsafe fn min_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
+        let gt = _mm_cmpgt_epi32(a.0, b.0);
+        Self::blendv_epi32(a, b, I32x4(gt))
+    }
     #[inline(always)]
     unsafe fn max_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
         F32x4(_mm_max_ps(a.0, b.0))

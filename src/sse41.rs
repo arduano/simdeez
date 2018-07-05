@@ -192,6 +192,14 @@ impl Simd for Sse41 {
         _mm_storeu_ps(a as *mut f32, b.0);
     }
     #[inline(always)]
+    unsafe fn max_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
+        I32x4_41(_mm_max_epi32(a.0, b.0))
+    }
+    #[inline(always)]
+    unsafe fn min_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
+        I32x4_41(_mm_min_epi32(a.0, b.0))
+    }
+    #[inline(always)]
     unsafe fn max_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
         F32x4(_mm_max_ps(a.0, b.0))
     }

@@ -201,6 +201,8 @@ pub trait Simd {
     unsafe fn loadu_pd(a: &f64) -> Self::Vf64;
     unsafe fn loadu_si(a: &i32) -> Self::Vi32;
     unsafe fn storeu_ps(a: &mut f32, b: Self::Vf32);
+    unsafe fn max_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
+    unsafe fn min_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     unsafe fn max_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn min_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn max_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;

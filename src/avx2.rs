@@ -177,6 +177,14 @@ impl Simd for Avx2 {
         _mm256_storeu_ps(a as *mut f32, b.0);
     }
     #[inline(always)]
+    unsafe fn max_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
+        I32x8(_mm256_max_epi32(a.0, b.0))
+    }
+    #[inline(always)]
+    unsafe fn min_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
+        I32x8(_mm256_min_epi32(a.0, b.0))
+    }
+    #[inline(always)]
     unsafe fn max_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
         F32x8(_mm256_max_ps(a.0, b.0))
     }
