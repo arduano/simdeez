@@ -1,10 +1,6 @@
 use super::*;
 use core::mem;
 
-#[cfg(target_arch = "x86")]
-use core::arch::x86::*;
-#[cfg(target_arch = "x86_64")]
-use core::arch::x86_64::*;
 use overloads::*;
 pub struct Sse41;
 impl Simd for Sse41 {
@@ -294,6 +290,32 @@ impl Simd for Sse41 {
             };
         }
         constify_imm8!(imm8, call)
+    }
+    unsafe fn srli_epi32(a: Self::Vi32, imm8: i32) -> Self::Vi32 {
+        macro_rules! call {
+            ($imm8:expr) => {
+                I32x4_41(_mm_srli_epi32(a.0, $imm8))
+            };
+        }
+        constify_imm8!(imm8, call)
+    }
+    unsafe fn slli_epi32(a: Self::Vi32, imm8: i32) -> Self::Vi32 {
+        macro_rules! call {
+            ($imm8:expr) => {
+                I32x4_41(_mm_slli_epi32(a.0, $imm8))
+            };
+        }
+        constify_imm8!(imm8, call)
+    }
+
+    unsafe fn sra_epi32(a: Self::Vi32, count: __m128i) -> Self::Vi32 {
+        I32x4_41(_mm_sra_epi32(a.0, count))
+    }
+    unsafe fn srl_epi32(a: Self::Vi32, count: __m128i) -> Self::Vi32 {
+        I32x4_41(_mm_srl_epi32(a.0, count))
+    }
+    unsafe fn sll_epi32(a: Self::Vi32, count: __m128i) -> Self::Vi32 {
+        I32x4_41(_mm_sll_epi32(a.0, count))
     }
 
     #[inline(always)]

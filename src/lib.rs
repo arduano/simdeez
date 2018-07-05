@@ -60,6 +60,10 @@
 //!
 //! ```
 #![no_std]
+#[cfg(target_arch = "x86")]
+use core::arch::x86::*;
+#[cfg(target_arch = "x86_64")]
+use core::arch::x86_64::*;
 use core::fmt::Debug;
 use core::ops::*;
 #[macro_use]
@@ -228,6 +232,11 @@ pub trait Simd {
     /// you will get a compile time error. This is necessary, the hardware
     /// demands it. With Avx2 you are free to pass anything.
     unsafe fn srai_epi32(a: Self::Vi32, imm8: i32) -> Self::Vi32;
+    unsafe fn srli_epi32(a: Self::Vi32, imm8: i32) -> Self::Vi32;
+    unsafe fn slli_epi32(a: Self::Vi32, imm8: i32) -> Self::Vi32;
+    unsafe fn sra_epi32(a: Self::Vi32, count: __m128i) -> Self::Vi32;
+    unsafe fn srl_epi32(a: Self::Vi32, count: __m128i) -> Self::Vi32;
+    unsafe fn sll_epi32(a: Self::Vi32, count: __m128i) -> Self::Vi32;
     unsafe fn sub_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     unsafe fn sub_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn sqrt_ps(a: Self::Vf32) -> Self::Vf32;
@@ -245,6 +254,47 @@ mod tests {
     use avx2::*;
     use sse2::*;
     use sse41::*;
+
+    #[inline(always)]
+    unsafe fn minmax_ints<S: Simd>() -> (i32, i32, i32, i32) {
+        let mut t1 = S::setzero_si();
+        let mut t2 = S::setzero_si();
+        for i in 0..S::VI32_WIDTH {
+            let ias32 = i as i32;
+            t1[i] = ias32;
+            if i % 2 == 0 {
+                t2[i] = ias32 * 10
+            } else {
+                t2[i] = -ias32;
+            }
+        }
+        let a = S::min_epi32(t1, t2)[0];
+        let b = S::min_epi32(t2, t1)[1];
+        let c = S::max_epi32(t1, t2)[2];
+        let d = S::max_epi32(t2, t1)[3];
+        (a, b, c, d)
+    }
+
+    #[target_feature(enable = "sse2")]
+    unsafe fn minmax_ints_sse2() -> (i32, i32, i32, i32) {
+        minmax_ints::<Sse2>()
+    }
+    #[target_feature(enable = "sse4.1")]
+    unsafe fn minmax_ints_sse41() -> (i32, i32, i32, i32) {
+        minmax_ints::<Sse41>()
+    }
+    #[target_feature(enable = "avx2")]
+    unsafe fn minmax_ints_avx2() -> (i32, i32, i32, i32) {
+        minmax_ints::<Avx2>()
+    }
+    #[test]
+    fn testminmax_ints_consistency() {
+        unsafe {
+            assert_eq!(minmax_ints_sse2(), minmax_ints_sse41());
+            assert_eq!(minmax_ints_sse41(), minmax_ints_avx2());
+        }
+    }
+
     // If using runtime feature detection, you will want to be sure this inlines
     #[inline(always)]
     unsafe fn sample<S: Simd>() -> i32 {
@@ -252,7 +302,7 @@ mod tests {
         let b = S::set1_epi32(-1);
         let c = a + b; //2
                        // let d = a + 2; // 4
-        d[S::VF32_WIDTH - 1]
+        c[S::VF32_WIDTH - 1]
     }
 
     // Make an sse2 version of sample
@@ -358,9 +408,9 @@ mod tests {
     #[test]
     fn overloadi32() {
         unsafe {
-            assert_eq!(sample_sse2(), 4);
-            assert_eq!(sample_sse41(), 4);
-            assert_eq!(sample_avx2(), 4);
+            assert_eq!(sample_sse2(), 2);
+            assert_eq!(sample_sse41(), 2);
+            assert_eq!(sample_avx2(), 2);
         }
     }
 }

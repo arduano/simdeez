@@ -1,8 +1,4 @@
 use super::*;
-#[cfg(target_arch = "x86")]
-use core::arch::x86::*;
-#[cfg(target_arch = "x86_64")]
-use core::arch::x86_64::*;
 use core::mem;
 use overloads::*;
 
@@ -222,8 +218,8 @@ impl Simd for Sse2 {
     unsafe fn storeu_ps(a: &mut f32, b: Self::Vf32) {
         _mm_storeu_ps(a as *mut f32, b.0);
     }
-//TODO test the max and min on epi32 work, blend
-#[inline(always)]
+    //TODO test the max and min on epi32 work, blend
+    #[inline(always)]
     unsafe fn max_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         let gt = _mm_cmpgt_epi32(a.0, b.0);
         Self::blendv_epi32(b, a, I32x4(gt))
@@ -337,6 +333,32 @@ impl Simd for Sse2 {
             };
         }
         constify_imm8!(imm8, call)
+    }
+    unsafe fn srli_epi32(a: Self::Vi32, imm8: i32) -> Self::Vi32 {
+        macro_rules! call {
+            ($imm8:expr) => {
+                I32x4(_mm_srli_epi32(a.0, $imm8))
+            };
+        }
+        constify_imm8!(imm8, call)
+    }
+    unsafe fn slli_epi32(a: Self::Vi32, imm8: i32) -> Self::Vi32 {
+        macro_rules! call {
+            ($imm8:expr) => {
+                I32x4(_mm_slli_epi32(a.0, $imm8))
+            };
+        }
+        constify_imm8!(imm8, call)
+    }
+
+    unsafe fn sra_epi32(a: Self::Vi32, count: __m128i) -> Self::Vi32 {
+        I32x4(_mm_sra_epi32(a.0, count))
+    }
+    unsafe fn srl_epi32(a: Self::Vi32, count: __m128i) -> Self::Vi32 {
+        I32x4(_mm_srl_epi32(a.0, count))
+    }
+    unsafe fn sll_epi32(a: Self::Vi32, count: __m128i) -> Self::Vi32 {
+        I32x4(_mm_sll_epi32(a.0, count))
     }
 
     #[inline(always)]

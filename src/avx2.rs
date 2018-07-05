@@ -1,8 +1,4 @@
 use super::*;
-#[cfg(target_arch = "x86")]
-use core::arch::x86::*;
-#[cfg(target_arch = "x86_64")]
-use core::arch::x86_64::*;
 use core::mem;
 use overloads::*;
 
@@ -12,6 +8,7 @@ impl Simd for Avx2 {
     type Vf32 = F32x8;
     type Vf64 = F64x4;
     type Vi64 = I64x4;
+
     const VF32_WIDTH: usize = 8;
     const VF64_WIDTH: usize = 4;
     const VI32_WIDTH: usize = 8;
@@ -274,6 +271,23 @@ impl Simd for Avx2 {
     unsafe fn srai_epi32(a: Self::Vi32, b: i32) -> Self::Vi32 {
         I32x8(_mm256_srai_epi32(a.0, b))
     }
+    unsafe fn srli_epi32(a: Self::Vi32, imm8: i32) -> Self::Vi32 {
+        I32x8(_mm256_srli_epi32(a.0, imm8))
+    }
+    unsafe fn slli_epi32(a: Self::Vi32, imm8: i32) -> Self::Vi32 {
+        I32x8(_mm256_slli_epi32(a.0, imm8))
+    }
+
+    unsafe fn sra_epi32(a: Self::Vi32, count: __m128i) -> Self::Vi32 {
+        I32x8(_mm256_sra_epi32(a.0, count))
+    }
+    unsafe fn srl_epi32(a: Self::Vi32, count: __m128i) -> Self::Vi32 {
+        I32x8(_mm256_srl_epi32(a.0, count))
+    }
+    unsafe fn sll_epi32(a: Self::Vi32, count: __m128i) -> Self::Vi32 {
+        I32x8(_mm256_sll_epi32(a.0, count))
+    }
+
     #[inline(always)]
     unsafe fn sub_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         I32x8(_mm256_sub_epi32(a.0, b.0))
