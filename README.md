@@ -6,29 +6,33 @@ You can either have the version you want chosen at compile time with `cfg` attri
 SIMDeez is currently in Beta, if there are intrinsics you need that are not currently implemented, create an issue
 and I'll add them. PRs to add more intrinsics are welcome. Currently things are well fleshed out for i32, i64, f32, and f64 types.
 
+As Rust stabilizes support for Neon and AVX-512 I plan to add those as well.
+
+Refer to the excellent [Intel Intrinsics Guide](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#) for documentation on these functions:
 
 # Features
 
+* SSE2, SSE41, and AVX2 
 * Can use used with compile time or run time selection
 * No runtime overhead
 * Uses familiar intel intrinsic naming conventions, easy to port. 
   * `_mm_add_ps(a,b)` becomes `add_ps(a,b)`
 * Fills in missing intrinsics in older APIs with fast SIMD workarounds. 
-  * ceil, floor, round, etc
+  * ceil, floor, round,blend etc
 * Can be used by `#[no_std]` projects
 * Operator overloading: `let sum = va + vb` or `s *= s`
 * Extract or set a single lane with the index operator: `let v1 = v[1];`
 
 # Compared to stdsimd
 
-* SIMDeez Can abstract over differing simd widths. stdsimd does not
+* SIMDeez can abstract over differing simd widths. stdsimd does not
 * SIMDeez builds on stable rust now, stdsimd does not
 
-# Compared to faster
+# Compared to Faster
 
 * SIMDeez can be used with runtime selection, Faster cannot.
 * SIMDeez has faster fallbacks for some functions
-* SIMDeez does not currently work with iterators, faster does.
+* SIMDeez does not currently work with iterators, Faster does.
 * SIMDeez uses more idiomatic intrinsic syntax while Faster uses more idomatic Rust syntax
 * SIMDeez can be used by `#[no_std]` projects
 * SIMDeez builds on stable rust now, Faster does not.
@@ -43,7 +47,12 @@ performance as long as you don't run into some of the slower fallback functions.
     // If using runtime feature detection, you will want to be sure this inlines
     // so you can leverage target_feature attributes
     #[inline(always)]
-    unsafe fn distance<S: Simd>(x1: &[f32], y1: &[f32], x2: &[f32], y2: &[f32]) -> Vec<f32> {
+    unsafe fn distance<S: Simd>(
+        x1: &[f32], 
+        y1: &[f32], 
+        x2: &[f32], 
+        y2: &[f32]) -> Vec<f32> {
+
         let mut result: Vec<f32> = Vec::with_capacity(x1.len());
         result.set_len(x1.len()); // for efficiency
 
@@ -77,18 +86,28 @@ performance as long as you don't run into some of the slower fallback functions.
 
     //Call distance as an SSE2 function
     #[target_feature(enable = "sse2")]
-    unsafe fn distance_sse2(x1: &[f32], y1: &[f32], x2: &[f32], y2: &[f32]) -> Vec<f32> {
+    unsafe fn distance_sse2(
+        x1: &[f32], 
+        y1: &[f32], 
+        x2: &[f32], 
+        y2: &[f32]) -> Vec<f32> {
         distance::<Sse2>(x1, y1, x2, y2)
     }
     //Call distance as an SSE41 function
     #[target_feature(enable = "sse4.1")]
-    unsafe fn distance_sse41(x1: &[f32], y1: &[f32], x2: &[f32], y2: &[f32]) -> Vec<f32> {
+    unsafe fn distance_sse41(
+        x1: &[f32], 
+        y1: &[f32], 
+        x2: &[f32], 
+        y2: &[f32]) -> Vec<f32> {
         distance::<Sse41>(x1, y1, x2, y2)
     }
     //Call distance as an AVX2 function
     #[target_feature(enable = "avx2")]
-    unsafe fn distance_avx2(x1: &[f32], y1: &[f32], x2: &[f32], y2: &[f32]) -> Vec<f32> {
+    unsafe fn distance_avx2(
+        x1: &[f32], 
+        y1: &[f32], 
+        x2: &[f32], 
+        y2: &[f32]) -> Vec<f32> {
         distance::<Avx2>(x1, y1, x2, y2)
-    }
-
-```
+    }```

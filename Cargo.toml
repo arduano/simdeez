@@ -6,8 +6,8 @@ description = "SIMD library to abstract over different instruction sets and widt
 license = "Apache-2.0/MIT"
 documentation = "https://docs.rs/simdeez/"
 readme = "README.md"
-keywords = ["SIMD", "avx2", "sse", "neon","performance"]
+keywords = ["SIMD", "avx2", "sse", "neon","performance","no_std"]
 repository = "https://github.com/jackmott/simdeez"
-categories = ["hardware-support","science"]
+categories = ["hardware-support","science","game-engines"]
 
 
