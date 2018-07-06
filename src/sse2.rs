@@ -145,12 +145,12 @@ impl Simd for Sse2 {
         F32x4(_mm_cmplt_ps(a.0, b.0))
     }
     #[inline(always)]
-    unsafe fn cvtepi32_ps(a: Self::Vi32) -> Self::Vf32 {
-        F32x4(_mm_cvtepi32_ps(a.0))
-    }
-    #[inline(always)]
     unsafe fn cvtps_epi32(a: Self::Vf32) -> Self::Vi32 {
         I32x4(_mm_cvtps_epi32(a.0))
+    }
+    #[inline(always)]
+    unsafe fn cvtepi32_ps(a: Self::Vi32) -> Self::Vf32 {
+        F32x4(_mm_cvtepi32_ps(a.0))
     }
     #[inline(always)]
     unsafe fn ceil_ps(a: Self::Vf32) -> Self::Vf32 {
@@ -250,9 +250,14 @@ impl Simd for Sse2 {
         F32x4(_mm_loadu_ps(a as *const f32))
     }
     #[inline(always)]
-    unsafe fn loadu_si(a: &i32) -> Self::Vi32 {
+    unsafe fn loadu_epi32(a: &i32) -> Self::Vi32 {
         let m = mem::transmute::<&i32, &__m128i>(a);
         I32x4(_mm_loadu_si128(m))
+    }
+    #[inline(always)]
+    unsafe fn loadu_epi64(a: &i64) -> Self::Vi64 {
+        let m = mem::transmute::<&i64, &__m128i>(a);
+        I64x2(_mm_loadu_si128(m))
     }
     #[inline(always)]
     unsafe fn storeu_ps(a: &mut f32, b: Self::Vf32) {
@@ -261,6 +266,16 @@ impl Simd for Sse2 {
     #[inline(always)]
     unsafe fn storeu_pd(a: &mut f64, b: Self::Vf64) {
         _mm_storeu_pd(a as *mut f64, b.0);
+    }
+    #[inline(always)]
+    unsafe fn storeu_epi32(a: &mut i32, b: Self::Vi32) {
+        let a_as_m128 = mem::transmute::<&mut i32, &mut __m128i>(a);
+        _mm_storeu_si128(a_as_m128, b.0);
+    }
+    #[inline(always)]
+    unsafe fn storeu_epi64(a: &mut i64, b: Self::Vi64) {
+        let a_as_m128 = mem::transmute::<&mut i64, &mut __m128i>(a);
+        _mm_storeu_si128(a_as_m128, b.0);
     }
     //TODO test the max and min on epi32 work, blend
     #[inline(always)]
@@ -335,6 +350,10 @@ impl Simd for Sse2 {
         F64x2(_mm_or_pd(a.0, b.0))
     }
     #[inline(always)]
+    unsafe fn rcp_ps(a: Self::Vf32) -> Self::Vf32 {
+        F32x4(_mm_rcp_ps(a.0))
+    }
+    #[inline(always)]
     unsafe fn round_ps(a: Self::Vf32) -> Self::Vf32 {
         let sign_mask = _mm_set1_ps(-0.0);
         let magic = _mm_castsi128_ps(_mm_set1_epi32(0x4B000000));
@@ -352,7 +371,6 @@ impl Simd for Sse2 {
         let b = _mm_add_pd(a.0, signedmagic);
         F64x2(_mm_sub_pd(b, signedmagic))
     }
-
     #[inline(always)]
     unsafe fn set1_epi32(a: i32) -> Self::Vi32 {
         I32x4(_mm_set1_epi32(a))
@@ -382,39 +400,43 @@ impl Simd for Sse2 {
         I64x2(_mm_setzero_si128())
     }
     #[inline(always)]
-    unsafe fn srai_epi32(a: Self::Vi32, imm8: i32) -> Self::Vi32 {
+    unsafe fn srai_epi32(a: Self::Vi32, amt_const: i32) -> Self::Vi32 {
         macro_rules! call {
-            ($imm8:expr) => {
-                I32x4(_mm_srai_epi32(a.0, $imm8))
+            ($amt_const:expr) => {
+                I32x4(_mm_srai_epi32(a.0, $amt_const))
             };
         }
-        constify_imm8!(imm8, call)
+        constify_imm8!(amt_const, call)
     }
-    unsafe fn srli_epi32(a: Self::Vi32, imm8: i32) -> Self::Vi32 {
+    #[inline(always)]
+    unsafe fn srli_epi32(a: Self::Vi32, amt_const: i32) -> Self::Vi32 {
         macro_rules! call {
-            ($imm8:expr) => {
-                I32x4(_mm_srli_epi32(a.0, $imm8))
+            ($amt_const:expr) => {
+                I32x4(_mm_srli_epi32(a.0, $amt_const))
             };
         }
-        constify_imm8!(imm8, call)
+        constify_imm8!(amt_const, call)
     }
-    unsafe fn slli_epi32(a: Self::Vi32, imm8: i32) -> Self::Vi32 {
+    #[inline(always)]
+    unsafe fn slli_epi32(a: Self::Vi32, amt_const: i32) -> Self::Vi32 {
         macro_rules! call {
-            ($imm8:expr) => {
-                I32x4(_mm_slli_epi32(a.0, $imm8))
+            ($amt_const:expr) => {
+                I32x4(_mm_slli_epi32(a.0, $amt_const))
             };
         }
-        constify_imm8!(imm8, call)
+        constify_imm8!(amt_const, call)
     }
-
-    unsafe fn sra_epi32(a: Self::Vi32, count: __m128i) -> Self::Vi32 {
-        I32x4(_mm_sra_epi32(a.0, count))
+    #[inline(always)]
+    unsafe fn sra_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32 {
+        I32x4(_mm_sra_epi32(a.0, _mm_set1_epi32(amt)))
     }
-    unsafe fn srl_epi32(a: Self::Vi32, count: __m128i) -> Self::Vi32 {
-        I32x4(_mm_srl_epi32(a.0, count))
+    #[inline(always)]
+    unsafe fn srl_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32 {
+        I32x4(_mm_srl_epi32(a.0, _mm_set1_epi32(amt)))
     }
-    unsafe fn sll_epi32(a: Self::Vi32, count: __m128i) -> Self::Vi32 {
-        I32x4(_mm_sll_epi32(a.0, count))
+    #[inline(always)]
+    unsafe fn sll_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32 {
+        I32x4(_mm_sll_epi32(a.0, _mm_set1_epi32(amt)))
     }
 
     #[inline(always)]
@@ -422,7 +444,6 @@ impl Simd for Sse2 {
         I32x4(_mm_sub_epi32(a.0, b.0))
     }
     #[inline(always)]
-
     unsafe fn sub_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
         F32x4(_mm_sub_ps(a.0, b.0))
     }
@@ -442,6 +463,7 @@ impl Simd for Sse2 {
     unsafe fn rsqrt_pd(a: Self::Vf64) -> Self::Vf64 {
         F64x2(_mm_div_pd(_mm_set1_pd(1.0), _mm_sqrt_pd(a.0)))
     }
+    #[inline(always)]
     unsafe fn shuffle_epi32(a: Self::Vi32, imm8: i32) -> Self::Vi32 {
         macro_rules! call {
             ($imm8:expr) => {
@@ -450,6 +472,7 @@ impl Simd for Sse2 {
         }
         constify_imm8!(imm8, call)
     }
+    #[inline(always)]
     unsafe fn shuffle_ps(a: Self::Vf32, b: Self::Vf32, imm8: i32) -> Self::Vf32 {
         macro_rules! call {
             ($imm8:expr) => {

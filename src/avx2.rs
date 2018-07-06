@@ -205,9 +205,14 @@ impl Simd for Avx2 {
         F64x4(_mm256_loadu_pd(a as *const f64))
     }
     #[inline(always)]
-    unsafe fn loadu_si(a: &i32) -> Self::Vi32 {
+    unsafe fn loadu_epi32(a: &i32) -> Self::Vi32 {
         let m = mem::transmute::<&i32, &__m256i>(a);
         I32x8(_mm256_loadu_si256(m))
+    }
+    #[inline(always)]
+    unsafe fn loadu_epi64(a: &i64) -> Self::Vi64 {
+        let m = mem::transmute::<&i64, &__m256i>(a);
+        I64x4(_mm256_loadu_si256(m))
     }
     #[inline(always)]
     unsafe fn storeu_ps(a: &mut f32, b: Self::Vf32) {
@@ -216,6 +221,16 @@ impl Simd for Avx2 {
     #[inline(always)]
     unsafe fn storeu_pd(a: &mut f64, b: Self::Vf64) {
         _mm256_storeu_pd(a as *mut f64, b.0);
+    }
+    #[inline(always)]
+    unsafe fn storeu_epi32(a: &mut i32, b: Self::Vi32) {
+        let a_as_m256 = mem::transmute::<&mut i32, &mut __m256i>(a);
+        _mm256_storeu_si256(a_as_m256, b.0);
+    }
+    #[inline(always)]
+    unsafe fn storeu_epi64(a: &mut i64, b: Self::Vi64) {
+        let a_as_m256 = mem::transmute::<&mut i64, &mut __m256i>(a);
+        _mm256_storeu_si256(a_as_m256, b.0);
     }
     #[inline(always)]
     unsafe fn max_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
@@ -282,6 +297,10 @@ impl Simd for Avx2 {
         F64x4(_mm256_or_pd(a.0, b.0))
     }
     #[inline(always)]
+    unsafe fn rcp_ps(a: Self::Vf32) -> Self::Vf32 {
+        F32x8(_mm256_rcp_ps(a.0))
+    }
+    #[inline(always)]
     unsafe fn round_ps(a: Self::Vf32) -> Self::Vf32 {
         F32x8(_mm256_round_ps(
             a.0,
@@ -324,24 +343,29 @@ impl Simd for Avx2 {
         I64x4(_mm256_setzero_si256())
     }
     #[inline(always)]
-    unsafe fn srai_epi32(a: Self::Vi32, b: i32) -> Self::Vi32 {
-        I32x8(_mm256_srai_epi32(a.0, b))
+    unsafe fn srai_epi32(a: Self::Vi32, amt_const: i32) -> Self::Vi32 {
+        I32x8(_mm256_srai_epi32(a.0, amt_const))
     }
-    unsafe fn srli_epi32(a: Self::Vi32, imm8: i32) -> Self::Vi32 {
-        I32x8(_mm256_srli_epi32(a.0, imm8))
+    #[inline(always)]
+    unsafe fn srli_epi32(a: Self::Vi32, amt_const: i32) -> Self::Vi32 {
+        I32x8(_mm256_srli_epi32(a.0, amt_const))
     }
-    unsafe fn slli_epi32(a: Self::Vi32, imm8: i32) -> Self::Vi32 {
-        I32x8(_mm256_slli_epi32(a.0, imm8))
+    #[inline(always)]
+    unsafe fn slli_epi32(a: Self::Vi32, amt_const: i32) -> Self::Vi32 {
+        I32x8(_mm256_slli_epi32(a.0, amt_const))
     }
 
-    unsafe fn sra_epi32(a: Self::Vi32, count: __m128i) -> Self::Vi32 {
-        I32x8(_mm256_sra_epi32(a.0, count))
+    #[inline(always)]
+    unsafe fn sra_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32 {
+        I32x8(_mm256_sra_epi32(a.0, _mm_set1_epi32(amt)))
     }
-    unsafe fn srl_epi32(a: Self::Vi32, count: __m128i) -> Self::Vi32 {
-        I32x8(_mm256_srl_epi32(a.0, count))
+    #[inline(always)]
+    unsafe fn srl_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32 {
+        I32x8(_mm256_srl_epi32(a.0, _mm_set1_epi32(amt)))
     }
-    unsafe fn sll_epi32(a: Self::Vi32, count: __m128i) -> Self::Vi32 {
-        I32x8(_mm256_sll_epi32(a.0, count))
+    #[inline(always)]
+    unsafe fn sll_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32 {
+        I32x8(_mm256_sll_epi32(a.0, _mm_set1_epi32(amt)))
     }
 
     #[inline(always)]

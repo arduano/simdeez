@@ -226,9 +226,12 @@ pub trait Simd {
     unsafe fn i32gather_ps(arr: &[f32], index: Self::Vi32) -> Self::Vf32;
     unsafe fn loadu_ps(a: &f32) -> Self::Vf32;
     unsafe fn loadu_pd(a: &f64) -> Self::Vf64;
-    unsafe fn loadu_si(a: &i32) -> Self::Vi32;
+    unsafe fn loadu_epi32(a: &i32) -> Self::Vi32;
+    unsafe fn loadu_epi64(a: &i64) -> Self::Vi64;
     unsafe fn storeu_ps(a: &mut f32, b: Self::Vf32);
     unsafe fn storeu_pd(a: &mut f64, b: Self::Vf64);
+    unsafe fn storeu_epi32(a: &mut i32, b: Self::Vi32);
+    unsafe fn storeu_epi64(a: &mut i64, b: Self::Vi64);
     unsafe fn max_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     unsafe fn min_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     unsafe fn max_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
@@ -244,6 +247,7 @@ pub trait Simd {
     unsafe fn or_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
     unsafe fn or_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn or_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
+    unsafe fn rcp_ps(a: Self::Vf32) -> Self::Vf32;
     /// Round is implemented for Sse2 by combining other Sse2 operations.
     unsafe fn round_ps(a: Self::Vf32) -> Self::Vf32;
     unsafe fn round_pd(a: Self::Vf64) -> Self::Vf64;
@@ -254,17 +258,18 @@ pub trait Simd {
     unsafe fn setzero_pd() -> Self::Vf64;
     unsafe fn setzero_epi32() -> Self::Vi32;
     unsafe fn setzero_epi64() -> Self::Vi64;
-    /// Shift operations for Sse require that imm8 be a constant,
-    /// we handle this with a macro, so if you pass a non constant
-    /// you will get a compile time error. This is necessary, the hardware
-    /// demands it. With Avx2 you are free to pass anything.
-    unsafe fn srai_epi32(a: Self::Vi32, imm8: i32) -> Self::Vi32;
-    unsafe fn srli_epi32(a: Self::Vi32, imm8: i32) -> Self::Vi32;
-    unsafe fn slli_epi32(a: Self::Vi32, imm8: i32) -> Self::Vi32;
-    // TODO can count just be an i32 or i64?
-    unsafe fn sra_epi32(a: Self::Vi32, count: __m128i) -> Self::Vi32;
-    unsafe fn srl_epi32(a: Self::Vi32, count: __m128i) -> Self::Vi32;
-    unsafe fn sll_epi32(a: Self::Vi32, count: __m128i) -> Self::Vi32;
+    /// amt must be a constant
+    unsafe fn srai_epi32(a: Self::Vi32, amt_const: i32) -> Self::Vi32;
+    /// amt must be a constant
+    unsafe fn srli_epi32(a: Self::Vi32, amt_const: i32) -> Self::Vi32;
+    /// amt must be a constant
+    unsafe fn slli_epi32(a: Self::Vi32, amt_const: i32) -> Self::Vi32;
+    /// amt does not have to be a constant, but may be slower than the srai version
+    unsafe fn sra_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32;
+    /// amt does not have to be a constant, but may be slower than the srli version
+    unsafe fn srl_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32;
+    /// amt does not have to be a constant, but may be slower than the slli version
+    unsafe fn sll_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32;
     unsafe fn sub_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     unsafe fn sub_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn sqrt_ps(a: Self::Vf32) -> Self::Vf32;
