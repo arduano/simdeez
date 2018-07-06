@@ -246,7 +246,7 @@ impl Simd for Sse41 {
         let a_as_m128 = mem::transmute::<&mut i64, &mut __m128i>(a);
         _mm_storeu_si128(a_as_m128, b.0);
     }
-     #[inline(always)]
+    #[inline(always)]
     unsafe fn max_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         I32x4_41(_mm_max_epi32(a.0, b.0))
     }

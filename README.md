@@ -1,57 +1,94 @@
 A library that abstracts over SIMD instruction sets, including ones with differing widths.
-Implemented such that you can use it with runtime feature detection (or not!) and with little to no performance penalty.
+SIMDeez is designed to allow you to write a function one time and produce SSE2, SSE41, and AVX2 versions of the function.
+You can either have the version you want chosen at compile time with `cfg` attributes, or at runtime with
+`target_feature` attributes and using the built in `is_x86_feature_detected!' macro.
+
+SIMDeez is currently in Beta, if there are intrinsics you need that are not currently implemented, create an issue
+and I'll add them. PRs to add more intrinsics are welcome. Currently things are well fleshed out for i32, i64, f32, and f64 types.
 
 
-Currently in alpha, I'm implementing just the functions I need for my own projects.  If a fully featured version would be useful to you
-or your company I'd be willing to flesh this out with some kind of corporate sponsorship. PRs adding more of the intrinsics are welcome, of course.
+# Features
 
-Currently supports: AVX2, SSE41, and SSE2. 
+* Can use used with compile time or run time selection
+* No runtime overhead
+* Uses familiar intel intrinsic naming conventions, easy to port. 
+  * `_mm_add_ps(a,b)` becomes `add_ps(a,b)`
+* Fills in missing intrinsics in older APIs with fast SIMD workarounds. 
+  * ceil, floor, round, etc
+* Can be used by `#[no_std]` projects
+* Operator overloading: `let sum = va + vb` or `s *= s`
+* Extract or set a single lane with the index operator: `let v1 = v[1];`
 
-SIMDeez is designed so you can easily import SIMD code from C or Rust with a few simple search/replace operations.  `%s/__m256i/S::Vi32/g`  `%s/_mm_/S::/g` etc will take
-care of 90% of the work. 
+# Compared to stdsimd
+
+* SIMDeez Can abstract over differing simd widths. stdsimd does not
+* SIMDeez builds on stable rust now, stdsimd does not
+
+# Compared to faster
+
+* SIMDeez can be used with runtime selection, Faster cannot.
+* SIMDeez has faster fallbacks for some functions
+* SIMDeez does not currently work with iterators, faster does.
+* SIMDeez uses more idiomatic intrinsic syntax while Faster uses more idomatic Rust syntax
+* SIMDeez can be used by `#[no_std]` projects
+* SIMDeez builds on stable rust now, Faster does not.
+
+All of the above could change! Faster seems to generally have the same
+performance as long as you don't run into some of the slower fallback functions.
 
 
-# Examples
+# Example
 
 ```rust
-// If using runtime feature detection, you will want to be sure this inlines
-#[inline(always)]
-unsafe fn sample<S: Simd>() -> f32 {
-    // function names mirror the intel intrinsics, minus the _mm_ part, call them as usual 
-    let a = S::set1_ps(1.5);
-    let b = S::set1_ps(2.5);
-    let mut c = S::add_ps(a,b);
-    // Or you can use overloaded operators when applicable:
-    let mut overloads = a*b+b-c/a;
-    // Bitwise and assignment overloads work too
-    overloads |= b;
-    // If your SIMD instruction set doesn't have floor, round, gather etc,  SIMDeez handles it for you
-    c = S::floor_ps(c);
-    // You can get the width (as a const!)  of the instruction set you are working with
-    let width = S::WIDTH_BYTES;    
-    // And set or get individual lanes with ease using the index operator.
-    let first = c[0];
-    let last = c[(width/4)-1];
-    // Horizontal sums! 
-    S::horizontal_add(first)+last
-    
-}
+    // If using runtime feature detection, you will want to be sure this inlines
+    // so you can leverage target_feature attributes
+    #[inline(always)]
+    unsafe fn distance<S: Simd>(x1: &[f32], y1: &[f32], x2: &[f32], y2: &[f32]) -> Vec<f32> {
+        let mut result: Vec<f32> = Vec::with_capacity(x1.len());
+        result.set_len(x1.len()); // for efficiency
 
-// Make an sse2 version of sample 
-#[target_feature(enable="sse2")]
-unsafe fn sample_sse2() -> f32 {
-    sample::<Sse2>()
-}
+        // Operations have to be done in terms of the vector width
+        // so that it will work with any size vector.
+        // the width of a vector type is provided as a constant
+        // so the compiler is free to optimize it more.
+        let mut i = 0;
+        //S::VF32_WIDTH is a constant, 4 when using SSE, 8 when using AVX2, etc
+        while i < x1.len() {
+            //load data from your vec into a SIMD value
+            let xv1 = S::loadu_ps(&x1[i]);
+            let yv1 = S::loadu_ps(&y1[i]);
+            let xv2 = S::loadu_ps(&x2[i]);
+            let yv2 = S::loadu_ps(&y2[i]);
 
-// Make an avx2 version of sample
-#[target_feature(enable="avx2")]
-unsafe fn sample_avx2() -> f32{
- sample::<Avx2>()
-}
+            // Use the usual intrinsic syntax if you prefer
+            let mut xdiff = S::sub_ps(xv1, xv2);
+            // Or use operater overloading if you like
+            let mut ydiff = yv1 - yv2;
+            xdiff *= xdiff;
+            ydiff *= ydiff;
+            let distance = S::sqrt_ps(xdiff + ydiff);
+            // Store the SIMD value into the result vec
+            S::storeu_ps(&mut result[i], distance);
+            // Increment i by the vector width
+            i += S::VF32_WIDTH
+        }
+        result
+    }
 
-
-// The target_feature attributes ensure that the compiler emits the appropriate instructions on
-// a per function basis.
-
+    //Call distance as an SSE2 function
+    #[target_feature(enable = "sse2")]
+    unsafe fn distance_sse2(x1: &[f32], y1: &[f32], x2: &[f32], y2: &[f32]) -> Vec<f32> {
+        distance::<Sse2>(x1, y1, x2, y2)
+    }
+    //Call distance as an SSE41 function
+    #[target_feature(enable = "sse4.1")]
+    unsafe fn distance_sse41(x1: &[f32], y1: &[f32], x2: &[f32], y2: &[f32]) -> Vec<f32> {
+        distance::<Sse41>(x1, y1, x2, y2)
+    }
+    //Call distance as an AVX2 function
+    #[target_feature(enable = "avx2")]
+    unsafe fn distance_avx2(x1: &[f32], y1: &[f32], x2: &[f32], y2: &[f32]) -> Vec<f32> {
+        distance::<Avx2>(x1, y1, x2, y2)
+    }
 
 ```
