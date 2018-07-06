@@ -52,14 +52,14 @@
 //!     // so you can leverage target_feature attributes
 //!     #[inline(always)]
 //!     unsafe fn distance<S: Simd>(
-//!         x1: &[f32], 
-//!         y1: &[f32], 
-//!         x2: &[f32], 
+//!         x1: &[f32],
+//!         y1: &[f32],
+//!         x2: &[f32],
 //!         y2: &[f32]) -> Vec<f32> {
-//! 
+//!
 //!         let mut result: Vec<f32> = Vec::with_capacity(x1.len());
 //!         result.set_len(x1.len()); // for efficiency
-//! 
+//!
 //!         // Operations have to be done in terms of the vector width
 //!         // so that it will work with any size vector.
 //!         // the width of a vector type is provided as a constant
@@ -72,7 +72,7 @@
 //!             let yv1 = S::loadu_ps(&y1[i]);
 //!             let xv2 = S::loadu_ps(&x2[i]);
 //!             let yv2 = S::loadu_ps(&y2[i]);
-//! 
+//!
 //!             // Use the usual intrinsic syntax if you prefer
 //!             let mut xdiff = S::sub_ps(xv1, xv2);
 //!             // Or use operater overloading if you like
@@ -87,31 +87,31 @@
 //!         }
 //!         result
 //!     }
-//! 
+//!
 //!     //Call distance as an SSE2 function
 //!     #[target_feature(enable = "sse2")]
 //!     unsafe fn distance_sse2(
-//!         x1: &[f32], 
-//!         y1: &[f32], 
-//!         x2: &[f32], 
+//!         x1: &[f32],
+//!         y1: &[f32],
+//!         x2: &[f32],
 //!         y2: &[f32]) -> Vec<f32> {
 //!         distance::<Sse2>(x1, y1, x2, y2)
 //!     }
 //!     //Call distance as an SSE41 function
 //!     #[target_feature(enable = "sse4.1")]
 //!     unsafe fn distance_sse41(
-//!         x1: &[f32], 
-//!         y1: &[f32], 
-//!         x2: &[f32], 
+//!         x1: &[f32],
+//!         y1: &[f32],
+//!         x2: &[f32],
 //!         y2: &[f32]) -> Vec<f32> {
 //!         distance::<Sse41>(x1, y1, x2, y2)
 //!     }
 //!     //Call distance as an AVX2 function
 //!     #[target_feature(enable = "avx2")]
 //!     unsafe fn distance_avx2(
-//!         x1: &[f32], 
-//!         y1: &[f32], 
-//!         x2: &[f32], 
+//!         x1: &[f32],
+//!         y1: &[f32],
+//!         x2: &[f32],
 //!         y2: &[f32]) -> Vec<f32> {
 //!         distance::<Avx2>(x1, y1, x2, y2)
 //!     }
@@ -284,10 +284,18 @@ pub trait Simd {
     /// Sse2 and Sse41 paths will simulate a gather by breaking out and
     /// doing scalar array accesses, because gather doesn't exist until Avx2.
     unsafe fn i32gather_ps(arr: &[f32], index: Self::Vi32) -> Self::Vf32;
+    unsafe fn load_ps(a: &f32) -> Self::Vf32;
+    unsafe fn load_pd(a: &f64) -> Self::Vf64;
+    unsafe fn load_epi32(a: &i32) -> Self::Vi32;
+    unsafe fn load_epi64(a: &i64) -> Self::Vi64;
     unsafe fn loadu_ps(a: &f32) -> Self::Vf32;
     unsafe fn loadu_pd(a: &f64) -> Self::Vf64;
     unsafe fn loadu_epi32(a: &i32) -> Self::Vi32;
     unsafe fn loadu_epi64(a: &i64) -> Self::Vi64;
+    unsafe fn store_ps(a: &mut f32, b: Self::Vf32);
+    unsafe fn store_pd(a: &mut f64, b: Self::Vf64);
+    unsafe fn store_epi32(a: &mut i32, b: Self::Vi32);
+    unsafe fn store_epi64(a: &mut i64, b: Self::Vi64);
     unsafe fn storeu_ps(a: &mut f32, b: Self::Vf32);
     unsafe fn storeu_pd(a: &mut f64, b: Self::Vf64);
     unsafe fn storeu_epi32(a: &mut i32, b: Self::Vi32);
@@ -338,6 +346,12 @@ pub trait Simd {
     unsafe fn rsqrt_pd(a: Self::Vf64) -> Self::Vf64;
     unsafe fn shuffle_epi32(a: Self::Vi32, imm8: i32) -> Self::Vi32;
     unsafe fn shuffle_ps(a: Self::Vf32, Self::Vf32, imm8: i32) -> Self::Vf32;
+    unsafe fn unpackhi_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
+    unsafe fn unpacklo_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
+    unsafe fn unpackhi_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
+    unsafe fn unpacklo_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
+    unsafe fn unpackhi_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
+    unsafe fn unpacklo_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
     unsafe fn xor_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     unsafe fn xor_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
     unsafe fn xor_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
@@ -356,12 +370,7 @@ mod tests {
     // If using runtime feature detection, you will want to be sure this inlines
     // so you can leverage target_feature attributes
     #[inline(always)]
-    unsafe fn distance<S: Simd>(
-        x1: &[f32], 
-        y1: &[f32], 
-        x2: &[f32], 
-        y2: &[f32]) -> Vec<f32> {
-
+    unsafe fn distance<S: Simd>(x1: &[f32], y1: &[f32], x2: &[f32], y2: &[f32]) -> Vec<f32> {
         let mut result: Vec<f32> = Vec::with_capacity(x1.len());
         result.set_len(x1.len()); // for efficiency
 
@@ -395,29 +404,17 @@ mod tests {
 
     //Call distance as an SSE2 function
     #[target_feature(enable = "sse2")]
-    unsafe fn distance_sse2(
-        x1: &[f32], 
-        y1: &[f32], 
-        x2: &[f32], 
-        y2: &[f32]) -> Vec<f32> {
+    unsafe fn distance_sse2(x1: &[f32], y1: &[f32], x2: &[f32], y2: &[f32]) -> Vec<f32> {
         distance::<Sse2>(x1, y1, x2, y2)
     }
     //Call distance as an SSE41 function
     #[target_feature(enable = "sse4.1")]
-    unsafe fn distance_sse41(
-        x1: &[f32], 
-        y1: &[f32], 
-        x2: &[f32], 
-        y2: &[f32]) -> Vec<f32> {
+    unsafe fn distance_sse41(x1: &[f32], y1: &[f32], x2: &[f32], y2: &[f32]) -> Vec<f32> {
         distance::<Sse41>(x1, y1, x2, y2)
     }
     //Call distance as an AVX2 function
     #[target_feature(enable = "avx2")]
-    unsafe fn distance_avx2(
-        x1: &[f32], 
-        y1: &[f32], 
-        x2: &[f32], 
-        y2: &[f32]) -> Vec<f32> {
+    unsafe fn distance_avx2(x1: &[f32], y1: &[f32], x2: &[f32], y2: &[f32]) -> Vec<f32> {
         distance::<Avx2>(x1, y1, x2, y2)
     }
 

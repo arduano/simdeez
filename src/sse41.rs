@@ -211,6 +211,24 @@ impl Simd for Sse41 {
         ))
     }
     #[inline(always)]
+    unsafe fn load_pd(a: &f64) -> Self::Vf64 {
+        F64x2(_mm_load_pd(a as *const f64))
+    }
+    #[inline(always)]
+    unsafe fn load_ps(a: &f32) -> Self::Vf32 {
+        F32x4(_mm_load_ps(a as *const f32))
+    }
+    #[inline(always)]
+    unsafe fn load_epi32(a: &i32) -> Self::Vi32 {
+        let m = mem::transmute::<&i32, &__m128i>(a);
+        I32x4_41(_mm_load_si128(m))
+    }
+    #[inline(always)]
+    unsafe fn load_epi64(a: &i64) -> Self::Vi64 {
+        let m = mem::transmute::<&i64, &__m128i>(a);
+        I64x2_41(_mm_load_si128(m))
+    }
+    #[inline(always)]
     unsafe fn loadu_ps(a: &f32) -> Self::Vf32 {
         F32x4(_mm_loadu_ps(a as *const f32))
     }
@@ -227,6 +245,24 @@ impl Simd for Sse41 {
     unsafe fn loadu_epi64(a: &i64) -> Self::Vi64 {
         let m = mem::transmute::<&i64, &__m128i>(a);
         I64x2_41(_mm_loadu_si128(m))
+    }
+    #[inline(always)]
+    unsafe fn store_ps(a: &mut f32, b: Self::Vf32) {
+        _mm_store_ps(a as *mut f32, b.0);
+    }
+    #[inline(always)]
+    unsafe fn store_pd(a: &mut f64, b: Self::Vf64) {
+        _mm_store_pd(a as *mut f64, b.0);
+    }
+    #[inline(always)]
+    unsafe fn store_epi32(a: &mut i32, b: Self::Vi32) {
+        let a_as_m128 = mem::transmute::<&mut i32, &mut __m128i>(a);
+        _mm_store_si128(a_as_m128, b.0);
+    }
+    #[inline(always)]
+    unsafe fn store_epi64(a: &mut i64, b: Self::Vi64) {
+        let a_as_m128 = mem::transmute::<&mut i64, &mut __m128i>(a);
+        _mm_store_si128(a_as_m128, b.0);
     }
     #[inline(always)]
     unsafe fn storeu_ps(a: &mut f32, b: Self::Vf32) {
@@ -438,6 +474,30 @@ impl Simd for Sse41 {
             };
         }
         constify_imm8!(imm8, call)
+    }
+    #[inline(always)]
+    unsafe fn unpackhi_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
+        I32x4_41(_mm_unpackhi_epi32(a.0, b.0))
+    }
+    #[inline(always)]
+    unsafe fn unpacklo_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
+        I32x4_41(_mm_unpacklo_epi32(a.0, b.0))
+    }
+    #[inline(always)]
+    unsafe fn unpackhi_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
+        I64x2_41(_mm_unpackhi_epi64(a.0, b.0))
+    }
+    #[inline(always)]
+    unsafe fn unpacklo_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
+        I64x2_41(_mm_unpacklo_epi64(a.0, b.0))
+    }
+    #[inline(always)]
+    unsafe fn unpackhi_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        F64x2(_mm_unpackhi_pd(a.0, b.0))
+    }
+    #[inline(always)]
+    unsafe fn unpacklo_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        F64x2(_mm_unpacklo_pd(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn xor_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
