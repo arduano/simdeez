@@ -10,4 +10,10 @@ keywords = ["SIMD", "avx2", "sse", "performance","no_std"]
 repository = "https://github.com/jackmott/simdeez"
 categories = ["hardware-support","science","game-engines"]
 
+[dev.dependencies]
+criterion = "*"
+
+[[bench]]
+name = "benchmarks"
+harness = false
 

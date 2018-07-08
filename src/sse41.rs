@@ -60,14 +60,20 @@ impl Simd for Sse41 {
     unsafe fn andnot_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
         I64x2_41(_mm_andnot_si128(a.0, b.0))
     }
+    // TODO is this equivalent?
     #[inline(always)]
     unsafe fn blendv_epi32(a: Self::Vi32, b: Self::Vi32, mask: Self::Vi32) -> Self::Vi32 {
-        /*        I32x4_41(_mm_castps_si128(_mm_blendv_ps(
-            _mm_castsi128_ps(a.0),
-            _mm_castsi128_ps(b.0),
-            _mm_castsi128_ps(mask.0),
-        )))*/
-        I32x4_41(_mm_blendv_epi8(a.0, b.0, mask.0))
+        I32x4_41(_mm_or_si128(
+            _mm_andnot_si128(mask.0, a.0),
+            _mm_and_si128(mask.0, b.0),
+        ))
+    }
+    #[inline(always)]
+    unsafe fn blendv_epi64(a: Self::Vi64, b: Self::Vi64, mask: Self::Vi64) -> Self::Vi64 {
+        I64x2_41(_mm_or_si128(
+            _mm_andnot_si128(mask.0, a.0),
+            _mm_and_si128(mask.0, b.0),
+        ))
     }
     #[inline(always)]
     unsafe fn blendv_ps(a: Self::Vf32, b: Self::Vf32, mask: Self::Vf32) -> Self::Vf32 {
@@ -247,40 +253,84 @@ impl Simd for Sse41 {
         I64x2_41(_mm_loadu_si128(m))
     }
     #[inline(always)]
-    unsafe fn store_ps(a: &mut f32, b: Self::Vf32) {
-        _mm_store_ps(a as *mut f32, b.0);
+    unsafe fn maskload_epi32(mem_addr: &i32, mask: Self::Vi32) -> Self::Vi32 {
+        let data = Self::loadu_epi32(mem_addr).0;
+        I32x4_41(_mm_and_si128(data, mask.0))
     }
     #[inline(always)]
-    unsafe fn store_pd(a: &mut f64, b: Self::Vf64) {
-        _mm_store_pd(a as *mut f64, b.0);
+    unsafe fn maskload_epi64(mem_addr: &i64, mask: Self::Vi64) -> Self::Vi64 {
+        let data = Self::loadu_epi64(mem_addr).0;
+        I64x2_41(_mm_and_si128(data, mask.0))
     }
     #[inline(always)]
-    unsafe fn store_epi32(a: &mut i32, b: Self::Vi32) {
-        let a_as_m128 = mem::transmute::<&mut i32, &mut __m128i>(a);
-        _mm_store_si128(a_as_m128, b.0);
+    unsafe fn maskload_ps(mem_addr: &f32, mask: Self::Vi32) -> Self::Vf32 {
+        let data = Self::loadu_ps(mem_addr).0;
+        F32x4(_mm_and_ps(data, _mm_castsi128_ps(mask.0)))
     }
     #[inline(always)]
-    unsafe fn store_epi64(a: &mut i64, b: Self::Vi64) {
-        let a_as_m128 = mem::transmute::<&mut i64, &mut __m128i>(a);
-        _mm_store_si128(a_as_m128, b.0);
+    unsafe fn maskload_pd(mem_addr: &f64, mask: Self::Vi64) -> Self::Vf64 {
+        let data = Self::loadu_pd(mem_addr).0;
+        F64x2(_mm_and_pd(data, _mm_castsi128_pd(mask.0)))
     }
     #[inline(always)]
-    unsafe fn storeu_ps(a: &mut f32, b: Self::Vf32) {
-        _mm_storeu_ps(a as *mut f32, b.0);
+    unsafe fn store_ps(mem_addr: &mut f32, a: Self::Vf32) {
+        _mm_store_ps(mem_addr as *mut f32, a.0);
     }
     #[inline(always)]
-    unsafe fn storeu_pd(a: &mut f64, b: Self::Vf64) {
-        _mm_storeu_pd(a as *mut f64, b.0);
+    unsafe fn store_pd(mem_addr: &mut f64, a: Self::Vf64) {
+        _mm_store_pd(mem_addr as *mut f64, a.0);
     }
     #[inline(always)]
-    unsafe fn storeu_epi32(a: &mut i32, b: Self::Vi32) {
-        let a_as_m128 = mem::transmute::<&mut i32, &mut __m128i>(a);
-        _mm_storeu_si128(a_as_m128, b.0);
+    unsafe fn store_epi32(mem_addr: &mut i32, a: Self::Vi32) {
+        let mem_addr_128 = mem::transmute::<&mut i32, &mut __m128i>(mem_addr);
+        _mm_store_si128(mem_addr_128, a.0);
     }
     #[inline(always)]
-    unsafe fn storeu_epi64(a: &mut i64, b: Self::Vi64) {
-        let a_as_m128 = mem::transmute::<&mut i64, &mut __m128i>(a);
-        _mm_storeu_si128(a_as_m128, b.0);
+    unsafe fn store_epi64(mem_addr: &mut i64, a: Self::Vi64) {
+        let mem_addr_128 = mem::transmute::<&mut i64, &mut __m128i>(mem_addr);
+        _mm_store_si128(mem_addr_128, a.0);
+    }
+    #[inline(always)]
+    unsafe fn storeu_ps(mem_addr: &mut f32, a: Self::Vf32) {
+        _mm_storeu_ps(mem_addr as *mut f32, a.0);
+    }
+    #[inline(always)]
+    unsafe fn storeu_pd(mem_addr: &mut f64, a: Self::Vf64) {
+        _mm_storeu_pd(mem_addr as *mut f64, a.0);
+    }
+    #[inline(always)]
+    unsafe fn storeu_epi32(mem_addr: &mut i32, a: Self::Vi32) {
+        let mem_addr_128 = mem::transmute::<&mut i32, &mut __m128i>(mem_addr);
+        _mm_storeu_si128(mem_addr_128, a.0);
+    }
+    #[inline(always)]
+    unsafe fn storeu_epi64(mem_addr: &mut i64, a: Self::Vi64) {
+        let mem_addr_128 = mem::transmute::<&mut i64, &mut __m128i>(mem_addr);
+        _mm_storeu_si128(mem_addr_128, a.0);
+    }
+    #[inline(always)]
+    unsafe fn maskstore_epi32(mem_addr: &mut i32, mask: Self::Vi32, a: Self::Vi32) {
+        let data = Self::loadu_epi32(mem_addr);
+        let result = Self::blendv_epi32(a, data, mask);
+        Self::storeu_epi32(mem_addr, result);
+    }
+    #[inline(always)]
+    unsafe fn maskstore_epi64(mem_addr: &mut i64, mask: Self::Vi64, a: Self::Vi64) {
+        let data = Self::loadu_epi64(mem_addr);
+        let result = Self::blendv_epi64(a, data, mask);
+        Self::storeu_epi64(mem_addr, result);
+    }
+    #[inline(always)]
+    unsafe fn maskstore_ps(mem_addr: &mut f32, mask: Self::Vi32, a: Self::Vf32) {
+        let data = Self::loadu_ps(mem_addr);
+        let result = Self::blendv_ps(a, data, Self::castepi32_ps(mask));
+        Self::storeu_ps(mem_addr, result);
+    }
+    #[inline(always)]
+    unsafe fn maskstore_pd(mem_addr: &mut f64, mask: Self::Vi64, a: Self::Vf64) {
+        let data = Self::loadu_pd(mem_addr);
+        let result = Self::blendv_pd(a, data, Self::castepi64_pd(mask));
+        Self::storeu_pd(mem_addr, result);
     }
     #[inline(always)]
     unsafe fn max_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {

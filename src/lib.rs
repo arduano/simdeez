@@ -237,6 +237,7 @@ pub trait Simd {
     /// This is provided for convenience, it uses casts and the blendv_ps
     /// intrinsics to implement it.
     unsafe fn blendv_epi32(a: Self::Vi32, b: Self::Vi32, mask: Self::Vi32) -> Self::Vi32;
+    unsafe fn blendv_epi64(a: Self::Vi64, b: Self::Vi64, mask: Self::Vi64) -> Self::Vi64;
     unsafe fn blendv_ps(a: Self::Vf32, b: Self::Vf32, mask: Self::Vf32) -> Self::Vf32;
     unsafe fn blendv_pd(a: Self::Vf64, b: Self::Vf64, mask: Self::Vf64) -> Self::Vf64;
     unsafe fn castps_epi32(a: Self::Vf32) -> Self::Vi32;
@@ -259,6 +260,7 @@ pub trait Simd {
     unsafe fn cmplt_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn cvtepi32_ps(a: Self::Vi32) -> Self::Vf32;
     unsafe fn cvtps_epi32(a: Self::Vf32) -> Self::Vi32;
+    //TODO compare perf and accuracy of agner vs stephanie methods for floor, ceil, and round
     unsafe fn floor_ps(a: Self::Vf32) -> Self::Vf32;
     unsafe fn floor_pd(a: Self::Vf64) -> Self::Vf64;
     /// When using Sse2, fastfloor uses a faster version of floor
@@ -292,14 +294,23 @@ pub trait Simd {
     unsafe fn loadu_pd(a: &f64) -> Self::Vf64;
     unsafe fn loadu_epi32(a: &i32) -> Self::Vi32;
     unsafe fn loadu_epi64(a: &i64) -> Self::Vi64;
-    unsafe fn store_ps(a: &mut f32, b: Self::Vf32);
-    unsafe fn store_pd(a: &mut f64, b: Self::Vf64);
-    unsafe fn store_epi32(a: &mut i32, b: Self::Vi32);
-    unsafe fn store_epi64(a: &mut i64, b: Self::Vi64);
-    unsafe fn storeu_ps(a: &mut f32, b: Self::Vf32);
-    unsafe fn storeu_pd(a: &mut f64, b: Self::Vf64);
-    unsafe fn storeu_epi32(a: &mut i32, b: Self::Vi32);
-    unsafe fn storeu_epi64(a: &mut i64, b: Self::Vi64);
+    unsafe fn maskload_epi32(mem_addr: &i32, mask: Self::Vi32) -> Self::Vi32;
+    unsafe fn maskload_epi64(mem_addr: &i64, mask: Self::Vi64) -> Self::Vi64;
+    unsafe fn maskload_ps(mem_addr: &f32, mask: Self::Vi32) -> Self::Vf32;
+    unsafe fn maskload_pd(mem_addr: &f64, mask: Self::Vi64) -> Self::Vf64;
+    unsafe fn store_ps(mem_addr: &mut f32, a: Self::Vf32);
+    unsafe fn store_pd(mem_addr: &mut f64, a: Self::Vf64);
+    unsafe fn store_epi32(mem_addr: &mut i32, a: Self::Vi32);
+    unsafe fn store_epi64(mem_addr: &mut i64, a: Self::Vi64);
+    unsafe fn storeu_ps(mem_addr: &mut f32, a: Self::Vf32);
+    unsafe fn storeu_pd(mem_addr: &mut f64, a: Self::Vf64);
+    unsafe fn storeu_epi32(mem_addr: &mut i32, a: Self::Vi32);
+    unsafe fn storeu_epi64(mem_addr: &mut i64, a: Self::Vi64);
+    //TODO compare perf of load, blend, store combo vs scalar check and store
+    unsafe fn maskstore_epi32(mem_addr: &mut i32, mask: Self::Vi32, a: Self::Vi32);
+    unsafe fn maskstore_epi64(mem_addr: &mut i64, mask: Self::Vi64, a: Self::Vi64);
+    unsafe fn maskstore_ps(mem_addr: &mut f32, mask: Self::Vi32, a: Self::Vf32);
+    unsafe fn maskstore_pd(mem_addr: &mut f64, mask: Self::Vi64, a: Self::Vf64);
     unsafe fn max_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     unsafe fn min_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     unsafe fn max_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;

@@ -1,5 +1,5 @@
 use super::*;
-
+//TODO perf comparison of this method vs a load intrinsic
 impl Index<usize> for I32x4 {
     type Output = i32;
 

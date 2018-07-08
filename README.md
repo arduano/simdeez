@@ -34,7 +34,6 @@ Refer to the excellent [Intel Intrinsics Guide](https://software.intel.com/sites
 * SIMDeez has faster fallbacks for some functions
 * SIMDeez does not currently work with iterators, Faster does.
 * SIMDeez uses more idiomatic intrinsic syntax while Faster uses more idomatic Rust syntax
-* SIMDeez can be used by `#[no_std]` projects
 * SIMDeez builds on stable rust now, Faster does not.
 
 All of the above could change! Faster seems to generally have the same

@@ -69,6 +69,14 @@ impl Simd for Avx2 {
         )))
     }
     #[inline(always)]
+    unsafe fn blendv_epi64(a: Self::Vi64, b: Self::Vi64, mask: Self::Vi64) -> Self::Vi64 {
+        I64x4(_mm256_castpd_si256(_mm256_blendv_pd(
+            _mm256_castsi256_pd(a.0),
+            _mm256_castsi256_pd(b.0),
+            _mm256_castsi256_pd(mask.0),
+        )))
+    }
+    #[inline(always)]
     unsafe fn blendv_ps(a: Self::Vf32, b: Self::Vf32, mask: Self::Vf32) -> Self::Vf32 {
         F32x8(_mm256_blendv_ps(a.0, b.0, mask.0))
     }
@@ -233,40 +241,72 @@ impl Simd for Avx2 {
         I64x4(_mm256_loadu_si256(m))
     }
     #[inline(always)]
-    unsafe fn store_ps(a: &mut f32, b: Self::Vf32) {
-        _mm256_store_ps(a as *mut f32, b.0);
+    unsafe fn maskload_epi32(mem_addr: &i32, mask: Self::Vi32) -> Self::Vi32 {
+        I32x8(_mm256_maskload_epi32(mem_addr as *const i32, mask.0))
     }
     #[inline(always)]
-    unsafe fn store_pd(a: &mut f64, b: Self::Vf64) {
-        _mm256_store_pd(a as *mut f64, b.0);
+    unsafe fn maskload_epi64(mem_addr: &i64, mask: Self::Vi64) -> Self::Vi64 {
+        I64x4(_mm256_maskload_epi64(mem_addr as *const i64, mask.0))
     }
     #[inline(always)]
-    unsafe fn store_epi32(a: &mut i32, b: Self::Vi32) {
-        let a_as_m256 = mem::transmute::<&mut i32, &mut __m256i>(a);
-        _mm256_store_si256(a_as_m256, b.0);
+    unsafe fn maskload_ps(mem_addr: &f32, mask: Self::Vi32) -> Self::Vf32 {
+        F32x8(_mm256_maskload_ps(mem_addr as *const f32, mask.0))
     }
     #[inline(always)]
-    unsafe fn store_epi64(a: &mut i64, b: Self::Vi64) {
-        let a_as_m256 = mem::transmute::<&mut i64, &mut __m256i>(a);
-        _mm256_store_si256(a_as_m256, b.0);
+    unsafe fn maskload_pd(mem_addr: &f64, mask: Self::Vi64) -> Self::Vf64 {
+        F64x4(_mm256_maskload_pd(mem_addr as *const f64, mask.0))
     }
     #[inline(always)]
-    unsafe fn storeu_ps(a: &mut f32, b: Self::Vf32) {
-        _mm256_storeu_ps(a as *mut f32, b.0);
+    unsafe fn store_ps(mem_addr: &mut f32, a: Self::Vf32) {
+        _mm256_store_ps(mem_addr as *mut f32, a.0);
     }
     #[inline(always)]
-    unsafe fn storeu_pd(a: &mut f64, b: Self::Vf64) {
-        _mm256_storeu_pd(a as *mut f64, b.0);
+    unsafe fn store_pd(mem_addr: &mut f64, a: Self::Vf64) {
+        _mm256_store_pd(mem_addr as *mut f64, a.0);
     }
     #[inline(always)]
-    unsafe fn storeu_epi32(a: &mut i32, b: Self::Vi32) {
-        let a_as_m256 = mem::transmute::<&mut i32, &mut __m256i>(a);
-        _mm256_storeu_si256(a_as_m256, b.0);
+    unsafe fn store_epi32(mem_addr: &mut i32, a: Self::Vi32) {
+        let mem_addr_256 = mem::transmute::<&mut i32, &mut __m256i>(mem_addr);
+        _mm256_store_si256(mem_addr_256, a.0);
     }
     #[inline(always)]
-    unsafe fn storeu_epi64(a: &mut i64, b: Self::Vi64) {
-        let a_as_m256 = mem::transmute::<&mut i64, &mut __m256i>(a);
-        _mm256_storeu_si256(a_as_m256, b.0);
+    unsafe fn store_epi64(mem_addr: &mut i64, a: Self::Vi64) {
+        let mem_addr_256 = mem::transmute::<&mut i64, &mut __m256i>(mem_addr);
+        _mm256_store_si256(mem_addr_256, a.0);
+    }
+    #[inline(always)]
+    unsafe fn storeu_ps(mem_addr: &mut f32, a: Self::Vf32) {
+        _mm256_storeu_ps(mem_addr as *mut f32, a.0);
+    }
+    #[inline(always)]
+    unsafe fn storeu_pd(mem_addr: &mut f64, a: Self::Vf64) {
+        _mm256_storeu_pd(mem_addr as *mut f64, a.0);
+    }
+    #[inline(always)]
+    unsafe fn storeu_epi32(mem_addr: &mut i32, a: Self::Vi32) {
+        let mem_addr_256 = mem::transmute::<&mut i32, &mut __m256i>(mem_addr);
+        _mm256_storeu_si256(mem_addr_256, a.0);
+    }
+    #[inline(always)]
+    unsafe fn storeu_epi64(mem_addr: &mut i64, a: Self::Vi64) {
+        let mem_addr_256 = mem::transmute::<&mut i64, &mut __m256i>(mem_addr);
+        _mm256_storeu_si256(mem_addr_256, a.0);
+    }
+    #[inline(always)]
+    unsafe fn maskstore_epi32(mem_addr: &mut i32, mask: Self::Vi32, a: Self::Vi32) {
+        _mm256_maskstore_epi32(mem_addr as *mut i32, mask.0, a.0)
+    }
+    #[inline(always)]
+    unsafe fn maskstore_epi64(mem_addr: &mut i64, mask: Self::Vi64, a: Self::Vi64) {
+        _mm256_maskstore_epi64(mem_addr as *mut i64, mask.0, a.0)
+    }
+    #[inline(always)]
+    unsafe fn maskstore_ps(mem_addr: &mut f32, mask: Self::Vi32, a: Self::Vf32) {
+        _mm256_maskstore_ps(mem_addr as *mut f32, mask.0, a.0)
+    }
+    #[inline(always)]
+    unsafe fn maskstore_pd(mem_addr: &mut f64, mask: Self::Vi64, a: Self::Vf64) {
+        _mm256_maskstore_pd(mem_addr as *mut f64, mask.0, a.0)
     }
     #[inline(always)]
     unsafe fn max_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
