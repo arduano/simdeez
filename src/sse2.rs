@@ -104,6 +104,22 @@ impl Simd for Sse2 {
         F64x2(_mm_castsi128_pd(a.0))
     }
     #[inline(always)]
+    unsafe fn castepi32_epi64(a: Self::Vi32) -> Self::Vi64 {
+        I64x2(a.0)
+    }
+    #[inline(always)]
+    unsafe fn castepi64_epi32(a: Self::Vi64) -> Self::Vi32 {
+        I32x4(a.0)
+    }
+    #[inline(always)]
+    unsafe fn castps_pd(a: Self::Vf32) -> Self::Vf64 {
+        F64x2(_mm_castps_pd(a.0))
+    }
+    #[inline(always)]
+    unsafe fn castpd_ps(a: Self::Vf64) -> Self::Vf32 {
+        F32x4(_mm_castpd_ps(a.0))
+    }
+    #[inline(always)]
     unsafe fn cmpeq_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         I32x4(_mm_cmpeq_epi32(a.0, b.0))
     }
@@ -126,6 +142,43 @@ impl Simd for Sse2 {
     #[inline(always)]
     unsafe fn cmplt_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         I32x4(_mm_cmplt_epi32(a.0, b.0))
+    }
+    #[inline(always)]
+    unsafe fn cmpeq_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
+        let com32 = _mm_cmpeq_epi32(a.0, b.0); // 32 bit compares
+        let com32s = _mm_shuffle_epi32(com32, 0xB1); // swap low and high dwords
+        let test = _mm_and_si128(com32, com32s); // low & high
+        let teste = _mm_srai_epi32(test, 31); // extend sign bit to 32 bits
+        I64x2(_mm_shuffle_epi32(teste, 0xF5)) // extend sign bit to 64 bits
+    }
+    #[inline(always)]
+    unsafe fn cmpneq_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
+        Self::not_epi64(Self::cmpeq_epi64(a, b))
+    }
+    #[inline(always)]
+    unsafe fn cmpge_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
+        Self::not_epi64(Self::cmplt_epi64(a, b))
+    }
+    #[inline(always)]
+    unsafe fn cmpgt_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
+        Self::cmplt_epi64(b, a)
+    }
+    #[inline(always)]
+    unsafe fn cmple_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
+        Self::cmpge_epi64(b, a)
+    }
+    #[inline(always)]
+    unsafe fn cmplt_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
+        let s = _mm_sub_epi64(a.0, b.0); // a-b
+
+        // a < b if a and b have same sign and s < 0 or (a < 0 and b >= 0)
+        // The latter () corrects for overflow
+        let axb = _mm_xor_si128(a.0, b.0); // a ^ b
+        let anb = _mm_andnot_si128(b.0, a.0); // a & ~b
+        let snaxb = _mm_andnot_si128(axb, s); // s & ~(a ^ b)
+        let or1 = _mm_or_si128(anb, snaxb); // (a & ~b) | (s & ~(a ^ b))
+        let teste = _mm_srai_epi32(or1, 31); // extend sign bit to 32 bits
+        I64x2(_mm_shuffle_epi32(teste, 0xF5)) // extend sign bit to 64 bits
     }
     #[inline(always)]
     unsafe fn cmpeq_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
@@ -286,13 +339,15 @@ impl Simd for Sse2 {
     }
     #[inline(always)]
     unsafe fn maskload_epi32(mem_addr: &i32, mask: Self::Vi32) -> Self::Vi32 {
+        let high_mask = Self::cmplt_epi32(mask, Self::setzero_epi32());
         let data = Self::loadu_epi32(mem_addr).0;
-        I32x4(_mm_and_si128(data, mask.0))
+        I32x4(_mm_and_si128(data, high_mask.0))
     }
     #[inline(always)]
     unsafe fn maskload_epi64(mem_addr: &i64, mask: Self::Vi64) -> Self::Vi64 {
+        let high_mask = Self::cmplt_epi64(mask, Self::setzero_epi64());
         let data = Self::loadu_epi64(mem_addr).0;
-        I64x2(_mm_and_si128(data, mask.0))
+        I64x2(_mm_and_si128(data, high_mask.0))
     }
     #[inline(always)]
     unsafe fn maskload_ps(mem_addr: &f32, mask: Self::Vi32) -> Self::Vf32 {
@@ -416,6 +471,10 @@ impl Simd for Sse2 {
         )) /* shuffle results to [63..0] and pack */
     }
     #[inline(always)]
+    unsafe fn not_epi64(a: Self::Vi64) -> Self::Vi64 {
+        I64x2(_mm_xor_si128(a.0, _mm_set1_epi32(-1)))
+    }
+    #[inline(always)]
     unsafe fn not_epi32(a: Self::Vi32) -> Self::Vi32 {
         I32x4(_mm_xor_si128(a.0, _mm_set1_epi32(-1)))
     }
@@ -460,6 +519,11 @@ impl Simd for Sse2 {
     #[inline(always)]
     unsafe fn set1_epi32(a: i32) -> Self::Vi32 {
         I32x4(_mm_set1_epi32(a))
+    }
+    #[inline(always)]
+    unsafe fn set1_epi64(a: i64) -> Self::Vi64 {
+        let x = _mm_cvtsi64_si128(a);
+        I64x2(_mm_unpacklo_epi64(x, x))
     }
     #[inline(always)]
     unsafe fn set1_pd(a: f64) -> Self::Vf64 {

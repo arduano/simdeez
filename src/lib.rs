@@ -244,8 +244,18 @@ pub trait Simd {
     unsafe fn castpd_epi64(a: Self::Vf64) -> Self::Vi64;
     unsafe fn castepi32_ps(a: Self::Vi32) -> Self::Vf32;
     unsafe fn castepi64_pd(a: Self::Vi64) -> Self::Vf64;
+    unsafe fn castepi32_epi64(a: Self::Vi32) -> Self::Vi64;
+    unsafe fn castepi64_epi32(a: Self::Vi64) -> Self::Vi32;
+    unsafe fn castps_pd(a: Self::Vf32) -> Self::Vf64;
+    unsafe fn castpd_ps(a: Self::Vf64) -> Self::Vf32;
     unsafe fn ceil_ps(a: Self::Vf32) -> Self::Vf32;
     unsafe fn ceil_pd(a: Self::Vf64) -> Self::Vf64;
+    unsafe fn cmpeq_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
+    unsafe fn cmpneq_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
+    unsafe fn cmpge_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
+    unsafe fn cmpgt_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
+    unsafe fn cmple_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
+    unsafe fn cmplt_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
     unsafe fn cmpeq_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     unsafe fn cmpneq_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     unsafe fn cmpge_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
@@ -322,6 +332,7 @@ pub trait Simd {
     /// Mullo is implemented for Sse2 by combining other Sse2 operations.
     unsafe fn mullo_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     unsafe fn not_epi32(a: Self::Vi32) -> Self::Vi32;
+    unsafe fn not_epi64(a: Self::Vi64) -> Self::Vi64;
     unsafe fn or_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     unsafe fn or_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
     unsafe fn or_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
@@ -331,6 +342,7 @@ pub trait Simd {
     unsafe fn round_ps(a: Self::Vf32) -> Self::Vf32;
     unsafe fn round_pd(a: Self::Vf64) -> Self::Vf64;
     unsafe fn set1_epi32(a: i32) -> Self::Vi32;
+    unsafe fn set1_epi64(a: i64) -> Self::Vi64;
     unsafe fn set1_ps(a: f32) -> Self::Vf32;
     unsafe fn set1_pd(a: f64) -> Self::Vf64;
     unsafe fn setzero_ps() -> Self::Vf32;
@@ -368,5 +380,3 @@ pub trait Simd {
     unsafe fn xor_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn xor_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
 }
-
-

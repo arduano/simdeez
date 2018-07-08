@@ -101,6 +101,22 @@ impl Simd for Avx2 {
         F64x4(_mm256_castsi256_pd(a.0))
     }
     #[inline(always)]
+    unsafe fn castepi32_epi64(a: Self::Vi32) -> Self::Vi64 {
+        I64x4(a.0)
+    }
+    #[inline(always)]
+    unsafe fn castepi64_epi32(a: Self::Vi64) -> Self::Vi32 {
+        I32x8(a.0)
+    }
+    #[inline(always)]
+    unsafe fn castps_pd(a: Self::Vf32) -> Self::Vf64 {
+        F64x4(_mm256_castps_pd(a.0))
+    }
+    #[inline(always)]
+    unsafe fn castpd_ps(a: Self::Vf64) -> Self::Vf32 {
+        F32x8(_mm256_castpd_ps(a.0))
+    }
+    #[inline(always)]
     unsafe fn cmpeq_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         I32x8(_mm256_cmpeq_epi32(a.0, b.0))
     }
@@ -123,6 +139,30 @@ impl Simd for Avx2 {
     #[inline(always)]
     unsafe fn cmplt_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         I32x8(_mm256_cmpgt_epi32(b.0, a.0))
+    }
+    #[inline(always)]
+    unsafe fn cmpeq_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
+        I64x4(_mm256_cmpeq_epi64(a.0, b.0))
+    }
+    #[inline(always)]
+    unsafe fn cmpneq_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
+        Self::not_epi64(I64x4(_mm256_cmpeq_epi64(a.0, b.0)))
+    }
+    #[inline(always)]
+    unsafe fn cmpge_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
+        Self::not_epi64(I64x4(_mm256_cmpgt_epi64(b.0, a.0)))
+    }
+    #[inline(always)]
+    unsafe fn cmpgt_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
+        I64x4(_mm256_cmpgt_epi64(a.0, b.0))
+    }
+    #[inline(always)]
+    unsafe fn cmple_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
+        Self::not_epi64(I64x4(_mm256_cmpgt_epi64(a.0, b.0)))
+    }
+    #[inline(always)]
+    unsafe fn cmplt_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
+        I64x4(_mm256_cmpgt_epi64(b.0, a.0))
     }
     #[inline(always)]
     unsafe fn cmpeq_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
@@ -357,6 +397,10 @@ impl Simd for Avx2 {
         I32x8(_mm256_xor_si256(a.0, _mm256_set1_epi32(-1)))
     }
     #[inline(always)]
+    unsafe fn not_epi64(a: Self::Vi64) -> Self::Vi64 {
+        I64x4(_mm256_xor_si256(a.0, _mm256_set1_epi64x(-1)))
+    }
+    #[inline(always)]
     unsafe fn or_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         I32x8(_mm256_or_si256(a.0, b.0))
     }
@@ -393,6 +437,10 @@ impl Simd for Avx2 {
     #[inline(always)]
     unsafe fn set1_epi32(a: i32) -> Self::Vi32 {
         I32x8(_mm256_set1_epi32(a))
+    }
+    #[inline(always)]
+    unsafe fn set1_epi64(a: i64) -> Self::Vi64 {
+        I64x4(_mm256_set1_epi64x(a))
     }
     #[inline(always)]
     unsafe fn set1_ps(a: f32) -> Self::Vf32 {

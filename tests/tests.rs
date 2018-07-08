@@ -1,10 +1,12 @@
 extern crate simdeez;
+
 #[cfg(test)]
 mod tests {
     use simdeez::avx2::*;
     use simdeez::sse2::*;
     use simdeez::sse41::*;
     use simdeez::*;
+    use std::*;
 
     // If using runtime feature detection, you will want to be sure this inlines
     // so you can leverage target_feature attributes
@@ -78,46 +80,6 @@ mod tests {
         }
     }
 
-    #[inline(always)]
-    unsafe fn minmax_ints<S: Simd>() -> (i32, i32, i32, i32) {
-        let mut t1 = S::setzero_epi32();
-        let mut t2 = S::setzero_epi32();
-        for i in 0..S::VI32_WIDTH {
-            let ias32 = i as i32;
-            t1[i] = ias32;
-            if i % 2 == 0 {
-                t2[i] = ias32 * 10
-            } else {
-                t2[i] = -ias32;
-            }
-        }
-        let a = S::min_epi32(t1, t2)[0];
-        let b = S::min_epi32(t2, t1)[1];
-        let c = S::max_epi32(t1, t2)[2];
-        let d = S::max_epi32(t2, t1)[3];
-        (a, b, c, d)
-    }
-
-    #[target_feature(enable = "sse2")]
-    unsafe fn minmax_ints_sse2() -> (i32, i32, i32, i32) {
-        minmax_ints::<Sse2>()
-    }
-    #[target_feature(enable = "sse4.1")]
-    unsafe fn minmax_ints_sse41() -> (i32, i32, i32, i32) {
-        minmax_ints::<Sse41>()
-    }
-    #[target_feature(enable = "avx2")]
-    unsafe fn minmax_ints_avx2() -> (i32, i32, i32, i32) {
-        minmax_ints::<Avx2>()
-    }
-    #[test]
-    fn testminmax_ints_consistency() {
-        unsafe {
-            assert_eq!(minmax_ints_sse2(), minmax_ints_sse41());
-            assert_eq!(minmax_ints_sse41(), minmax_ints_avx2());
-        }
-    }
-
     // If using runtime feature detection, you will want to be sure this inlines
     #[inline(always)]
     unsafe fn sample<S: Simd>() -> i32 {
@@ -143,97 +105,11 @@ mod tests {
     unsafe fn sample_sse41() -> i32 {
         sample::<Sse41>()
     }
-    #[inline(always)]
-    unsafe fn setlanetest<S: Simd>() -> f32 {
-        let mut a = S::set1_ps(1.0);
-        a[0] = 5.0;
-        a[0]
-    }
-    unsafe fn setlanetest_avx2() -> f32 {
-        setlanetest::<Avx2>()
-    }
-
-    #[inline(always)]
-    unsafe fn gathertest_simd<S: Simd>() -> f32 {
-        let a = [4.0, 3.0, 2.0, 1.0];
-        let iarr = [0, 1, 2, 3];
-
-        let index = S::loadu_epi32(&iarr[0]);
-        let result = S::i32gather_ps(&a, index);
-        result[0]
-    }
-    unsafe fn gathertest_sse2() -> f32 {
-        gathertest_simd::<Sse2>()
-    }
-
-    #[inline(always)]
-    unsafe fn overload_test<S: Simd>() -> i32 {
-        let a = S::set1_epi32(3);
-        let b = S::set1_epi32(2);
-        let c = a + b; // 5
-        let d = c * b; // 10
-        let mut e = d - a; // 7
-        e *= b; // 14
-        let mut result = S::set1_epi32(9);
-        result[0] = e[0];
-        result[0]
-    }
-    unsafe fn overload_test_sse2() -> i32 {
-        overload_test::<Sse2>()
-    }
-
-    #[test]
-    fn overloads() {
-        unsafe {
-            assert_eq!(overload_test_sse2(), 14);
-        }
-    }
-    #[inline(always)]
-    unsafe fn overload_float_test<S: Simd>() -> f32 {
-        let a = S::set1_ps(3.0);
-        let b = S::set1_ps(2.0);
-        let c = a + b; // 5
-        let d = c * b; // 10
-        let e = d - a; // 7
-        let e = e / b; // 3.5
-        let e = e * S::set1_ps(2.0); //7
-        e[0]
-    }
-    unsafe fn overload_float_test_sse2() -> f32 {
-        overload_float_test::<Sse2>()
-    }
-
-    #[test]
-    fn overloads_float() {
-        unsafe {
-            assert_eq!(overload_float_test_sse2(), 7.0);
-        }
-    }
     #[test]
     fn consistency() {
         unsafe {
             assert_eq!(sample_sse2(), sample_sse41());
             assert_eq!(sample_sse41(), sample_avx2());
-        }
-    }
-    #[test]
-    fn setlane() {
-        unsafe {
-            assert_eq!(setlanetest_avx2(), 5.0);
-        }
-    }
-    #[test]
-    fn gathertest() {
-        unsafe {
-            assert_eq!(gathertest_sse2(), 4.0);
-        }
-    }
-    #[test]
-    fn overloadi32() {
-        unsafe {
-            assert_eq!(sample_sse2(), 2);
-            assert_eq!(sample_sse41(), 2);
-            assert_eq!(sample_avx2(), 2);
         }
     }
 }
