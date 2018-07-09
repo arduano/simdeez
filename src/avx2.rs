@@ -189,6 +189,30 @@ impl Simd for Avx2 {
         F32x8(_mm256_cmp_ps(a.0, b.0, _CMP_LT_OQ))
     }
     #[inline(always)]
+    unsafe fn cmpeq_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        F64x4(_mm256_cmp_pd(a.0, b.0, _CMP_EQ_OQ))
+    }
+    #[inline(always)]
+    unsafe fn cmpneq_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        F64x4(_mm256_cmp_pd(a.0, b.0, _CMP_NEQ_OQ))
+    }
+    #[inline(always)]
+    unsafe fn cmpge_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        F64x4(_mm256_cmp_pd(a.0, b.0, _CMP_GE_OQ))
+    }
+    #[inline(always)]
+    unsafe fn cmpgt_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        F64x4(_mm256_cmp_pd(a.0, b.0, _CMP_GT_OQ))
+    }
+    #[inline(always)]
+    unsafe fn cmple_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        F64x4(_mm256_cmp_pd(a.0, b.0, _CMP_LE_OQ))
+    }
+    #[inline(always)]
+    unsafe fn cmplt_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        F64x4(_mm256_cmp_pd(a.0, b.0, _CMP_LT_OQ))
+    }
+    #[inline(always)]
     unsafe fn cvtepi32_ps(a: Self::Vi32) -> Self::Vf32 {
         F32x8(_mm256_cvtepi32_ps(a.0))
     }

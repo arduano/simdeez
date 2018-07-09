@@ -45,6 +45,8 @@ performance as long as you don't run into some of the slower fallback functions.
 ```rust
 // When using runtime feature detection we need to be sure this inlines into each specific
 // function using a given `feature_target` or intrinsics will get downgraded
+// All intrinsics are unsafe, so functions using them must be unsafe or 
+// you must wrap all calls with unsafe blocks.
 #[inline(always)]
 unsafe fn distance<S: Simd>(
     x1: &[f32], 

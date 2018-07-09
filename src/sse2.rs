@@ -180,7 +180,7 @@ impl Simd for Sse2 {
         let teste = _mm_srai_epi32(or1, 31); // extend sign bit to 32 bits
         I64x2(_mm_shuffle_epi32(teste, 0xF5)) // extend sign bit to 64 bits
     }
-    #[inline(always)]
+     #[inline(always)]
     unsafe fn cmpeq_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
         F32x4(_mm_cmpeq_ps(a.0, b.0))
     }
@@ -203,6 +203,30 @@ impl Simd for Sse2 {
     #[inline(always)]
     unsafe fn cmplt_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
         F32x4(_mm_cmplt_ps(a.0, b.0))
+    }
+   #[inline(always)]
+    unsafe fn cmpeq_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        F64x2(_mm_cmpeq_pd(a.0, b.0))
+    }
+    #[inline(always)]
+    unsafe fn cmpneq_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        F64x2(_mm_cmpneq_pd(a.0, b.0))
+    }
+    #[inline(always)]
+    unsafe fn cmpge_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        F64x2(_mm_cmpge_pd(a.0, b.0))
+    }
+    #[inline(always)]
+    unsafe fn cmpgt_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        F64x2(_mm_cmpgt_pd(a.0, b.0))
+    }
+    #[inline(always)]
+    unsafe fn cmple_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        F64x2(_mm_cmple_pd(a.0, b.0))
+    }
+    #[inline(always)]
+    unsafe fn cmplt_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        F64x2(_mm_cmplt_pd(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn cvtps_epi32(a: Self::Vf32) -> Self::Vi32 {

@@ -268,6 +268,12 @@ pub trait Simd {
     unsafe fn cmpgt_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn cmple_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn cmplt_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
+    unsafe fn cmpeq_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
+    unsafe fn cmpneq_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
+    unsafe fn cmpge_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
+    unsafe fn cmpgt_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
+    unsafe fn cmple_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
+    unsafe fn cmplt_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
     unsafe fn cvtepi32_ps(a: Self::Vi32) -> Self::Vf32;
     unsafe fn cvtps_epi32(a: Self::Vf32) -> Self::Vi32;
     //TODO compare perf and accuracy of agner vs stephanie methods for floor, ceil, and round

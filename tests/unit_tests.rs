@@ -52,29 +52,26 @@ mod tests {
 
         let the_true = -1i32;
         let the_false = 0i32;
-        let af32 = [f32::MAX, f32::MIN, 0.0, -1.0, 0.0,0.0,0.0,0.0];
-        let bf32 = [f32::MAX, f32::MAX, -0.0, 1.0, 0.0,0.0,0.0,0.0];
+        let af32 = [f32::MAX, f32::MIN, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0];
+        let bf32 = [f32::MAX, f32::MAX, -0.0, 1.0, 0.0, 0.0, 0.0, 0.0];
 
         let rf32 = S::cmpeq_ps(S::loadu_ps(&af32[0]), S::loadu_ps(&bf32[0]));
-        assert_eq!(mem::transmute::<f32,i32>(rf32[0]), the_true);
-        assert_eq!(mem::transmute::<f32,i32>(rf32[1]), the_false);
-        assert_eq!(mem::transmute::<f32,i32>(rf32[2]), the_true);
-        assert_eq!(mem::transmute::<f32,i32>(rf32[3]), the_false);
+        assert_eq!(mem::transmute::<f32, i32>(rf32[0]), the_true);
+        assert_eq!(mem::transmute::<f32, i32>(rf32[1]), the_false);
+        assert_eq!(mem::transmute::<f32, i32>(rf32[2]), the_true);
+        assert_eq!(mem::transmute::<f32, i32>(rf32[3]), the_false);
 
-/*  test for cmp_pd when we get it in
         let the_true = -1i64;
         let the_false = 0i64;
         let af64 = [f64::MAX, f64::MIN, 0.0, -1.0];
         let bf64 = [f64::MAX, f64::MAX, -0.0, 1.0];
 
         let rf64 = S::cmpeq_pd(S::loadu_pd(&af64[0]), S::loadu_pd(&bf64[0]));
-        assert_eq!(mem::transmute::<f64,i64>(rf64[0]), the_true);
-        assert_eq!(mem::transmute::<f64,i64>(rf64[1]), the_false);
+        assert_eq!(mem::transmute::<f64, i64>(rf64[0]), the_true);
+        assert_eq!(mem::transmute::<f64, i64>(rf64[1]), the_false);
         let rf64 = S::cmpeq_pd(S::loadu_pd(&af64[2]), S::loadu_pd(&bf64[2]));
-        assert_eq!(mem::transmute::<f64,i64>(rf64[2]), the_true);
-        assert_eq!(mem::transmute::<f64,i64>(rf64[3]), the_false);
-*/
-
+        assert_eq!(mem::transmute::<f64, i64>(rf64[0]), the_true);
+        assert_eq!(mem::transmute::<f64, i64>(rf64[1]), the_false);
     }
     #[target_feature(enable = "sse2")]
     unsafe fn cmpeq_sse2() {
@@ -109,7 +106,7 @@ mod tests {
         assert_eq!(ri32[1], the_true);
         assert_eq!(ri32[2], the_false);
         assert_eq!(ri32[3], the_false);
-        
+
         let the_true = -1i64;
         let the_false = 0i64;
         let ai64 = [i64::MAX, i64::MIN, 0, -1];
@@ -120,15 +117,26 @@ mod tests {
 
         let the_true = -1i32;
         let the_false = 0i32;
-        let af32 = [f32::MAX, f32::MIN, 0.0, -1.0, 0.0,0.0,0.0,0.0];
-        let bf32 = [f32::MAX, f32::MAX, -0.0, 1.0, 0.0,0.0,0.0,0.0];
+        let af32 = [f32::MAX, f32::MIN, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0];
+        let bf32 = [f32::MAX, f32::MAX, -0.0, 1.0, 0.0, 0.0, 0.0, 0.0];
 
         let rf32 = S::cmplt_ps(S::loadu_ps(&af32[0]), S::loadu_ps(&bf32[0]));
-        assert_eq!(mem::transmute::<f32,i32>(rf32[0]), the_false);
-        assert_eq!(mem::transmute::<f32,i32>(rf32[1]), the_true);
-        assert_eq!(mem::transmute::<f32,i32>(rf32[2]), the_false);
-        assert_eq!(mem::transmute::<f32,i32>(rf32[3]), the_true);
+        assert_eq!(mem::transmute::<f32, i32>(rf32[0]), the_false);
+        assert_eq!(mem::transmute::<f32, i32>(rf32[1]), the_true);
+        assert_eq!(mem::transmute::<f32, i32>(rf32[2]), the_false);
+        assert_eq!(mem::transmute::<f32, i32>(rf32[3]), the_true);
 
+        let the_true = -1i64;
+        let the_false = 0i64;
+        let af64 = [f64::MAX, f64::MIN, 0.0, -1.0];
+        let bf64 = [f64::MAX, f64::MAX, -0.0, 1.0];
+
+        let rf64 = S::cmplt_pd(S::loadu_pd(&af64[0]), S::loadu_pd(&bf64[0]));
+        assert_eq!(mem::transmute::<f64, i64>(rf64[0]), the_false);
+        assert_eq!(mem::transmute::<f64, i64>(rf64[1]), the_true);
+        let rf64 = S::cmplt_pd(S::loadu_pd(&af64[2]), S::loadu_pd(&bf64[2]));
+        assert_eq!(mem::transmute::<f64, i64>(rf64[0]), the_false);
+        assert_eq!(mem::transmute::<f64, i64>(rf64[1]), the_true);
     }
     #[target_feature(enable = "sse2")]
     unsafe fn cmplt_sse2() {
@@ -150,7 +158,7 @@ mod tests {
             cmplt_avx2();
         }
     }
-     #[inline(always)]
+    #[inline(always)]
     unsafe fn cmple<S: Simd>() {
         let the_true = -1i32;
         let the_false = 0i32;
@@ -163,7 +171,7 @@ mod tests {
         assert_eq!(ri32[2], the_true);
         assert_eq!(ri32[3], the_false);
 
-        let the_true = -1i64;        
+        let the_true = -1i64;
         let the_false = 0i64;
         let ai64 = [i64::MAX, i64::MIN, 2, -1];
         let bi64 = [i64::MAX, i64::MAX, 0, 1];
@@ -171,19 +179,31 @@ mod tests {
         assert_eq!(ri64[0], the_true);
         assert_eq!(ri64[1], the_true);
         let ri64 = S::cmple_epi64(S::loadu_epi64(&ai64[2]), S::loadu_epi64(&bi64[2]));
-        assert_eq!(ri64[0],the_false);
-        assert_eq!(ri64[1],the_true);
+        assert_eq!(ri64[0], the_false);
+        assert_eq!(ri64[1], the_true);
 
         let the_true = -1i32;
         let the_false = 0i32;
-        let af32 = [f32::MAX, 2.0, 0.0, -1.0, 0.0,0.0,0.0,0.0];
-        let bf32 = [f32::MAX, 1.0, -0.0, 1.0, 0.0,0.0,0.0,0.0];
+        let af32 = [f32::MAX, 2.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0];
+        let bf32 = [f32::MAX, 1.0, -0.0, 1.0, 0.0, 0.0, 0.0, 0.0];
 
         let rf32 = S::cmple_ps(S::loadu_ps(&af32[0]), S::loadu_ps(&bf32[0]));
-        assert_eq!(mem::transmute::<f32,i32>(rf32[0]), the_true);
-        assert_eq!(mem::transmute::<f32,i32>(rf32[1]), the_false);
-        assert_eq!(mem::transmute::<f32,i32>(rf32[2]), the_true);
-        assert_eq!(mem::transmute::<f32,i32>(rf32[3]), the_true);
+        assert_eq!(mem::transmute::<f32, i32>(rf32[0]), the_true);
+        assert_eq!(mem::transmute::<f32, i32>(rf32[1]), the_false);
+        assert_eq!(mem::transmute::<f32, i32>(rf32[2]), the_true);
+        assert_eq!(mem::transmute::<f32, i32>(rf32[3]), the_true);
+
+        let the_true = -1i64;
+        let the_false = 0i64;
+        let af64 = [f64::MAX, f64::MIN, 0.0, 2.0];
+        let bf64 = [f64::MAX, f64::MAX, -0.0, 1.0];
+
+        let rf64 = S::cmple_pd(S::loadu_pd(&af64[0]), S::loadu_pd(&bf64[0]));
+        assert_eq!(mem::transmute::<f64, i64>(rf64[0]), the_true);
+        assert_eq!(mem::transmute::<f64, i64>(rf64[1]), the_true);
+        let rf64 = S::cmple_pd(S::loadu_pd(&af64[2]), S::loadu_pd(&bf64[2]));
+        assert_eq!(mem::transmute::<f64, i64>(rf64[0]), the_true);
+        assert_eq!(mem::transmute::<f64, i64>(rf64[1]), the_false);
     }
     #[target_feature(enable = "sse2")]
     unsafe fn cmple_sse2() {
@@ -219,7 +239,7 @@ mod tests {
         assert_eq!(ri32[2], the_false);
         assert_eq!(ri32[3], the_true);
 
-        let the_true = -1i64;        
+        let the_true = -1i64;
         let the_false = 0i64;
         let ai64 = [i64::MAX, i64::MIN, 2, -1];
         let bi64 = [i64::MAX, i64::MAX, 0, 1];
@@ -227,19 +247,31 @@ mod tests {
         assert_eq!(ri64[0], the_false);
         assert_eq!(ri64[1], the_false);
         let ri64 = S::cmpgt_epi64(S::loadu_epi64(&ai64[2]), S::loadu_epi64(&bi64[2]));
-        assert_eq!(ri64[0],the_true);
-        assert_eq!(ri64[1],the_false);
+        assert_eq!(ri64[0], the_true);
+        assert_eq!(ri64[1], the_false);
 
         let the_true = -1i32;
         let the_false = 0i32;
-        let af32 = [f32::MAX, 2.0, 0.0, -1.0, 0.0,0.0,0.0,0.0];
-        let bf32 = [f32::MAX, 1.0, -0.0, 1.0, 0.0,0.0,0.0,0.0];
+        let af32 = [f32::MAX, 2.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0];
+        let bf32 = [f32::MAX, 1.0, -0.0, 1.0, 0.0, 0.0, 0.0, 0.0];
 
         let rf32 = S::cmpgt_ps(S::loadu_ps(&af32[0]), S::loadu_ps(&bf32[0]));
-        assert_eq!(mem::transmute::<f32,i32>(rf32[0]), the_false);
-        assert_eq!(mem::transmute::<f32,i32>(rf32[1]), the_true);
-        assert_eq!(mem::transmute::<f32,i32>(rf32[2]), the_false);
-        assert_eq!(mem::transmute::<f32,i32>(rf32[3]), the_false);
+        assert_eq!(mem::transmute::<f32, i32>(rf32[0]), the_false);
+        assert_eq!(mem::transmute::<f32, i32>(rf32[1]), the_true);
+        assert_eq!(mem::transmute::<f32, i32>(rf32[2]), the_false);
+        assert_eq!(mem::transmute::<f32, i32>(rf32[3]), the_false);
+
+        let the_true = -1i64;
+        let the_false = 0i64;
+        let af64 = [f64::MAX, f64::MIN, 0.0, 2.0];
+        let bf64 = [f64::MAX, f64::MAX, -0.0, 1.0];
+
+        let rf64 = S::cmpgt_pd(S::loadu_pd(&af64[0]), S::loadu_pd(&bf64[0]));
+        assert_eq!(mem::transmute::<f64, i64>(rf64[0]), the_false);
+        assert_eq!(mem::transmute::<f64, i64>(rf64[1]), the_false);
+        let rf64 = S::cmpgt_pd(S::loadu_pd(&af64[2]), S::loadu_pd(&bf64[2]));
+        assert_eq!(mem::transmute::<f64, i64>(rf64[0]), the_false);
+        assert_eq!(mem::transmute::<f64, i64>(rf64[1]), the_true);
     }
     #[target_feature(enable = "sse2")]
     unsafe fn cmpgt_sse2() {
@@ -262,7 +294,7 @@ mod tests {
         }
     }
 
-   #[inline(always)]
+    #[inline(always)]
     unsafe fn cmpge<S: Simd>() {
         let the_true = -1i32;
         let the_false = 0i32;
@@ -275,7 +307,7 @@ mod tests {
         assert_eq!(ri32[2], the_true);
         assert_eq!(ri32[3], the_true);
 
-        let the_true = -1i64;        
+        let the_true = -1i64;
         let the_false = 0i64;
         let ai64 = [i64::MAX, i64::MIN, 2, -1];
         let bi64 = [i64::MAX, i64::MAX, 0, 1];
@@ -283,20 +315,31 @@ mod tests {
         assert_eq!(ri64[0], the_true);
         assert_eq!(ri64[1], the_false);
         let ri64 = S::cmpge_epi64(S::loadu_epi64(&ai64[2]), S::loadu_epi64(&bi64[2]));
-        assert_eq!(ri64[0],the_true);
-        assert_eq!(ri64[1],the_false);
+        assert_eq!(ri64[0], the_true);
+        assert_eq!(ri64[1], the_false);
 
         let the_true = -1i32;
         let the_false = 0i32;
-        let af32 = [f32::MAX, 2.0, 0.0, -1.0, 0.0,0.0,0.0,0.0];
-        let bf32 = [f32::MAX, 1.0, -0.0, 1.0, 0.0,0.0,0.0,0.0];
+        let af32 = [f32::MAX, 2.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0];
+        let bf32 = [f32::MAX, 1.0, -0.0, 1.0, 0.0, 0.0, 0.0, 0.0];
 
         let rf32 = S::cmpge_ps(S::loadu_ps(&af32[0]), S::loadu_ps(&bf32[0]));
-        assert_eq!(mem::transmute::<f32,i32>(rf32[0]), the_true);
-        assert_eq!(mem::transmute::<f32,i32>(rf32[1]), the_true);
-        assert_eq!(mem::transmute::<f32,i32>(rf32[2]), the_true);
-        assert_eq!(mem::transmute::<f32,i32>(rf32[3]), the_false);
-    }
+        assert_eq!(mem::transmute::<f32, i32>(rf32[0]), the_true);
+        assert_eq!(mem::transmute::<f32, i32>(rf32[1]), the_true);
+        assert_eq!(mem::transmute::<f32, i32>(rf32[2]), the_true);
+        assert_eq!(mem::transmute::<f32, i32>(rf32[3]), the_false);
+       let the_true = -1i64;
+        let the_false = 0i64;
+        let af64 = [f64::MAX, f64::MIN, 0.0, 2.0];
+        let bf64 = [f64::MAX, f64::MAX, -0.0, 1.0];
+
+        let rf64 = S::cmpge_pd(S::loadu_pd(&af64[0]), S::loadu_pd(&bf64[0]));
+        assert_eq!(mem::transmute::<f64, i64>(rf64[0]), the_true);
+        assert_eq!(mem::transmute::<f64, i64>(rf64[1]), the_false);
+        let rf64 = S::cmpge_pd(S::loadu_pd(&af64[2]), S::loadu_pd(&bf64[2]));
+        assert_eq!(mem::transmute::<f64, i64>(rf64[0]), the_true);
+        assert_eq!(mem::transmute::<f64, i64>(rf64[1]), the_true);
+ }
     #[target_feature(enable = "sse2")]
     unsafe fn cmpge_sse2() {
         cmpge::<Sse2>();
@@ -318,7 +361,7 @@ mod tests {
         }
     }
 
- #[inline(always)]
+    #[inline(always)]
     unsafe fn cmpneq<S: Simd>() {
         let the_true = -1i32;
         let the_false = 0i32;
@@ -331,7 +374,7 @@ mod tests {
         assert_eq!(ri32[2], the_false);
         assert_eq!(ri32[3], the_true);
 
-        let the_true = -1i64;        
+        let the_true = -1i64;
         let the_false = 0i64;
         let ai64 = [i64::MAX, i64::MIN, 2, -1];
         let bi64 = [i64::MAX, i64::MAX, 0, 1];
@@ -339,19 +382,30 @@ mod tests {
         assert_eq!(ri64[0], the_false);
         assert_eq!(ri64[1], the_true);
         let ri64 = S::cmpneq_epi64(S::loadu_epi64(&ai64[2]), S::loadu_epi64(&bi64[2]));
-        assert_eq!(ri64[0],the_true);
-        assert_eq!(ri64[1],the_true);
+        assert_eq!(ri64[0], the_true);
+        assert_eq!(ri64[1], the_true);
 
         let the_true = -1i32;
         let the_false = 0i32;
-        let af32 = [f32::MAX, 2.0, 0.0, -1.0, 0.0,0.0,0.0,0.0];
-        let bf32 = [f32::MAX, 1.0, -0.0, 1.0, 0.0,0.0,0.0,0.0];
+        let af32 = [f32::MAX, 2.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0];
+        let bf32 = [f32::MAX, 1.0, -0.0, 1.0, 0.0, 0.0, 0.0, 0.0];
 
         let rf32 = S::cmpneq_ps(S::loadu_ps(&af32[0]), S::loadu_ps(&bf32[0]));
-        assert_eq!(mem::transmute::<f32,i32>(rf32[0]), the_false);
-        assert_eq!(mem::transmute::<f32,i32>(rf32[1]), the_true);
-        assert_eq!(mem::transmute::<f32,i32>(rf32[2]), the_false);
-        assert_eq!(mem::transmute::<f32,i32>(rf32[3]), the_true);
+        assert_eq!(mem::transmute::<f32, i32>(rf32[0]), the_false);
+        assert_eq!(mem::transmute::<f32, i32>(rf32[1]), the_true);
+        assert_eq!(mem::transmute::<f32, i32>(rf32[2]), the_false);
+        assert_eq!(mem::transmute::<f32, i32>(rf32[3]), the_true);
+       let the_true = -1i64;
+        let the_false = 0i64;
+        let af64 = [f64::MAX, f64::MIN, 0.0, 2.0];
+        let bf64 = [f64::MAX, f64::MAX, -0.0, 1.0];
+
+        let rf64 = S::cmpneq_pd(S::loadu_pd(&af64[0]), S::loadu_pd(&bf64[0]));
+        assert_eq!(mem::transmute::<f64, i64>(rf64[0]), the_false);
+        assert_eq!(mem::transmute::<f64, i64>(rf64[1]), the_true);
+        let rf64 = S::cmpneq_pd(S::loadu_pd(&af64[2]), S::loadu_pd(&bf64[2]));
+        assert_eq!(mem::transmute::<f64, i64>(rf64[0]), the_false);
+        assert_eq!(mem::transmute::<f64, i64>(rf64[1]), the_true);
     }
     #[target_feature(enable = "sse2")]
     unsafe fn cmpneq_sse2() {
