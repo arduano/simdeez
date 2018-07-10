@@ -495,6 +495,25 @@ impl Simd for Avx2 {
         I32x8(_mm256_srai_epi32(a.0, amt_const))
     }
     #[inline(always)]
+    unsafe fn srai_epi64(a: Self::Vi64, amt_const: i32) -> Self::Vi64 {
+        // instruction does not exist. Split into 32-bit shifts
+        if amt_const <= 32 {
+            let bb = _mm_set_epi32(0, 0, 0, amt_const);
+            let sra = _mm256_sra_epi32(a.0, bb); // a >> b signed dwords
+            let srl = _mm256_srl_epi64(a.0, bb); // a >> b unsigned qwords
+            let mask = _mm256_setr_epi32(0, -1, 0, -1, 0, -1, 0, -1); // mask for signed high part
+            Self::blendv_epi64(I64x4(srl), I64x4(sra), I64x4(mask))
+        } else {
+            // b > 32
+            let bm32 = _mm_set_epi32(0, 0, 0, amt_const - 32);
+            let sign = _mm256_srai_epi32(a.0, 31); // sign of a
+            let sra2 = _mm256_sra_epi32(a.0, bm32); // a >> (b-32) signed dwords
+            let sra3 = _mm256_srli_epi64(sra2, 32); // a >> (b-32) >> 32 (second shift unsigned qword)
+            let mask = _mm256_setr_epi32(0, -1, 0, -1, 0, -1, 0, -1); // mask for high part containing only sign
+            Self::blendv_epi64(I64x4(sra3), I64x4(sign), I64x4(mask))
+        }
+    }
+    #[inline(always)]
     unsafe fn srli_epi32(a: Self::Vi32, amt_const: i32) -> Self::Vi32 {
         I32x8(_mm256_srli_epi32(a.0, amt_const))
     }

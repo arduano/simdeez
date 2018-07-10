@@ -234,11 +234,21 @@ pub trait Simd {
     unsafe fn andnot_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
     unsafe fn andnot_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     unsafe fn andnot_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
-    /// This is provided for convenience, it uses casts and the blendv_ps
-    /// intrinsics to implement it.
+    /// Note SSE2 will select B only when all bits are 1, while SSE41 and AVX2 only
+    /// check the high bit. To maintain portability ensure all bits are 1 when using
+    /// blend. Results of comparison operations adhere to this.
     unsafe fn blendv_epi32(a: Self::Vi32, b: Self::Vi32, mask: Self::Vi32) -> Self::Vi32;
+    /// Note SSE2 will select B only when all bits are 1, while SSE41 and AVX2 only
+    /// check the high bit. To maintain portability ensure all bits are 1 when using
+    /// blend. Results of comparison operations adhere to this.
     unsafe fn blendv_epi64(a: Self::Vi64, b: Self::Vi64, mask: Self::Vi64) -> Self::Vi64;
+    /// Note SSE2 will select B only when all bits are 1, while SSE41 and AVX2 only
+    /// check the high bit. To maintain portability ensure all bits are 1 when using
+    /// blend. Results of comparison operations adhere to this.
     unsafe fn blendv_ps(a: Self::Vf32, b: Self::Vf32, mask: Self::Vf32) -> Self::Vf32;
+    /// Note SSE2 will select B only when all bits are 1, while SSE41 and AVX2 only
+    /// check the high bit. To maintain portability ensure all bits are 1 when using
+    /// blend. Results of comparison operations adhere to this.
     unsafe fn blendv_pd(a: Self::Vf64, b: Self::Vf64, mask: Self::Vf64) -> Self::Vf64;
     unsafe fn castps_epi32(a: Self::Vf32) -> Self::Vi32;
     unsafe fn castpd_epi64(a: Self::Vf64) -> Self::Vi64;
@@ -310,9 +320,21 @@ pub trait Simd {
     unsafe fn loadu_pd(a: &f64) -> Self::Vf64;
     unsafe fn loadu_epi32(a: &i32) -> Self::Vi32;
     unsafe fn loadu_epi64(a: &i64) -> Self::Vi64;
+    /// Note, SSE2 and SSE4 will load when mask[i] is nonzero, where AVX2
+    /// will store only when the high bit is set. To ensure portability
+    /// ensure that the high bit is set.
     unsafe fn maskload_epi32(mem_addr: &i32, mask: Self::Vi32) -> Self::Vi32;
+    /// Note, SSE2 and SSE4 will load when mask[i] is nonzero, where AVX2
+    /// will store only when the high bit is set. To ensure portability
+    /// ensure that the high bit is set.
     unsafe fn maskload_epi64(mem_addr: &i64, mask: Self::Vi64) -> Self::Vi64;
+    /// Note, SSE2 and SSE4 will load when mask[i] is nonzero, where AVX2
+    /// will store only when the high bit is set. To ensure portability
+    /// ensure that the high bit is set.
     unsafe fn maskload_ps(mem_addr: &f32, mask: Self::Vi32) -> Self::Vf32;
+    /// Note, SSE2 and SSE4 will load when mask[i] is nonzero, where AVX2
+    /// will store only when the high bit is set. To ensure portability
+    /// ensure that the high bit is set.
     unsafe fn maskload_pd(mem_addr: &f64, mask: Self::Vi64) -> Self::Vf64;
     unsafe fn store_ps(mem_addr: &mut f32, a: Self::Vf32);
     unsafe fn store_pd(mem_addr: &mut f64, a: Self::Vf64);
@@ -322,10 +344,21 @@ pub trait Simd {
     unsafe fn storeu_pd(mem_addr: &mut f64, a: Self::Vf64);
     unsafe fn storeu_epi32(mem_addr: &mut i32, a: Self::Vi32);
     unsafe fn storeu_epi64(mem_addr: &mut i64, a: Self::Vi64);
-    //TODO compare perf of load, blend, store combo vs scalar check and store
+    /// Note, SSE2 and SSE4 will store when mask[i] is nonzero, where AVX2
+    /// will store only when the high bit is set. To ensure portability ensure the
+    /// high bit is set.
     unsafe fn maskstore_epi32(mem_addr: &mut i32, mask: Self::Vi32, a: Self::Vi32);
+    /// Note, SSE2 and SSE4 will store when mask[i] is nonzero, where AVX2
+    /// will store only when the high bit is set. To ensure portability ensure the
+    /// high bit is set.
     unsafe fn maskstore_epi64(mem_addr: &mut i64, mask: Self::Vi64, a: Self::Vi64);
+    /// Note, SSE2 and SSE4 will store when mask[i] is nonzero, where AVX2
+    /// will store only when the high bit is set. To ensure portability ensure the
+    /// high bit is set.
     unsafe fn maskstore_ps(mem_addr: &mut f32, mask: Self::Vi32, a: Self::Vf32);
+    /// Note, SSE2 and SSE4 will store when mask[i] is nonzero, where AVX2
+    /// will store only when the high bit is set. To ensure portability ensure the
+    /// high bit is set.
     unsafe fn maskstore_pd(mem_addr: &mut f64, mask: Self::Vi64, a: Self::Vf64);
     unsafe fn max_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     unsafe fn min_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
@@ -357,6 +390,8 @@ pub trait Simd {
     unsafe fn setzero_epi64() -> Self::Vi64;
     /// amt must be a constant
     unsafe fn srai_epi32(a: Self::Vi32, amt_const: i32) -> Self::Vi32;
+    /// amt must be a constant
+    unsafe fn srai_epi64(a: Self::Vi64, amt_const: i32) -> Self::Vi64;
     /// amt must be a constant
     unsafe fn srli_epi32(a: Self::Vi32, amt_const: i32) -> Self::Vi32;
     /// amt must be a constant

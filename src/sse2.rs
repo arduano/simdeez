@@ -180,7 +180,7 @@ impl Simd for Sse2 {
         let teste = _mm_srai_epi32(or1, 31); // extend sign bit to 32 bits
         I64x2(_mm_shuffle_epi32(teste, 0xF5)) // extend sign bit to 64 bits
     }
-     #[inline(always)]
+    #[inline(always)]
     unsafe fn cmpeq_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
         F32x4(_mm_cmpeq_ps(a.0, b.0))
     }
@@ -204,7 +204,7 @@ impl Simd for Sse2 {
     unsafe fn cmplt_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
         F32x4(_mm_cmplt_ps(a.0, b.0))
     }
-   #[inline(always)]
+    #[inline(always)]
     unsafe fn cmpeq_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
         F64x2(_mm_cmpeq_pd(a.0, b.0))
     }
@@ -363,25 +363,47 @@ impl Simd for Sse2 {
     }
     #[inline(always)]
     unsafe fn maskload_epi32(mem_addr: &i32, mask: Self::Vi32) -> Self::Vi32 {
-        let high_mask = Self::cmplt_epi32(mask, Self::setzero_epi32());
-        let data = Self::loadu_epi32(mem_addr).0;
-        I32x4(_mm_and_si128(data, high_mask.0))
+        let mut result = I32x4(_mm_setzero_si128());
+        let ptr = mem_addr as *const i32;
+        result[0] = if mask[0] != 0 { *ptr } else { 0 };
+        result[1] =
+            if mask[1] != 0 { *ptr.offset(1) } else { 0 };
+        result[2] =
+            if mask[2] != 0 { *ptr.offset(2) } else { 0 };
+        result[3] =
+            if mask[3] != 0 { *ptr.offset(3) } else { 0 };
+        result
     }
     #[inline(always)]
     unsafe fn maskload_epi64(mem_addr: &i64, mask: Self::Vi64) -> Self::Vi64 {
-        let high_mask = Self::cmplt_epi64(mask, Self::setzero_epi64());
-        let data = Self::loadu_epi64(mem_addr).0;
-        I64x2(_mm_and_si128(data, high_mask.0))
+        let mut result = I64x2(_mm_setzero_si128());
+        let ptr = mem_addr as *const i64;
+        result[0] = if mask[0] != 0 { *ptr } else { 0 };
+        result[1] =
+            if mask[1] != 0 { *ptr.offset(1) } else { 0 };
+        result
     }
     #[inline(always)]
     unsafe fn maskload_ps(mem_addr: &f32, mask: Self::Vi32) -> Self::Vf32 {
-        let data = Self::loadu_ps(mem_addr).0;
-        F32x4(_mm_and_ps(data, _mm_castsi128_ps(mask.0)))
+        let mut result = F32x4(_mm_setzero_ps());
+        let ptr = mem_addr as *const f32;
+        result[0] = if mask[0] != 0 { *ptr } else { 0.0 };
+        result[1] =
+            if mask[1] != 0 { *ptr.offset(1) } else { 0.0 };
+        result[2] =
+            if mask[2] != 0 { *ptr.offset(2) } else { 0.0 };
+        result[3] =
+            if mask[3] != 0 { *ptr.offset(3) } else { 0.0 };
+        result
     }
     #[inline(always)]
     unsafe fn maskload_pd(mem_addr: &f64, mask: Self::Vi64) -> Self::Vf64 {
-        let data = Self::loadu_pd(mem_addr).0;
-        F64x2(_mm_and_pd(data, _mm_castsi128_pd(mask.0)))
+        let mut result = F64x2(_mm_setzero_pd());
+        let ptr = mem_addr as *const f64;
+        result[0] = if mask[0] != 0 { *ptr } else { 0.0 };
+        result[1] =
+            if mask[1] != 0 { *ptr.offset(1) } else { 0.0 };
+        result
     }
     #[inline(always)]
     unsafe fn store_ps(mem_addr: &mut f32, a: Self::Vf32) {
@@ -421,27 +443,55 @@ impl Simd for Sse2 {
     }
     #[inline(always)]
     unsafe fn maskstore_epi32(mem_addr: &mut i32, mask: Self::Vi32, a: Self::Vi32) {
-        let data = Self::loadu_epi32(mem_addr);
-        let result = Self::blendv_epi32(a, data, mask);
-        Self::storeu_epi32(mem_addr, result);
+        let ptr = mem_addr as *mut i32;
+        if mask[0] != 0 {
+            *ptr = a[0]
+        };
+        if mask[1] != 0 {
+            *ptr.offset(1) = a[1]
+        };
+        if mask[2] != 0 {
+            *ptr.offset(2) = a[2]
+        };
+        if mask[3] != 0 {
+            *ptr.offset(3) = a[3]
+        };
     }
     #[inline(always)]
     unsafe fn maskstore_epi64(mem_addr: &mut i64, mask: Self::Vi64, a: Self::Vi64) {
-        let data = Self::loadu_epi64(mem_addr);
-        let result = Self::blendv_epi64(a, data, mask);
-        Self::storeu_epi64(mem_addr, result);
+        let ptr = mem_addr as *mut i64;
+        if mask[0] != 0 {
+            *ptr = a[0]
+        };
+        if mask[1] != 0 {
+            *ptr.offset(1) = a[1]
+        };
     }
     #[inline(always)]
     unsafe fn maskstore_ps(mem_addr: &mut f32, mask: Self::Vi32, a: Self::Vf32) {
-        let data = Self::loadu_ps(mem_addr);
-        let result = Self::blendv_ps(a, data, Self::castepi32_ps(mask));
-        Self::storeu_ps(mem_addr, result);
+        let ptr = mem_addr as *mut f32;
+        if mask[0] != 0 {
+            *ptr = a[0]
+        };
+        if mask[1] != 0 {
+            *ptr.offset(1) = a[1]
+        };
+        if mask[2] != 0 {
+            *ptr.offset(2) = a[2]
+        };
+        if mask[3] != 0 {
+            *ptr.offset(3) = a[3]
+        };
     }
     #[inline(always)]
     unsafe fn maskstore_pd(mem_addr: &mut f64, mask: Self::Vi64, a: Self::Vf64) {
-        let data = Self::loadu_pd(mem_addr);
-        let result = Self::blendv_pd(a, data, Self::castepi64_pd(mask));
-        Self::storeu_pd(mem_addr, result);
+        let ptr = mem_addr as *mut f64;
+        if mask[0] != 0 {
+            *ptr = a[0]
+        };
+        if mask[1] != 0 {
+            *ptr.offset(1) = a[1]
+        };
     }
     #[inline(always)]
     unsafe fn max_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
@@ -581,6 +631,25 @@ impl Simd for Sse2 {
             };
         }
         constify_imm8!(amt_const, call)
+    }
+    #[inline(always)]
+    unsafe fn srai_epi64(a: Self::Vi64, amt_const: i32) -> Self::Vi64 {
+        // instruction does not exist. Split into 32-bit shifts
+        if amt_const <= 32 {
+            let bb = _mm_cvtsi32_si128(amt_const); // b
+            let sra = _mm_sra_epi32(a.0, bb); // a >> b signed dwords
+            let srl = _mm_srl_epi64(a.0, bb); // a >> b unsigned qwords
+            let mask = _mm_setr_epi32(0, -1, 0, -1); // mask for signed high part
+            Self::blendv_epi64(I64x2(srl), I64x2(sra), I64x2(mask))
+        } else {
+            // b > 32
+            let bm32 = _mm_cvtsi32_si128(amt_const - 32); // b - 32
+            let sign = _mm_srai_epi32(a.0, 31); // sign of a
+            let sra2 = _mm_sra_epi32(a.0, bm32); // a >> (b-32) signed dwords
+            let sra3 = _mm_srli_epi64(sra2, 32); // a >> (b-32) >> 32 (second shift unsigned qword)
+            let mask = _mm_setr_epi32(0, -1, 0, -1); // mask for high part containing only sign
+            Self::blendv_epi64(I64x2(sra3), I64x2(sign), I64x2(mask))
+        }
     }
     #[inline(always)]
     unsafe fn srli_epi32(a: Self::Vi32, amt_const: i32) -> Self::Vi32 {
