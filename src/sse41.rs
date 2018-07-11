@@ -227,8 +227,12 @@ impl Simd for Sse41 {
     unsafe fn floor_pd(a: Self::Vf64) -> Self::Vf64 {
         F64x2(_mm_floor_pd(a.0))
     }
-    #[inline(always)]
+     #[inline(always)]
     unsafe fn ceil_ps(a: Self::Vf32) -> Self::Vf32 {
+        F32x4(_mm_ceil_ps(a.0))
+    }
+   #[inline(always)]
+    unsafe fn fastceil_ps(a: Self::Vf32) -> Self::Vf32 {
         F32x4(_mm_ceil_ps(a.0))
     }
     #[inline(always)]
@@ -520,8 +524,15 @@ impl Simd for Sse41 {
     unsafe fn rcp_ps(a: Self::Vf32) -> Self::Vf32 {
         F32x4(_mm_rcp_ps(a.0))
     }
-    #[inline(always)]
+     #[inline(always)]
     unsafe fn round_ps(a: Self::Vf32) -> Self::Vf32 {
+        F32x4(_mm_round_ps(
+            a.0,
+            _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC,
+        ))
+    }
+   #[inline(always)]
+    unsafe fn fastround_ps(a: Self::Vf32) -> Self::Vf32 {
         F32x4(_mm_round_ps(
             a.0,
             _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC,

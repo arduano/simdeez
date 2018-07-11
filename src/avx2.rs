@@ -220,8 +220,12 @@ impl Simd for Avx2 {
     unsafe fn cvtps_epi32(a: Self::Vf32) -> Self::Vi32 {
         I32x8(_mm256_cvtps_epi32(a.0))
     }
-    #[inline(always)]
+     #[inline(always)]
     unsafe fn ceil_ps(a: Self::Vf32) -> Self::Vf32 {
+        F32x8(_mm256_ceil_ps(a.0))
+    }
+   #[inline(always)]
+    unsafe fn fastceil_ps(a: Self::Vf32) -> Self::Vf32 {
         F32x8(_mm256_ceil_ps(a.0))
     }
     #[inline(always)]
@@ -444,8 +448,15 @@ impl Simd for Avx2 {
     unsafe fn rcp_ps(a: Self::Vf32) -> Self::Vf32 {
         F32x8(_mm256_rcp_ps(a.0))
     }
-    #[inline(always)]
+     #[inline(always)]
     unsafe fn round_ps(a: Self::Vf32) -> Self::Vf32 {
+        F32x8(_mm256_round_ps(
+            a.0,
+            _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC,
+        ))
+    }
+   #[inline(always)]
+    unsafe fn fastround_ps(a: Self::Vf32) -> Self::Vf32 {
         F32x8(_mm256_round_ps(
             a.0,
             _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC,

@@ -289,9 +289,19 @@ pub trait Simd {
     //TODO compare perf and accuracy of agner vs stephanie methods for floor, ceil, and round
     unsafe fn floor_ps(a: Self::Vf32) -> Self::Vf32;
     unsafe fn floor_pd(a: Self::Vf64) -> Self::Vf64;
-    /// When using Sse2, fastfloor uses a faster version of floor
+     /// When using Sse2, fastround uses a faster version of floor
     /// that only works on floating point values small enough to fit in
-    /// an i32.  This is important for performance if you don't need
+    /// an i32.  This is a big performance boost if you don't need
+    /// a complete floor.
+    unsafe fn fastround_ps(a: Self::Vf32) -> Self::Vf32;
+   /// When using Sse2, fastceil uses a faster version of floor
+    /// that only works on floating point values small enough to fit in
+    /// an i32.  This is a big performance boost if you don't need
+    /// a complete floor.
+    unsafe fn fastceil_ps(a: Self::Vf32) -> Self::Vf32;
+   /// When using Sse2, fastfloor uses a faster version of floor
+    /// that only works on floating point values small enough to fit in
+    /// an i32.  This is a big performance boost if you don't need
     /// a complete floor.
     unsafe fn fastfloor_ps(a: Self::Vf32) -> Self::Vf32;
     /// Actual FMA instructions will be used when Avx2 is used,

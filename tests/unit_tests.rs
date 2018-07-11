@@ -676,23 +676,6 @@ mod tests {
               println!("i:{}",i);
             assert_eq!(somedoubles[i],9.0);
         }
-/*
-       //maskstore only looks at the high bits so this should be all 0?
-        let mask = S::set1_epi32(1);
-        let a = S::maskstore_epi32(&someints[0], mask);
-        let b = S::maskstore_epi64(&somelongs[0], S::castepi32_epi64(mask));
-        let c = S::maskstore_ps(&somefloats[0], mask);
-        let d = S::maskstore_pd(&somedoubles[0], S::castepi32_epi64(mask));
-        for i in 0..S::VI32_WIDTH {
-            assert_eq!(a[i], 0);
-            assert_delta!(c[i], 0.0f32, 0.001);
-        }
-
-        for i in 0..S::VI64_WIDTH {
-            assert_eq!(b[i], 0);
-            assert_delta!(d[i], 0.0f64, 0.001);
-        }
-        */
     }
 
     #[target_feature(enable = "sse2")]

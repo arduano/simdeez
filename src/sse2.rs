@@ -274,11 +274,32 @@ impl Simd for Sse2 {
     }
     #[inline(always)]
     unsafe fn fastfloor_ps(a: Self::Vf32) -> Self::Vf32 {
-        let t = _mm_cvtepi32_ps(_mm_cvttps_epi32(a.0));
-        F32x4(_mm_sub_ps(
-            t,
-            _mm_and_ps(_mm_cmplt_ps(a.0, t), _mm_set1_ps(1.0)),
-        ))
+        let i = _mm_cvttps_epi32(a.0);
+        let fi = _mm_cvtepi32_ps(i);
+        let igx = _mm_cmpgt_ps(fi, a.0);
+        let j = _mm_and_ps(igx, _mm_set1_ps(1.0));
+        F32x4(_mm_sub_ps(fi, j))
+    }
+    #[inline(always)]
+    unsafe fn fastceil_ps(a: Self::Vf32) -> Self::Vf32 {
+        let i = _mm_cvttps_epi32(a.0);
+        let fi = _mm_cvtepi32_ps(i);
+        let igx = _mm_cmplt_ps(fi, a.0);
+        let j = _mm_and_ps(igx, _mm_set1_ps(1.0));
+        F32x4(_mm_add_ps(fi, j))
+    }
+    #[inline(always)]
+    unsafe fn fastround_ps(a: Self::Vf32) -> Self::Vf32 {
+        let v0 = _mm_setzero_ps(); //generate the highest value &lt; 2
+        let v1 = _mm_cmpeq_ps(v0, v0);
+        let v_nearest2 = _mm_castsi128_ps(_mm_srli_epi32(_mm_castps_si128(v1), 2));
+        let i = _mm_cvttps_epi32(a.0);
+        let a_trunc = _mm_cvtepi32_ps(i); // truncate a
+        let rmd = _mm_sub_ps(a.0, a_trunc); // get remainder
+        let rmd2 = _mm_mul_ps(rmd, v_nearest2); // mul remainder by near 2 will yield the needed offset
+        let rmd2i = _mm_cvttps_epi32(rmd2); // after being truncated of course
+        let rmd2_trunc = _mm_cvtepi32_ps(rmd2i);
+        F32x4(_mm_add_ps(a_trunc, rmd2_trunc))
     }
     #[inline(always)]
     unsafe fn fmadd_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32 {
