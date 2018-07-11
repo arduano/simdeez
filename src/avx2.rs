@@ -220,11 +220,11 @@ impl Simd for Avx2 {
     unsafe fn cvtps_epi32(a: Self::Vf32) -> Self::Vi32 {
         I32x8(_mm256_cvtps_epi32(a.0))
     }
-     #[inline(always)]
+    #[inline(always)]
     unsafe fn ceil_ps(a: Self::Vf32) -> Self::Vf32 {
         F32x8(_mm256_ceil_ps(a.0))
     }
-   #[inline(always)]
+    #[inline(always)]
     unsafe fn fastceil_ps(a: Self::Vf32) -> Self::Vf32 {
         F32x8(_mm256_ceil_ps(a.0))
     }
@@ -244,13 +244,37 @@ impl Simd for Avx2 {
     unsafe fn fastfloor_ps(a: Self::Vf32) -> Self::Vf32 {
         F32x8(_mm256_floor_ps(a.0))
     }
-    #[inline(always)]
+     #[inline(always)]
     unsafe fn fmadd_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32 {
         F32x8(_mm256_fmadd_ps(a.0, b.0, c.0))
     }
     #[inline(always)]
     unsafe fn fnmadd_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32 {
         F32x8(_mm256_fnmadd_ps(a.0, b.0, c.0))
+    }
+    #[inline(always)]
+    unsafe fn fmadd_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64 {
+        F64x4(_mm256_fmadd_pd(a.0, b.0, c.0))
+    }
+    #[inline(always)]
+    unsafe fn fnmadd_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64 {
+        F64x4(_mm256_fnmadd_pd(a.0, b.0, c.0))
+    }
+   #[inline(always)]
+    unsafe fn fmsub_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32 {
+        F32x8(_mm256_fmsub_ps(a.0, b.0, c.0))
+    }
+    #[inline(always)]
+    unsafe fn fnmsub_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32 {
+        F32x8(_mm256_fnmsub_ps(a.0, b.0, c.0))
+    }
+    #[inline(always)]
+    unsafe fn fmsub_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64 {
+        F64x4(_mm256_fmsub_pd(a.0, b.0, c.0))
+    }
+    #[inline(always)]
+    unsafe fn fnmsub_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64 {
+        F64x4(_mm256_fnmsub_pd(a.0, b.0, c.0))
     }
     // TODO: test this
     #[inline(always)]
@@ -448,14 +472,14 @@ impl Simd for Avx2 {
     unsafe fn rcp_ps(a: Self::Vf32) -> Self::Vf32 {
         F32x8(_mm256_rcp_ps(a.0))
     }
-     #[inline(always)]
+    #[inline(always)]
     unsafe fn round_ps(a: Self::Vf32) -> Self::Vf32 {
         F32x8(_mm256_round_ps(
             a.0,
             _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC,
         ))
     }
-   #[inline(always)]
+    #[inline(always)]
     unsafe fn fastround_ps(a: Self::Vf32) -> Self::Vf32 {
         F32x8(_mm256_round_ps(
             a.0,

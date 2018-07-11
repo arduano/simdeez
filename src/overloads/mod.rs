@@ -5,6 +5,7 @@ use core::arch::x86_64::*;
 use core::mem;
 use core::ops::*;
 
+
 // Newtypes for i32 vectors
 // We have to do this to allow for overloading of
 // __m128i etc
@@ -71,3 +72,14 @@ mod xor;
 pub use self::xor::*;
 mod xor_assign;
 pub use self::xor_assign::*;
+mod not;
+pub use self::not::*;
+mod shl;
+pub use self::shl::*;
+mod shl_assign;
+pub use self::shl_assign::*;
+mod shr;
+pub use self::shr::*;
+mod shr_assign;
+pub use self::shr_assign::*;
+

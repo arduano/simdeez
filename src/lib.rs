@@ -133,6 +133,8 @@ pub mod overloads;
 pub mod sse2;
 pub mod sse41;
 
+
+
 pub trait Simd {
     /// Vi32 stands for Vector of i32s.  Corresponds to __m128i when used
     /// with the Sse impl, __m256i when used with Avx2, or a single i32
@@ -152,7 +154,12 @@ pub trait Simd {
         + BitOrAssign<Self::Vi32>
         + BitXorAssign<Self::Vi32>
         + Index<usize, Output = i32>
-        + IndexMut<usize>;
+        + IndexMut<usize>
+        + Not<Output = Self::Vi32>
+        + Shl<i32,Output=Self::Vi32>
+        + ShlAssign<i32>
+        + Shr<i32,Output=Self::Vi32>
+        + ShrAssign<i32>;
     /// Vf32 stands for Vector of f32s.  Corresponds to __m128 when used
     /// with the Sse impl, __m256 when used with Avx2, or a single f32
     /// when used with Scalar.
@@ -210,14 +217,18 @@ pub trait Simd {
         + BitXor<Self::Vi64, Output = Self::Vi64>
         + BitAndAssign<Self::Vi64>
         + BitOrAssign<Self::Vi64>
-        + BitXorAssign<Self::Vi64>;
-
+        + BitXorAssign<Self::Vi64>
+        + Not<Output = Self::Vi64>;
     /// The width of the vector lane.  Necessary for creating
     /// lane width agnostic code.
     const VF32_WIDTH: usize;
     const VF64_WIDTH: usize;
     const VI32_WIDTH: usize;
     const VI64_WIDTH: usize;
+
+
+//    fn map_simd<T,U>(a: Vec::<T>, f: fn(T) -> U) -> Vec::<U> {
+//    }
 
     unsafe fn div_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn div_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
@@ -286,20 +297,19 @@ pub trait Simd {
     unsafe fn cmplt_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
     unsafe fn cvtepi32_ps(a: Self::Vi32) -> Self::Vf32;
     unsafe fn cvtps_epi32(a: Self::Vf32) -> Self::Vi32;
-    //TODO compare perf and accuracy of agner vs stephanie methods for floor, ceil, and round
     unsafe fn floor_ps(a: Self::Vf32) -> Self::Vf32;
     unsafe fn floor_pd(a: Self::Vf64) -> Self::Vf64;
-     /// When using Sse2, fastround uses a faster version of floor
+    /// When using Sse2, fastround uses a faster version of floor
     /// that only works on floating point values small enough to fit in
     /// an i32.  This is a big performance boost if you don't need
     /// a complete floor.
     unsafe fn fastround_ps(a: Self::Vf32) -> Self::Vf32;
-   /// When using Sse2, fastceil uses a faster version of floor
+    /// When using Sse2, fastceil uses a faster version of floor
     /// that only works on floating point values small enough to fit in
     /// an i32.  This is a big performance boost if you don't need
     /// a complete floor.
     unsafe fn fastceil_ps(a: Self::Vf32) -> Self::Vf32;
-   /// When using Sse2, fastfloor uses a faster version of floor
+    /// When using Sse2, fastfloor uses a faster version of floor
     /// that only works on floating point values small enough to fit in
     /// an i32.  This is a big performance boost if you don't need
     /// a complete floor.
@@ -312,6 +322,30 @@ pub trait Simd {
     /// otherwise a mul and add are used to replicate it, allowing you to
     /// just always use FMA in your code and get best perf in both cases.
     unsafe fn fnmadd_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32;
+    /// Actual FMA instructions will be used when Avx2 is used,
+    /// otherwise a mul and add are used to replicate it, allowing you to
+    /// just always use FMA in your code and get best perf in both cases.
+    unsafe fn fmadd_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64;
+    /// Actual FMA instructions will be used when Avx2 is used,
+    /// otherwise a mul and add are used to replicate it, allowing you to
+    /// just always use FMA in your code and get best perf in both cases.
+    unsafe fn fnmadd_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64;
+/// Actual FMA instructions will be used when Avx2 is used,
+    /// otherwise a mul and sub are used to replicate it, allowing you to
+    /// just always use FMA in your code and get best perf in both cases.
+    unsafe fn fmsub_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32;
+    /// Actual FMA instructions will be used when Avx2 is used,
+    /// otherwise a mul and sub are used to replicate it, allowing you to
+    /// just always use FMA in your code and get best perf in both cases.
+    unsafe fn fnmsub_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32;
+    /// Actual FMA instructions will be used when Avx2 is used,
+    /// otherwise a mul and sub are used to replicate it, allowing you to
+    /// just always use FMA in your code and get best perf in both cases.
+    unsafe fn fmsub_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64;
+    /// Actual FMA instructions will be used when Avx2 is used,
+    /// otherwise a mul and sub are used to replicate it, allowing you to
+    /// just always use FMA in your code and get best perf in both cases.
+    unsafe fn fnmsub_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64;
     /// Adds all lanes together. Distinct from h_add which adds pairs.
     unsafe fn horizontal_add_ps(a: Self::Vf32) -> f32;
     /// Adds all lanes together. Distinct from h_add which adds pairs.

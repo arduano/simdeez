@@ -301,7 +301,7 @@ impl Simd for Sse2 {
         let rmd2_trunc = _mm_cvtepi32_ps(rmd2i);
         F32x4(_mm_add_ps(a_trunc, rmd2_trunc))
     }
-    #[inline(always)]
+      #[inline(always)]
     unsafe fn fmadd_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32 {
         F32x4(_mm_add_ps(_mm_mul_ps(a.0, b.0), c.0))
     }
@@ -309,6 +309,39 @@ impl Simd for Sse2 {
     unsafe fn fnmadd_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32 {
         F32x4(_mm_add_ps(
             _mm_mul_ps(_mm_set1_ps(-1.0), _mm_mul_ps(a.0, b.0)),
+            c.0,
+        ))
+    }
+   #[inline(always)]
+    unsafe fn fmadd_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64 {
+        F64x2(_mm_add_pd(_mm_mul_pd(a.0, b.0), c.0))
+    }
+    #[inline(always)]
+    unsafe fn fnmadd_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64 {
+        F64x2(_mm_add_pd(
+            _mm_mul_pd(_mm_set1_pd(-1.0), _mm_mul_pd(a.0, b.0)),
+            c.0,
+        ))
+    }
+    #[inline(always)]
+    unsafe fn fmsub_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32 {
+        F32x4(_mm_sub_ps(_mm_mul_ps(a.0, b.0), c.0))
+    }
+    #[inline(always)]
+    unsafe fn fnmsub_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32 {
+        F32x4(_mm_sub_ps(
+            _mm_mul_ps(_mm_set1_ps(-1.0), _mm_mul_ps(a.0, b.0)),
+            c.0,
+        ))
+    }
+   #[inline(always)]
+    unsafe fn fmsub_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64 {
+        F64x2(_mm_sub_pd(_mm_mul_pd(a.0, b.0), c.0))
+    }
+    #[inline(always)]
+    unsafe fn fnmsub_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64 {
+        F64x2(_mm_sub_pd(
+            _mm_mul_pd(_mm_set1_pd(-1.0), _mm_mul_pd(a.0, b.0)),
             c.0,
         ))
     }
