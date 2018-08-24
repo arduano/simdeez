@@ -6,6 +6,15 @@ use core::mem;
 use core::ops::*;
 
 
+// Newtypes for i16 vectors
+// We have to do this to allow for overloading of
+// __m128i etc
+#[derive(Copy, Debug, Clone)]
+pub struct I16x8(pub __m128i);
+#[derive(Copy, Debug, Clone)]
+pub struct I16x16(pub __m256i);
+
+
 // Newtypes for i32 vectors
 // We have to do this to allow for overloading of
 // __m128i etc
@@ -34,7 +43,7 @@ pub struct F32x4(pub __m128);
 #[derive(Copy, Debug, Clone)]
 pub struct F32x8(pub __m256);
 
-// Newtypes for i64 vectors
+// Newtypes for f64 vectors
 #[derive(Copy, Debug, Clone)]
 pub struct F64x2(pub __m128d);
 #[derive(Copy, Debug, Clone)]
