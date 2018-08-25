@@ -1,6 +1,22 @@
 use super::*;
 // -- Bitwise And
 
+impl BitAnd for I16x8 {
+    type Output = I16x8;
+
+    #[inline(always)]
+    fn bitand(self, rhs: I16x8) -> I16x8 {
+        I16x8(unsafe { _mm_and_si128(self.0, rhs.0) })
+    }
+}
+impl BitAnd for I16x16 {
+    type Output = I16x16;
+
+    #[inline(always)]
+    fn bitand(self, rhs: I16x16) -> I16x16 {
+        I16x16(unsafe { _mm256_and_si256(self.0, rhs.0) })
+    }
+}
 impl BitAnd for I32x4 {
     type Output = I32x4;
 
