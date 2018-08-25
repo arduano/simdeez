@@ -4,6 +4,7 @@ use overloads::*;
 
 pub struct Avx2;
 impl Simd for Avx2 {
+    type Vi16 = I16x16;
     type Vi32 = I32x8;
     type Vf32 = F32x8;
     type Vf64 = F64x4;
@@ -11,6 +12,7 @@ impl Simd for Avx2 {
 
     const VF32_WIDTH: usize = 8;
     const VF64_WIDTH: usize = 4;
+    const VI16_WIDTH: usize = 16;
     const VI32_WIDTH: usize = 8;
     const VI64_WIDTH: usize = 4;
 

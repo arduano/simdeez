@@ -136,6 +136,28 @@ pub mod sse41;
 
 
 pub trait Simd {
+
+    type Vi16: Copy
+        + Debug
+        + Add<Self::Vi16, Output = Self::Vi16>
+        + Sub<Self::Vi16, Output = Self::Vi16>
+        // + Mul<Self::Vi16, Output = Self::Vi16>
+        + AddAssign<Self::Vi16>
+        + SubAssign<Self::Vi16>
+        // + MulAssign<Self::Vi16>
+        + BitAnd<Self::Vi16, Output = Self::Vi16>
+        + BitOr<Self::Vi16, Output = Self::Vi16>
+        + BitXor<Self::Vi16, Output = Self::Vi16>
+        + BitAndAssign<Self::Vi16>
+        + BitOrAssign<Self::Vi16>
+        + BitXorAssign<Self::Vi16>
+        + Index<usize, Output = i16>;
+        // + IndexMut<usize>
+        // + Not<Output = Self::Vi16>
+        // + Shl<i16,Output=Self::Vi16>
+        // + ShlAssign<i16>
+        // + Shr<i16,Output=Self::Vi16>
+        // + ShrAssign<i16>;
     /// Vi32 stands for Vector of i32s.  Corresponds to __m128i when used
     /// with the Sse impl, __m256i when used with Avx2, or a single i32
     /// when used with Scalar.
@@ -223,6 +245,7 @@ pub trait Simd {
     /// lane width agnostic code.
     const VF32_WIDTH: usize;
     const VF64_WIDTH: usize;
+    const VI16_WIDTH: usize;
     const VI32_WIDTH: usize;
     const VI64_WIDTH: usize;
 

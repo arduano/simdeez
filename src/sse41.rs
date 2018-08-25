@@ -4,6 +4,7 @@ use core::mem;
 use overloads::*;
 pub struct Sse41;
 impl Simd for Sse41 {
+    type Vi16 = I16x8;
     type Vi32 = I32x4_41;
     type Vf32 = F32x4;
     type Vf64 = F64x2;
@@ -11,6 +12,7 @@ impl Simd for Sse41 {
 
     const VF32_WIDTH: usize = 4;
     const VF64_WIDTH: usize = 2;
+    const VI16_WIDTH: usize = 8;
     const VI32_WIDTH: usize = 4;
     const VI64_WIDTH: usize = 2;
 
