@@ -20,7 +20,7 @@ macro_rules! constify_imm6 {
     ($imm8:expr, $expand:ident) => {
         #[allow(overflowing_literals)]
         match ($imm8) & 0b1_1111 {
-            x @ 0...30 => $expand!(0),
+            x @ 0...30 => $expand!(x),
             _ => $expand!(31),
         }
     };
