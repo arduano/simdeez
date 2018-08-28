@@ -27,6 +27,10 @@ impl Simd for Sse41 {
         F64x2(_mm_andnot_pd(a.0, b))
     }
     #[inline(always)]
+    unsafe fn add_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 {
+        I16x8(_mm_add_epi16(a.0, b.0))
+    }
+    #[inline(always)]
     unsafe fn add_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         I32x4_41(_mm_add_epi32(a.0, b.0))
     }

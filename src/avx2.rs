@@ -27,6 +27,10 @@ impl Simd for Avx2 {
         F64x4(_mm256_andnot_pd(a.0, b))
     }
     #[inline(always)]
+    unsafe fn add_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 {
+        I16x16(_mm256_add_epi16(a.0, b.0))
+    }
+    #[inline(always)]
     unsafe fn add_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         I32x8(_mm256_add_epi32(a.0, b.0))
     }
