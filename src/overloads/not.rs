@@ -1,5 +1,21 @@
 use super::*;
 
+impl Not for I16x8 {
+    type Output = I16x8;
+
+    #[inline(always)]
+    fn not(self) -> I16x8 {
+        unsafe { I16x8(_mm_xor_si128(self.0, _mm_set1_epi16(-1))) }
+    }
+}
+impl Not for I16x16 {
+    type Output = I16x16;
+
+    #[inline(always)]
+    fn not(self) -> I16x16 {
+        unsafe { I16x16(_mm256_xor_si256(self.0, _mm256_set1_epi16(-1))) }
+    }
+}
 impl Not for I32x4 {
     type Output = I32x4;
 
