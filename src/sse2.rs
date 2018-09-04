@@ -30,6 +30,18 @@ impl Simd for Sse2 {
         I16x8(_mm_add_epi16(a.0, b.0))
     }
     #[inline(always)]
+    unsafe fn sub_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 {
+        I16x8(_mm_sub_epi16(a.0, b.0))
+    }
+    #[inline(always)]
+    unsafe fn mullo_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 {
+        I16x8(_mm_mullo_epi16(a.0, b.0))
+    }    
+    #[inline(always)]
+    unsafe fn mulhi_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 {
+        I16x8(_mm_mulhi_epi16(a.0, b.0))
+    }    
+    #[inline(always)]
     unsafe fn add_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         I32x4(_mm_add_epi32(a.0, b.0))
     }

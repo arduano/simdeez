@@ -31,6 +31,18 @@ impl Simd for Avx2 {
         I16x16(_mm256_add_epi16(a.0, b.0))
     }
     #[inline(always)]
+    unsafe fn sub_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 {
+        I16x16(_mm256_sub_epi16(a.0, b.0))
+    }
+    #[inline(always)]
+    unsafe fn mullo_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 {
+        I16x16(_mm256_mullo_epi16(a.0, b.0))
+    }    
+    #[inline(always)]
+    unsafe fn mulhi_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 {
+        I16x16(_mm256_mulhi_epi16(a.0, b.0))
+    }  
+    #[inline(always)]
     unsafe fn add_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         I32x8(_mm256_add_epi32(a.0, b.0))
     }

@@ -260,6 +260,9 @@ pub trait Simd {
     unsafe fn abs_ps(a: Self::Vf32) -> Self::Vf32;
     unsafe fn abs_pd(a: Self::Vf64) -> Self::Vf64;
     unsafe fn add_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16;
+    unsafe fn sub_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16;
+    unsafe fn mullo_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16;
+    unsafe fn mulhi_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16;
     unsafe fn add_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     unsafe fn add_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn add_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
