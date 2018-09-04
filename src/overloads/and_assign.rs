@@ -1,6 +1,18 @@
 use super::*;
 // -- BitAndAssign
 
+impl BitAndAssign for I16x8 {
+    #[inline(always)]
+    fn bitand_assign(&mut self, rhs: I16x8) {
+        *self = I16x8(unsafe { _mm_and_si128(self.0, rhs.0) })
+    }
+}
+impl BitAndAssign for I16x16 {
+    #[inline(always)]
+    fn bitand_assign(&mut self, rhs: I16x16) {
+        *self = I16x16(unsafe { _mm256_and_si256(self.0, rhs.0) })
+    }
+}
 impl BitAndAssign for I32x4 {
     #[inline(always)]
     fn bitand_assign(&mut self, rhs: I32x4) {

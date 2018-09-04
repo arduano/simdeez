@@ -136,6 +136,28 @@ pub mod sse41;
 
 
 pub trait Simd {
+
+    type Vi16: Copy
+        + Debug
+        + Add<Self::Vi16, Output = Self::Vi16>
+        + Sub<Self::Vi16, Output = Self::Vi16>
+        + Mul<Self::Vi16, Output = Self::Vi16>
+        + AddAssign<Self::Vi16>
+        + SubAssign<Self::Vi16>
+        + MulAssign<Self::Vi16>
+        + BitAnd<Self::Vi16, Output = Self::Vi16>
+        + BitOr<Self::Vi16, Output = Self::Vi16>
+        + BitXor<Self::Vi16, Output = Self::Vi16>
+        + BitAndAssign<Self::Vi16>
+        + BitOrAssign<Self::Vi16>
+        + BitXorAssign<Self::Vi16>
+        + Index<usize, Output = i16>
+        + IndexMut<usize>
+        + Not<Output = Self::Vi16>
+        + Shl<i32,Output=Self::Vi16>
+        + ShlAssign<i32>
+        + Shr<i32,Output=Self::Vi16>
+        + ShrAssign<i32>;
     /// Vi32 stands for Vector of i32s.  Corresponds to __m128i when used
     /// with the Sse impl, __m256i when used with Avx2, or a single i32
     /// when used with Scalar.
@@ -223,6 +245,7 @@ pub trait Simd {
     /// lane width agnostic code.
     const VF32_WIDTH: usize;
     const VF64_WIDTH: usize;
+    const VI16_WIDTH: usize;
     const VI32_WIDTH: usize;
     const VI64_WIDTH: usize;
 
@@ -236,6 +259,7 @@ pub trait Simd {
     /// it at the index i.
     unsafe fn abs_ps(a: Self::Vf32) -> Self::Vf32;
     unsafe fn abs_pd(a: Self::Vf64) -> Self::Vf64;
+    unsafe fn add_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16;
     unsafe fn add_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     unsafe fn add_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn add_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;

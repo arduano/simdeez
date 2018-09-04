@@ -1,5 +1,23 @@
 use super::*;
 
+impl Add for I16x8 {
+    type Output = I16x8;
+
+    #[inline(always)]
+    fn add(self, rhs: I16x8) -> I16x8 {
+        I16x8(unsafe { _mm_add_epi16(self.0, rhs.0) })
+    }
+}
+
+impl Add for I16x16 {
+    type Output = I16x16;
+
+    #[inline(always)]
+    fn add(self, rhs: I16x16) -> I16x16 {
+        I16x16(unsafe { _mm256_add_epi16(self.0, rhs.0) })
+    }
+}
+
 impl Add for I32x4 {
     type Output = I32x4;
 

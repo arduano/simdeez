@@ -1,6 +1,24 @@
 use super::*;
 // -- Mul
 
+impl Mul for I16x8 {
+    type Output = I16x8;
+
+    #[inline(always)]
+    fn mul(self, rhs: I16x8) -> I16x8 {
+        I16x8(unsafe { _mm_mullo_epi16(self.0, rhs.0) })
+    }
+}
+
+impl Mul for I16x16 {
+    type Output = I16x16;
+
+    #[inline(always)]
+    fn mul(self, rhs: I16x16) -> I16x16 {
+        I16x16(unsafe { _mm256_mullo_epi16(self.0, rhs.0) })
+    }
+}
+
 impl Mul for I32x4 {
     type Output = I32x4;
 

@@ -4,12 +4,14 @@ use overloads::*;
 
 pub struct Sse2;
 impl Simd for Sse2 {
+    type Vi16 = I16x8;
     type Vi32 = I32x4;
     type Vf32 = F32x4;
     type Vf64 = F64x2;
     type Vi64 = I64x2;
     const VF32_WIDTH: usize = 4;
     const VF64_WIDTH: usize = 2;
+    const VI16_WIDTH: usize = 8;
     const VI32_WIDTH: usize = 4;
     const VI64_WIDTH: usize = 2;
 
@@ -22,6 +24,10 @@ impl Simd for Sse2 {
     unsafe fn abs_pd(a: Self::Vf64) -> Self::Vf64 {
         let b = _mm_set1_pd(-0.0);
         F64x2(_mm_andnot_pd(a.0, b))
+    }
+    #[inline(always)]
+    unsafe fn add_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 {
+        I16x8(_mm_add_epi16(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn add_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {

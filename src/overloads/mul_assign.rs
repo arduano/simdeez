@@ -2,6 +2,20 @@ use super::*;
 
 // -- MulAssign
 
+impl MulAssign for I16x8 {
+    #[inline(always)]
+    fn mul_assign(&mut self, rhs: I16x8) {
+        *self = I16x8(unsafe { _mm_mullo_epi16(self.0, rhs.0) })
+    }
+}
+
+impl MulAssign for I16x16 {
+    #[inline(always)]
+    fn mul_assign(&mut self, rhs: I16x16) {
+        *self = I16x16(unsafe { _mm256_mullo_epi16(self.0, rhs.0) })
+    }
+}
+
 impl MulAssign for I32x4 {
     #[inline(always)]
     fn mul_assign(&mut self, rhs: I32x4) {

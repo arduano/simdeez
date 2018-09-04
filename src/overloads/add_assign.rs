@@ -1,6 +1,18 @@
 use super::*;
 // -- AddAssign
 
+impl AddAssign for I16x8 {
+    #[inline(always)]
+    fn add_assign(&mut self, rhs: I16x8) {
+        *self = I16x8(unsafe { _mm_add_epi16(self.0, rhs.0) })
+    }
+}
+impl AddAssign for I16x16 {
+    #[inline(always)]
+    fn add_assign(&mut self, rhs: I16x16) {
+        *self = I16x16(unsafe { _mm256_add_epi16(self.0, rhs.0) })
+    }
+}
 impl AddAssign for I32x4 {
     #[inline(always)]
     fn add_assign(&mut self, rhs: I32x4) {

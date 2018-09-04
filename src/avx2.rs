@@ -4,6 +4,7 @@ use overloads::*;
 
 pub struct Avx2;
 impl Simd for Avx2 {
+    type Vi16 = I16x16;
     type Vi32 = I32x8;
     type Vf32 = F32x8;
     type Vf64 = F64x4;
@@ -11,6 +12,7 @@ impl Simd for Avx2 {
 
     const VF32_WIDTH: usize = 8;
     const VF64_WIDTH: usize = 4;
+    const VI16_WIDTH: usize = 16;
     const VI32_WIDTH: usize = 8;
     const VI64_WIDTH: usize = 4;
 
@@ -23,6 +25,10 @@ impl Simd for Avx2 {
     unsafe fn abs_pd(a: Self::Vf64) -> Self::Vf64 {
         let b = _mm256_set1_pd(-0.0);
         F64x4(_mm256_andnot_pd(a.0, b))
+    }
+    #[inline(always)]
+    unsafe fn add_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 {
+        I16x16(_mm256_add_epi16(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn add_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {

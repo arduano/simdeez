@@ -1,5 +1,24 @@
 use super::*;
 //TODO perf comparison of this method vs a load intrinsic
+
+impl Index<usize> for I16x8 {
+    type Output = i16;
+
+    #[inline(always)]
+    fn index(&self, i: usize) -> &i16 {
+        let arr = unsafe { mem::transmute::<&I16x8, &[i16; 8]>(self) };
+        &arr[i]
+    }
+}
+impl Index<usize> for I16x16 {
+    type Output = i16;
+
+    #[inline(always)]
+    fn index(&self, i: usize) -> &i16 {
+        let arr = unsafe { mem::transmute::<&I16x16, &[i16; 16]>(self) };
+        &arr[i]
+    }
+}
 impl Index<usize> for I32x4 {
     type Output = i32;
 
