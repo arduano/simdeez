@@ -27,7 +27,7 @@ unsafe fn floorsse41(inval:&[f32],out: &mut [f32]) {
 
 fn floor_bench(c: &mut Criterion) {
     let mut nums = Vec::new();
-    for i in 0 .. 8129 {
+    for _i in 0 .. 8129 {
         nums.push(rand::random::<f32>()*f32::MAX);
     }
     let mut result = Vec::with_capacity(nums.len());
