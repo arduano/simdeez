@@ -85,9 +85,9 @@ mod tests {
     unsafe fn sample<S: Simd>() -> i32 {
         let a = S::set1_epi32(3);
         let b = S::set1_epi32(-1);
-        let c = S::add_epi32(a,b); //2
-        
-        c[S::VI32_WIDTH-1]
+        let c = S::add_epi32(a, b); //2
+
+        c[S::VI32_WIDTH - 1]
     }
 
     // Make an sse2 version of sample

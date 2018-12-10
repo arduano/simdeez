@@ -1,6 +1,6 @@
 use super::*;
+use crate::overloads::*;
 use core::mem;
-use overloads::*;
 
 pub struct Sse2;
 impl Simd for Sse2 {
@@ -36,11 +36,11 @@ impl Simd for Sse2 {
     #[inline(always)]
     unsafe fn mullo_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 {
         I16x8(_mm_mullo_epi16(a.0, b.0))
-    }    
+    }
     #[inline(always)]
     unsafe fn mulhi_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 {
         I16x8(_mm_mulhi_epi16(a.0, b.0))
-    }    
+    }
     #[inline(always)]
     unsafe fn add_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         I32x4(_mm_add_epi32(a.0, b.0))
@@ -319,7 +319,7 @@ impl Simd for Sse2 {
         let rmd2_trunc = _mm_cvtepi32_ps(rmd2i);
         F32x4(_mm_add_ps(a_trunc, rmd2_trunc))
     }
-      #[inline(always)]
+    #[inline(always)]
     unsafe fn fmadd_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32 {
         F32x4(_mm_add_ps(_mm_mul_ps(a.0, b.0), c.0))
     }
@@ -330,7 +330,7 @@ impl Simd for Sse2 {
             c.0,
         ))
     }
-   #[inline(always)]
+    #[inline(always)]
     unsafe fn fmadd_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64 {
         F64x2(_mm_add_pd(_mm_mul_pd(a.0, b.0), c.0))
     }
@@ -352,7 +352,7 @@ impl Simd for Sse2 {
             c.0,
         ))
     }
-   #[inline(always)]
+    #[inline(always)]
     unsafe fn fmsub_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64 {
         F64x2(_mm_sub_pd(_mm_mul_pd(a.0, b.0), c.0))
     }
@@ -438,12 +438,9 @@ impl Simd for Sse2 {
         let mut result = I32x4(_mm_setzero_si128());
         let ptr = mem_addr as *const i32;
         result[0] = if mask[0] != 0 { *ptr } else { 0 };
-        result[1] =
-            if mask[1] != 0 { *ptr.offset(1) } else { 0 };
-        result[2] =
-            if mask[2] != 0 { *ptr.offset(2) } else { 0 };
-        result[3] =
-            if mask[3] != 0 { *ptr.offset(3) } else { 0 };
+        result[1] = if mask[1] != 0 { *ptr.offset(1) } else { 0 };
+        result[2] = if mask[2] != 0 { *ptr.offset(2) } else { 0 };
+        result[3] = if mask[3] != 0 { *ptr.offset(3) } else { 0 };
         result
     }
     #[inline(always)]
@@ -451,8 +448,7 @@ impl Simd for Sse2 {
         let mut result = I64x2(_mm_setzero_si128());
         let ptr = mem_addr as *const i64;
         result[0] = if mask[0] != 0 { *ptr } else { 0 };
-        result[1] =
-            if mask[1] != 0 { *ptr.offset(1) } else { 0 };
+        result[1] = if mask[1] != 0 { *ptr.offset(1) } else { 0 };
         result
     }
     #[inline(always)]
@@ -460,12 +456,9 @@ impl Simd for Sse2 {
         let mut result = F32x4(_mm_setzero_ps());
         let ptr = mem_addr as *const f32;
         result[0] = if mask[0] != 0 { *ptr } else { 0.0 };
-        result[1] =
-            if mask[1] != 0 { *ptr.offset(1) } else { 0.0 };
-        result[2] =
-            if mask[2] != 0 { *ptr.offset(2) } else { 0.0 };
-        result[3] =
-            if mask[3] != 0 { *ptr.offset(3) } else { 0.0 };
+        result[1] = if mask[1] != 0 { *ptr.offset(1) } else { 0.0 };
+        result[2] = if mask[2] != 0 { *ptr.offset(2) } else { 0.0 };
+        result[3] = if mask[3] != 0 { *ptr.offset(3) } else { 0.0 };
         result
     }
     #[inline(always)]
@@ -473,8 +466,7 @@ impl Simd for Sse2 {
         let mut result = F64x2(_mm_setzero_pd());
         let ptr = mem_addr as *const f64;
         result[0] = if mask[0] != 0 { *ptr } else { 0.0 };
-        result[1] =
-            if mask[1] != 0 { *ptr.offset(1) } else { 0.0 };
+        result[1] = if mask[1] != 0 { *ptr.offset(1) } else { 0.0 };
         result
     }
     #[inline(always)]

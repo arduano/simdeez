@@ -1,6 +1,6 @@
 use super::*;
+use crate::overloads::*;
 use core::mem;
-use overloads::*;
 
 pub struct Avx2;
 impl Simd for Avx2 {
@@ -37,11 +37,11 @@ impl Simd for Avx2 {
     #[inline(always)]
     unsafe fn mullo_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 {
         I16x16(_mm256_mullo_epi16(a.0, b.0))
-    }    
+    }
     #[inline(always)]
     unsafe fn mulhi_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 {
         I16x16(_mm256_mulhi_epi16(a.0, b.0))
-    }  
+    }
     #[inline(always)]
     unsafe fn add_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         I32x8(_mm256_add_epi32(a.0, b.0))
@@ -262,7 +262,7 @@ impl Simd for Avx2 {
     unsafe fn fastfloor_ps(a: Self::Vf32) -> Self::Vf32 {
         F32x8(_mm256_floor_ps(a.0))
     }
-     #[inline(always)]
+    #[inline(always)]
     unsafe fn fmadd_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32 {
         F32x8(_mm256_fmadd_ps(a.0, b.0, c.0))
     }
@@ -278,7 +278,7 @@ impl Simd for Avx2 {
     unsafe fn fnmadd_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64 {
         F64x4(_mm256_fnmadd_pd(a.0, b.0, c.0))
     }
-   #[inline(always)]
+    #[inline(always)]
     unsafe fn fmsub_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32 {
         F32x8(_mm256_fmsub_ps(a.0, b.0, c.0))
     }

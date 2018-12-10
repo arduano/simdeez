@@ -133,10 +133,7 @@ pub mod overloads;
 pub mod sse2;
 pub mod sse41;
 
-
-
 pub trait Simd {
-
     type Vi16: Copy
         + Debug
         + Add<Self::Vi16, Output = Self::Vi16>
@@ -154,9 +151,9 @@ pub trait Simd {
         + Index<usize, Output = i16>
         + IndexMut<usize>
         + Not<Output = Self::Vi16>
-        + Shl<i32,Output=Self::Vi16>
+        + Shl<i32, Output = Self::Vi16>
         + ShlAssign<i32>
-        + Shr<i32,Output=Self::Vi16>
+        + Shr<i32, Output = Self::Vi16>
         + ShrAssign<i32>;
     /// Vi32 stands for Vector of i32s.  Corresponds to __m128i when used
     /// with the Sse impl, __m256i when used with Avx2, or a single i32
@@ -178,9 +175,9 @@ pub trait Simd {
         + Index<usize, Output = i32>
         + IndexMut<usize>
         + Not<Output = Self::Vi32>
-        + Shl<i32,Output=Self::Vi32>
+        + Shl<i32, Output = Self::Vi32>
         + ShlAssign<i32>
-        + Shr<i32,Output=Self::Vi32>
+        + Shr<i32, Output = Self::Vi32>
         + ShrAssign<i32>;
     /// Vf32 stands for Vector of f32s.  Corresponds to __m128 when used
     /// with the Sse impl, __m256 when used with Avx2, or a single f32
@@ -249,14 +246,8 @@ pub trait Simd {
     const VI32_WIDTH: usize;
     const VI64_WIDTH: usize;
 
-
-//    fn map_simd<T,U>(a: Vec::<T>, f: fn(T) -> U) -> Vec::<U> {
-//    }
-
     unsafe fn div_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn div_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
-    /// Equivalent to transmuting the SIMD type to an array and accessing
-    /// it at the index i.
     unsafe fn abs_ps(a: Self::Vf32) -> Self::Vf32;
     unsafe fn abs_pd(a: Self::Vf64) -> Self::Vf64;
     unsafe fn add_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16;
@@ -357,7 +348,7 @@ pub trait Simd {
     /// otherwise a mul and add are used to replicate it, allowing you to
     /// just always use FMA in your code and get best perf in both cases.
     unsafe fn fnmadd_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64;
-/// Actual FMA instructions will be used when Avx2 is used,
+    /// Actual FMA instructions will be used when Avx2 is used,
     /// otherwise a mul and sub are used to replicate it, allowing you to
     /// just always use FMA in your code and get best perf in both cases.
     unsafe fn fmsub_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32;
@@ -480,7 +471,7 @@ pub trait Simd {
     unsafe fn sqrt_pd(a: Self::Vf64) -> Self::Vf64;
     unsafe fn rsqrt_pd(a: Self::Vf64) -> Self::Vf64;
     unsafe fn shuffle_epi32(a: Self::Vi32, imm8: i32) -> Self::Vi32;
-    unsafe fn shuffle_ps(a: Self::Vf32, Self::Vf32, imm8: i32) -> Self::Vf32;
+    unsafe fn shuffle_ps(a: Self::Vf32, b: Self::Vf32, imm8: i32) -> Self::Vf32;
     unsafe fn unpackhi_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     unsafe fn unpacklo_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     unsafe fn unpackhi_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;

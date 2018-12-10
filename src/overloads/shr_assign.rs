@@ -16,7 +16,7 @@ impl ShrAssign<i32> for I16x16 {
     fn shr_assign(&mut self, rhs: i32) {
         macro_rules! call {
             ($rhs:expr) => {
-                *self = unsafe {I16x16(_mm256_srai_epi16(self.0, $rhs))}
+                *self = unsafe { I16x16(_mm256_srai_epi16(self.0, $rhs)) }
             };
         }
         constify_imm8!(rhs, call)

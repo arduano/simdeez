@@ -30,108 +30,101 @@ mod tests {
     }
 
     #[inline(always)]
-    unsafe fn blendv<S:Simd>() {
-     
+    unsafe fn blendv<S: Simd>() {
         //i32
         let a = S::set1_epi32(1);
-        let b=  S::set1_epi32(2);
-        let cmp = S::cmplt_epi32(a,b);
-        let r = S::blendv_epi32(a,b,cmp);
+        let b = S::set1_epi32(2);
+        let cmp = S::cmplt_epi32(a, b);
+        let r = S::blendv_epi32(a, b, cmp);
         //r should be all 2
-        for i in 0 .. S::VI32_WIDTH {
-            assert_eq!(r[i],2);
+        for i in 0..S::VI32_WIDTH {
+            assert_eq!(r[i], 2);
         }
 
         let a = S::set1_epi32(2);
-        let b=  S::set1_epi32(1);
-        let cmp = S::cmplt_epi32(a,b);
-        let r = S::blendv_epi32(a,b,cmp);
+        let b = S::set1_epi32(1);
+        let cmp = S::cmplt_epi32(a, b);
+        let r = S::blendv_epi32(a, b, cmp);
         //r should be all 2
-        for i in 0 .. S::VI32_WIDTH {
-            assert_eq!(r[i],2);
+        for i in 0..S::VI32_WIDTH {
+            assert_eq!(r[i], 2);
         }
 
         //i64
         let a = S::set1_epi64(1);
-        let b=  S::set1_epi64(2);
-        let cmp = S::cmplt_epi64(a,b);
-        let r = S::blendv_epi64(a,b,cmp);
+        let b = S::set1_epi64(2);
+        let cmp = S::cmplt_epi64(a, b);
+        let r = S::blendv_epi64(a, b, cmp);
         //r should be all 2
-        for i in 0 .. S::VI64_WIDTH {
-            assert_eq!(r[i],2);
+        for i in 0..S::VI64_WIDTH {
+            assert_eq!(r[i], 2);
         }
 
         let a = S::set1_epi64(2);
-        let b=  S::set1_epi64(1);
-        let cmp = S::cmplt_epi64(a,b);
-        let r = S::blendv_epi64(a,b,cmp);
+        let b = S::set1_epi64(1);
+        let cmp = S::cmplt_epi64(a, b);
+        let r = S::blendv_epi64(a, b, cmp);
         //r should be all 2
-        for i in 0 .. S::VI64_WIDTH {
-            assert_eq!(r[i],2);
+        for i in 0..S::VI64_WIDTH {
+            assert_eq!(r[i], 2);
         }
 
-     
-         //f32
+        //f32
         let a = S::set1_ps(1.0);
-        let b=  S::set1_ps(2.0);
-        let cmp = S::cmplt_ps(a,b);
-        let r = S::blendv_ps(a,b,cmp);
+        let b = S::set1_ps(2.0);
+        let cmp = S::cmplt_ps(a, b);
+        let r = S::blendv_ps(a, b, cmp);
         //r should be all 2
-        for i in 0 .. S::VI32_WIDTH {
-            assert_eq!(r[i],2.0);
+        for i in 0..S::VI32_WIDTH {
+            assert_eq!(r[i], 2.0);
         }
 
         let a = S::set1_ps(2.0);
-        let b=  S::set1_ps(1.0);
-        let cmp = S::cmplt_ps(a,b);
-        let r = S::blendv_ps(a,b,cmp);
+        let b = S::set1_ps(1.0);
+        let cmp = S::cmplt_ps(a, b);
+        let r = S::blendv_ps(a, b, cmp);
         //r should be all 2
-        for i in 0 .. S::VI32_WIDTH {
-            assert_eq!(r[i],2.0);
+        for i in 0..S::VI32_WIDTH {
+            assert_eq!(r[i], 2.0);
         }
         let a = S::set1_ps(1.0);
-        let b=  S::set1_ps(9.0);
+        let b = S::set1_ps(9.0);
         let cmp = S::set1_epi32(-1);
-        let r = S::blendv_ps(a,b,S::castepi32_ps(cmp));
+        let r = S::blendv_ps(a, b, S::castepi32_ps(cmp));
         //r should be all 9
-        
-         for i in 0 .. S::VI32_WIDTH {
-            assert_eq!(r[i],9.0);
-        }
 
+        for i in 0..S::VI32_WIDTH {
+            assert_eq!(r[i], 9.0);
+        }
 
         //f64
         let a = S::set1_pd(1.0);
-        let b=  S::set1_pd(2.0);
-        let cmp = S::cmplt_pd(a,b);
-        let r = S::blendv_pd(a,b,cmp);
+        let b = S::set1_pd(2.0);
+        let cmp = S::cmplt_pd(a, b);
+        let r = S::blendv_pd(a, b, cmp);
         //r should be all 2
-        for i in 0 .. S::VI64_WIDTH {
-            assert_eq!(r[i],2.0);
+        for i in 0..S::VI64_WIDTH {
+            assert_eq!(r[i], 2.0);
         }
 
         let a = S::set1_pd(2.0);
-        let b=  S::set1_pd(1.0);
-        let cmp = S::cmplt_pd(a,b);
-        let r = S::blendv_pd(a,b,cmp);
+        let b = S::set1_pd(1.0);
+        let cmp = S::cmplt_pd(a, b);
+        let r = S::blendv_pd(a, b, cmp);
         //r should be all 2
-        for i in 0 .. S::VI64_WIDTH {
-            assert_eq!(r[i],2.0);
+        for i in 0..S::VI64_WIDTH {
+            assert_eq!(r[i], 2.0);
         }
-
-        
-
-
     }
-      #[target_feature(enable="sse2")]
+    #[target_feature(enable = "sse2")]
     unsafe fn blendv_sse2() {
         blendv::<Sse2>()
     }
-   #[target_feature(enable="sse4.1")]
+    #[target_feature(enable = "sse4.1")]
     unsafe fn blendv_sse41() {
         blendv::<Sse41>()
     }
-   #[target_feature(enable="avx2")]
+    #[target_feature(enable = "avx2")]
     unsafe fn blendv_avx2() {
         blendv::<Avx2>()
     }
@@ -442,7 +435,7 @@ mod tests {
         assert_eq!(mem::transmute::<f32, i32>(rf32[1]), the_true);
         assert_eq!(mem::transmute::<f32, i32>(rf32[2]), the_true);
         assert_eq!(mem::transmute::<f32, i32>(rf32[3]), the_false);
-       let the_true = -1i64;
+        let the_true = -1i64;
         let the_false = 0i64;
         let af64 = [f64::MAX, f64::MIN, 0.0, 2.0];
         let bf64 = [f64::MAX, f64::MAX, -0.0, 1.0];
@@ -453,7 +446,7 @@ mod tests {
         let rf64 = S::cmpge_pd(S::loadu_pd(&af64[2]), S::loadu_pd(&bf64[2]));
         assert_eq!(mem::transmute::<f64, i64>(rf64[0]), the_true);
         assert_eq!(mem::transmute::<f64, i64>(rf64[1]), the_true);
- }
+    }
     #[target_feature(enable = "sse2")]
     unsafe fn cmpge_sse2() {
         cmpge::<Sse2>();
@@ -509,7 +502,7 @@ mod tests {
         assert_eq!(mem::transmute::<f32, i32>(rf32[1]), the_true);
         assert_eq!(mem::transmute::<f32, i32>(rf32[2]), the_false);
         assert_eq!(mem::transmute::<f32, i32>(rf32[3]), the_true);
-       let the_true = -1i64;
+        let the_true = -1i64;
         let the_false = 0i64;
         let af64 = [f64::MAX, f64::MIN, 0.0, 2.0];
         let bf64 = [f64::MAX, f64::MAX, -0.0, 1.0];
@@ -542,8 +535,7 @@ mod tests {
         }
     }
 
-
-     #[inline(always)]
+    #[inline(always)]
     unsafe fn maskload<S: Simd>() {
         let someints = [1i32, 0, -1, i32::MAX, i32::MIN, 100, -100, 1000];
         let somefloats = [
@@ -624,24 +616,24 @@ mod tests {
         }
     }
 
-   #[inline(always)]
+    #[inline(always)]
     unsafe fn maskstore<S: Simd>() {
-        let mut someints = [0i32,1,2,3,4,5,6,7];
-        let mut somefloats = [0.0f32,1.0,2.0,3.0,4.0,5.0,6.0,7.0];
-        let mut somelongs = [0i64,1,2,3,4,5,6,7];        
-        let mut somedoubles =[0.0f64,1.0,2.0,3.0,4.0,5.0,6.0,7.0];
- 
+        let mut someints = [0i32, 1, 2, 3, 4, 5, 6, 7];
+        let mut somefloats = [0.0f32, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0];
+        let mut somelongs = [0i64, 1, 2, 3, 4, 5, 6, 7];
+        let mut somedoubles = [0.0f64, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0];
+
         let i32data = S::set1_epi32(9);
         let f32data = S::set1_ps(9.0);
         let i64data = S::set1_epi64(9);
         let f64data = S::set1_pd(9.0);
 
-        //Mask is all 0 so nothing should get stored                    
+        //Mask is all 0 so nothing should get stored
         let mask = S::setzero_epi32();
-        S::maskstore_epi32(&mut someints[0], mask,i32data);
-        S::maskstore_epi64(&mut somelongs[0], S::castepi32_epi64(mask),i64data);
+        S::maskstore_epi32(&mut someints[0], mask, i32data);
+        S::maskstore_epi64(&mut somelongs[0], S::castepi32_epi64(mask), i64data);
         S::maskstore_ps(&mut somefloats[0], mask, f32data);
-        S::maskstore_pd(&mut somedoubles[0], S::castepi32_epi64(mask),f64data);
+        S::maskstore_pd(&mut somedoubles[0], S::castepi32_epi64(mask), f64data);
 
         for i in 0..S::VI32_WIDTH {
             assert_eq!(someints[i], i as i32);
@@ -651,30 +643,28 @@ mod tests {
         for i in 0..S::VI64_WIDTH {
             assert_eq!(somelongs[i], i as i64);
             //assert_delta!(somedoubles[i], i as f64, 0.001);
-            assert_eq!(somedoubles[i],i as f64);
+            assert_eq!(somedoubles[i], i as f64);
         }
 
-        
         //All things should get stores
         let mask = S::set1_epi32(-1);
         let mask64 = S::castepi32_epi64(mask);
 
-   
-        S::maskstore_epi32(&mut someints[0], mask,i32data);
-        S::maskstore_epi64(&mut somelongs[0],mask64,i64data);
-        S::maskstore_ps(&mut somefloats[0], mask,f32data);
-        S::maskstore_pd(&mut somedoubles[0], mask64,f64data);
+        S::maskstore_epi32(&mut someints[0], mask, i32data);
+        S::maskstore_epi64(&mut somelongs[0], mask64, i64data);
+        S::maskstore_ps(&mut somefloats[0], mask, f32data);
+        S::maskstore_pd(&mut somedoubles[0], mask64, f64data);
 
         for i in 0..S::VI32_WIDTH {
             assert_eq!(someints[i], 9);
-            assert_delta!(somefloats[i],9.0f32,0.001); 
+            assert_delta!(somefloats[i], 9.0f32, 0.001);
         }
 
         for i in 0..S::VI64_WIDTH {
             assert_eq!(somelongs[i], 9);
-//            assert_delta!(somedoubles[i], 9.0f64, 0.001);
-              println!("i:{}",i);
-            assert_eq!(somedoubles[i],9.0);
+            //            assert_delta!(somedoubles[i], 9.0f64, 0.001);
+            println!("i:{}", i);
+            assert_eq!(somedoubles[i], 9.0);
         }
     }
 
@@ -694,11 +684,9 @@ mod tests {
     #[test]
     fn maskstore_test() {
         unsafe {
-            
             maskstore_avx2();
             maskstore_sse2();
-          maskstore_sse41();
-           
+            maskstore_sse41();
         }
     }
 

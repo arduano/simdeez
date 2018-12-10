@@ -5,7 +5,6 @@ use core::arch::x86_64::*;
 use core::mem;
 use core::ops::*;
 
-
 // Newtypes for i16 vectors
 // We have to do this to allow for overloading of
 // __m128i etc
@@ -13,7 +12,6 @@ use core::ops::*;
 pub struct I16x8(pub __m128i);
 #[derive(Copy, Debug, Clone)]
 pub struct I16x16(pub __m256i);
-
 
 // Newtypes for i32 vectors
 // We have to do this to allow for overloading of
@@ -91,4 +89,3 @@ mod shr;
 pub use self::shr::*;
 mod shr_assign;
 pub use self::shr_assign::*;
-
