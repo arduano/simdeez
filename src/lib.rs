@@ -128,6 +128,7 @@ use core::fmt::Debug;
 use core::ops::*;
 #[macro_use]
 mod macros;
+pub mod scalar;
 pub mod avx2;
 pub mod overloads;
 pub mod sse2;

@@ -1,6 +1,49 @@
 use super::*;
 // -- BitAndAssign
 
+
+impl BitAndAssign for I16x1 {
+    #[inline(always)]
+    fn bitand_assign(&mut self, rhs: I16x1) {
+        *self = I16x1(self.0 & rhs.0);
+    }
+}
+
+impl BitAndAssign for I32x1 {
+    #[inline(always)]
+    fn bitand_assign(&mut self, rhs: I32x1) {
+        *self = I32x1(self.0 & rhs.0);
+    }
+}
+
+impl BitAndAssign for I64x1 {
+    #[inline(always)]
+    fn bitand_assign(&mut self, rhs: I64x1) {
+        *self = I64x1(self.0 & rhs.0);
+    }
+}
+
+impl BitAndAssign for F32x1 {
+    #[inline(always)]
+    fn bitand_assign(&mut self, rhs: F32x1) {
+        let lbits = self.0.to_bits();
+        let rbits = rhs.0.to_bits();
+        let result = lbits & rbits;
+        *self = F32x1(f32::from_bits(result));
+    }
+}
+
+impl BitAndAssign for F64x1 {
+    #[inline(always)]
+    fn bitand_assign(&mut self, rhs: F64x1) {
+        let lbits = self.0.to_bits();
+        let rbits = rhs.0.to_bits();
+        let result = lbits & rbits;
+        *self = F64x1(f64::from_bits(result));
+    }
+}
+
+
 impl BitAndAssign for I16x8 {
     #[inline(always)]
     fn bitand_assign(&mut self, rhs: I16x8) {

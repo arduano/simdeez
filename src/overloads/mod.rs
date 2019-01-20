@@ -9,6 +9,8 @@ use core::ops::*;
 // We have to do this to allow for overloading of
 // __m128i etc
 #[derive(Copy, Debug, Clone)]
+pub struct I16x1(pub i16);
+#[derive(Copy, Debug, Clone)]
 pub struct I16x8(pub __m128i);
 #[derive(Copy, Debug, Clone)]
 pub struct I16x16(pub __m256i);
@@ -16,6 +18,8 @@ pub struct I16x16(pub __m256i);
 // Newtypes for i32 vectors
 // We have to do this to allow for overloading of
 // __m128i etc
+#[derive(Copy, Debug, Clone)]
+pub struct I32x1(pub i32);
 #[derive(Copy, Debug, Clone)]
 pub struct I32x4(pub __m128i);
 #[derive(Copy, Debug, Clone)]
@@ -27,6 +31,8 @@ pub struct I32x8(pub __m256i);
 // We have to do this to allow for overloading of
 // __m128i etc
 #[derive(Copy, Debug, Clone)]
+pub struct I64x1(pub i64);
+#[derive(Copy, Debug, Clone)]
 pub struct I64x2(pub __m128i);
 #[derive(Copy, Debug, Clone)]
 pub struct I64x2_41(pub __m128i);
@@ -37,11 +43,15 @@ pub struct I64x4(pub __m256i);
 // We have to do this to allow for overloading of
 // __m128 etc
 #[derive(Copy, Debug, Clone)]
+pub struct F32x1(pub f32);
+#[derive(Copy, Debug, Clone)]
 pub struct F32x4(pub __m128);
 #[derive(Copy, Debug, Clone)]
 pub struct F32x8(pub __m256);
 
 // Newtypes for f64 vectors
+#[derive(Copy, Debug, Clone)]
+pub struct F64x1(pub f64);
 #[derive(Copy, Debug, Clone)]
 pub struct F64x2(pub __m128d);
 #[derive(Copy, Debug, Clone)]
