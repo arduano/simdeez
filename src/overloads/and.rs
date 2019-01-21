@@ -6,7 +6,7 @@ impl BitAnd for I16x1 {
 
     #[inline(always)]
     fn bitand(self, rhs: I16x1) -> I16x1 {
-         I16x1(self.0 & rhs.0)
+        I16x1(self.0 & rhs.0)
     }
 }
 
@@ -15,7 +15,7 @@ impl BitAnd for I32x1 {
 
     #[inline(always)]
     fn bitand(self, rhs: I32x1) -> I32x1 {
-         I32x1(self.0 & rhs.0)
+        I32x1(self.0 & rhs.0)
     }
 }
 
@@ -24,7 +24,7 @@ impl BitAnd for I64x1 {
 
     #[inline(always)]
     fn bitand(self, rhs: I64x1) -> I64x1 {
-         I64x1(self.0 & rhs.0)
+        I64x1(self.0 & rhs.0)
     }
 }
 
@@ -51,7 +51,6 @@ impl BitAnd for F64x1 {
         F64x1(f64::from_bits(result))
     }
 }
-
 
 impl BitAnd for I16x8 {
     type Output = I16x8;

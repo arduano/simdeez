@@ -1,8 +1,6 @@
 use super::*;
 // -- BitXorAssign
 
-
-
 impl BitXorAssign for I16x1 {
     #[inline(always)]
     fn bitxor_assign(&mut self, rhs: I16x1) {

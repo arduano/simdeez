@@ -47,7 +47,6 @@ impl Shr<i32> for F64x1 {
     }
 }
 
-
 impl Shr<i32> for I16x8 {
     type Output = I16x8;
 

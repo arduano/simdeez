@@ -1,11 +1,9 @@
 use super::*;
-use core::mem;
+use crate::libm::*;
 use crate::overloads::*;
+use core::mem;
 
-extern crate libm;
-
-use libm::{F32Ext,F64Ext};
-
+use libm::{F32Ext, F64Ext};
 
 pub struct Scalar;
 impl Simd for Scalar {
@@ -30,32 +28,32 @@ impl Simd for Scalar {
     }
     #[inline(always)]
     unsafe fn add_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 {
-        a+b
+        a + b
     }
     #[inline(always)]
     unsafe fn sub_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 {
-        a-b
+        a - b
     }
     #[inline(always)]
     unsafe fn mullo_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 {
-        a*b
+        a * b
     }
     #[inline(always)]
     unsafe fn mulhi_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 {
         //todo figure out how to do this
-        a*b
+        a * b
     }
     #[inline(always)]
     unsafe fn add_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        a+b
+        a + b
     }
     #[inline(always)]
     unsafe fn add_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        a+b
+        a + b
     }
     #[inline(always)]
     unsafe fn add_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
-        a+b
+        a + b
     }
     #[inline(always)]
     unsafe fn and_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
@@ -83,62 +81,54 @@ impl Simd for Scalar {
     }
     #[inline(always)]
     unsafe fn blendv_epi32(a: Self::Vi32, b: Self::Vi32, mask: Self::Vi32) -> Self::Vi32 {
-        if mask.0 != 0
-        { 
+        if mask.0 != 0 {
             b
-        }
-        else {
+        } else {
             a
-        }        
+        }
     }
     #[inline(always)]
     unsafe fn blendv_epi64(a: Self::Vi64, b: Self::Vi64, mask: Self::Vi64) -> Self::Vi64 {
-        if mask.0 != 0
-        { 
+        if mask.0 != 0 {
             b
-        }
-        else {
+        } else {
             a
-        }        
+        }
     }
     #[inline(always)]
     unsafe fn blendv_ps(a: Self::Vf32, b: Self::Vf32, mask: Self::Vf32) -> Self::Vf32 {
-        if mask.0 != 0.0
-        { 
+        if mask.0 != 0.0 {
             b
-        }
-        else {
+        } else {
             a
-        }        
+        }
     }
     #[inline(always)]
     unsafe fn blendv_pd(a: Self::Vf64, b: Self::Vf64, mask: Self::Vf64) -> Self::Vf64 {
-         if mask.0 != 0.0
-        { 
+        if mask.0 != 0.0 {
             b
-        }
-        else {
+        } else {
             a
-        }        
+        }
     }
     #[inline(always)]
     unsafe fn castps_epi32(a: Self::Vf32) -> Self::Vi32 {
-        I32x1(mem::transmute::<f32,i32>(a.0))
+        I32x1(mem::transmute::<f32, i32>(a.0))
     }
     #[inline(always)]
     unsafe fn castpd_epi64(a: Self::Vf64) -> Self::Vi64 {
-        I64x1(mem::transmute::<f64,i64>(a.0))
+        I64x1(mem::transmute::<f64, i64>(a.0))
     }
     #[inline(always)]
     unsafe fn castepi32_ps(a: Self::Vi32) -> Self::Vf32 {
-        F32x1(mem::transmute::<i32,f32>(a.0))
+        F32x1(mem::transmute::<i32, f32>(a.0))
     }
     #[inline(always)]
     unsafe fn castepi64_pd(a: Self::Vi64) -> Self::Vf64 {
-        F64x1(mem::transmute::<i64,f64>(a.0))
+        F64x1(mem::transmute::<i64, f64>(a.0))
     }
     #[inline(always)]
-    unsafe fn castepi32_epi64(a: Self::Vi32) -> Self::Vi64 {        
+    unsafe fn castepi32_epi64(a: Self::Vi32) -> Self::Vi64 {
         I64x1(a.0 as i64)
     }
     #[inline(always)]
@@ -161,7 +151,7 @@ impl Simd for Scalar {
             I32x1(-1)
         } else {
             I32x1(0)
-        }        
+        }
     }
     #[inline(always)]
     unsafe fn cmpneq_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
@@ -177,7 +167,7 @@ impl Simd for Scalar {
             I32x1(-1)
         } else {
             I32x1(0)
-        }        
+        }
     }
     #[inline(always)]
     unsafe fn cmpgt_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
@@ -185,7 +175,7 @@ impl Simd for Scalar {
             I32x1(-1)
         } else {
             I32x1(0)
-        }        
+        }
     }
     #[inline(always)]
     unsafe fn cmple_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
@@ -193,7 +183,7 @@ impl Simd for Scalar {
             I32x1(-1)
         } else {
             I32x1(0)
-        }        
+        }
     }
     #[inline(always)]
     unsafe fn cmplt_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
@@ -201,15 +191,15 @@ impl Simd for Scalar {
             I32x1(-1)
         } else {
             I32x1(0)
-        }        
-    }    
+        }
+    }
     #[inline(always)]
     unsafe fn cmpeq_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
-       if a.0 == b.0 {
+        if a.0 == b.0 {
             I64x1(-1)
         } else {
             I64x1(0)
-        }        
+        }
     }
     #[inline(always)]
     unsafe fn cmpneq_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
@@ -217,7 +207,7 @@ impl Simd for Scalar {
             I64x1(-1)
         } else {
             I64x1(0)
-        }        
+        }
     }
     #[inline(always)]
     unsafe fn cmpge_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
@@ -225,7 +215,7 @@ impl Simd for Scalar {
             I64x1(-1)
         } else {
             I64x1(0)
-        }        
+        }
     }
     #[inline(always)]
     unsafe fn cmpgt_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
@@ -233,7 +223,7 @@ impl Simd for Scalar {
             I64x1(-1)
         } else {
             I64x1(0)
-        }        
+        }
     }
     #[inline(always)]
     unsafe fn cmple_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
@@ -241,111 +231,111 @@ impl Simd for Scalar {
             I64x1(-1)
         } else {
             I64x1(0)
-        }        
+        }
     }
     #[inline(always)]
     unsafe fn cmplt_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
-      if a.0 < b.0 {
+        if a.0 < b.0 {
             I64x1(-1)
         } else {
             I64x1(0)
-        }        
+        }
     }
     #[inline(always)]
     unsafe fn cmpeq_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
         if a.0 == b.0 {
-            F32x1(mem::transmute::<i32,f32>(-1))
+            F32x1(mem::transmute::<i32, f32>(-1))
         } else {
             F32x1(0.0)
-        }        
+        }
     }
     #[inline(always)]
     unsafe fn cmpneq_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
         if a.0 != b.0 {
-            F32x1(mem::transmute::<i32,f32>(-1))
+            F32x1(mem::transmute::<i32, f32>(-1))
         } else {
             F32x1(0.0)
-        }    
+        }
     }
     #[inline(always)]
     unsafe fn cmpge_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-         if a.0 >= b.0 {
-            F32x1(mem::transmute::<i32,f32>(-1))
+        if a.0 >= b.0 {
+            F32x1(mem::transmute::<i32, f32>(-1))
         } else {
             F32x1(0.0)
-        }    
+        }
     }
     #[inline(always)]
     unsafe fn cmpgt_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-         if a.0 > b.0 {
-            F32x1(mem::transmute::<i32,f32>(-1))
+        if a.0 > b.0 {
+            F32x1(mem::transmute::<i32, f32>(-1))
         } else {
             F32x1(0.0)
-        }    
+        }
     }
     #[inline(always)]
     unsafe fn cmple_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-         if a.0 <= b.0 {
-            F32x1(mem::transmute::<i32,f32>(-1))
+        if a.0 <= b.0 {
+            F32x1(mem::transmute::<i32, f32>(-1))
         } else {
             F32x1(0.0)
-        }    
+        }
     }
     #[inline(always)]
     unsafe fn cmplt_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-         if a.0 < b.0 {
-            F32x1(mem::transmute::<i32,f32>(-1))
+        if a.0 < b.0 {
+            F32x1(mem::transmute::<i32, f32>(-1))
         } else {
             F32x1(0.0)
-        }    
+        }
     }
     #[inline(always)]
     unsafe fn cmpeq_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
-         if a.0 == b.0 {
-            F64x1(mem::transmute::<i64,f64>(-1) )
+        if a.0 == b.0 {
+            F64x1(mem::transmute::<i64, f64>(-1))
         } else {
             F64x1(0.0)
-        }    
+        }
     }
     #[inline(always)]
     unsafe fn cmpneq_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
         if a.0 != b.0 {
-            F64x1(mem::transmute::<i64,f64>(-1) )
+            F64x1(mem::transmute::<i64, f64>(-1))
         } else {
             F64x1(0.0)
-        }    
+        }
     }
     #[inline(always)]
     unsafe fn cmpge_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
         if a.0 >= b.0 {
-            F64x1(mem::transmute::<i64,f64>(-1) )
+            F64x1(mem::transmute::<i64, f64>(-1))
         } else {
             F64x1(0.0)
-        }    
+        }
     }
     #[inline(always)]
     unsafe fn cmpgt_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
         if a.0 > b.0 {
-            F64x1(mem::transmute::<i64,f64>(-1) )
+            F64x1(mem::transmute::<i64, f64>(-1))
         } else {
             F64x1(0.0)
-        }    
+        }
     }
     #[inline(always)]
     unsafe fn cmple_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
         if a.0 <= b.0 {
-            F64x1(mem::transmute::<i64,f64>(-1) )
+            F64x1(mem::transmute::<i64, f64>(-1))
         } else {
             F64x1(0.0)
-        }    
+        }
     }
     #[inline(always)]
     unsafe fn cmplt_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
         if a.0 < b.0 {
-            F64x1(mem::transmute::<i64,f64>(-1) )
+            F64x1(mem::transmute::<i64, f64>(-1))
         } else {
             F64x1(0.0)
-        }    
+        }
     }
     #[inline(always)]
     unsafe fn cvtps_epi32(a: Self::Vf32) -> Self::Vi32 {
@@ -369,52 +359,51 @@ impl Simd for Scalar {
     }
     #[inline(always)]
     unsafe fn floor_pd(a: Self::Vf64) -> Self::Vf64 {
-       F64x1(a.0.floor())
+        F64x1(a.0.floor())
     }
     #[inline(always)]
     unsafe fn fastfloor_ps(a: Self::Vf32) -> Self::Vf32 {
-       F32x1(a.0.floor())
+        F32x1(a.0.floor())
     }
     #[inline(always)]
     unsafe fn fastceil_ps(a: Self::Vf32) -> Self::Vf32 {
-       F32x1(a.0.ceil())
+        F32x1(a.0.ceil())
     }
     #[inline(always)]
     unsafe fn fastround_ps(a: Self::Vf32) -> Self::Vf32 {
-       F32x1(a.0.round())
+        F32x1(a.0.round())
     }
     #[inline(always)]
-    unsafe fn fmadd_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32 {        
-        a*b+c
+    unsafe fn fmadd_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32 {
+        a * b + c
     }
     #[inline(always)]
     unsafe fn fnmadd_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32 {
-        F32x1((-(a.0*b.0))+c.0)
+        F32x1((-(a.0 * b.0)) + c.0)
     }
     #[inline(always)]
     unsafe fn fmadd_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64 {
-        a*b+c        
+        a * b + c
     }
     #[inline(always)]
     unsafe fn fnmadd_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64 {
-        F64x1((-(a.0*b.0))+c.0)
-        
+        F64x1((-(a.0 * b.0)) + c.0)
     }
     #[inline(always)]
     unsafe fn fmsub_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32 {
-        a*b-c        
+        a * b - c
     }
     #[inline(always)]
     unsafe fn fnmsub_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32 {
-        F32x1((-(a.0*b.0))-c.0)
+        F32x1((-(a.0 * b.0)) - c.0)
     }
     #[inline(always)]
     unsafe fn fmsub_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64 {
-        a*b-c        
+        a * b - c
     }
     #[inline(always)]
     unsafe fn fnmsub_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64 {
-        F64x1((-(a.0*b.0))-c.0)
+        F64x1((-(a.0 * b.0)) - c.0)
     }
     #[inline(always)]
     unsafe fn horizontal_add_ps(a: Self::Vf32) -> f32 {
@@ -470,7 +459,7 @@ impl Simd for Scalar {
             I32x1(*mem_addr)
         } else {
             I32x1(0)
-        }       
+        }
     }
     #[inline(always)]
     unsafe fn maskload_epi64(mem_addr: &i64, mask: Self::Vi64) -> Self::Vi64 {
@@ -478,7 +467,7 @@ impl Simd for Scalar {
             I64x1(*mem_addr)
         } else {
             I64x1(0)
-        }       
+        }
     }
     #[inline(always)]
     unsafe fn maskload_ps(mem_addr: &f32, mask: Self::Vi32) -> Self::Vf32 {
@@ -486,59 +475,58 @@ impl Simd for Scalar {
             F32x1(*mem_addr)
         } else {
             F32x1(0.0)
-        }       
+        }
     }
     #[inline(always)]
     unsafe fn maskload_pd(mem_addr: &f64, mask: Self::Vi64) -> Self::Vf64 {
-         if mask.0 != 0 {
+        if mask.0 != 0 {
             F64x1(*mem_addr)
         } else {
             F64x1(0.0)
-        }       
+        }
     }
     #[inline(always)]
     unsafe fn store_ps(mem_addr: &mut f32, a: Self::Vf32) {
-        *mem_addr = a.0;        
+        *mem_addr = a.0;
     }
     #[inline(always)]
     unsafe fn store_pd(mem_addr: &mut f64, a: Self::Vf64) {
-        *mem_addr = a.0;        
+        *mem_addr = a.0;
     }
     #[inline(always)]
     unsafe fn store_epi32(mem_addr: &mut i32, a: Self::Vi32) {
-        *mem_addr = a.0;        
+        *mem_addr = a.0;
     }
     #[inline(always)]
     unsafe fn store_epi64(mem_addr: &mut i64, a: Self::Vi64) {
-        *mem_addr = a.0;        
+        *mem_addr = a.0;
     }
     #[inline(always)]
     unsafe fn storeu_ps(mem_addr: &mut f32, a: Self::Vf32) {
-        *mem_addr = a.0;        
+        *mem_addr = a.0;
     }
     #[inline(always)]
     unsafe fn storeu_pd(mem_addr: &mut f64, a: Self::Vf64) {
-        *mem_addr = a.0;        
+        *mem_addr = a.0;
     }
     #[inline(always)]
     unsafe fn storeu_epi32(mem_addr: &mut i32, a: Self::Vi32) {
-        *mem_addr = a.0;        
+        *mem_addr = a.0;
     }
     #[inline(always)]
     unsafe fn storeu_epi64(mem_addr: &mut i64, a: Self::Vi64) {
-        *mem_addr = a.0;        
+        *mem_addr = a.0;
     }
     #[inline(always)]
     unsafe fn maskstore_epi32(mem_addr: &mut i32, mask: Self::Vi32, a: Self::Vi32) {
         if mask.0 != 0 {
-            *mem_addr = a.0;        
+            *mem_addr = a.0;
         }
-        
     }
     #[inline(always)]
     unsafe fn maskstore_epi64(mem_addr: &mut i64, mask: Self::Vi64, a: Self::Vi64) {
         if mask.0 != 0 {
-            *mem_addr = a.0;  
+            *mem_addr = a.0;
         }
     }
     #[inline(always)]
@@ -571,7 +559,7 @@ impl Simd for Scalar {
     }
     #[inline(always)]
     unsafe fn max_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-         if a.0 > b.0 {
+        if a.0 > b.0 {
             a
         } else {
             b
@@ -579,7 +567,7 @@ impl Simd for Scalar {
     }
     #[inline(always)]
     unsafe fn min_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-         if a.0 < b.0 {
+        if a.0 < b.0 {
             a
         } else {
             b
@@ -587,7 +575,7 @@ impl Simd for Scalar {
     }
     #[inline(always)]
     unsafe fn max_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
-         if a.0 > b.0 {
+        if a.0 > b.0 {
             a
         } else {
             b
@@ -595,7 +583,7 @@ impl Simd for Scalar {
     }
     #[inline(always)]
     unsafe fn min_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
-         if a.0 < b.0 {
+        if a.0 < b.0 {
             a
         } else {
             b
@@ -603,27 +591,27 @@ impl Simd for Scalar {
     }
     #[inline(always)]
     unsafe fn mul_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        a*b
+        a * b
     }
     #[inline(always)]
     unsafe fn mul_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
-        a*b
+        a * b
     }
     #[inline(always)]
     unsafe fn div_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        a/b
+        a / b
     }
     #[inline(always)]
     unsafe fn div_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
-        a/b
+        a / b
     }
     #[inline(always)]
     unsafe fn mullo_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-       a*b
+        a * b
     }
     #[inline(always)]
     unsafe fn not_epi64(a: Self::Vi64) -> Self::Vi64 {
-        !a        
+        !a
     }
     #[inline(always)]
     unsafe fn not_epi32(a: Self::Vi32) -> Self::Vi32 {
@@ -647,15 +635,15 @@ impl Simd for Scalar {
     }
     #[inline(always)]
     unsafe fn rcp_ps(a: Self::Vf32) -> Self::Vf32 {
-        F32x1(1.0/a.0)
+        F32x1(1.0 / a.0)
     }
     #[inline(always)]
     unsafe fn round_ps(a: Self::Vf32) -> Self::Vf32 {
-       F32x1(a.0.round())
+        F32x1(a.0.round())
     }
     #[inline(always)]
     unsafe fn round_pd(a: Self::Vf64) -> Self::Vf64 {
-       F64x1(a.0.round())
+        F64x1(a.0.round())
     }
     #[inline(always)]
     unsafe fn set1_epi32(a: i32) -> Self::Vi32 {
@@ -696,11 +684,11 @@ impl Simd for Scalar {
     }
     #[inline(always)]
     unsafe fn srai_epi64(a: Self::Vi64, amt_const: i32) -> Self::Vi64 {
-       // todo we need to shift in sign bits somehow
+        // todo we need to shift in sign bits somehow
         a >> amt_const
     }
     #[inline(always)]
-    unsafe fn srli_epi32(a: Self::Vi32, amt_const: i32) -> Self::Vi32 {        
+    unsafe fn srli_epi32(a: Self::Vi32, amt_const: i32) -> Self::Vi32 {
         a >> amt_const
     }
     #[inline(always)]
@@ -714,7 +702,7 @@ impl Simd for Scalar {
         a >> amt
     }
     #[inline(always)]
-    unsafe fn srl_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32 {        
+    unsafe fn srl_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32 {
         a >> amt
     }
     #[inline(always)]
@@ -725,11 +713,11 @@ impl Simd for Scalar {
 
     #[inline(always)]
     unsafe fn sub_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        a-b
+        a - b
     }
     #[inline(always)]
     unsafe fn sub_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        a-b
+        a - b
     }
     #[inline(always)]
     unsafe fn sqrt_ps(a: Self::Vf32) -> Self::Vf32 {
@@ -737,7 +725,7 @@ impl Simd for Scalar {
     }
     #[inline(always)]
     unsafe fn rsqrt_ps(a: Self::Vf32) -> Self::Vf32 {
-        F32x1(1.0/a.0.sqrt())
+        F32x1(1.0 / a.0.sqrt())
     }
     #[inline(always)]
     unsafe fn sqrt_pd(a: Self::Vf64) -> Self::Vf64 {
@@ -745,7 +733,7 @@ impl Simd for Scalar {
     }
     #[inline(always)]
     unsafe fn rsqrt_pd(a: Self::Vf64) -> Self::Vf64 {
-        F64x1(1.0/a.0.sqrt())
+        F64x1(1.0 / a.0.sqrt())
     }
     #[inline(always)]
     unsafe fn shuffle_epi32(a: Self::Vi32, _imm8: i32) -> Self::Vi32 {
@@ -754,7 +742,7 @@ impl Simd for Scalar {
     #[inline(always)]
     unsafe fn shuffle_ps(a: Self::Vf32, b: Self::Vf32, imm8: i32) -> Self::Vf32 {
         //todo I have no idea
-       a
+        a
     }
     #[inline(always)]
     unsafe fn unpackhi_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {

@@ -11,9 +11,6 @@ repository = "https://github.com/jackmott/simdeez"
 categories = ["hardware-support","science","game-engines"]
 edition="2018"
 
-[dependencies]
-libm = "*"
-
 [dev-dependencies]
 criterion = "0.2"
 rand = "*"
@@ -21,4 +18,5 @@ rand = "*"
 [[bench]]
 name = "benchmarks"
 harness = false
+
 

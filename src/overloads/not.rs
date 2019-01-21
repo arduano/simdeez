@@ -9,7 +9,6 @@ impl Not for I16x1 {
     }
 }
 
-
 impl Not for I32x1 {
     type Output = I32x1;
 
@@ -19,7 +18,6 @@ impl Not for I32x1 {
     }
 }
 
-
 impl Not for I64x1 {
     type Output = I64x1;
 
@@ -28,7 +26,6 @@ impl Not for I64x1 {
         I64x1(!(self.0))
     }
 }
-
 
 impl Not for F32x1 {
     type Output = F32x1;
@@ -49,7 +46,6 @@ impl Not for F64x1 {
         F64x1(f64::from_bits(bits))
     }
 }
-
 
 impl Not for I16x8 {
     type Output = I16x8;

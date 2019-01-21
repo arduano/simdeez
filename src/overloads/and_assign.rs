@@ -1,7 +1,6 @@
 use super::*;
 // -- BitAndAssign
 
-
 impl BitAndAssign for I16x1 {
     #[inline(always)]
     fn bitand_assign(&mut self, rhs: I16x1) {
@@ -42,7 +41,6 @@ impl BitAndAssign for F64x1 {
         *self = F64x1(f64::from_bits(result));
     }
 }
-
 
 impl BitAndAssign for I16x8 {
     #[inline(always)]

@@ -120,17 +120,23 @@
 #[macro_use]
 #[cfg(test)]
 extern crate std;
+
 #[cfg(target_arch = "x86")]
 use core::arch::x86::*;
+
 #[cfg(target_arch = "x86_64")]
 use core::arch::x86_64::*;
+
 use core::fmt::Debug;
 use core::ops::*;
+
 #[macro_use]
 mod macros;
-pub mod scalar;
+
 pub mod avx2;
+pub mod libm;
 pub mod overloads;
+pub mod scalar;
 pub mod sse2;
 pub mod sse41;
 

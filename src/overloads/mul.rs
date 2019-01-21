@@ -5,7 +5,7 @@ impl Mul for I16x1 {
 
     #[inline(always)]
     fn mul(self, rhs: I16x1) -> I16x1 {
-        I16x1(self.0*rhs.0)
+        I16x1(self.0 * rhs.0)
     }
 }
 
@@ -14,7 +14,7 @@ impl Mul for I32x1 {
 
     #[inline(always)]
     fn mul(self, rhs: I32x1) -> I32x1 {
-        I32x1(self.0*rhs.0)
+        I32x1(self.0 * rhs.0)
     }
 }
 
@@ -23,17 +23,16 @@ impl Mul for I64x1 {
 
     #[inline(always)]
     fn mul(self, rhs: I64x1) -> I64x1 {
-        I64x1(self.0*rhs.0)
+        I64x1(self.0 * rhs.0)
     }
 }
-
 
 impl Mul for F32x1 {
     type Output = F32x1;
 
     #[inline(always)]
     fn mul(self, rhs: F32x1) -> F32x1 {
-        F32x1(self.0*rhs.0)
+        F32x1(self.0 * rhs.0)
     }
 }
 
@@ -42,7 +41,7 @@ impl Mul for F64x1 {
 
     #[inline(always)]
     fn mul(self, rhs: F64x1) -> F64x1 {
-        F64x1(self.0*rhs.0)
+        F64x1(self.0 * rhs.0)
     }
 }
 

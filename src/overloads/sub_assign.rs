@@ -1,37 +1,37 @@
 use super::*;
 // -- SubAssign
 impl SubAssign for I16x1 {
-       #[inline(always)]
+    #[inline(always)]
     fn sub_assign(&mut self, rhs: I16x1) {
-        *self = I16x1(self.0-rhs.0);
+        *self = I16x1(self.0 - rhs.0);
     }
 }
 
 impl SubAssign for I32x1 {
-       #[inline(always)]
+    #[inline(always)]
     fn sub_assign(&mut self, rhs: I32x1) {
-        *self = I32x1(self.0-rhs.0);
+        *self = I32x1(self.0 - rhs.0);
     }
 }
 
 impl SubAssign for I64x1 {
-       #[inline(always)]
+    #[inline(always)]
     fn sub_assign(&mut self, rhs: I64x1) {
-        *self = I64x1(self.0-rhs.0);
+        *self = I64x1(self.0 - rhs.0);
     }
 }
 
 impl SubAssign for F32x1 {
-       #[inline(always)]
+    #[inline(always)]
     fn sub_assign(&mut self, rhs: F32x1) {
-        *self = F32x1(self.0-rhs.0);
+        *self = F32x1(self.0 - rhs.0);
     }
 }
 
 impl SubAssign for F64x1 {
-       #[inline(always)]
+    #[inline(always)]
     fn sub_assign(&mut self, rhs: F64x1) {
-        *self = F64x1(self.0-rhs.0);
+        *self = F64x1(self.0 - rhs.0);
     }
 }
 impl SubAssign for I16x8 {

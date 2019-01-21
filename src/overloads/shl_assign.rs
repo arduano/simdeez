@@ -37,7 +37,6 @@ impl ShlAssign<i32> for F64x1 {
     }
 }
 
-
 impl ShlAssign<i32> for I16x8 {
     #[inline(always)]
     fn shl_assign(&mut self, rhs: i32) {
