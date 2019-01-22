@@ -1,6 +1,6 @@
 [package]
 name = "simdeez"
-version = "0.4.2"
+version = "0.5.0"
 authors = ["Jack Mott <jack.mott@gmail.com>"]
 description = "SIMD library to abstract over different instruction sets and widths"
 license = "Apache-2.0/MIT"
