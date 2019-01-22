@@ -140,111 +140,66 @@ pub mod scalar;
 pub mod sse2;
 pub mod sse41;
 
+/// Grouping all the constraints shared by associated types in
+/// the Simd trait into this marker trait drastically reduces
+/// compile time.
+pub trait SimdBase<T,U> : 
+      Copy
+    + Debug
+    + IndexMut<usize>
+    + Add<T, Output = T>
+    + Sub<T, Output = T>
+    + AddAssign<T>
+    + SubAssign<T>
+    + BitAnd<T, Output = T>
+    + BitOr<T, Output = T>
+    + BitXor<T, Output = T>
+    + BitAndAssign<T>
+    + BitOrAssign<T>
+    + BitXorAssign<T>
+    + Index<usize, Output = U> {}
+
+pub trait SimdSmallInt<T,U> : SimdBase<T,U>
+    + Mul<T, Output = T>        
+    + MulAssign<T>               
+    + Not<Output = T>
+    + Shl<i32, Output = T>
+    + ShlAssign<i32>
+    + Shr<i32, Output = T>
+    + ShrAssign<i32> {}
+
+pub trait SimdFloat<T,U> : SimdBase<T,U>
+    + Mul<T, Output = T>
+    + Div<T, Output = T>    
+    + MulAssign<T>
+    + DivAssign<T> {}
+
 pub trait Simd {
-    type Vi16: Copy
-        + Debug
-        + Add<Self::Vi16, Output = Self::Vi16>
-        + Sub<Self::Vi16, Output = Self::Vi16>
-        + Mul<Self::Vi16, Output = Self::Vi16>
-        + AddAssign<Self::Vi16>
-        + SubAssign<Self::Vi16>
-        + MulAssign<Self::Vi16>
-        + BitAnd<Self::Vi16, Output = Self::Vi16>
-        + BitOr<Self::Vi16, Output = Self::Vi16>
-        + BitXor<Self::Vi16, Output = Self::Vi16>
-        + BitAndAssign<Self::Vi16>
-        + BitOrAssign<Self::Vi16>
-        + BitXorAssign<Self::Vi16>
-        + Index<usize, Output = i16>
-        + IndexMut<usize>
-        + Not<Output = Self::Vi16>
-        + Shl<i32, Output = Self::Vi16>
-        + ShlAssign<i32>
-        + Shr<i32, Output = Self::Vi16>
-        + ShrAssign<i32>;
-    /// Vi32 stands for Vector of i32s.  Corresponds to __m128i when used
+    
+    type Vi16: SimdSmallInt<Self::Vi16,i16>;
+        
+    /// Vector of i32s.  Corresponds to __m128i when used
     /// with the Sse impl, __m256i when used with Avx2, or a single i32
     /// when used with Scalar.
-    type Vi32: Copy
-        + Debug
-        + Add<Self::Vi32, Output = Self::Vi32>
-        + Sub<Self::Vi32, Output = Self::Vi32>
-        + Mul<Self::Vi32, Output = Self::Vi32>
-        + AddAssign<Self::Vi32>
-        + SubAssign<Self::Vi32>
-        + MulAssign<Self::Vi32>
-        + BitAnd<Self::Vi32, Output = Self::Vi32>
-        + BitOr<Self::Vi32, Output = Self::Vi32>
-        + BitXor<Self::Vi32, Output = Self::Vi32>
-        + BitAndAssign<Self::Vi32>
-        + BitOrAssign<Self::Vi32>
-        + BitXorAssign<Self::Vi32>
-        + Index<usize, Output = i32>
-        + IndexMut<usize>
-        + Not<Output = Self::Vi32>
-        + Shl<i32, Output = Self::Vi32>
-        + ShlAssign<i32>
-        + Shr<i32, Output = Self::Vi32>
-        + ShrAssign<i32>;
-    /// Vf32 stands for Vector of f32s.  Corresponds to __m128 when used
+    type Vi32: SimdSmallInt<Self::Vi32,i32>;
+
+    /// Vector of i64s.  Corresponds to __m128i when used
+    /// with the Sse impl, __m256i when used with Avx2, or a single i64
+    /// when used with Scalar.
+    type Vi64: SimdBase<Self::Vi64,i64>                                     
+        + Not<Output = Self::Vi64>;
+        
+    /// Vector of f32s.  Corresponds to __m128 when used
     /// with the Sse impl, __m256 when used with Avx2, or a single f32
     /// when used with Scalar.
-    type Vf32: Copy
-        + Debug
-        + Add<Self::Vf32, Output = Self::Vf32>
-        + Sub<Self::Vf32, Output = Self::Vf32>
-        + Mul<Self::Vf32, Output = Self::Vf32>
-        + Div<Self::Vf32, Output = Self::Vf32>
-        + AddAssign<Self::Vf32>
-        + SubAssign<Self::Vf32>
-        + MulAssign<Self::Vf32>
-        + DivAssign<Self::Vf32>
-        + BitAnd<Self::Vf32, Output = Self::Vf32>
-        + BitOr<Self::Vf32, Output = Self::Vf32>
-        + BitXor<Self::Vf32, Output = Self::Vf32>
-        + BitAndAssign<Self::Vf32>
-        + BitOrAssign<Self::Vf32>
-        + BitXorAssign<Self::Vf32>
-        + Index<usize, Output = f32>
-        + IndexMut<usize>;
+    type Vf32: SimdFloat<Self::Vf32,f32>;
 
-    /// Vi64 stands for Vector of f64s.  Corresponds to __m128 when used
-    /// with the Sse impl, __m256 when used with Avx2, or a single f64
+    /// Vector of f64s.  Corresponds to __m128d when used
+    /// with the Sse impl, __m256d when used with Avx2, or a single f64
     /// when used with Scalar.
-    type Vf64: Copy
-        + Debug
-        + Index<usize, Output = f64>
-        + IndexMut<usize>
-        + Add<Self::Vf64, Output = Self::Vf64>
-        + Sub<Self::Vf64, Output = Self::Vf64>
-        + Mul<Self::Vf64, Output = Self::Vf64>
-        + Div<Self::Vf64, Output = Self::Vf64>
-        + AddAssign<Self::Vf64>
-        + SubAssign<Self::Vf64>
-        + MulAssign<Self::Vf64>
-        + DivAssign<Self::Vf64>
-        + BitAnd<Self::Vf64, Output = Self::Vf64>
-        + BitOr<Self::Vf64, Output = Self::Vf64>
-        + BitXor<Self::Vf64, Output = Self::Vf64>
-        + BitAndAssign<Self::Vf64>
-        + BitOrAssign<Self::Vf64>
-        + BitXorAssign<Self::Vf64>;
-
-    type Vi64: Copy
-        + Debug
-        + Index<usize, Output = i64>
-        + IndexMut<usize>
-        + Add<Self::Vi64, Output = Self::Vi64>
-        + Sub<Self::Vi64, Output = Self::Vi64>
-        + AddAssign<Self::Vi64>
-        + SubAssign<Self::Vi64>
-        + BitAnd<Self::Vi64, Output = Self::Vi64>
-        + BitOr<Self::Vi64, Output = Self::Vi64>
-        + BitXor<Self::Vi64, Output = Self::Vi64>
-        + BitAndAssign<Self::Vi64>
-        + BitOrAssign<Self::Vi64>
-        + BitXorAssign<Self::Vi64>
-        + Not<Output = Self::Vi64>;
+    type Vf64: SimdFloat<Self::Vf64,f64>;
+        
+    
     /// The width of the vector lane.  Necessary for creating
     /// lane width agnostic code.
     const VF32_WIDTH: usize;

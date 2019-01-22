@@ -1,5 +1,4 @@
 use super::*;
-use crate::libm::*;
 use crate::overloads::*;
 use core::mem;
 

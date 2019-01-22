@@ -4,58 +4,89 @@ use core::arch::x86::*;
 use core::arch::x86_64::*;
 use core::mem;
 use core::ops::*;
+use super::*;
 
 // Newtypes for i16 vectors
 // We have to do this to allow for overloading of
 // __m128i etc
 #[derive(Copy, Debug, Clone)]
 pub struct I16x1(pub i16);
+impl SimdBase<I16x1,i16> for I16x1 {}
+impl SimdSmallInt<I16x1,i16> for I16x1 {}
 #[derive(Copy, Debug, Clone)]
 pub struct I16x8(pub __m128i);
+impl SimdBase<I16x8,i16> for I16x8 {}
+impl SimdSmallInt<I16x8,i16> for I16x8 {}
 #[derive(Copy, Debug, Clone)]
 pub struct I16x16(pub __m256i);
+impl SimdBase<I16x16,i16> for I16x16 {}
+impl SimdSmallInt<I16x16,i16> for I16x16 {}
 
 // Newtypes for i32 vectors
 // We have to do this to allow for overloading of
 // __m128i etc
 #[derive(Copy, Debug, Clone)]
 pub struct I32x1(pub i32);
+impl SimdBase<I32x1,i32> for I32x1 {}
+impl SimdSmallInt<I32x1,i32> for I32x1 {}
 #[derive(Copy, Debug, Clone)]
 pub struct I32x4(pub __m128i);
+impl SimdBase<I32x4,i32> for I32x4 {}
+impl SimdSmallInt<I32x4,i32> for I32x4 {}
 #[derive(Copy, Debug, Clone)]
 pub struct I32x4_41(pub __m128i);
+impl SimdBase<I32x4_41,i32> for I32x4_41 {}
+impl SimdSmallInt<I32x4_41,i32> for I32x4_41 {}
 #[derive(Copy, Debug, Clone)]
 pub struct I32x8(pub __m256i);
+impl SimdBase<I32x8,i32> for I32x8 {}
+impl SimdSmallInt<I32x8,i32> for I32x8 {}
 
 // Newtypes for i64 vectors
 // We have to do this to allow for overloading of
 // __m128i etc
 #[derive(Copy, Debug, Clone)]
 pub struct I64x1(pub i64);
+impl SimdBase<I64x1,i64> for I64x1 {}
 #[derive(Copy, Debug, Clone)]
 pub struct I64x2(pub __m128i);
+impl SimdBase<I64x2,i64> for I64x2 {}
 #[derive(Copy, Debug, Clone)]
 pub struct I64x2_41(pub __m128i);
+impl SimdBase<I64x2_41,i64> for I64x2_41 {}
 #[derive(Copy, Debug, Clone)]
 pub struct I64x4(pub __m256i);
+impl SimdBase<I64x4,i64> for I64x4 {}
 
 // Newtypes for f32 vectors
 // We have to do this to allow for overloading of
 // __m128 etc
 #[derive(Copy, Debug, Clone)]
 pub struct F32x1(pub f32);
+impl SimdBase<F32x1,f32> for F32x1 {}
+impl SimdFloat<F32x1,f32> for F32x1 {}
 #[derive(Copy, Debug, Clone)]
 pub struct F32x4(pub __m128);
+impl SimdBase<F32x4,f32> for F32x4 {}
+impl SimdFloat<F32x4,f32> for F32x4 {}
 #[derive(Copy, Debug, Clone)]
 pub struct F32x8(pub __m256);
+impl SimdBase<F32x8,f32> for F32x8 {}
+impl SimdFloat<F32x8,f32> for F32x8 {}
 
 // Newtypes for f64 vectors
 #[derive(Copy, Debug, Clone)]
 pub struct F64x1(pub f64);
+impl SimdBase<F64x1,f64> for F64x1 {}
+impl SimdFloat<F64x1,f64> for F64x1 {}
 #[derive(Copy, Debug, Clone)]
 pub struct F64x2(pub __m128d);
+impl SimdBase<F64x2,f64> for F64x2 {}
+impl SimdFloat<F64x2,f64> for F64x2 {}
 #[derive(Copy, Debug, Clone)]
 pub struct F64x4(pub __m256d);
+impl SimdBase<F64x4,f64> for F64x4 {}
+impl SimdFloat<F64x4,f64> for F64x4 {}
 
 mod index;
 pub use self::index::*;
