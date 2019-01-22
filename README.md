@@ -22,6 +22,7 @@ Refer to the excellent [Intel Intrinsics Guide](https://software.intel.com/sites
 * Can be used by `#[no_std]` projects
 * Operator overloading: `let sum = va + vb` or `s *= s`
 * Extract or set a single lane with the index operator: `let v1 = v[1];`
+* Falls all the way back to scalar code for platforms with no SIMD or unsupported SIMD
 
 # Compared to stdsimd
 
