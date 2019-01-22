@@ -159,6 +159,9 @@ pub trait SimdBase<T,U> :
     + BitXorAssign<T>
     + Index<usize, Output = U> {}
 
+/// 16 and 32 bit int types share all of these
+/// constraints, grouping them here speeds up
+/// compile times considerably
 pub trait SimdSmallInt<T,U> : SimdBase<T,U>
     + Mul<T, Output = T>        
     + MulAssign<T>               
@@ -168,6 +171,8 @@ pub trait SimdSmallInt<T,U> : SimdBase<T,U>
     + Shr<i32, Output = T>
     + ShrAssign<i32> {}
 
+/// f32 and f64 share these constraints, grouping
+/// them here speeds up compile times considerably
 pub trait SimdFloat<T,U> : SimdBase<T,U>
     + Mul<T, Output = T>
     + Div<T, Output = T>    
@@ -176,6 +181,9 @@ pub trait SimdFloat<T,U> : SimdBase<T,U>
 
 pub trait Simd {
     
+    /// Vector of i16s.  Corresponds to __m128i when used
+    /// with the Sse impl, __m256i when used with Avx2, or a single i16
+    /// when used with Scalar.
     type Vi16: SimdSmallInt<Self::Vi16,i16>;
         
     /// Vector of i32s.  Corresponds to __m128i when used
