@@ -39,10 +39,6 @@ impl Simd for Sse41 {
         I16x8(_mm_mullo_epi16(a.0, b.0))
     }
     #[inline(always)]
-    unsafe fn mulhi_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 {
-        I16x8(_mm_mulhi_epi16(a.0, b.0))
-    }
-    #[inline(always)]
     unsafe fn add_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         I32x4_41(_mm_add_epi32(a.0, b.0))
     }
@@ -714,39 +710,6 @@ impl Simd for Sse41 {
             };
         }
         constify_imm8!(imm8, call)
-    }
-    #[inline(always)]
-    unsafe fn shuffle_ps(a: Self::Vf32, b: Self::Vf32, imm8: i32) -> Self::Vf32 {
-        macro_rules! call {
-            ($imm8:expr) => {
-                F32x4(_mm_shuffle_ps(a.0, b.0, $imm8))
-            };
-        }
-        constify_imm8!(imm8, call)
-    }
-    #[inline(always)]
-    unsafe fn unpackhi_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        I32x4_41(_mm_unpackhi_epi32(a.0, b.0))
-    }
-    #[inline(always)]
-    unsafe fn unpacklo_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        I32x4_41(_mm_unpacklo_epi32(a.0, b.0))
-    }
-    #[inline(always)]
-    unsafe fn unpackhi_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
-        I64x2_41(_mm_unpackhi_epi64(a.0, b.0))
-    }
-    #[inline(always)]
-    unsafe fn unpacklo_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
-        I64x2_41(_mm_unpacklo_epi64(a.0, b.0))
-    }
-    #[inline(always)]
-    unsafe fn unpackhi_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
-        F64x2(_mm_unpackhi_pd(a.0, b.0))
-    }
-    #[inline(always)]
-    unsafe fn unpacklo_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
-        F64x2(_mm_unpacklo_pd(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn xor_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {

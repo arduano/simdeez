@@ -143,8 +143,8 @@ pub mod sse41;
 /// Grouping all the constraints shared by associated types in
 /// the Simd trait into this marker trait drastically reduces
 /// compile time.
-pub trait SimdBase<T,U> : 
-      Copy
+pub trait SimdBase<T, U>:
+    Copy
     + Debug
     + IndexMut<usize>
     + Add<T, Output = T>
@@ -157,57 +157,58 @@ pub trait SimdBase<T,U> :
     + BitAndAssign<T>
     + BitOrAssign<T>
     + BitXorAssign<T>
-    + Index<usize, Output = U> {}
+    + Index<usize, Output = U>
+{
+}
 
 /// 16 and 32 bit int types share all of these
 /// constraints, grouping them here speeds up
 /// compile times considerably
-pub trait SimdSmallInt<T,U> : SimdBase<T,U>
-    + Mul<T, Output = T>        
-    + MulAssign<T>               
+pub trait SimdSmallInt<T, U>:
+    SimdBase<T, U>
+    + Mul<T, Output = T>
+    + MulAssign<T>
     + Not<Output = T>
     + Shl<i32, Output = T>
     + ShlAssign<i32>
     + Shr<i32, Output = T>
-    + ShrAssign<i32> {}
+    + ShrAssign<i32>
+{
+}
 
 /// f32 and f64 share these constraints, grouping
 /// them here speeds up compile times considerably
-pub trait SimdFloat<T,U> : SimdBase<T,U>
-    + Mul<T, Output = T>
-    + Div<T, Output = T>    
-    + MulAssign<T>
-    + DivAssign<T> {}
+pub trait SimdFloat<T, U>:
+    SimdBase<T, U> + Mul<T, Output = T> + Div<T, Output = T> + MulAssign<T> + DivAssign<T>
+{
+}
 
 pub trait Simd {
-    
     /// Vector of i16s.  Corresponds to __m128i when used
     /// with the Sse impl, __m256i when used with Avx2, or a single i16
     /// when used with Scalar.
-    type Vi16: SimdSmallInt<Self::Vi16,i16>;
-        
+    type Vi16: SimdSmallInt<Self::Vi16, i16>;
+
     /// Vector of i32s.  Corresponds to __m128i when used
     /// with the Sse impl, __m256i when used with Avx2, or a single i32
     /// when used with Scalar.
-    type Vi32: SimdSmallInt<Self::Vi32,i32>;
+    type Vi32: SimdSmallInt<Self::Vi32, i32>;
 
     /// Vector of i64s.  Corresponds to __m128i when used
     /// with the Sse impl, __m256i when used with Avx2, or a single i64
     /// when used with Scalar.
-    type Vi64: SimdBase<Self::Vi64,i64>                                     
-        + Not<Output = Self::Vi64>;
-        
+    type Vi64: SimdBase<Self::Vi64, i64> + Not<Output = Self::Vi64>;
+
     /// Vector of f32s.  Corresponds to __m128 when used
     /// with the Sse impl, __m256 when used with Avx2, or a single f32
     /// when used with Scalar.
-    type Vf32: SimdFloat<Self::Vf32,f32>;
+    type Vf32: SimdFloat<Self::Vf32, f32>;
 
     /// Vector of f64s.  Corresponds to __m128d when used
     /// with the Sse impl, __m256d when used with Avx2, or a single f64
     /// when used with Scalar.
-    type Vf64: SimdFloat<Self::Vf64,f64>;
-        
-    
+    type Vf64: SimdFloat<Self::Vf64, f64>;
+
     /// The width of the vector lane.  Necessary for creating
     /// lane width agnostic code.
     const VF32_WIDTH: usize;
@@ -223,7 +224,6 @@ pub trait Simd {
     unsafe fn add_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16;
     unsafe fn sub_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16;
     unsafe fn mullo_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16;
-    unsafe fn mulhi_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16;
     unsafe fn add_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     unsafe fn add_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn add_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
@@ -441,13 +441,6 @@ pub trait Simd {
     unsafe fn sqrt_pd(a: Self::Vf64) -> Self::Vf64;
     unsafe fn rsqrt_pd(a: Self::Vf64) -> Self::Vf64;
     unsafe fn shuffle_epi32(a: Self::Vi32, imm8: i32) -> Self::Vi32;
-    unsafe fn shuffle_ps(a: Self::Vf32, b: Self::Vf32, imm8: i32) -> Self::Vf32;
-    unsafe fn unpackhi_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
-    unsafe fn unpacklo_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
-    unsafe fn unpackhi_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
-    unsafe fn unpacklo_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
-    unsafe fn unpackhi_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
-    unsafe fn unpacklo_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
     unsafe fn xor_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     unsafe fn xor_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
     unsafe fn xor_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;

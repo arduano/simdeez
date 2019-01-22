@@ -35,12 +35,7 @@ impl Simd for Scalar {
     }
     #[inline(always)]
     unsafe fn mullo_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 {
-        a * b
-    }
-    #[inline(always)]
-    unsafe fn mulhi_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 {
-        //todo figure out how to do this
-        a * b
+        I16x1((((a.0 as i32 * b.0 as i32) << 16) >> 16) as i16)
     }
     #[inline(always)]
     unsafe fn add_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
@@ -737,41 +732,6 @@ impl Simd for Scalar {
     #[inline(always)]
     unsafe fn shuffle_epi32(a: Self::Vi32, _imm8: i32) -> Self::Vi32 {
         a
-    }
-    #[inline(always)]
-    unsafe fn shuffle_ps(a: Self::Vf32, b: Self::Vf32, imm8: i32) -> Self::Vf32 {
-        //todo I have no idea
-        a
-    }
-    #[inline(always)]
-    unsafe fn unpackhi_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        //todo I have no idea
-        I32x1(0)
-    }
-    #[inline(always)]
-    unsafe fn unpacklo_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        //todo I have no idea
-        I32x1(0)
-    }
-    #[inline(always)]
-    unsafe fn unpackhi_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
-        //todo I have no idea
-        I64x1(0)
-    }
-    #[inline(always)]
-    unsafe fn unpacklo_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
-        //todo I have no idea
-        I64x1(0)
-    }
-    #[inline(always)]
-    unsafe fn unpackhi_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
-        //todo I have no idea
-        F64x1(0.0)
-    }
-    #[inline(always)]
-    unsafe fn unpacklo_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
-        //tobo I have no idea
-        F64x1(0.0)
     }
     #[inline(always)]
     unsafe fn xor_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
