@@ -562,10 +562,11 @@ mod tests {
 
         //Mask is all 0 so nothing should get loaded, only 0s
         let mask = S::setzero_epi32();
+        let mask64 = S::setzero_epi64();
         let a = S::maskload_epi32(&someints[0], mask);
-        let b = S::maskload_epi64(&somelongs[0], S::castepi32_epi64(mask));
+        let b = S::maskload_epi64(&somelongs[0], mask64);
         let c = S::maskload_ps(&somefloats[0], mask);
-        let d = S::maskload_pd(&somedoubles[0], S::castepi32_epi64(mask));
+        let d = S::maskload_pd(&somedoubles[0], mask64);
 
         for i in 0..S::VI32_WIDTH {
             assert_eq!(a[i], 0);
@@ -578,10 +579,11 @@ mod tests {
         }
         //All things should get loaded
         let mask = S::set1_epi32(-1);
+        let mask64 = S::set1_epi64(-1);
         let a = S::maskload_epi32(&someints[0], mask);
-        let b = S::maskload_epi64(&somelongs[0], S::castepi32_epi64(mask));
+        let b = S::maskload_epi64(&somelongs[0], mask64);
         let c = S::maskload_ps(&somefloats[0], mask);
-        let d = S::maskload_pd(&somedoubles[0], S::castepi32_epi64(mask));
+        let d = S::maskload_pd(&somedoubles[0], mask64);
 
         for i in 0..S::VI32_WIDTH {
             assert_eq!(a[i], someints[i]);
@@ -630,10 +632,11 @@ mod tests {
 
         //Mask is all 0 so nothing should get stored
         let mask = S::setzero_epi32();
+        let mask64 = S::setzero_epi64();
         S::maskstore_epi32(&mut someints[0], mask, i32data);
-        S::maskstore_epi64(&mut somelongs[0], S::castepi32_epi64(mask), i64data);
+        S::maskstore_epi64(&mut somelongs[0], mask64, i64data);
         S::maskstore_ps(&mut somefloats[0], mask, f32data);
-        S::maskstore_pd(&mut somedoubles[0], S::castepi32_epi64(mask), f64data);
+        S::maskstore_pd(&mut somedoubles[0], mask64, f64data);
 
         for i in 0..S::VI32_WIDTH {
             assert_eq!(someints[i], i as i32);
@@ -648,7 +651,7 @@ mod tests {
 
         //All things should get stores
         let mask = S::set1_epi32(-1);
-        let mask64 = S::castepi32_epi64(mask);
+        let mask64 = S::set1_epi64(-1);
 
         S::maskstore_epi32(&mut someints[0], mask, i32data);
         S::maskstore_epi64(&mut somelongs[0], mask64, i64data);

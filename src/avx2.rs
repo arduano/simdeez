@@ -115,14 +115,6 @@ impl Simd for Avx2 {
         F64x4(_mm256_castsi256_pd(a.0))
     }
     #[inline(always)]
-    unsafe fn castepi32_epi64(a: Self::Vi32) -> Self::Vi64 {
-        I64x4(a.0)
-    }
-    #[inline(always)]
-    unsafe fn castepi64_epi32(a: Self::Vi64) -> Self::Vi32 {
-        I32x8(a.0)
-    }
-    #[inline(always)]
     unsafe fn castps_pd(a: Self::Vf32) -> Self::Vf64 {
         F64x4(_mm256_castps_pd(a.0))
     }

@@ -74,7 +74,6 @@ impl Simd for Sse41 {
     unsafe fn andnot_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
         I64x2_41(_mm_andnot_si128(a.0, b.0))
     }
-    // TODO is this equivalent?
     #[inline(always)]
     unsafe fn blendv_epi32(a: Self::Vi32, b: Self::Vi32, mask: Self::Vi32) -> Self::Vi32 {
         I32x4_41(_mm_or_si128(
@@ -112,14 +111,6 @@ impl Simd for Sse41 {
     #[inline(always)]
     unsafe fn castepi64_pd(a: Self::Vi64) -> Self::Vf64 {
         F64x2(_mm_castsi128_pd(a.0))
-    }
-    #[inline(always)]
-    unsafe fn castepi32_epi64(a: Self::Vi32) -> Self::Vi64 {
-        I64x2_41(a.0)
-    }
-    #[inline(always)]
-    unsafe fn castepi64_epi32(a: Self::Vi64) -> Self::Vi32 {
-        I32x4_41(a.0)
     }
     #[inline(always)]
     unsafe fn castps_pd(a: Self::Vf32) -> Self::Vf64 {

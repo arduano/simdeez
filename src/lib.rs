@@ -253,8 +253,6 @@ pub trait Simd {
     unsafe fn castpd_epi64(a: Self::Vf64) -> Self::Vi64;
     unsafe fn castepi32_ps(a: Self::Vi32) -> Self::Vf32;
     unsafe fn castepi64_pd(a: Self::Vi64) -> Self::Vf64;
-    unsafe fn castepi32_epi64(a: Self::Vi32) -> Self::Vi64;
-    unsafe fn castepi64_epi32(a: Self::Vi64) -> Self::Vi32;
     unsafe fn castps_pd(a: Self::Vf32) -> Self::Vf64;
     unsafe fn castpd_ps(a: Self::Vf64) -> Self::Vf32;
     unsafe fn ceil_ps(a: Self::Vf32) -> Self::Vf32;

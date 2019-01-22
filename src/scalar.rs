@@ -122,21 +122,11 @@ impl Simd for Scalar {
         F64x1(mem::transmute::<i64, f64>(a.0))
     }
     #[inline(always)]
-    unsafe fn castepi32_epi64(a: Self::Vi32) -> Self::Vi64 {
-        I64x1(a.0 as i64)
-    }
-    #[inline(always)]
-    unsafe fn castepi64_epi32(a: Self::Vi64) -> Self::Vi32 {
-        //todo think about
-        I32x1(a.0 as i32)
-    }
-    #[inline(always)]
     unsafe fn castps_pd(a: Self::Vf32) -> Self::Vf64 {
         F64x1(a.0 as f64)
     }
     #[inline(always)]
     unsafe fn castpd_ps(a: Self::Vf64) -> Self::Vf32 {
-        // todo think about
         F32x1(a.0 as f32)
     }
     #[inline(always)]
@@ -673,38 +663,37 @@ impl Simd for Scalar {
     }
     #[inline(always)]
     unsafe fn srai_epi32(a: Self::Vi32, amt_const: i32) -> Self::Vi32 {
-        // todo we need to shift in sign bits somehow
         a >> amt_const
     }
     #[inline(always)]
     unsafe fn srai_epi64(a: Self::Vi64, amt_const: i32) -> Self::Vi64 {
-        // todo we need to shift in sign bits somehow
         a >> amt_const
     }
     #[inline(always)]
     unsafe fn srli_epi32(a: Self::Vi32, amt_const: i32) -> Self::Vi32 {
-        a >> amt_const
+        //Transmute to unsigned so we don't get sign bits in the shift
+        I32x1(mem::transmute::<u32, i32>(
+            mem::transmute::<i32, u32>(a.0) >> amt_const,
+        ))
     }
     #[inline(always)]
     unsafe fn slli_epi32(a: Self::Vi32, amt_const: i32) -> Self::Vi32 {
-        // todo check this
         a << amt_const
     }
     #[inline(always)]
     unsafe fn sra_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32 {
-        // todo we need to shift in sign bits somehow
         a >> amt
     }
     #[inline(always)]
     unsafe fn srl_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32 {
-        a >> amt
+        I32x1(mem::transmute::<u32, i32>(
+            mem::transmute::<i32, u32>(a.0) >> amt,
+        ))
     }
     #[inline(always)]
     unsafe fn sll_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32 {
-        //todo check
         a << amt
     }
-
     #[inline(always)]
     unsafe fn sub_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         a - b
