@@ -12,7 +12,7 @@ categories = ["hardware-support","science","game-engines"]
 edition="2018"
 
 [dev-dependencies]
-criterion = "0.2"
+criterion = "0.2.8"
 rand = "0.6.4"
 
 [[bench]]
