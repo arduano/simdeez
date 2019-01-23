@@ -5,7 +5,7 @@ impl Mul for I16x1 {
 
     #[inline(always)]
     fn mul(self, rhs: I16x1) -> I16x1 {
-        I16x1(self.0 * rhs.0)
+        I16x1(self.0.wrapping_mul(rhs.0))
     }
 }
 
@@ -14,7 +14,7 @@ impl Mul for I32x1 {
 
     #[inline(always)]
     fn mul(self, rhs: I32x1) -> I32x1 {
-        I32x1(self.0 * rhs.0)
+        I32x1(self.0.wrapping_mul(rhs.0))
     }
 }
 
@@ -23,7 +23,7 @@ impl Mul for I64x1 {
 
     #[inline(always)]
     fn mul(self, rhs: I64x1) -> I64x1 {
-        I64x1(self.0 * rhs.0)
+        I64x1(self.0.wrapping_mul(rhs.0))
     }
 }
 

@@ -4,21 +4,21 @@ use super::*;
 impl MulAssign for I16x1 {
     #[inline(always)]
     fn mul_assign(&mut self, rhs: I16x1) {
-        *self = I16x1(self.0 * rhs.0);
+        *self = I16x1(self.0.wrapping_mul(rhs.0));
     }
 }
 
 impl MulAssign for I32x1 {
     #[inline(always)]
     fn mul_assign(&mut self, rhs: I32x1) {
-        *self = I32x1(self.0 * rhs.0);
+        *self = I32x1(self.0.wrapping_mul(rhs.0));
     }
 }
 
 impl MulAssign for I64x1 {
     #[inline(always)]
     fn mul_assign(&mut self, rhs: I64x1) {
-        *self = I64x1(self.0 * rhs.0);
+        *self = I64x1(self.0.wrapping_mul(rhs.0));
     }
 }
 
