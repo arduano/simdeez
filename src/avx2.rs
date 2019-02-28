@@ -18,13 +18,13 @@ impl Simd for Avx2 {
 
     #[inline(always)]
     unsafe fn abs_ps(a: Self::Vf32) -> Self::Vf32 {
-        let b = _mm256_set1_ps(-0.0);
-        F32x8(_mm256_andnot_ps(a.0, b))
+        let b = _mm256_set1_ps(-0.0f32);
+        F32x8(_mm256_andnot_ps(b,a.0))
     }
     #[inline(always)]
     unsafe fn abs_pd(a: Self::Vf64) -> Self::Vf64 {
-        let b = _mm256_set1_pd(-0.0);
-        F64x4(_mm256_andnot_pd(a.0, b))
+        let b = _mm256_set1_pd(-0.0f64);
+        F64x4(_mm256_andnot_pd(b,a.0))
     }
     #[inline(always)]
     unsafe fn add_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 {
