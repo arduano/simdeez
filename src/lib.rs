@@ -1,7 +1,7 @@
 //! A library that abstracts over SIMD instruction sets, including ones with differing widths.
-//! SIMDeez is designed to allow you to write a function one time and produce SSE2, SSE41, and AVX2 versions of the function.
-//! You can either have the version you want chosen at compile time with `cfg` attributes, or at runtime with
-//! `target_feature` attributes and using the built in `is_x86_feature_detected!' macro.
+//! SIMDeez is designed to allow you to write a function one time and produce scalar, SSE2, SSE41, and AVX2 versions of the function.
+//! You can either have the version you want selected automatically at runtime, at compiletime, or
+//! select yourself by hand.
 //!
 //! SIMDeez is currently in Beta, if there are intrinsics you need that are not currently implemented, create an issue
 //! and I'll add them. PRs to add more intrinsics are welcome. Currently things are well fleshed out for i32, i64, f32, and f64 types.
@@ -45,13 +45,14 @@
 //!
 //! ```rust
 //!     use simdeez::*;
+//!     use simdeez::scalar::*;
 //!     use simdeez::sse2::*;
 //!     use simdeez::sse41::*;
 //!     use simdeez::avx2::*;
-//!     // If using runtime feature detection, you will want to be sure this inlines
-//!     // so you can leverage target_feature attributes
-//!     #[inline(always)]
-//!     unsafe fn distance<S: Simd>(
+//!     // If you want your SIMD function to use use runtime feature detection to call
+//!     // the fastest available version, use the simd_runtime_generate macro:
+//!     simd_runtime_generate!(
+//!     fn distance(
 //!         x1: &[f32],
 //!         y1: &[f32],
 //!         x2: &[f32],
@@ -64,9 +65,8 @@
 //!         // so that it will work with any size vector.
 //!         // the width of a vector type is provided as a constant
 //!         // so the compiler is free to optimize it more.
-//!         let mut i = 0;
-//!         //S::VF32_WIDTH is a constant, 4 when using SSE, 8 when using AVX2, etc
-//!         while i < x1.len() {
+//!         // S::VF32_WIDTH is a constant, 4 when using SSE, 8 when using AVX2, etc
+//!         for i in (0..x1.len()).step_by(S::VF32_WIDTH) {
 //!             //load data from your vec into a SIMD value
 //!             let xv1 = S::loadu_ps(&x1[i]);
 //!             let yv1 = S::loadu_ps(&y1[i]);
@@ -82,40 +82,35 @@
 //!             let distance = S::sqrt_ps(xdiff + ydiff);
 //!             // Store the SIMD value into the result vec
 //!             S::storeu_ps(&mut result[i], distance);
-//!             // Increment i by the vector width
-//!             i += S::VF32_WIDTH
 //!         }
 //!         result
-//!     }
-//!
-//!     //Call distance as an SSE2 function
-//!     #[target_feature(enable = "sse2")]
-//!     unsafe fn distance_sse2(
-//!         x1: &[f32],
-//!         y1: &[f32],
-//!         x2: &[f32],
-//!         y2: &[f32]) -> Vec<f32> {
-//!         distance::<Sse2>(x1, y1, x2, y2)
-//!     }
-//!     //Call distance as an SSE41 function
-//!     #[target_feature(enable = "sse4.1")]
-//!     unsafe fn distance_sse41(
-//!         x1: &[f32],
-//!         y1: &[f32],
-//!         x2: &[f32],
-//!         y2: &[f32]) -> Vec<f32> {
-//!         distance::<Sse41>(x1, y1, x2, y2)
-//!     }
-//!     //Call distance as an AVX2 function
-//!     #[target_feature(enable = "avx2")]
-//!     unsafe fn distance_avx2(
-//!         x1: &[f32],
-//!         y1: &[f32],
-//!         x2: &[f32],
-//!         y2: &[f32]) -> Vec<f32> {
-//!         distance::<Avx2>(x1, y1, x2, y2)
-//!     }
+//!     });
+//! fn main() {
+//! }
 //! ```
+//!
+//! This will generate 5 functions for you:
+//! * `distance<S:Simd>` the generic version of your function
+//! * `distance_scalar`  a scalar fallback
+//! * `distance_sse2`    SSE2 version
+//! * `distance_sse41`   SSE41 version
+//! * `distance_avx2`    AVX2 version
+//! * `distance_runtime_select`  // picks the fastest of the above at runtime
+//!
+//! You can use any of these you wish, though typically you would use the runtime_select version
+//! unless you want to force an older instruction set to avoid throttling or for other arcane
+//! reasons.
+//!
+//! Optionally you can use the `simd_compiletime_generate!` macro in the same way.  This will
+//! produce 2 active functions via the `cfg` attribute feature:
+//!
+//! * `distance<S:Simd>`      the generic version of your function
+//! * `distance_compiletime`  the fastest instruction set availble for the given compile time
+//! feature set
+//!
+//! You may also forgoe the macros if you know what you are doing, just keep in mind there are lots
+//! of arcane subtleties with inlining and target_features that must be managed. See how the macros
+//! expand for more detail.
 #![no_std]
 #[macro_use]
 #[cfg(test)]
@@ -283,6 +278,8 @@ pub trait Simd {
     unsafe fn cmple_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
     unsafe fn cmplt_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
     unsafe fn cvtepi32_ps(a: Self::Vi32) -> Self::Vf32;
+    /// Currently scalar will have different results in some cases depending on the 
+    /// current SSE rounding mode. 
     unsafe fn cvtps_epi32(a: Self::Vf32) -> Self::Vi32;
     unsafe fn floor_ps(a: Self::Vf32) -> Self::Vf32;
     unsafe fn floor_pd(a: Self::Vf64) -> Self::Vf64;
@@ -484,7 +481,7 @@ macro_rules! simd_runtime_generate {
             }
         }
     };
- 
+
 }
 
 #[macro_export]
@@ -493,7 +490,7 @@ macro_rules! simd_compiletime_generate {
         #[inline(always)]
         $vis unsafe fn $fn_name<S: Simd>($($arg:$typ,)*) $(-> $rt)?
             $body
-        
+
         paste::item! {
             #[cfg(target_feature = "avx2")]
             $vis fn [<$fn_name _compiletime>]($($arg:$typ,)*) $(-> $rt)? {
@@ -516,10 +513,7 @@ macro_rules! simd_compiletime_generate {
 
 
        }
-       
+
     };
-  
+
 }
-
-
-
