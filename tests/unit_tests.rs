@@ -31,7 +31,89 @@ mod tests {
     }
 
 
-        
+    simd_generate!(
+        fn set1(floats:&Vec<f32>, ints:&Vec<i32>) {
+            for i in 0 .. ints.len() {
+                let a = S::set1_epi32(ints[i]);
+                for j in 0..S::VI32_WIDTH {
+                    assert_eq!(a[j],ints[i]);
+                }
+            }
+            for i in 0 .. floats.len() {
+                let b = S::set1_ps(floats[i]);
+                for j in 0..S::VF32_WIDTH {
+                    assert_delta!(b[j],floats[i],0.001);
+                }
+            }
+        });
+    #[test]
+    fn set1_test() {
+        let ints = &vec![-1,1,0,10,-10,i32::max_value(),i32::min_value()];
+        let floats = &vec![-1.0,1.0,0.0,-0.0,10.0,-10.0,f32::MIN,f32::MAX,f32::MIN_POSITIVE,f32::NAN,f32::NEG_INFINITY,f32::INFINITY];
+        unsafe {
+        set1_sse2(floats,ints);
+        set1_sse41(floats,ints);
+        set1_avx2(floats,ints);
+        set1_scalar(floats,ints);
+        }
+    }
+     simd_generate!(
+        fn sub(floats:&Vec<f32>, ints:&Vec<i32>) {
+            for i in 0 .. ints.len() {
+                let a = S::sub_epi32(S::set1_epi32(ints[i]),S::set1_epi32(ints[i]));
+                for j in 0..S::VI32_WIDTH {
+                    assert_eq!(a[j],ints[i]-ints[i]);
+                }
+            }
+            for i in 0 .. floats.len() {
+                let b = S::sub_ps(S::set1_ps(floats[i]),S::set1_ps(floats[i]));
+                for j in 0..S::VF32_WIDTH {
+                    assert_delta!(b[j],floats[i]-floats[i],0.001);
+                }
+            }
+        });
+    #[test]
+    fn sub_test() {
+        let ints = &vec![-1,1,0,10,-10,i32::max_value(),i32::min_value()];
+        let floats = &vec![-1.0,1.0,0.0,-0.0,10.0,-10.0,f32::MIN,f32::MAX,f32::MIN_POSITIVE,f32::NAN,f32::NEG_INFINITY,f32::INFINITY];
+        unsafe {
+        sub_sse2(floats,ints);
+        sub_sse41(floats,ints);
+        sub_avx2(floats,ints);
+        sub_scalar(floats,ints);
+        }
+    }     
+ simd_generate!(
+        fn cvt(floats:&Vec<f32>, ints:&Vec<i32>) {
+            for i in 0 .. ints.len() {
+                let a = S::cvtepi32_ps(S::set1_epi32(ints[i]));
+                for j in 0..S::VI32_WIDTH {
+                    assert_delta!(a[j],ints[i] as f32,0.001);
+                }
+            }
+            for i in 0 .. floats.len() {
+                let b = S::cvtps_epi32(S::set1_ps(floats[i]));
+                for j in 0..S::VF32_WIDTH {
+                  println!("i:{}",i);
+                    let x = floats[i];
+                    let rounded =  (x + 0.5).floor();
+                    assert_eq!(b[j],rounded as i32);
+
+                }
+            }
+        });
+    #[test]
+    fn cvt_test() {
+        let ints = &vec![-1,1,0,10,-10,i32::max_value(),i32::min_value()];
+        let floats = &vec![1.5,-1.5,-0.5,0.5,-0.999,0.999,0.0001,-0.0001,-1.0,1.0,0.0,-0.0,10.0,-10.0,f32::MIN,f32::MAX,f32::MIN_POSITIVE,f32::NAN,f32::NEG_INFINITY,f32::INFINITY];
+        unsafe {
+        cvt_sse2(floats,ints);
+//        cvt_sse41(floats,ints);
+//        cvt_avx2(floats,ints);
+//        cvt_scalar(floats,ints);
+
+        }
+    }     
     simd_generate!(
     fn blendv() {
         //i32

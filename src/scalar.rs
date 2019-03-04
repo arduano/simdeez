@@ -323,7 +323,7 @@ impl Simd for Scalar {
     }
     #[inline(always)]
     unsafe fn cvtps_epi32(a: Self::Vf32) -> Self::Vi32 {
-        I32x1(a.0 as i32)
+        I32x1((a.0 + 0.5).floor() as i32)
     }
     #[inline(always)]
     unsafe fn cvtepi32_ps(a: Self::Vi32) -> Self::Vf32 {
