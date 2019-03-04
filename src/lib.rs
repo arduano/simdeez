@@ -121,6 +121,7 @@
 #[cfg(test)]
 extern crate std;
 
+extern crate paste;
 #[cfg(target_arch = "x86")]
 use core::arch::x86::*;
 
@@ -444,3 +445,82 @@ pub trait Simd {
     unsafe fn xor_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn xor_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
 }
+
+#[macro_export]
+macro_rules! simd_generate {
+  (pub fn $fn_name:ident ($($arg:ident:$typ:ty),*) $(-> $rt:ty)? $body:block  ) => {
+        #[inline(always)]
+        pub unsafe fn $fn_name<S: Simd>($($arg:$typ,)*) $(-> $rt)?
+            $body
+
+        paste::item! {
+            pub unsafe fn [<$fn_name _scalar>]($($arg:$typ,)*) $(-> $rt)? {
+                $fn_name::<Scalar>($($arg,)*)
+            }
+
+            #[target_feature(enable = "sse2")]
+            pub  unsafe fn [<$fn_name _sse2>]($($arg:$typ,)*) $(-> $rt)? {
+                $fn_name::<Sse2>($($arg,)*)
+            }
+
+            #[target_feature(enable = "sse4.1")]
+                pub unsafe fn [<$fn_name _sse41>]($($arg:$typ,)*) $(-> $rt)? {
+                $fn_name::<Sse41>($($arg,)*)
+            }
+            #[target_feature(enable = "avx2")]
+            pub  unsafe fn [<$fn_name _avx2>]($($arg:$typ,)*) $(-> $rt)? {
+                $fn_name::<Avx2>($($arg,)*)
+            }
+            pub  fn [<$fn_name _runtime_select>]($($arg:$typ,)*) $(-> $rt)? {
+                if is_x86_feature_detected!("avx2") {
+                    unsafe { [<$fn_name _avx2>]($($arg,)*) }
+                } else if is_x86_feature_detected!("sse4.1") {
+                    unsafe { [<$fn_name _sse41>]($($arg,)*) }
+                } else if is_x86_feature_detected!("sse2") {
+                    unsafe { [<$fn_name _sse2>]($($arg,)*) }
+                } else {
+                    unsafe { [<$fn_name _scalar>]($($arg,)*) }
+                }
+            }
+        }
+    };
+ ( fn $fn_name:ident ($($arg:ident:$typ:ty),*) $(-> $rt:ty)? $body:block  ) => {
+        #[inline(always)]
+         unsafe fn $fn_name<S: Simd>($($arg:$typ,)*) $(-> $rt)?
+            $body
+
+        paste::item! {
+             unsafe fn [<$fn_name _scalar>]($($arg:$typ,)*) $(-> $rt)? {
+                $fn_name::<Scalar>($($arg,)*)
+            }
+
+            #[target_feature(enable = "sse2")]
+              unsafe fn [<$fn_name _sse2>]($($arg:$typ,)*) $(-> $rt)? {
+                $fn_name::<Sse2>($($arg,)*)
+            }
+
+            #[target_feature(enable = "sse4.1")]
+                 unsafe fn [<$fn_name _sse41>]($($arg:$typ,)*) $(-> $rt)? {
+                $fn_name::<Sse41>($($arg,)*)
+            }
+            #[target_feature(enable = "avx2")]
+              unsafe fn [<$fn_name _avx2>]($($arg:$typ,)*) $(-> $rt)? {
+                $fn_name::<Avx2>($($arg,)*)
+            }
+              fn [<$fn_name _runtime_select>]($($arg:$typ,)*) $(-> $rt)? {
+                if is_x86_feature_detected!("avx2") {
+                    unsafe { [<$fn_name _avx2>]($($arg,)*) }
+                } else if is_x86_feature_detected!("sse4.1") {
+                    unsafe { [<$fn_name _sse41>]($($arg,)*) }
+                } else if is_x86_feature_detected!("sse2") {
+                    unsafe { [<$fn_name _sse2>]($($arg,)*) }
+                } else {
+                    unsafe { [<$fn_name _scalar>]($($arg,)*) }
+                }
+            }
+        }
+    };
+
+}
+
+

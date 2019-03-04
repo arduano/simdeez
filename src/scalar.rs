@@ -35,7 +35,7 @@ impl Simd for Scalar {
     }
     #[inline(always)]
     unsafe fn mullo_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 {
-        a * b 
+        a * b
     }
     #[inline(always)]
     unsafe fn add_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {

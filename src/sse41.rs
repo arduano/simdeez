@@ -24,7 +24,7 @@ impl Simd for Sse41 {
     #[inline(always)]
     unsafe fn abs_pd(a: Self::Vf64) -> Self::Vf64 {
         let b = _mm_set1_pd(-0.0f64);
-        F64x2(_mm_andnot_pd(b,a.0))
+        F64x2(_mm_andnot_pd(b, a.0))
     }
     #[inline(always)]
     unsafe fn add_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 {
