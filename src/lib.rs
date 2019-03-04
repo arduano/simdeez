@@ -447,31 +447,31 @@ pub trait Simd {
 }
 
 #[macro_export]
-macro_rules! simd_generate {
-  (pub fn $fn_name:ident ($($arg:ident:$typ:ty),*) $(-> $rt:ty)? $body:block  ) => {
+macro_rules! simd_runtime_generate {
+  ($vis:vis fn $fn_name:ident ($($arg:ident:$typ:ty),*) $(-> $rt:ty)? $body:block  ) => {
         #[inline(always)]
-        pub unsafe fn $fn_name<S: Simd>($($arg:$typ,)*) $(-> $rt)?
+        $vis unsafe fn $fn_name<S: Simd>($($arg:$typ,)*) $(-> $rt)?
             $body
 
         paste::item! {
-            pub unsafe fn [<$fn_name _scalar>]($($arg:$typ,)*) $(-> $rt)? {
+            $vis unsafe fn [<$fn_name _scalar>]($($arg:$typ,)*) $(-> $rt)? {
                 $fn_name::<Scalar>($($arg,)*)
             }
 
             #[target_feature(enable = "sse2")]
-            pub  unsafe fn [<$fn_name _sse2>]($($arg:$typ,)*) $(-> $rt)? {
+            $vis  unsafe fn [<$fn_name _sse2>]($($arg:$typ,)*) $(-> $rt)? {
                 $fn_name::<Sse2>($($arg,)*)
             }
 
             #[target_feature(enable = "sse4.1")]
-                pub unsafe fn [<$fn_name _sse41>]($($arg:$typ,)*) $(-> $rt)? {
+                $vis unsafe fn [<$fn_name _sse41>]($($arg:$typ,)*) $(-> $rt)? {
                 $fn_name::<Sse41>($($arg,)*)
             }
             #[target_feature(enable = "avx2")]
-            pub  unsafe fn [<$fn_name _avx2>]($($arg:$typ,)*) $(-> $rt)? {
+            $vis  unsafe fn [<$fn_name _avx2>]($($arg:$typ,)*) $(-> $rt)? {
                 $fn_name::<Avx2>($($arg,)*)
             }
-            pub  fn [<$fn_name _runtime_select>]($($arg:$typ,)*) $(-> $rt)? {
+            $vis  fn [<$fn_name _runtime_select>]($($arg:$typ,)*) $(-> $rt)? {
                 if is_x86_feature_detected!("avx2") {
                     unsafe { [<$fn_name _avx2>]($($arg,)*) }
                 } else if is_x86_feature_detected!("sse4.1") {
@@ -484,43 +484,42 @@ macro_rules! simd_generate {
             }
         }
     };
- ( fn $fn_name:ident ($($arg:ident:$typ:ty),*) $(-> $rt:ty)? $body:block  ) => {
-        #[inline(always)]
-         unsafe fn $fn_name<S: Simd>($($arg:$typ,)*) $(-> $rt)?
-            $body
-
-        paste::item! {
-             unsafe fn [<$fn_name _scalar>]($($arg:$typ,)*) $(-> $rt)? {
-                $fn_name::<Scalar>($($arg,)*)
-            }
-
-            #[target_feature(enable = "sse2")]
-              unsafe fn [<$fn_name _sse2>]($($arg:$typ,)*) $(-> $rt)? {
-                $fn_name::<Sse2>($($arg,)*)
-            }
-
-            #[target_feature(enable = "sse4.1")]
-                 unsafe fn [<$fn_name _sse41>]($($arg:$typ,)*) $(-> $rt)? {
-                $fn_name::<Sse41>($($arg,)*)
-            }
-            #[target_feature(enable = "avx2")]
-              unsafe fn [<$fn_name _avx2>]($($arg:$typ,)*) $(-> $rt)? {
-                $fn_name::<Avx2>($($arg,)*)
-            }
-              fn [<$fn_name _runtime_select>]($($arg:$typ,)*) $(-> $rt)? {
-                if is_x86_feature_detected!("avx2") {
-                    unsafe { [<$fn_name _avx2>]($($arg,)*) }
-                } else if is_x86_feature_detected!("sse4.1") {
-                    unsafe { [<$fn_name _sse41>]($($arg,)*) }
-                } else if is_x86_feature_detected!("sse2") {
-                    unsafe { [<$fn_name _sse2>]($($arg,)*) }
-                } else {
-                    unsafe { [<$fn_name _scalar>]($($arg,)*) }
-                }
-            }
-        }
-    };
-
+ 
 }
+
+#[macro_export]
+macro_rules! simd_compiletime_generate {
+ ($vis:vis fn $fn_name:ident ($($arg:ident:$typ:ty),*) $(-> $rt:ty)? $body:block  ) => {
+        #[inline(always)]
+        $vis unsafe fn $fn_name<S: Simd>($($arg:$typ,)*) $(-> $rt)?
+            $body
+        
+        paste::item! {
+            #[cfg(target_feature = "avx2")]
+            $vis fn [<$fn_name _compiletime>]($($arg:$typ,)*) $(-> $rt)? {
+                unsafe { $fn_name::<Avx2>($($arg,)*) }
+            }
+
+            #[cfg(all(target_feature = "sse4.1",not(target_feature = "avx2")))]
+            $vis fn [<$fn_name _compiletime>]($($arg:$typ,)*) $(-> $rt)? {
+                unsafe { $fn_name::<Sse41>($($arg,)*) }
+            }
+            #[cfg(all(target_feature = "sse2",not(any(target_feature="sse4.1",target_feature = "avx2"))))]
+            $vis fn [<$fn_name _compiletime>]($($arg:$typ,)*) $(-> $rt)? {
+               unsafe { $fn_name::<Sse2>($($arg,)*) }
+            }
+
+            #[cfg(not(any(target_feature="sse4.1",target_feature = "avx2",target_feature="sse2")))]
+            $vis fn [<$fn_name _compiletime>]($($arg:$typ,)*) $(-> $rt)? {
+               unsafe { $fn_name::<Scalar>($($arg,)*) }
+            }
+
+
+       }
+       
+    };
+  
+}
+
 
 

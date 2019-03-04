@@ -31,7 +31,7 @@ mod tests {
     }
 
 
-    simd_generate!(
+    simd_runtime_generate!(
         fn set1(floats:&Vec<f32>, ints:&Vec<i32>) {
             for i in 0 .. ints.len() {
                 let a = S::set1_epi32(ints[i]);
@@ -57,7 +57,7 @@ mod tests {
         set1_scalar(floats,ints);
         }
     }
-     simd_generate!(
+     simd_runtime_generate!(
         fn sub(floats:&Vec<f32>, ints:&Vec<i32>) {
             for i in 0 .. ints.len() {
                 let a = S::sub_epi32(S::set1_epi32(ints[i]),S::set1_epi32(ints[i]));
@@ -83,7 +83,7 @@ mod tests {
         sub_scalar(floats,ints);
         }
     }     
- simd_generate!(
+ simd_compiletime_generate!(
         fn cvt(floats:&Vec<f32>, ints:&Vec<i32>) {
             for i in 0 .. ints.len() {
                 let a = S::cvtepi32_ps(S::set1_epi32(ints[i]));
@@ -107,14 +107,15 @@ mod tests {
         let ints = &vec![-1,1,0,10,-10,i32::max_value(),i32::min_value()];
         let floats = &vec![1.5,-1.5,-0.5,0.5,-0.999,0.999,0.0001,-0.0001,-1.0,1.0,0.0,-0.0,10.0,-10.0,f32::MIN,f32::MAX,f32::MIN_POSITIVE,f32::NAN,f32::NEG_INFINITY,f32::INFINITY];
         unsafe {
-        cvt_sse2(floats,ints);
+            cvt_compiletime(floats,ints);
+//        cvt_sse2(floats,ints);
 //        cvt_sse41(floats,ints);
 //        cvt_avx2(floats,ints);
 //        cvt_scalar(floats,ints);
 
         }
     }     
-    simd_generate!(
+    simd_runtime_generate!(
     fn blendv() {
         //i32
         let a = S::set1_epi32(1);
@@ -212,7 +213,7 @@ mod tests {
         }
     }
 
-    simd_generate!(fn maskload() {
+    simd_runtime_generate!(fn maskload() {
         let someints = [1i32, 0, -1, i32::MAX, i32::MIN, 100, -100, 1000];
         let somefloats = [
             0.0f32,
@@ -283,7 +284,7 @@ mod tests {
         }
     }
 
-    simd_generate!( fn maskstore() {
+    simd_runtime_generate!( fn maskstore() {
         let mut someints = [0i32, 1, 2, 3, 4, 5, 6, 7];
         let mut somefloats = [0.0f32, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0];
         let mut somelongs = [0i64, 1, 2, 3, 4, 5, 6, 7];
