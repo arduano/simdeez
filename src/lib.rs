@@ -85,8 +85,8 @@
 //!         }
 //!         result
 //!     });
-//! fn main() {
-//! }
+//! # fn main() {
+//! # }
 //! ```
 //!
 //! This will generate 5 functions for you:
@@ -95,7 +95,7 @@
 //! * `distance_sse2`    SSE2 version
 //! * `distance_sse41`   SSE41 version
 //! * `distance_avx2`    AVX2 version
-//! * `distance_runtime_select`  // picks the fastest of the above at runtime
+//! * `distance_runtime_select`  picks the fastest of the above at runtime
 //!
 //! You can use any of these you wish, though typically you would use the runtime_select version
 //! unless you want to force an older instruction set to avoid throttling or for other arcane
