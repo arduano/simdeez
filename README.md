@@ -1,9 +1,8 @@
 A library that abstracts over SIMD instruction sets, including ones with differing widths.
 SIMDeez is designed to allow you to write a function one time and produce SSE2, SSE41, and AVX2 versions of the function.
-You can either have the version you want chosen at compile time with `cfg` attributes, or at runtime with
-`target_feature` attributes and using the built in `is_x86_feature_detected!` macro.
+You can either have the version you want chosen at compile time or automatically at runtime.
 
-SIMDeez is currently in Beta, if there are intrinsics you need that are not currently implemented, create an issue
+If there are intrinsics you need that are not currently implemented, create an issue
 and I'll add them. PRs to add more intrinsics are welcome. Currently things are well fleshed out for i32, i64, f32, and f64 types.
 
 As Rust stabilizes support for Neon and AVX-512 I plan to add those as well.
@@ -12,7 +11,7 @@ Refer to the excellent [Intel Intrinsics Guide](https://software.intel.com/sites
 
 # Features
 
-* SSE2, SSE41, and AVX2 
+* SSE2, SSE41, and AVX2, and scalar fallback
 * Can be used with compile time or run time selection
 * No runtime overhead
 * Uses familiar intel intrinsic naming conventions, easy to port. 
