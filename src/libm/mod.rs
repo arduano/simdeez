@@ -1,14 +1,10 @@
 //! libm in pure Rust
 //!
-//! # Usage
+//! This is pulled from  https://github.com/rust-lang-nursery/libm
+//! Maintainers of that project have gone dark, and I had to fix some things
+//! so I just pulled it into simdeez.
+//! This is all just to support no_std
 //!
-//! You can use this crate in two ways:
-//!
-//! - By directly using its free functions, e.g. `libm::powf`.
-//!
-//! - By importing the `F32Ext` and / or `F64Ext` extension traits to add methods like `powf` to the
-//! `f32` and `f64` types. Then you'll be able to invoke math functions as methods, e.g. `x.sqrt()`.
-
 #![deny(warnings)]
 
 #![cfg_attr(
