@@ -23,7 +23,7 @@ Refer to the excellent [Intel Intrinsics Guide](https://software.intel.com/sites
 * Extract or set a single lane with the index operator: `let v1 = v[1];`
 * Falls all the way back to scalar code for platforms with no SIMD or unsupported SIMD
 
-# Compared to stdsimd
+# Compared to packed_simd
 
 * SIMDeez can abstract over differing simd widths. stdsimd does not
 * SIMDeez builds on stable rust now, stdsimd does not
