@@ -25,8 +25,8 @@ Refer to the excellent [Intel Intrinsics Guide](https://software.intel.com/sites
 
 # Compared to packed_simd
 
-* SIMDeez can abstract over differing simd widths. stdsimd does not
-* SIMDeez builds on stable rust now, stdsimd does not
+* SIMDeez can abstract over differing simd widths. packed_simd does not
+* SIMDeez builds on stable rust now, packed_simd does not
 
 # Compared to Faster
 
