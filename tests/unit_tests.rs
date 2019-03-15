@@ -419,8 +419,8 @@ mod tests {
             let sse41_res = sum_simdeez_horizontal_sse41(&x);
             let sse_res = sum_simdeez_horizontal_sse2(&x);
             let scalar_res = sum_simdeez_horizontal_scalar(&x);
-            assert_delta!(avx2_res, sse41_res, 0.001);
-            assert_delta!(sse_res, sse41_res, 0.001);
+            assert_delta!(avx2_res, sse41_res, 0.01);
+            assert_delta!(sse_res, sse41_res, 0.01);
             assert_delta!(sse_res, scalar_res, 0.01);
         }
     }
@@ -446,8 +446,8 @@ mod tests {
             let sse41_res = sum_simdeez_horizontal_pd_sse41(&x);
             let sse_res = sum_simdeez_horizontal_pd_sse2(&x);
             let scalar_res = sum_simdeez_horizontal_pd_scalar(&x);
-            assert_delta!(avx2_res, sse41_res, 0.001);
-            assert_delta!(sse_res, sse41_res, 0.001);
+            assert_delta!(avx2_res, sse41_res, 0.01);
+            assert_delta!(sse_res, sse41_res, 0.01);
             assert_delta!(sse_res, scalar_res, 0.01);
         }
     }
