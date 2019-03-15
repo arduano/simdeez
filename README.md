@@ -1,9 +1,8 @@
 A library that abstracts over SIMD instruction sets, including ones with differing widths.
 SIMDeez is designed to allow you to write a function one time and produce SSE2, SSE41, and AVX2 versions of the function.
-You can either have the version you want chosen at compile time with `cfg` attributes, or at runtime with
-`target_feature` attributes and using the built in `is_x86_feature_detected!` macro.
+You can either have the version you want chosen at compile time or automatically at runtime.
 
-SIMDeez is currently in Beta, if there are intrinsics you need that are not currently implemented, create an issue
+If there are intrinsics you need that are not currently implemented, create an issue
 and I'll add them. PRs to add more intrinsics are welcome. Currently things are well fleshed out for i32, i64, f32, and f64 types.
 
 As Rust stabilizes support for Neon and AVX-512 I plan to add those as well.
@@ -12,7 +11,7 @@ Refer to the excellent [Intel Intrinsics Guide](https://software.intel.com/sites
 
 # Features
 
-* SSE2, SSE41, and AVX2 
+* SSE2, SSE41, and AVX2, and scalar fallback
 * Can be used with compile time or run time selection
 * No runtime overhead
 * Uses familiar intel intrinsic naming conventions, easy to port. 
@@ -24,10 +23,10 @@ Refer to the excellent [Intel Intrinsics Guide](https://software.intel.com/sites
 * Extract or set a single lane with the index operator: `let v1 = v[1];`
 * Falls all the way back to scalar code for platforms with no SIMD or unsupported SIMD
 
-# Compared to stdsimd
+# Compared to packed_simd
 
-* SIMDeez can abstract over differing simd widths. stdsimd does not
-* SIMDeez builds on stable rust now, stdsimd does not
+* SIMDeez can abstract over differing simd widths. packed_simd does not
+* SIMDeez builds on stable rust now, packed_simd does not
 
 # Compared to Faster
 
