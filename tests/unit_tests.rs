@@ -397,6 +397,60 @@ mod tests {
         }
     }
 
+    simd_runtime_generate!(
+        fn sum_simdeez_horizontal(x: &[f32]) -> f32 {
+            assert!(x.len() % S::VF32_WIDTH == 0);
+
+            S::horizontal_add_ps(
+                x.chunks_exact(S::VF32_WIDTH)
+                    .map(|y| S::loadu_ps(&y[0]))
+                    .fold(S::setzero_ps(), |x, y| S::add_ps(x, y)),
+            )
+        }
+    );
+    #[test]
+    fn horizontal_add_test() {
+        use rand::distributions::Standard;
+        use rand::prelude::*;
+        let x: Vec<f32> = thread_rng().sample_iter(&Standard).take(4000).collect();
+
+        unsafe {
+            let avx2_res = sum_simdeez_horizontal_avx2(&x);
+            let sse41_res = sum_simdeez_horizontal_sse41(&x);
+            let sse_res = sum_simdeez_horizontal_sse2(&x);
+            let scalar_res = sum_simdeez_horizontal_scalar(&x);
+            assert_delta!(avx2_res, sse41_res, 0.001);
+            assert_delta!(sse_res, sse41_res, 0.001);
+            assert_delta!(sse_res, scalar_res, 0.01);
+        }
+    }
+    simd_runtime_generate!(
+        fn sum_simdeez_horizontal_pd(x: &[f64]) -> f64 {
+            assert!(x.len() % S::VF64_WIDTH == 0);
+
+            S::horizontal_add_pd(
+                x.chunks_exact(S::VF64_WIDTH)
+                    .map(|y| S::loadu_pd(&y[0]))
+                    .fold(S::setzero_pd(), |x, y| S::add_pd(x, y)),
+            )
+        }
+    );
+    #[test]
+    fn horizontal_add_test_pd() {
+        use rand::distributions::Standard;
+        use rand::prelude::*;
+        let x: Vec<f64> = thread_rng().sample_iter(&Standard).take(4000).collect();
+
+        unsafe {
+            let avx2_res = sum_simdeez_horizontal_pd_avx2(&x);
+            let sse41_res = sum_simdeez_horizontal_pd_sse41(&x);
+            let sse_res = sum_simdeez_horizontal_pd_sse2(&x);
+            let scalar_res = sum_simdeez_horizontal_pd_scalar(&x);
+            assert_delta!(avx2_res, sse41_res, 0.001);
+            assert_delta!(sse_res, sse41_res, 0.001);
+            assert_delta!(sse_res, scalar_res, 0.01);
+        }
+    }
     #[inline(always)]
     unsafe fn setlanetest<S: Simd>() -> f32 {
         let mut a = S::set1_ps(1.0);

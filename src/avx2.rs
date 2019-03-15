@@ -282,17 +282,24 @@ impl Simd for Avx2 {
     unsafe fn fnmsub_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64 {
         F64x4(_mm256_fnmsub_pd(a.0, b.0, c.0))
     }
-    // TODO: test this
     #[inline(always)]
     unsafe fn horizontal_add_ps(a: Self::Vf32) -> f32 {
-        let t1 = _mm256_hadd_ps(a.0, a.0);
-        let t2 = _mm256_hadd_ps(t1, t1);
-        _mm256_cvtss_f32(_mm256_hadd_ps(t2, t2))
+        let mut vlow = _mm256_castps256_ps128(a.0);
+        let vhigh = _mm256_extractf128_ps(a.0, 1);
+        vlow = _mm_add_ps(vlow, vhigh);
+        let mut shuf = _mm_movehdup_ps(vlow);
+        let mut sums = _mm_add_ps(vlow, shuf);
+        shuf = _mm_movehl_ps(shuf, sums);
+        sums = _mm_add_ss(sums, shuf);
+        _mm_cvtss_f32(sums)
     }
     #[inline(always)]
     unsafe fn horizontal_add_pd(a: Self::Vf64) -> f64 {
-        let t1 = F64x4(_mm256_hadd_pd(a.0, a.0));
-        t1[0] + t1[2]
+        let mut vlow = _mm256_castpd256_pd128(a.0);
+        let vhigh = _mm256_extractf128_pd(a.0, 1);
+        vlow = _mm_add_pd(vlow, vhigh);
+        let high64 = _mm_unpackhi_pd(vlow, vlow);
+        _mm_cvtsd_f64(_mm_add_sd(vlow, high64))
     }
     #[inline(always)]
     unsafe fn i32gather_epi32(arr: &[i32], index: Self::Vi32) -> Self::Vi32 {

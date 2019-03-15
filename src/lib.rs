@@ -279,8 +279,8 @@ pub trait Simd {
     unsafe fn cmple_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
     unsafe fn cmplt_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
     unsafe fn cvtepi32_ps(a: Self::Vi32) -> Self::Vf32;
-    /// Currently scalar will have different results in some cases depending on the 
-    /// current SSE rounding mode. 
+    /// Currently scalar will have different results in some cases depending on the
+    /// current SSE rounding mode.
     unsafe fn cvtps_epi32(a: Self::Vf32) -> Self::Vi32;
     unsafe fn floor_ps(a: Self::Vf32) -> Self::Vf32;
     unsafe fn floor_pd(a: Self::Vf64) -> Self::Vf64;
@@ -492,8 +492,8 @@ macro_rules! simd_runtime_generate {
 
 }
 
-/// Generates a generic version of your function (fn_name) 
-/// And the fastest version supported by your rust compilation settings 
+/// Generates a generic version of your function (fn_name)
+/// And the fastest version supported by your rust compilation settings
 /// (fn_name_compiletime)
 #[macro_export]
 macro_rules! simd_compiletime_generate {
