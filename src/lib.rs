@@ -115,8 +115,7 @@
 #[macro_use]
 #[cfg(test)]
 extern crate std;
-
-extern crate paste;
+pub extern crate paste;
 #[cfg(target_arch = "x86")]
 use core::arch::x86::*;
 
