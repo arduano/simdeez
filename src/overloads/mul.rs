@@ -94,7 +94,7 @@ impl Mul for I32x8 {
     type Output = I32x8;
     #[inline(always)]
     fn mul(self, rhs: I32x8) -> I32x8 {
-        I32x8(unsafe { _mm256_mul_epi32(self.0, rhs.0) })
+        I32x8(unsafe { _mm256_mullo_epi32(self.0, rhs.0) })
     }
 }
 
