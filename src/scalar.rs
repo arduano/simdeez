@@ -703,6 +703,10 @@ impl Simd for Scalar {
         a - b
     }
     #[inline(always)]
+    unsafe fn sub_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        a - b
+    }
+    #[inline(always)]
     unsafe fn sqrt_ps(a: Self::Vf32) -> Self::Vf32 {
         F32x1(a.0.sqrt())
     }

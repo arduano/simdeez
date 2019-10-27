@@ -432,6 +432,7 @@ pub trait Simd {
     unsafe fn sll_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32;
     unsafe fn sub_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     unsafe fn sub_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
+    unsafe fn sub_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
     unsafe fn sqrt_ps(a: Self::Vf32) -> Self::Vf32;
     unsafe fn rsqrt_ps(a: Self::Vf32) -> Self::Vf32;
     unsafe fn sqrt_pd(a: Self::Vf64) -> Self::Vf64;
