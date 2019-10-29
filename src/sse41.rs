@@ -678,6 +678,10 @@ impl Simd for Sse41 {
         F32x4(_mm_sub_ps(a.0, b.0))
     }
     #[inline(always)]
+    unsafe fn sub_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        F64x2(_mm_sub_pd(a.0, b.0))
+    }
+    #[inline(always)]
     unsafe fn sqrt_ps(a: Self::Vf32) -> Self::Vf32 {
         F32x4(_mm_sqrt_ps(a.0))
     }
