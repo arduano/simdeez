@@ -153,6 +153,8 @@ pub trait SimdBase<T, U>:
     + BitOrAssign<T>
     + BitXorAssign<T>
     + Index<usize, Output = U>
+    + core::marker::Sync
+    + core::marker::Send
 {
 }
 
@@ -197,7 +199,7 @@ pub trait Simd {
 
     /// Vector of f32s.  Corresponds to __m128 when used
     /// with the Sse impl, __m256 when used with Avx2, or a single f32
-    /// when used with Scalar.
+    /// when used with Scalar.    
     type Vf32: SimdFloat<Self::Vf32, f32>;
 
     /// Vector of f64s.  Corresponds to __m128d when used
