@@ -12,12 +12,13 @@ categories = ["hardware-support","science","game-engines"]
 edition="2018"
 
 [features]
-sleef = []
+sleef = ["sleef-sys"]
 
 [dependencies]
 paste = "0.1.5"
 # To build this, we need nightly, cmake installed, and clang dlls in the clang dll path
-sleef-sys = "*"
+sleef-sys = {version = "*", optional=true}
+
 
 [dev-dependencies]
 criterion = "0.2.8"
