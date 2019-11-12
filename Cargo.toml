@@ -13,6 +13,8 @@ edition="2018"
 
 [dependencies]
 paste = "0.1.5"
+# To build this, we need nightly, cmake installed, and clang dlls in the clang dll path
+sleef-sys = "*"
 
 [dev-dependencies]
 criterion = "0.2.8"

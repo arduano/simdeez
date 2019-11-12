@@ -2,6 +2,7 @@ use super::*;
 use crate::overloads::*;
 use core::mem;
 
+
 use libm::{F32Ext, F64Ext};
 
 pub struct Scalar;
@@ -741,5 +742,10 @@ impl Simd for Scalar {
     #[inline(always)]
     unsafe fn xor_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
         a ^ b
+    }
+
+    #[inline(always)]
+    unsafe fn sin_ps(a: Self::Vf32) -> Self::Vf32 {
+        F32x1(a.0.sin())
     }
 }
