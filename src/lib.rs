@@ -444,6 +444,8 @@ pub trait Simd {
     unsafe fn xor_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
     unsafe fn xor_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn xor_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
+
+    #[cfg(feature = "sleef")]
     unsafe fn sin_ps(a: Self::Vf32) -> Self::Vf32;
 }
 

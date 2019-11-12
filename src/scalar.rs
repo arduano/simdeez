@@ -744,6 +744,7 @@ impl Simd for Scalar {
         a ^ b
     }
 
+    #[cfg(feature = "sleef")]
     #[inline(always)]
     unsafe fn sin_ps(a: Self::Vf32) -> Self::Vf32 {
         F32x1(a.0.sin())

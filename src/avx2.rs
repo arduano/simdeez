@@ -636,6 +636,8 @@ impl Simd for Avx2 {
     unsafe fn xor_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
         F64x4(_mm256_xor_pd(a.0, b.0))
     }
+
+    #[cfg(feature = "sleef")]
     #[inline(always)]
     unsafe fn sin_ps(a:Self::Vf32) -> Self::Vf32 {       
         //todo make this not wrong!

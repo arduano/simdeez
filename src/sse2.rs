@@ -788,6 +788,8 @@ impl Simd for Sse2 {
     unsafe fn xor_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
         F64x2(_mm_xor_pd(a.0, b.0))
     }        
+
+    #[cfg(feature = "sleef")]
     #[inline(always)]
     unsafe fn sin_ps(a:Self::Vf32) -> Self::Vf32 {       
         F32x4(sleef_sys::Sleef_sinf4_u35sse2(a.0))        
