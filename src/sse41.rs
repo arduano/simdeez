@@ -237,7 +237,7 @@ impl Simd for Sse41 {
         F32x4(_mm_ceil_ps(a.0))
     }
     #[inline(always)]
-    unsafe fn fastceil_ps(a: Self::Vf32) -> Self::Vf32 {
+    unsafe fn fast_ceil_ps(a: Self::Vf32) -> Self::Vf32 {
         F32x4(_mm_ceil_ps(a.0))
     }
     #[inline(always)]
@@ -245,7 +245,7 @@ impl Simd for Sse41 {
         F64x2(_mm_ceil_pd(a.0))
     }
     #[inline(always)]
-    unsafe fn fastfloor_ps(a: Self::Vf32) -> Self::Vf32 {
+    unsafe fn fast_floor_ps(a: Self::Vf32) -> Self::Vf32 {
         F32x4(_mm_floor_ps(a.0))
     }
     #[inline(always)]
@@ -562,7 +562,7 @@ impl Simd for Sse41 {
         ))
     }
     #[inline(always)]
-    unsafe fn fastround_ps(a: Self::Vf32) -> Self::Vf32 {
+    unsafe fn fast_round_ps(a: Self::Vf32) -> Self::Vf32 {
         F32x4(_mm_round_ps(
             a.0,
             _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC,
@@ -723,9 +723,62 @@ impl Simd for Sse41 {
         F64x2(_mm_xor_pd(a.0, b.0))
     }
 
-    #[cfg(feature = "sleef")]
-    #[inline(always)]
-    unsafe fn sin_ps(a:Self::Vf32) -> Self::Vf32 {       
-        F32x4(sleef_sys::Sleef_sinf4_u35sse4(a.0))        
+    cfg_if::cfg_if! {
+            if #[cfg(feature = "sleef")] {
+                #[inline(always)]
+                unsafe fn sin_ps(a: Self::Vf32) -> Self::Vf32 {
+                    F32x4(sleef_sys::Sleef_sinf4_u10sse4(a.0))
+                }
+
+                #[inline(always)]
+                unsafe fn cos_ps(a: Self::Vf32) -> Self::Vf32 {
+                    F32x4(sleef_sys::Sleef_cosf4_u10sse4(a.0))
+                }
+
+                #[inline(always)]
+                unsafe fn fast_sin_ps(a: Self::Vf32) -> Self::Vf32 {
+                    F32x4(sleef_sys::Sleef_sinf4_u35sse4(a.0))
+                }
+
+                #[inline(always)]
+                unsafe fn fast_cos_ps(a: Self::Vf32) -> Self::Vf32 {
+                    F32x4(sleef_sys::Sleef_cosf4_u35sse4(a.0))
+                }
+                #[inline(always)]
+                unsafe fn tan_ps(a: Self::Vf32) -> Self::Vf32 {
+                    F32x4(sleef_sys::Sleef_tanf4_u10sse4(a.0))
+                }
+
+                #[inline(always)]
+                unsafe fn fast_tan_ps(a: Self::Vf32) -> Self::Vf32 {
+                    F32x4(sleef_sys::Sleef_tanf4_u35sse4(a.0))
+                }
+                #[inline(always)]
+                unsafe fn atan_ps(a: Self::Vf32) -> Self::Vf32 {
+                    F32x4(sleef_sys::Sleef_atanf4_u10sse4(a.0))
+                }
+
+                #[inline(always)]
+                unsafe fn fast_atan_ps(a: Self::Vf32) -> Self::Vf32 {
+                    F32x4(sleef_sys::Sleef_atanf4_u35sse4(a.0))
+                }
+                #[inline(always)]
+                unsafe fn atan2_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
+                    F32x4(sleef_sys::Sleef_atan2f4_u10sse4(a.0,b.0))
+                }
+
+                #[inline(always)]
+                unsafe fn fast_atan2_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
+                    F32x4(sleef_sys::Sleef_atan2f4_u35sse4(a.0,b.0))
+                }      
+                #[inline(always)]
+            unsafe fn log_ps(a: Self::Vf32) -> Self::Vf32 {
+                F32x4(sleef_sys::Sleef_logf4_u10sse4(a.0))
+            }
+            #[inline(always)]
+            unsafe fn fast_log_ps(a: Self::Vf32) -> Self::Vf32 {
+                F32x4(sleef_sys::Sleef_logf4_u35sse4(a.0))
+            }                        
+        }
     }
 }

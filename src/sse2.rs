@@ -2,7 +2,6 @@ use super::*;
 use crate::overloads::*;
 use core::mem;
 
-
 pub struct Sse2;
 impl Simd for Sse2 {
     type Vi16 = I16x8;
@@ -280,7 +279,7 @@ impl Simd for Sse2 {
         r
     }
     #[inline(always)]
-    unsafe fn fastfloor_ps(a: Self::Vf32) -> Self::Vf32 {
+    unsafe fn fast_floor_ps(a: Self::Vf32) -> Self::Vf32 {
         let i = _mm_cvttps_epi32(a.0);
         let fi = _mm_cvtepi32_ps(i);
         let igx = _mm_cmpgt_ps(fi, a.0);
@@ -288,7 +287,7 @@ impl Simd for Sse2 {
         F32x4(_mm_sub_ps(fi, j))
     }
     #[inline(always)]
-    unsafe fn fastceil_ps(a: Self::Vf32) -> Self::Vf32 {
+    unsafe fn fast_ceil_ps(a: Self::Vf32) -> Self::Vf32 {
         let i = _mm_cvttps_epi32(a.0);
         let fi = _mm_cvtepi32_ps(i);
         let igx = _mm_cmplt_ps(fi, a.0);
@@ -296,7 +295,7 @@ impl Simd for Sse2 {
         F32x4(_mm_add_ps(fi, j))
     }
     #[inline(always)]
-    unsafe fn fastround_ps(a: Self::Vf32) -> Self::Vf32 {
+    unsafe fn fast_round_ps(a: Self::Vf32) -> Self::Vf32 {
         let v0 = _mm_setzero_ps(); //generate the highest value &lt; 2
         let v1 = _mm_cmpeq_ps(v0, v0);
         let v_nearest2 = _mm_castsi128_ps(_mm_srli_epi32(_mm_castps_si128(v1), 2));
@@ -787,11 +786,60 @@ impl Simd for Sse2 {
     #[inline(always)]
     unsafe fn xor_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
         F64x2(_mm_xor_pd(a.0, b.0))
-    }        
+    }
 
-    #[cfg(feature = "sleef")]
-    #[inline(always)]
-    unsafe fn sin_ps(a:Self::Vf32) -> Self::Vf32 {       
-        F32x4(sleef_sys::Sleef_sinf4_u35sse2(a.0))        
+    cfg_if::cfg_if! {
+        if #[cfg(feature = "sleef")] {
+            #[inline(always)]
+            unsafe fn sin_ps(a: Self::Vf32) -> Self::Vf32 {
+                F32x4(sleef_sys::Sleef_sinf4_u10sse2(a.0))
+            }
+            #[inline(always)]
+            unsafe fn cos_ps(a: Self::Vf32) -> Self::Vf32 {
+                F32x4(sleef_sys::Sleef_cosf4_u10sse2(a.0))
+            }
+            #[inline(always)]
+            unsafe fn fast_sin_ps(a: Self::Vf32) -> Self::Vf32 {
+                F32x4(sleef_sys::Sleef_sinf4_u35sse2(a.0))
+            }
+            #[inline(always)]
+            unsafe fn fast_cos_ps(a: Self::Vf32) -> Self::Vf32 {
+                F32x4(sleef_sys::Sleef_cosf4_u35sse2(a.0))
+            }
+            #[inline(always)]
+            unsafe fn tan_ps(a: Self::Vf32) -> Self::Vf32 {
+                F32x4(sleef_sys::Sleef_tanf4_u10sse2(a.0))
+            }
+            #[inline(always)]
+            unsafe fn fast_tan_ps(a: Self::Vf32) -> Self::Vf32 {
+                F32x4(sleef_sys::Sleef_tanf4_u35sse2(a.0))
+            }
+            #[inline(always)]
+            unsafe fn atan_ps(a: Self::Vf32) -> Self::Vf32 {
+                F32x4(sleef_sys::Sleef_atanf4_u10sse2(a.0))
+            }
+            #[inline(always)]
+            unsafe fn fast_atan_ps(a: Self::Vf32) -> Self::Vf32 {
+                F32x4(sleef_sys::Sleef_atanf4_u35sse2(a.0))
+            }
+            #[inline(always)]
+            unsafe fn atan2_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
+                F32x4(sleef_sys::Sleef_atan2f4_u10sse2(a.0,b.0))
+            }
+
+            #[inline(always)]
+            unsafe fn fast_atan2_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
+                F32x4(sleef_sys::Sleef_atan2f4_u35sse2(a.0,b.0))
+            }     
+            #[inline(always)]
+            unsafe fn log_ps(a: Self::Vf32) -> Self::Vf32 {
+                F32x4(sleef_sys::Sleef_logf4_u10sse2(a.0))
+            }
+            #[inline(always)]
+            unsafe fn fast_log_ps(a: Self::Vf32) -> Self::Vf32 {
+                F32x4(sleef_sys::Sleef_logf4_u35sse2(a.0))
+            }
+            
+        }
     }
 }

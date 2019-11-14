@@ -289,17 +289,17 @@ pub trait Simd {
     /// that only works on floating point values small enough to fit in
     /// an i32.  This is a big performance boost if you don't need
     /// a complete floor.
-    unsafe fn fastround_ps(a: Self::Vf32) -> Self::Vf32;
+    unsafe fn fast_round_ps(a: Self::Vf32) -> Self::Vf32;
     /// When using Sse2, fastceil uses a faster version of floor
     /// that only works on floating point values small enough to fit in
     /// an i32.  This is a big performance boost if you don't need
     /// a complete floor.
-    unsafe fn fastceil_ps(a: Self::Vf32) -> Self::Vf32;
+    unsafe fn fast_ceil_ps(a: Self::Vf32) -> Self::Vf32;
     /// When using Sse2, fastfloor uses a faster version of floor
     /// that only works on floating point values small enough to fit in
     /// an i32.  This is a big performance boost if you don't need
     /// a complete floor.
-    unsafe fn fastfloor_ps(a: Self::Vf32) -> Self::Vf32;
+    unsafe fn fast_floor_ps(a: Self::Vf32) -> Self::Vf32;
     /// Actual FMA instructions will be used when Avx2 is used,
     /// otherwise a mul and add are used to replicate it, allowing you to
     /// just always use FMA in your code and get best perf in both cases.
@@ -445,8 +445,22 @@ pub trait Simd {
     unsafe fn xor_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn xor_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
 
-    #[cfg(feature = "sleef")]
-    unsafe fn sin_ps(a: Self::Vf32) -> Self::Vf32;
+    cfg_if::cfg_if! {
+        if #[cfg(feature = "sleef")] {
+            unsafe fn sin_ps(a: Self::Vf32) -> Self::Vf32;
+            unsafe fn fast_sin_ps(a: Self::Vf32) -> Self::Vf32;
+            unsafe fn cos_ps(a: Self::Vf32) -> Self::Vf32;
+            unsafe fn fast_cos_ps(a: Self::Vf32) -> Self::Vf32;
+            unsafe fn tan_ps(a: Self::Vf32) -> Self::Vf32;
+            unsafe fn fast_tan_ps(a: Self::Vf32) -> Self::Vf32;
+            unsafe fn atan_ps(a: Self::Vf32) -> Self::Vf32;
+            unsafe fn fast_atan_ps(a: Self::Vf32) -> Self::Vf32;
+            unsafe fn atan2_ps(a: Self::Vf32,b: Self::Vf32) -> Self::Vf32;
+            unsafe fn fast_atan2_ps(a: Self::Vf32,b: Self::Vf32) -> Self::Vf32;
+            unsafe fn log_ps(a:Self::Vf32) -> Self::Vf32;
+            unsafe fn fast_log_ps(a:Self::Vf32) -> Self::Vf32;
+        }
+    }
 }
 
 /// Generates a generic version of your function (fn_name), and verions for:

@@ -15,14 +15,14 @@ edition="2018"
 sleef = ["sleef-sys"]
 
 [dependencies]
-paste = "0.1.5"
+paste = "0.1.6"
 # To build this, we need nightly, cmake installed, and clang dlls in the clang dll path
 sleef-sys = {version = "*", optional=true}
-
+cfg-if = "0.1.10"
 
 [dev-dependencies]
-criterion = "0.2.8"
-rand = "0.6.4"
+criterion = "0.3.0"
+rand = "0.7.2"
 [[bench]]
 name = "benchmarks"
 harness = false

@@ -231,7 +231,7 @@ impl Simd for Avx2 {
         F32x8(_mm256_ceil_ps(a.0))
     }
     #[inline(always)]
-    unsafe fn fastceil_ps(a: Self::Vf32) -> Self::Vf32 {
+    unsafe fn fast_ceil_ps(a: Self::Vf32) -> Self::Vf32 {
         F32x8(_mm256_ceil_ps(a.0))
     }
     #[inline(always)]
@@ -247,7 +247,7 @@ impl Simd for Avx2 {
         F64x4(_mm256_floor_pd(a.0))
     }
     #[inline(always)]
-    unsafe fn fastfloor_ps(a: Self::Vf32) -> Self::Vf32 {
+    unsafe fn fast_floor_ps(a: Self::Vf32) -> Self::Vf32 {
         F32x8(_mm256_floor_ps(a.0))
     }
     #[inline(always)]
@@ -493,7 +493,7 @@ impl Simd for Avx2 {
         ))
     }
     #[inline(always)]
-    unsafe fn fastround_ps(a: Self::Vf32) -> Self::Vf32 {
+    unsafe fn fast_round_ps(a: Self::Vf32) -> Self::Vf32 {
         F32x8(_mm256_round_ps(
             a.0,
             _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC,
@@ -637,10 +637,87 @@ impl Simd for Avx2 {
         F64x4(_mm256_xor_pd(a.0, b.0))
     }
 
-    #[cfg(feature = "sleef")]
-    #[inline(always)]
-    unsafe fn sin_ps(a:Self::Vf32) -> Self::Vf32 {       
-        //todo make this not wrong!
-        a
+    cfg_if::cfg_if! {
+        if #[cfg(feature = "sleef")] {
+
+            #[inline(always)]
+            unsafe fn sin_ps(a: Self::Vf32) -> Self::Vf32 {
+                let sin1 = F32x4(sleef_sys::Sleef_sinf4_u10sse4(_mm_loadu_ps(&a[0])));
+                let sin2 = F32x4(sleef_sys::Sleef_sinf4_u10sse4(_mm_loadu_ps(&a[4])));
+                F32x8(_mm256_loadu2_m128(&sin2[0], &sin1[0]))
+            }
+
+            #[inline(always)]
+            unsafe fn cos_ps(a: Self::Vf32) -> Self::Vf32 {
+                let cos1 = F32x4(sleef_sys::Sleef_cosf4_u10sse4(_mm_loadu_ps(&a[0])));
+                let cos2 = F32x4(sleef_sys::Sleef_cosf4_u10sse4(_mm_loadu_ps(&a[4])));
+                F32x8(_mm256_loadu2_m128(&cos2[0], &cos1[0]))
+            }
+
+            #[inline(always)]
+            unsafe fn fast_sin_ps(a: Self::Vf32) -> Self::Vf32 {
+                let sin1 = F32x4(sleef_sys::Sleef_sinf4_u35sse4(_mm_loadu_ps(&a[0])));
+                let sin2 = F32x4(sleef_sys::Sleef_sinf4_u35sse4(_mm_loadu_ps(&a[4])));
+                F32x8(_mm256_loadu2_m128(&sin2[0], &sin1[0]))
+            }
+
+            #[inline(always)]
+            unsafe fn fast_cos_ps(a: Self::Vf32) -> Self::Vf32 {
+                let cos1 = F32x4(sleef_sys::Sleef_cosf4_u35sse4(_mm_loadu_ps(&a[0])));
+                let cos2 = F32x4(sleef_sys::Sleef_cosf4_u35sse4(_mm_loadu_ps(&a[4])));
+                F32x8(_mm256_loadu2_m128(&cos2[0], &cos1[0]))
+            }
+            #[inline(always)]
+            unsafe fn tan_ps(a: Self::Vf32) -> Self::Vf32 {
+                let tan1 = F32x4(sleef_sys::Sleef_tanf4_u10sse4(_mm_loadu_ps(&a[0])));
+                let tan2 = F32x4(sleef_sys::Sleef_tanf4_u10sse4(_mm_loadu_ps(&a[4])));
+                F32x8(_mm256_loadu2_m128(&tan2[0], &tan1[0]))
+            }
+
+            #[inline(always)]
+            unsafe fn fast_tan_ps(a: Self::Vf32) -> Self::Vf32 {
+                let tan1 = F32x4(sleef_sys::Sleef_tanf4_u35sse4(_mm_loadu_ps(&a[0])));
+                let tan2 = F32x4(sleef_sys::Sleef_tanf4_u35sse4(_mm_loadu_ps(&a[4])));
+                F32x8(_mm256_loadu2_m128(&tan2[0], &tan1[0]))
+            }
+            #[inline(always)]
+            unsafe fn atan_ps(a: Self::Vf32) -> Self::Vf32 {
+                let atan1 = F32x4(sleef_sys::Sleef_atanf4_u10sse4(_mm_loadu_ps(&a[0])));
+                let atan2 = F32x4(sleef_sys::Sleef_atanf4_u10sse4(_mm_loadu_ps(&a[4])));
+                F32x8(_mm256_loadu2_m128(&atan2[0], &atan1[0]))
+            }
+
+            #[inline(always)]
+            unsafe fn fast_atan_ps(a: Self::Vf32) -> Self::Vf32 {
+                let atan1 = F32x4(sleef_sys::Sleef_atanf4_u35sse4(_mm_loadu_ps(&a[0])));
+                let atan2 = F32x4(sleef_sys::Sleef_atanf4_u35sse4(_mm_loadu_ps(&a[4])));
+                F32x8(_mm256_loadu2_m128(&atan2[0], &atan1[0]))
+            }
+            #[inline(always)]
+            unsafe fn atan2_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
+                let atan1 = F32x4(sleef_sys::Sleef_atan2f4_u10sse4(_mm_loadu_ps(&a[0]),_mm_loadu_ps(&b[0])));
+                let atan2 = F32x4(sleef_sys::Sleef_atan2f4_u10sse4(_mm_loadu_ps(&a[4]),_mm_loadu_ps(&b[4])));
+                F32x8(_mm256_loadu2_m128(&atan2[0], &atan1[0]))
+            }
+
+            #[inline(always)]
+            unsafe fn fast_atan2_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
+                let atan1 = F32x4(sleef_sys::Sleef_atan2f4_u35sse4(_mm_loadu_ps(&a[0]),_mm_loadu_ps(&b[0])));
+                let atan2 = F32x4(sleef_sys::Sleef_atan2f4_u35sse4(_mm_loadu_ps(&a[4]),_mm_loadu_ps(&b[4])));
+                F32x8(_mm256_loadu2_m128(&atan2[0], &atan1[0]))
+            }                     
+            #[inline(always)]
+            unsafe fn log_ps(a: Self::Vf32) -> Self::Vf32 {
+                let log1 = F32x4(sleef_sys::Sleef_logf4_u10sse4(_mm_loadu_ps(&a[0])));
+                let log2 = F32x4(sleef_sys::Sleef_logf4_u10sse4(_mm_loadu_ps(&a[4])));
+                F32x8(_mm256_loadu2_m128(&log2[0], &log1[0]))
+            }
+            #[inline(always)]
+            unsafe fn fast_log_ps(a: Self::Vf32) -> Self::Vf32 {
+                let log1 = F32x4(sleef_sys::Sleef_logf4_u35sse4(_mm_loadu_ps(&a[0])));
+                let log2 = F32x4(sleef_sys::Sleef_logf4_u35sse4(_mm_loadu_ps(&a[4])));
+                F32x8(_mm256_loadu2_m128(&log2[0], &log1[0]))
+            }
+        }
     }
 }
