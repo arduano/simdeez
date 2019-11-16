@@ -13,7 +13,7 @@
 //! # Features
 //!
 //! * SSE2, SSE41, and AVX2 and scalar fallback
-//! * Can use used with compile time or run time selection
+//! * Can be used with compile time or run time selection
 //! * No runtime overhead
 //! * Uses familiar intel intrinsic naming conventions, easy to port.
 //!   * `_mm_add_ps(a,b)` becomes `add_ps(a,b)`
