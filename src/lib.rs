@@ -446,7 +446,7 @@ pub trait Simd {
     unsafe fn xor_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
 }
 
-/// Generates a generic version of your function (fn_name), and verions for:
+/// Generates a generic version of your function (fn_name), and versions for:
 /// * AVX2 (fn_name_avx2)
 /// * SSE41 (fn_name_sse41)
 /// * SSE2 (fn_name_sse2)
