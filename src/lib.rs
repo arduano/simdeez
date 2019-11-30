@@ -23,6 +23,11 @@
 //! * Operator overloading: `let sum = va + vb` or `s *= s`
 //! * Extract or set a single lane with the index operator: `let v1 = v[1];`
 //!
+//! # Trig Functions via Sleef-sys
+//! A number of trigonometric and other common math functions are provided
+//! in vectorized form via the Sleef-sys crate. This is an optional feature `sleef` that you can enable.
+//! Doing so currently requires nightly, as well as having CMake and Clang installed.
+//!
 //! # Compared to stdsimd
 //!
 //! * SIMDeez can abstract over differing simd widths. stdsimd does not
@@ -289,17 +294,17 @@ pub trait Simd {
     /// that only works on floating point values small enough to fit in
     /// an i32.  This is a big performance boost if you don't need
     /// a complete floor.
-    unsafe fn fastround_ps(a: Self::Vf32) -> Self::Vf32;
+    unsafe fn fast_round_ps(a: Self::Vf32) -> Self::Vf32;
     /// When using Sse2, fastceil uses a faster version of floor
     /// that only works on floating point values small enough to fit in
     /// an i32.  This is a big performance boost if you don't need
     /// a complete floor.
-    unsafe fn fastceil_ps(a: Self::Vf32) -> Self::Vf32;
+    unsafe fn fast_ceil_ps(a: Self::Vf32) -> Self::Vf32;
     /// When using Sse2, fastfloor uses a faster version of floor
     /// that only works on floating point values small enough to fit in
     /// an i32.  This is a big performance boost if you don't need
     /// a complete floor.
-    unsafe fn fastfloor_ps(a: Self::Vf32) -> Self::Vf32;
+    unsafe fn fast_floor_ps(a: Self::Vf32) -> Self::Vf32;
     /// Actual FMA instructions will be used when Avx2 is used,
     /// otherwise a mul and add are used to replicate it, allowing you to
     /// just always use FMA in your code and get best perf in both cases.
@@ -444,6 +449,45 @@ pub trait Simd {
     unsafe fn xor_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
     unsafe fn xor_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn xor_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
+
+    cfg_if::cfg_if! {
+        if #[cfg(feature = "sleef")] {
+            unsafe fn sin_ps(a: Self::Vf32) -> Self::Vf32;
+            unsafe fn fast_sin_ps(a: Self::Vf32) -> Self::Vf32;
+            unsafe fn cos_ps(a: Self::Vf32) -> Self::Vf32;
+            unsafe fn fast_cos_ps(a: Self::Vf32) -> Self::Vf32;
+            unsafe fn asin_ps(a: Self::Vf32) -> Self::Vf32;
+            unsafe fn fast_asin_ps(a: Self::Vf32) -> Self::Vf32;
+            unsafe fn acos_ps(a: Self::Vf32) -> Self::Vf32;
+            unsafe fn fast_acos_ps(a: Self::Vf32) -> Self::Vf32;
+            unsafe fn tan_ps(a: Self::Vf32) -> Self::Vf32;
+            unsafe fn fast_tan_ps(a: Self::Vf32) -> Self::Vf32;
+            unsafe fn atan_ps(a: Self::Vf32) -> Self::Vf32;
+            unsafe fn fast_atan_ps(a: Self::Vf32) -> Self::Vf32;
+
+            //hyperbolic
+            unsafe fn sinh_ps(a: Self::Vf32) -> Self::Vf32;
+            unsafe fn fast_sinh_ps(a: Self::Vf32) -> Self::Vf32;
+            unsafe fn cosh_ps(a: Self::Vf32) -> Self::Vf32;
+            unsafe fn fast_cosh_ps(a: Self::Vf32) -> Self::Vf32;
+            unsafe fn asinh_ps(a: Self::Vf32) -> Self::Vf32;
+            unsafe fn acosh_ps(a: Self::Vf32) -> Self::Vf32;
+            unsafe fn tanh_ps(a: Self::Vf32) -> Self::Vf32;
+            unsafe fn fast_tanh_ps(a: Self::Vf32) -> Self::Vf32;
+            unsafe fn atanh_ps(a: Self::Vf32) -> Self::Vf32;
+
+            unsafe fn atan2_ps(a: Self::Vf32,b: Self::Vf32) -> Self::Vf32;
+            unsafe fn fast_atan2_ps(a: Self::Vf32,b: Self::Vf32) -> Self::Vf32;
+            unsafe fn ln_ps(a:Self::Vf32) -> Self::Vf32;
+            unsafe fn fast_ln_ps(a:Self::Vf32) -> Self::Vf32;
+            unsafe fn log2_ps(a:Self::Vf32) -> Self::Vf32;
+            unsafe fn log10_ps(a:Self::Vf32) -> Self::Vf32;
+            unsafe fn hypot_ps(a:Self::Vf32,b:Self::Vf32) -> Self::Vf32;
+            unsafe fn fast_hypot_ps(a:Self::Vf32,b:Self::Vf32) -> Self::Vf32;
+
+            unsafe fn fmod_ps(a:Self::Vf32,b:Self::Vf32) -> Self::Vf32;
+        }
+    }
 }
 
 /// Generates a generic version of your function (fn_name), and versions for:

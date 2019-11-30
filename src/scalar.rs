@@ -346,15 +346,15 @@ impl Simd for Scalar {
         F64x1(a.0.floor())
     }
     #[inline(always)]
-    unsafe fn fastfloor_ps(a: Self::Vf32) -> Self::Vf32 {
+    unsafe fn fast_floor_ps(a: Self::Vf32) -> Self::Vf32 {
         F32x1(a.0.floor())
     }
     #[inline(always)]
-    unsafe fn fastceil_ps(a: Self::Vf32) -> Self::Vf32 {
+    unsafe fn fast_ceil_ps(a: Self::Vf32) -> Self::Vf32 {
         F32x1(a.0.ceil())
     }
     #[inline(always)]
-    unsafe fn fastround_ps(a: Self::Vf32) -> Self::Vf32 {
+    unsafe fn fast_round_ps(a: Self::Vf32) -> Self::Vf32 {
         F32x1(a.0.round())
     }
     #[inline(always)]
@@ -741,5 +741,132 @@ impl Simd for Scalar {
     #[inline(always)]
     unsafe fn xor_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
         a ^ b
+    }
+
+    cfg_if::cfg_if! {
+        if #[cfg(feature = "sleef")] {
+            #[inline(always)]
+            unsafe fn sin_ps(a: Self::Vf32) -> Self::Vf32 {
+                F32x1(a.0.sin())
+            }
+            #[inline(always)]
+            unsafe fn cos_ps(a: Self::Vf32) -> Self::Vf32 {
+                F32x1(a.0.cos())
+            }
+            #[inline(always)]
+            unsafe fn fast_sin_ps(a: Self::Vf32) -> Self::Vf32 {
+                F32x1(a.0.sin())
+            }
+            #[inline(always)]
+            unsafe fn fast_cos_ps(a: Self::Vf32) -> Self::Vf32 {
+                F32x1(a.0.cos())
+            }
+            #[inline(always)]
+            unsafe fn asin_ps(a: Self::Vf32) -> Self::Vf32 {
+                F32x1(a.0.asin())
+            }
+            #[inline(always)]
+            unsafe fn acos_ps(a: Self::Vf32) -> Self::Vf32 {
+                F32x1(a.0.acos())
+            }
+            #[inline(always)]
+            unsafe fn fast_asin_ps(a: Self::Vf32) -> Self::Vf32 {
+                F32x1(a.0.asin())
+            }
+            #[inline(always)]
+            unsafe fn fast_acos_ps(a: Self::Vf32) -> Self::Vf32 {
+                F32x1(a.0.acos())
+            }
+            #[inline(always)]
+            unsafe fn tan_ps(a: Self::Vf32) -> Self::Vf32 {
+                F32x1(a.0.tan())
+            }
+            #[inline(always)]
+            unsafe fn fast_tan_ps(a: Self::Vf32) -> Self::Vf32 {
+                F32x1(a.0.tan())
+            }
+            #[inline(always)]
+            unsafe fn atan_ps(a: Self::Vf32) -> Self::Vf32 {
+                F32x1(a.0.atan())
+            }
+
+            #[inline(always)]
+            unsafe fn fast_atan_ps(a: Self::Vf32) -> Self::Vf32 {
+                F32x1(a.0.atan())
+            }
+            //hyperbolic
+            #[inline(always)]
+            unsafe fn sinh_ps(a: Self::Vf32) -> Self::Vf32 {
+                F32x1(a.0.sinh())
+            }
+            #[inline(always)]
+            unsafe fn cosh_ps(a: Self::Vf32) -> Self::Vf32 {
+                F32x1(a.0.cosh())
+            }
+            #[inline(always)]
+            unsafe fn fast_sinh_ps(a: Self::Vf32) -> Self::Vf32 {
+                F32x1(a.0.sinh())
+            }
+            #[inline(always)]
+            unsafe fn fast_cosh_ps(a: Self::Vf32) -> Self::Vf32 {
+                F32x1(a.0.cosh())
+            }
+            #[inline(always)]
+            unsafe fn asinh_ps(a: Self::Vf32) -> Self::Vf32 {
+                F32x1(a.0.asinh())
+            }
+            #[inline(always)]
+            unsafe fn acosh_ps(a: Self::Vf32) -> Self::Vf32 {
+                F32x1(a.0.acosh())
+            }
+            #[inline(always)]
+            unsafe fn tanh_ps(a: Self::Vf32) -> Self::Vf32 {
+                F32x1(a.0.tanh())
+            }
+            #[inline(always)]
+            unsafe fn fast_tanh_ps(a: Self::Vf32) -> Self::Vf32 {
+                F32x1(a.0.tanh())
+            }
+            #[inline(always)]
+            unsafe fn atanh_ps(a: Self::Vf32) -> Self::Vf32 {
+                F32x1(a.0.atanh())
+            }
+            #[inline(always)]
+            unsafe fn atan2_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
+                F32x1(a.0.atan2(b.0))
+            }
+            #[inline(always)]
+            unsafe fn fast_atan2_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
+                F32x1(a.0.atan2(b.0))
+            }
+            #[inline(always)]
+            unsafe fn ln_ps(a: Self::Vf32) -> Self::Vf32 {
+                F32x1(a.0.ln())
+            }
+            #[inline(always)]
+            unsafe fn fast_ln_ps(a: Self::Vf32) -> Self::Vf32 {
+                F32x1(a.0.ln())
+            }
+            #[inline(always)]
+            unsafe fn log2_ps(a: Self::Vf32) -> Self::Vf32 {
+                F32x1(a.0.log2())
+            }
+            #[inline(always)]
+            unsafe fn log10_ps(a: Self::Vf32) -> Self::Vf32 {
+                F32x1(a.0.log10())
+            }
+            #[inline(always)]
+            unsafe fn hypot_ps(a:Self::Vf32,b:Self::Vf32) -> Self::Vf32 {
+                F32x1(a.0.hypot(b.0))
+            }
+            #[inline(always)]
+            unsafe fn fast_hypot_ps(a:Self::Vf32,b:Self::Vf32) -> Self::Vf32 {
+                F32x1(a.0.hypot(b.0))
+            }
+            #[inline(always)]
+            unsafe fn fmod_ps(a:Self::Vf32,b:Self::Vf32) -> Self::Vf32 {
+                F32x1(a.0 % b.0)
+            }
+        }
     }
 }
