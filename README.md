@@ -23,6 +23,11 @@ Refer to the excellent [Intel Intrinsics Guide](https://software.intel.com/sites
 * Extract or set a single lane with the index operator: `let v1 = v[1];`
 * Falls all the way back to scalar code for platforms with no SIMD or unsupported SIMD
 
+# Trig Functions via Sleef-sys
+A number of trigonometric and other common math functions are provided
+in vectorized form via the Sleef-sys crate. This is an optional feature `sleef` that you can enable.
+Doing so currently requires nightly, as well as having CMake and Clang installed.
+
 # Compared to packed_simd
 
 * SIMDeez can abstract over differing simd widths. packed_simd does not

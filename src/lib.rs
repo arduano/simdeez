@@ -23,6 +23,11 @@
 //! * Operator overloading: `let sum = va + vb` or `s *= s`
 //! * Extract or set a single lane with the index operator: `let v1 = v[1];`
 //!
+//! # Trig Functions via Sleef-sys
+//! A number of trigonometric and other common math functions are provided
+//! in vectorized form via the Sleef-sys crate. This is an optional feature `sleef` that you can enable.
+//! Doing so currently requires nightly, as well as having CMake and Clang installed.
+//!
 //! # Compared to stdsimd
 //!
 //! * SIMDeez can abstract over differing simd widths. stdsimd does not
@@ -451,14 +456,36 @@ pub trait Simd {
             unsafe fn fast_sin_ps(a: Self::Vf32) -> Self::Vf32;
             unsafe fn cos_ps(a: Self::Vf32) -> Self::Vf32;
             unsafe fn fast_cos_ps(a: Self::Vf32) -> Self::Vf32;
+            unsafe fn asin_ps(a: Self::Vf32) -> Self::Vf32;
+            unsafe fn fast_asin_ps(a: Self::Vf32) -> Self::Vf32;
+            unsafe fn acos_ps(a: Self::Vf32) -> Self::Vf32;
+            unsafe fn fast_acos_ps(a: Self::Vf32) -> Self::Vf32;
             unsafe fn tan_ps(a: Self::Vf32) -> Self::Vf32;
             unsafe fn fast_tan_ps(a: Self::Vf32) -> Self::Vf32;
             unsafe fn atan_ps(a: Self::Vf32) -> Self::Vf32;
             unsafe fn fast_atan_ps(a: Self::Vf32) -> Self::Vf32;
+
+            //hyperbolic
+            unsafe fn sinh_ps(a: Self::Vf32) -> Self::Vf32;
+            unsafe fn fast_sinh_ps(a: Self::Vf32) -> Self::Vf32;
+            unsafe fn cosh_ps(a: Self::Vf32) -> Self::Vf32;
+            unsafe fn fast_cosh_ps(a: Self::Vf32) -> Self::Vf32;
+            unsafe fn asinh_ps(a: Self::Vf32) -> Self::Vf32;
+            unsafe fn acosh_ps(a: Self::Vf32) -> Self::Vf32;
+            unsafe fn tanh_ps(a: Self::Vf32) -> Self::Vf32;
+            unsafe fn fast_tanh_ps(a: Self::Vf32) -> Self::Vf32;
+            unsafe fn atanh_ps(a: Self::Vf32) -> Self::Vf32;
+
             unsafe fn atan2_ps(a: Self::Vf32,b: Self::Vf32) -> Self::Vf32;
             unsafe fn fast_atan2_ps(a: Self::Vf32,b: Self::Vf32) -> Self::Vf32;
-            unsafe fn log_ps(a:Self::Vf32) -> Self::Vf32;
-            unsafe fn fast_log_ps(a:Self::Vf32) -> Self::Vf32;
+            unsafe fn ln_ps(a:Self::Vf32) -> Self::Vf32;
+            unsafe fn fast_ln_ps(a:Self::Vf32) -> Self::Vf32;
+            unsafe fn log2_ps(a:Self::Vf32) -> Self::Vf32;
+            unsafe fn log10_ps(a:Self::Vf32) -> Self::Vf32;
+            unsafe fn hypot_ps(a:Self::Vf32,b:Self::Vf32) -> Self::Vf32;
+            unsafe fn fast_hypot_ps(a:Self::Vf32,b:Self::Vf32) -> Self::Vf32;
+
+            unsafe fn fmod_ps(a:Self::Vf32,b:Self::Vf32) -> Self::Vf32;
         }
     }
 }
