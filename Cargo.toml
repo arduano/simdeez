@@ -17,7 +17,7 @@ sleef = ["sleef-sys"]
 [dependencies]
 paste = "0.1.6"
 # To build this, we need nightly, cmake installed, and clang dlls in the clang dll path
-sleef-sys = {version = "*", optional=true}
+sleef-sys = {version = "0.1.2", optional=true}
 cfg-if = "0.1.10"
 
 [dev-dependencies]
