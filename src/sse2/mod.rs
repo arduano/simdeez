@@ -2,7 +2,9 @@ use super::*;
 use core::mem;
 
 mod overloads;
+mod sse2;
 pub use self::overloads::*;
+pub use self::sse2::*;
 
 #[derive(Copy, Debug, Clone)]
 pub struct I16x8(pub __m128i);
