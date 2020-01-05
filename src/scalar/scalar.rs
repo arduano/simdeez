@@ -1,5 +1,4 @@
 use super::*;
-use crate::overloads::*;
 use core::mem;
 
 use libm::{F32Ext, F64Ext};
@@ -26,36 +25,8 @@ impl Simd for Scalar {
         F64x1(a.0.abs())
     }
     #[inline(always)]
-    unsafe fn add_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 {
-        a + b
-    }
-    #[inline(always)]
-    unsafe fn sub_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 {
-        a - b
-    }
-    #[inline(always)]
     unsafe fn mullo_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 {
         a * b
-    }
-    #[inline(always)]
-    unsafe fn add_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        a + b
-    }
-    #[inline(always)]
-    unsafe fn add_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        a + b
-    }
-    #[inline(always)]
-    unsafe fn add_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
-        a + b
-    }
-    #[inline(always)]
-    unsafe fn and_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        a & b
-    }
-    #[inline(always)]
-    unsafe fn and_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
-        a & b
     }
     #[inline(always)]
     unsafe fn andnot_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
@@ -574,48 +545,8 @@ impl Simd for Scalar {
         }
     }
     #[inline(always)]
-    unsafe fn mul_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        a * b
-    }
-    #[inline(always)]
-    unsafe fn mul_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
-        a * b
-    }
-    #[inline(always)]
-    unsafe fn div_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        a / b
-    }
-    #[inline(always)]
-    unsafe fn div_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
-        a / b
-    }
-    #[inline(always)]
     unsafe fn mullo_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         a * b
-    }
-    #[inline(always)]
-    unsafe fn not_epi64(a: Self::Vi64) -> Self::Vi64 {
-        !a
-    }
-    #[inline(always)]
-    unsafe fn not_epi32(a: Self::Vi32) -> Self::Vi32 {
-        !a
-    }
-    #[inline(always)]
-    unsafe fn or_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        a | b
-    }
-    #[inline(always)]
-    unsafe fn or_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
-        a | b
-    }
-    #[inline(always)]
-    unsafe fn or_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        a | b
-    }
-    #[inline(always)]
-    unsafe fn or_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
-        a | b
     }
     #[inline(always)]
     unsafe fn rcp_ps(a: Self::Vf32) -> Self::Vf32 {
@@ -662,10 +593,6 @@ impl Simd for Scalar {
         I64x1(0)
     }
     #[inline(always)]
-    unsafe fn srai_epi32(a: Self::Vi32, amt_const: i32) -> Self::Vi32 {
-        a >> amt_const
-    }
-    #[inline(always)]
     unsafe fn srai_epi64(a: Self::Vi64, amt_const: i32) -> Self::Vi64 {
         a >> amt_const
     }
@@ -675,10 +602,6 @@ impl Simd for Scalar {
         I32x1(mem::transmute::<u32, i32>(
             mem::transmute::<i32, u32>(a.0) >> amt_const,
         ))
-    }
-    #[inline(always)]
-    unsafe fn slli_epi32(a: Self::Vi32, amt_const: i32) -> Self::Vi32 {
-        a << amt_const
     }
     #[inline(always)]
     unsafe fn sra_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32 {
@@ -693,18 +616,6 @@ impl Simd for Scalar {
     #[inline(always)]
     unsafe fn sll_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32 {
         a << amt
-    }
-    #[inline(always)]
-    unsafe fn sub_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        a - b
-    }
-    #[inline(always)]
-    unsafe fn sub_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        a - b
-    }
-    #[inline(always)]
-    unsafe fn sub_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
-        a - b
     }
     #[inline(always)]
     unsafe fn sqrt_ps(a: Self::Vf32) -> Self::Vf32 {
@@ -726,23 +637,6 @@ impl Simd for Scalar {
     unsafe fn shuffle_epi32(a: Self::Vi32, _imm8: i32) -> Self::Vi32 {
         a
     }
-    #[inline(always)]
-    unsafe fn xor_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        a ^ b
-    }
-    #[inline(always)]
-    unsafe fn xor_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
-        a ^ b
-    }
-    #[inline(always)]
-    unsafe fn xor_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        a ^ b
-    }
-    #[inline(always)]
-    unsafe fn xor_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
-        a ^ b
-    }
-
     cfg_if::cfg_if! {
         if #[cfg(feature = "sleef")] {
             #[inline(always)]

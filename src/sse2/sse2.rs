@@ -1,5 +1,4 @@
 use super::*;
-use crate::overloads::*;
 use core::mem;
 
 pub struct Sse2;
@@ -26,36 +25,8 @@ impl Simd for Sse2 {
         F64x2(_mm_andnot_pd(b, a.0))
     }
     #[inline(always)]
-    unsafe fn add_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 {
-        I16x8(_mm_add_epi16(a.0, b.0))
-    }
-    #[inline(always)]
-    unsafe fn sub_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 {
-        I16x8(_mm_sub_epi16(a.0, b.0))
-    }
-    #[inline(always)]
     unsafe fn mullo_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 {
         I16x8(_mm_mullo_epi16(a.0, b.0))
-    }
-    #[inline(always)]
-    unsafe fn add_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        I32x4(_mm_add_epi32(a.0, b.0))
-    }
-    #[inline(always)]
-    unsafe fn add_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        F32x4(_mm_add_ps(a.0, b.0))
-    }
-    #[inline(always)]
-    unsafe fn add_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
-        F64x2(_mm_add_pd(a.0, b.0))
-    }
-    #[inline(always)]
-    unsafe fn and_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        I32x4(_mm_and_si128(a.0, b.0))
-    }
-    #[inline(always)]
-    unsafe fn and_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
-        I64x2(_mm_and_si128(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn andnot_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
@@ -572,22 +543,6 @@ impl Simd for Sse2 {
         F64x2(_mm_min_pd(a.0, b.0))
     }
     #[inline(always)]
-    unsafe fn mul_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        F32x4(_mm_mul_ps(a.0, b.0))
-    }
-    #[inline(always)]
-    unsafe fn mul_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
-        F64x2(_mm_mul_pd(a.0, b.0))
-    }
-    #[inline(always)]
-    unsafe fn div_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        F32x4(_mm_div_ps(a.0, b.0))
-    }
-    #[inline(always)]
-    unsafe fn div_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
-        F64x2(_mm_div_pd(a.0, b.0))
-    }
-    #[inline(always)]
     unsafe fn mullo_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         let tmp1 = _mm_mul_epu32(a.0, b.0); /* mul 2,0*/
         let tmp2 = _mm_mul_epu32(_mm_srli_si128(a.0, 4), _mm_srli_si128(b.0, 4)); /* mul 3,1 */
@@ -595,30 +550,6 @@ impl Simd for Sse2 {
             _mm_shuffle_epi32(tmp1, mm_shuffle!(0, 0, 2, 0) as i32),
             _mm_shuffle_epi32(tmp2, mm_shuffle!(0, 0, 2, 0) as i32),
         )) /* shuffle results to [63..0] and pack */
-    }
-    #[inline(always)]
-    unsafe fn not_epi64(a: Self::Vi64) -> Self::Vi64 {
-        I64x2(_mm_xor_si128(a.0, _mm_set1_epi32(-1)))
-    }
-    #[inline(always)]
-    unsafe fn not_epi32(a: Self::Vi32) -> Self::Vi32 {
-        I32x4(_mm_xor_si128(a.0, _mm_set1_epi32(-1)))
-    }
-    #[inline(always)]
-    unsafe fn or_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        I32x4(_mm_or_si128(a.0, b.0))
-    }
-    #[inline(always)]
-    unsafe fn or_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
-        I64x2(_mm_or_si128(a.0, b.0))
-    }
-    #[inline(always)]
-    unsafe fn or_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        F32x4(_mm_or_ps(a.0, b.0))
-    }
-    #[inline(always)]
-    unsafe fn or_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
-        F64x2(_mm_or_pd(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn rcp_ps(a: Self::Vf32) -> Self::Vf32 {
@@ -676,15 +607,6 @@ impl Simd for Sse2 {
         I64x2(_mm_setzero_si128())
     }
     #[inline(always)]
-    unsafe fn srai_epi32(a: Self::Vi32, amt_const: i32) -> Self::Vi32 {
-        macro_rules! call {
-            ($amt_const:expr) => {
-                I32x4(_mm_srai_epi32(a.0, $amt_const))
-            };
-        }
-        constify_imm8!(amt_const, call)
-    }
-    #[inline(always)]
     unsafe fn srai_epi64(a: Self::Vi64, amt_const: i32) -> Self::Vi64 {
         // instruction does not exist. Split into 32-bit shifts
         if amt_const <= 32 {
@@ -713,15 +635,6 @@ impl Simd for Sse2 {
         constify_imm8!(amt_const, call)
     }
     #[inline(always)]
-    unsafe fn slli_epi32(a: Self::Vi32, amt_const: i32) -> Self::Vi32 {
-        macro_rules! call {
-            ($amt_const:expr) => {
-                I32x4(_mm_slli_epi32(a.0, $amt_const))
-            };
-        }
-        constify_imm8!(amt_const, call)
-    }
-    #[inline(always)]
     unsafe fn sra_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32 {
         I32x4(_mm_sra_epi32(a.0, _mm_set1_epi32(amt)))
     }
@@ -734,18 +647,6 @@ impl Simd for Sse2 {
         I32x4(_mm_sll_epi32(a.0, _mm_set1_epi32(amt)))
     }
 
-    #[inline(always)]
-    unsafe fn sub_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        I32x4(_mm_sub_epi32(a.0, b.0))
-    }
-    #[inline(always)]
-    unsafe fn sub_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        F32x4(_mm_sub_ps(a.0, b.0))
-    }
-    #[inline(always)]
-    unsafe fn sub_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
-        F64x2(_mm_sub_pd(a.0, b.0))
-    }
     #[inline(always)]
     unsafe fn sqrt_ps(a: Self::Vf32) -> Self::Vf32 {
         F32x4(_mm_sqrt_ps(a.0))
@@ -771,23 +672,6 @@ impl Simd for Sse2 {
         }
         constify_imm8!(imm8, call)
     }
-    #[inline(always)]
-    unsafe fn xor_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        I32x4(_mm_xor_si128(a.0, b.0))
-    }
-    #[inline(always)]
-    unsafe fn xor_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
-        I64x2(_mm_xor_si128(a.0, b.0))
-    }
-    #[inline(always)]
-    unsafe fn xor_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        F32x4(_mm_xor_ps(a.0, b.0))
-    }
-    #[inline(always)]
-    unsafe fn xor_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
-        F64x2(_mm_xor_pd(a.0, b.0))
-    }
-
     cfg_if::cfg_if! {
         if #[cfg(feature = "sleef")] {
             #[inline(always)]

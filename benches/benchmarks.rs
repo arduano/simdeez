@@ -13,7 +13,7 @@ use std::f32;
 #[inline(always)]
 unsafe fn floor<S: Simd>(inval: &[f32], out: &mut [f32]) {
     let n = S::loadu_ps(&inval[0]);
-    S::storeu_ps(&mut out[0], S::fastfloor_ps(n));
+    S::storeu_ps(&mut out[0], S::fast_floor_ps(n));
 }
 
 #[target_feature(enable = "sse2")]

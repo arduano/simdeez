@@ -135,7 +135,6 @@ mod macros;
 
 pub mod avx2;
 pub mod libm;
-pub mod overloads;
 pub mod scalar;
 pub mod sse2;
 pub mod sse41;
@@ -204,7 +203,7 @@ pub trait Simd {
 
     /// Vector of f32s.  Corresponds to __m128 when used
     /// with the Sse impl, __m256 when used with Avx2, or a single f32
-    /// when used with Scalar.    
+    /// when used with Scalar.
     type Vf32: SimdFloat<Self::Vf32, f32>;
 
     /// Vector of f64s.  Corresponds to __m128d when used
@@ -219,19 +218,57 @@ pub trait Simd {
     const VI16_WIDTH: usize;
     const VI32_WIDTH: usize;
     const VI64_WIDTH: usize;
-
-    unsafe fn div_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
-    unsafe fn div_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
+    #[inline(always)]
+    unsafe fn mul_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 { a * b }
+    #[inline(always)]
+    unsafe fn mul_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 { a * b }
+    #[inline(always)]
+    unsafe fn not_epi32(a: Self::Vi32) -> Self::Vi32 { !a }
+    #[inline(always)]
+    unsafe fn not_epi64(a: Self::Vi64) -> Self::Vi64 { !a}
+    #[inline(always)]
+    unsafe fn or_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {a | b }
+    #[inline(always)]
+    unsafe fn or_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 { a | b}
+    #[inline(always)]
+    unsafe fn or_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {a | b }
+    #[inline(always)]
+    unsafe fn or_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 { a | b }
+    #[inline(always)]
+    unsafe fn xor_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 { a ^ b }
+    #[inline(always)]
+    unsafe fn xor_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 { a ^ b }
+    #[inline(always)]
+    unsafe fn xor_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {a ^ b }
+    #[inline(always)]
+    unsafe fn xor_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {a ^ b }
+    /// amt must be a constant
+    #[inline(always)]
+    unsafe fn slli_epi32(a: Self::Vi32, amt_const: i32) -> Self::Vi32 { a << amt_const }
+    /// amt must be a constant
+    #[inline(always)]
+    unsafe fn srai_epi32(a: Self::Vi32, amt_const: i32) -> Self::Vi32 { a >> amt_const }
+    #[inline(always)]
+    unsafe fn div_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 { a/b }
+    #[inline(always)]
+    unsafe fn div_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 { a/b }
+    #[inline(always)]
+    unsafe fn add_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 { a + b }
+    #[inline(always)]
+    unsafe fn sub_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 { a - b }
+    #[inline(always)]
+    unsafe fn add_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 { a + b }
+    #[inline(always)]
+    unsafe fn add_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 { a + b }
+    #[inline(always)]
+    unsafe fn add_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 { a + b }
+    #[inline(always)]
+    unsafe fn and_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 { a & b }
+    #[inline(always)]
+    unsafe fn and_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 { a & b }
     unsafe fn abs_ps(a: Self::Vf32) -> Self::Vf32;
     unsafe fn abs_pd(a: Self::Vf64) -> Self::Vf64;
-    unsafe fn add_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16;
-    unsafe fn sub_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16;
     unsafe fn mullo_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16;
-    unsafe fn add_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
-    unsafe fn add_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
-    unsafe fn add_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
-    unsafe fn and_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
-    unsafe fn and_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
     unsafe fn andnot_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn andnot_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
     unsafe fn andnot_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
@@ -401,16 +438,8 @@ pub trait Simd {
     unsafe fn min_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
     unsafe fn max_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
     unsafe fn min_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
-    unsafe fn mul_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
-    unsafe fn mul_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
     /// Mullo is implemented for Sse2 by combining other Sse2 operations.
     unsafe fn mullo_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
-    unsafe fn not_epi32(a: Self::Vi32) -> Self::Vi32;
-    unsafe fn not_epi64(a: Self::Vi64) -> Self::Vi64;
-    unsafe fn or_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
-    unsafe fn or_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
-    unsafe fn or_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
-    unsafe fn or_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
     unsafe fn rcp_ps(a: Self::Vf32) -> Self::Vf32;
     /// Round is implemented for Sse2 by combining other Sse2 operations.
     unsafe fn round_ps(a: Self::Vf32) -> Self::Vf32;
@@ -424,31 +453,24 @@ pub trait Simd {
     unsafe fn setzero_epi32() -> Self::Vi32;
     unsafe fn setzero_epi64() -> Self::Vi64;
     /// amt must be a constant
-    unsafe fn srai_epi32(a: Self::Vi32, amt_const: i32) -> Self::Vi32;
-    /// amt must be a constant
     unsafe fn srai_epi64(a: Self::Vi64, amt_const: i32) -> Self::Vi64;
     /// amt must be a constant
     unsafe fn srli_epi32(a: Self::Vi32, amt_const: i32) -> Self::Vi32;
-    /// amt must be a constant
-    unsafe fn slli_epi32(a: Self::Vi32, amt_const: i32) -> Self::Vi32;
+
     /// amt does not have to be a constant, but may be slower than the srai version
     unsafe fn sra_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32;
     /// amt does not have to be a constant, but may be slower than the srli version
     unsafe fn srl_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32;
     /// amt does not have to be a constant, but may be slower than the slli version
     unsafe fn sll_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32;
-    unsafe fn sub_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
-    unsafe fn sub_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
-    unsafe fn sub_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
+    unsafe fn sub_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 { a - b}
+    unsafe fn sub_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 { a - b }
+    unsafe fn sub_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {a - b }
     unsafe fn sqrt_ps(a: Self::Vf32) -> Self::Vf32;
     unsafe fn rsqrt_ps(a: Self::Vf32) -> Self::Vf32;
     unsafe fn sqrt_pd(a: Self::Vf64) -> Self::Vf64;
     unsafe fn rsqrt_pd(a: Self::Vf64) -> Self::Vf64;
     unsafe fn shuffle_epi32(a: Self::Vi32, imm8: i32) -> Self::Vi32;
-    unsafe fn xor_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
-    unsafe fn xor_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
-    unsafe fn xor_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
-    unsafe fn xor_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
 
     cfg_if::cfg_if! {
         if #[cfg(feature = "sleef")] {
