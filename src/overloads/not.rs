@@ -56,14 +56,7 @@ impl Not for I16x16 {
     }
 }
 
-impl Not for I32x4_41 {
-    type Output = I32x4_41;
 
-    #[inline(always)]
-    fn not(self) -> I32x4_41 {
-        unsafe { I32x4_41(_mm_xor_si128(self.0, _mm_set1_epi32(-1))) }
-    }
-}
 impl Not for I32x8 {
     type Output = I32x8;
 
@@ -73,14 +66,7 @@ impl Not for I32x8 {
     }
 }
 
-impl Not for I64x2_41 {
-    type Output = I64x2_41;
 
-    #[inline(always)]
-    fn not(self) -> I64x2_41 {
-        unsafe { I64x2_41(_mm_xor_si128(self.0, _mm_set1_epi64x(-1))) }
-    }
-}
 impl Not for I64x4 {
     type Output = I64x4;
 

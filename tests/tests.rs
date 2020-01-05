@@ -4,7 +4,8 @@ extern crate simdeez;
 mod tests {
     use simdeez::avx2::*;
     use simdeez::scalar::*;
-    use simdeez::sse2::*;
+    use simdeez::*;
+    use simdeez::sse2;
     use simdeez::sse41::*;
     use simdeez::*;
     use std::*;
