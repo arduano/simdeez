@@ -43,12 +43,7 @@ impl MulAssign for I16x16 {
     }
 }
 
-impl MulAssign for I32x4_41 {
-    #[inline(always)]
-    fn mul_assign(&mut self, rhs: I32x4_41) {
-        *self = I32x4_41(unsafe { _mm_mullo_epi32(self.0, rhs.0) })
-    }
-}
+
 
 impl MulAssign for I32x8 {
     #[inline(always)]

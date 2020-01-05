@@ -49,12 +49,7 @@ impl BitAndAssign for I16x16 {
     }
 }
 
-impl BitAndAssign for I32x4_41 {
-    #[inline(always)]
-    fn bitand_assign(&mut self, rhs: I32x4_41) {
-        *self = I32x4_41(unsafe { _mm_and_si128(self.0, rhs.0) })
-    }
-}
+
 impl BitAndAssign for I32x8 {
     #[inline(always)]
     fn bitand_assign(&mut self, rhs: I32x8) {
@@ -62,12 +57,7 @@ impl BitAndAssign for I32x8 {
     }
 }
 
-impl BitAndAssign for I64x2_41 {
-    #[inline(always)]
-    fn bitand_assign(&mut self, rhs: I64x2_41) {
-        *self = I64x2_41(unsafe { _mm_and_si128(self.0, rhs.0) })
-    }
-}
+
 impl BitAndAssign for I64x4 {
     #[inline(always)]
     fn bitand_assign(&mut self, rhs: I64x4) {

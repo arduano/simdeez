@@ -56,16 +56,7 @@ impl Index<usize> for I16x16 {
     }
 }
 
-impl Index<usize> for I32x4_41 {
-    type Output = i32;
 
-    #[inline(always)]
-    fn index(&self, i: usize) -> &i32 {
-        debug_assert!(i < 4);
-        let arr = unsafe { mem::transmute::<&I32x4_41, &[i32; 4]>(self) };
-        &arr[i]
-    }
-}
 impl Index<usize> for I32x8 {
     type Output = i32;
 
@@ -76,16 +67,7 @@ impl Index<usize> for I32x8 {
         &arr[i]
     }
 }
-impl Index<usize> for I64x2_41 {
-    type Output = i64;
 
-    #[inline(always)]
-    fn index(&self, i: usize) -> &i64 {
-        debug_assert!(i < 2);
-        let arr = unsafe { mem::transmute::<&I64x2_41, &[i64; 2]>(self) };
-        &arr[i]
-    }
-}
 impl Index<usize> for I64x4 {
     type Output = i64;
 

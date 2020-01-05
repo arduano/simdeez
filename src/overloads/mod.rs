@@ -21,10 +21,7 @@ impl SimdSmallInt<I16x16, i16> for I16x16 {}
 pub struct I32x1(pub i32);
 impl SimdBase<I32x1, i32> for I32x1 {}
 impl SimdSmallInt<I32x1, i32> for I32x1 {}
-#[derive(Copy, Debug, Clone)]
-pub struct I32x4_41(pub __m128i);
-impl SimdBase<I32x4_41, i32> for I32x4_41 {}
-impl SimdSmallInt<I32x4_41, i32> for I32x4_41 {}
+
 #[derive(Copy, Debug, Clone)]
 pub struct I32x8(pub __m256i);
 impl SimdBase<I32x8, i32> for I32x8 {}
@@ -36,9 +33,6 @@ impl SimdSmallInt<I32x8, i32> for I32x8 {}
 #[derive(Copy, Debug, Clone)]
 pub struct I64x1(pub i64);
 impl SimdBase<I64x1, i64> for I64x1 {}
-#[derive(Copy, Debug, Clone)]
-pub struct I64x2_41(pub __m128i);
-impl SimdBase<I64x2_41, i64> for I64x2_41 {}
 #[derive(Copy, Debug, Clone)]
 pub struct I64x4(pub __m256i);
 impl SimdBase<I64x4, i64> for I64x4 {}

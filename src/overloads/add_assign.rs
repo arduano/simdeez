@@ -42,12 +42,7 @@ impl AddAssign for I16x16 {
     }
 }
 
-impl AddAssign for I32x4_41 {
-    #[inline(always)]
-    fn add_assign(&mut self, rhs: I32x4_41) {
-        *self = I32x4_41(unsafe { _mm_add_epi32(self.0, rhs.0) })
-    }
-}
+
 impl AddAssign for I32x8 {
     #[inline(always)]
     fn add_assign(&mut self, rhs: I32x8) {
@@ -55,12 +50,6 @@ impl AddAssign for I32x8 {
     }
 }
 
-impl AddAssign for I64x2_41 {
-    #[inline(always)]
-    fn add_assign(&mut self, rhs: I64x2_41) {
-        *self = I64x2_41(unsafe { _mm_add_epi64(self.0, rhs.0) })
-    }
-}
 impl AddAssign for I64x4 {
     #[inline(always)]
     fn add_assign(&mut self, rhs: I64x4) {

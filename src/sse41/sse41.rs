@@ -1,6 +1,7 @@
 use super::*;
 use crate::overloads::*;
 use core::mem;
+use super::sse2::*;
 
 pub struct Sse41;
 impl Simd for Sse41 {

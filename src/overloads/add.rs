@@ -54,14 +54,7 @@ impl Add for I16x16 {
     }
 }
 
-impl Add for I32x4_41 {
-    type Output = I32x4_41;
 
-    #[inline(always)]
-    fn add(self, rhs: I32x4_41) -> I32x4_41 {
-        I32x4_41(unsafe { _mm_add_epi32(self.0, rhs.0) })
-    }
-}
 impl Add for I32x8 {
     type Output = I32x8;
 
@@ -71,14 +64,7 @@ impl Add for I32x8 {
     }
 }
 
-impl Add for I64x2_41 {
-    type Output = I64x2_41;
 
-    #[inline(always)]
-    fn add(self, rhs: I64x2_41) -> I64x2_41 {
-        I64x2_41(unsafe { _mm_add_epi64(self.0, rhs.0) })
-    }
-}
 impl Add for I64x4 {
     type Output = I64x4;
 
