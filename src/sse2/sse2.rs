@@ -1,5 +1,4 @@
 use super::*;
-use crate::overloads::*;
 use core::mem;
 
 pub struct Sse2;

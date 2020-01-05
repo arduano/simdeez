@@ -7,6 +7,11 @@ pub use self::overloads::*;
 pub use self::avx2::*;
 
 #[derive(Copy, Debug, Clone)]
+pub struct I16x16(pub __m256i);
+impl SimdBase<I16x16, i16> for I16x16 {}
+impl SimdSmallInt<I16x16, i16> for I16x16 {}
+
+#[derive(Copy, Debug, Clone)]
 pub struct I32x8(pub __m256i);
 impl SimdBase<I32x8, i32> for I32x8 {}
 impl SimdSmallInt<I32x8, i32> for I32x8 {}

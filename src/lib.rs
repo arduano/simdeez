@@ -135,7 +135,6 @@ mod macros;
 
 pub mod avx2;
 pub mod libm;
-pub mod overloads;
 pub mod scalar;
 pub mod sse2;
 pub mod sse41;
@@ -204,7 +203,7 @@ pub trait Simd {
 
     /// Vector of f32s.  Corresponds to __m128 when used
     /// with the Sse impl, __m256 when used with Avx2, or a single f32
-    /// when used with Scalar.    
+    /// when used with Scalar.
     type Vf32: SimdFloat<Self::Vf32, f32>;
 
     /// Vector of f64s.  Corresponds to __m128d when used
@@ -238,7 +237,7 @@ pub trait Simd {
     #[inline(always)]
     unsafe fn xor_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 { a ^ b }
     #[inline(always)]
-    unsafe fn xor_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 { a ^ b } 
+    unsafe fn xor_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 { a ^ b }
     #[inline(always)]
     unsafe fn xor_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {a ^ b }
     #[inline(always)]
@@ -452,12 +451,12 @@ pub trait Simd {
     unsafe fn setzero_ps() -> Self::Vf32;
     unsafe fn setzero_pd() -> Self::Vf64;
     unsafe fn setzero_epi32() -> Self::Vi32;
-    unsafe fn setzero_epi64() -> Self::Vi64; 
+    unsafe fn setzero_epi64() -> Self::Vi64;
     /// amt must be a constant
     unsafe fn srai_epi64(a: Self::Vi64, amt_const: i32) -> Self::Vi64;
     /// amt must be a constant
     unsafe fn srli_epi32(a: Self::Vi32, amt_const: i32) -> Self::Vi32;
-    
+
     /// amt does not have to be a constant, but may be slower than the srai version
     unsafe fn sra_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32;
     /// amt does not have to be a constant, but may be slower than the srli version
@@ -472,7 +471,7 @@ pub trait Simd {
     unsafe fn sqrt_pd(a: Self::Vf64) -> Self::Vf64;
     unsafe fn rsqrt_pd(a: Self::Vf64) -> Self::Vf64;
     unsafe fn shuffle_epi32(a: Self::Vi32, imm8: i32) -> Self::Vi32;
-    
+
     cfg_if::cfg_if! {
         if #[cfg(feature = "sleef")] {
             unsafe fn sin_ps(a: Self::Vf32) -> Self::Vf32;

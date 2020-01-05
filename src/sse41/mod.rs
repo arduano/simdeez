@@ -1,10 +1,11 @@
-use super::*;
+pub use super::*;
 use core::mem;
 
 mod sse41;
 mod overloads;
 pub use self::overloads::*;
 pub use self::sse41::*;
+pub use self::sse2::*;
 
 #[derive(Copy, Debug, Clone)]
 pub struct I64x2_41(pub __m128i);
