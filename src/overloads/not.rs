@@ -57,21 +57,3 @@ impl Not for I16x16 {
 }
 
 
-impl Not for I32x8 {
-    type Output = I32x8;
-
-    #[inline(always)]
-    fn not(self) -> I32x8 {
-        unsafe { I32x8(_mm256_xor_si256(self.0, _mm256_set1_epi32(-1))) }
-    }
-}
-
-
-impl Not for I64x4 {
-    type Output = I64x4;
-
-    #[inline(always)]
-    fn not(self) -> I64x4 {
-        unsafe { I64x4(_mm256_xor_si256(self.0, _mm256_set1_epi64x(-1))) }
-    }
-}

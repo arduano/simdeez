@@ -62,38 +62,3 @@ impl BitAnd for I16x16 {
 }
 
 
-impl BitAnd for I32x8 {
-    type Output = I32x8;
-
-    #[inline(always)]
-    fn bitand(self, rhs: I32x8) -> I32x8 {
-        I32x8(unsafe { _mm256_and_si256(self.0, rhs.0) })
-    }
-}
-
-
-impl BitAnd for I64x4 {
-    type Output = I64x4;
-
-    #[inline(always)]
-    fn bitand(self, rhs: I64x4) -> I64x4 {
-        I64x4(unsafe { _mm256_and_si256(self.0, rhs.0) })
-    }
-}
-impl BitAnd for F32x8 {
-    type Output = F32x8;
-
-    #[inline(always)]
-    fn bitand(self, rhs: F32x8) -> F32x8 {
-        F32x8(unsafe { _mm256_and_ps(self.0, rhs.0) })
-    }
-}
-
-impl BitAnd for F64x4 {
-    type Output = F64x4;
-
-    #[inline(always)]
-    fn bitand(self, rhs: F64x4) -> F64x4 {
-        F64x4(unsafe { _mm256_and_pd(self.0, rhs.0) })
-    }
-}

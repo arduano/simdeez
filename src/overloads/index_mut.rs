@@ -44,38 +44,3 @@ impl IndexMut<usize> for I16x16 {
     }
 }
 
-impl IndexMut<usize> for I32x8 {
-    #[inline(always)]
-    fn index_mut(&mut self, i: usize) -> &mut i32 {
-        debug_assert!(i < 8);
-        let arr = unsafe { mem::transmute::<&mut I32x8, &mut [i32; 8]>(self) };
-        &mut arr[i]
-    }
-}
-
-
-impl IndexMut<usize> for I64x4 {
-    #[inline(always)]
-    fn index_mut(&mut self, i: usize) -> &mut i64 {
-        debug_assert!(i < 4);
-        let arr = unsafe { mem::transmute::<&mut I64x4, &mut [i64; 4]>(self) };
-        &mut arr[i]
-    }
-}
-
-impl IndexMut<usize> for F32x8 {
-    #[inline(always)]
-    fn index_mut(&mut self, i: usize) -> &mut f32 {
-        debug_assert!(i < 8);
-        let arr = unsafe { mem::transmute::<&mut F32x8, &mut [f32; 8]>(self) };
-        &mut arr[i]
-    }
-}
-impl IndexMut<usize> for F64x4 {
-    #[inline(always)]
-    fn index_mut(&mut self, i: usize) -> &mut f64 {
-        debug_assert!(i < 4);
-        let arr = unsafe { mem::transmute::<&mut F64x4, &mut [f64; 4]>(self) };
-        &mut arr[i]
-    }
-}

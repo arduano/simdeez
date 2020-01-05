@@ -61,39 +61,3 @@ impl BitXor for I16x16 {
 }
 
 
-impl BitXor for I32x8 {
-    type Output = I32x8;
-
-    #[inline(always)]
-    fn bitxor(self, rhs: I32x8) -> I32x8 {
-        I32x8(unsafe { _mm256_xor_si256(self.0, rhs.0) })
-    }
-}
-
-
-impl BitXor for I64x4 {
-    type Output = I64x4;
-
-    #[inline(always)]
-    fn bitxor(self, rhs: I64x4) -> I64x4 {
-        I64x4(unsafe { _mm256_xor_si256(self.0, rhs.0) })
-    }
-}
-
-impl BitXor for F32x8 {
-    type Output = F32x8;
-
-    #[inline(always)]
-    fn bitxor(self, rhs: F32x8) -> F32x8 {
-        F32x8(unsafe { _mm256_xor_ps(self.0, rhs.0) })
-    }
-}
-
-impl BitXor for F64x4 {
-    type Output = F64x4;
-
-    #[inline(always)]
-    fn bitxor(self, rhs: F64x4) -> F64x4 {
-        F64x4(unsafe { _mm256_xor_pd(self.0, rhs.0) })
-    }
-}

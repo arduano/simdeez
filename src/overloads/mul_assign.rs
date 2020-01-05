@@ -45,23 +45,3 @@ impl MulAssign for I16x16 {
 
 
 
-impl MulAssign for I32x8 {
-    #[inline(always)]
-    fn mul_assign(&mut self, rhs: I32x8) {
-        *self = I32x8(unsafe { _mm256_mullo_epi32(self.0, rhs.0) })
-    }
-}
-
-impl MulAssign for F32x8 {
-    #[inline(always)]
-    fn mul_assign(&mut self, rhs: F32x8) {
-        *self = F32x8(unsafe { _mm256_mul_ps(self.0, rhs.0) })
-    }
-}
-
-impl MulAssign for F64x4 {
-    #[inline(always)]
-    fn mul_assign(&mut self, rhs: F64x4) {
-        *self = F64x4(unsafe { _mm256_mul_pd(self.0, rhs.0) })
-    }
-}

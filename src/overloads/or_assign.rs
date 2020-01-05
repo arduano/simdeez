@@ -49,32 +49,3 @@ impl BitOrAssign for I16x16 {
     }
 }
 
-
-impl BitOrAssign for I32x8 {
-    #[inline(always)]
-    fn bitor_assign(&mut self, rhs: I32x8) {
-        *self = I32x8(unsafe { _mm256_or_si256(self.0, rhs.0) })
-    }
-}
-
-
-impl BitOrAssign for I64x4 {
-    #[inline(always)]
-    fn bitor_assign(&mut self, rhs: I64x4) {
-        *self = I64x4(unsafe { _mm256_or_si256(self.0, rhs.0) })
-    }
-}
-
-impl BitOrAssign for F32x8 {
-    #[inline(always)]
-    fn bitor_assign(&mut self, rhs: F32x8) {
-        *self = F32x8(unsafe { _mm256_or_ps(self.0, rhs.0) })
-    }
-}
-
-impl BitOrAssign for F64x4 {
-    #[inline(always)]
-    fn bitor_assign(&mut self, rhs: F64x4) {
-        *self = F64x4(unsafe { _mm256_or_pd(self.0, rhs.0) })
-    }
-}

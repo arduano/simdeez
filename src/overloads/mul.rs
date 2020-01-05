@@ -53,27 +53,3 @@ impl Mul for I16x16 {
         I16x16(unsafe { _mm256_mullo_epi16(self.0, rhs.0) })
     }
 }
-
-impl Mul for I32x8 {
-    type Output = I32x8;
-    #[inline(always)]
-    fn mul(self, rhs: I32x8) -> I32x8 {
-        I32x8(unsafe { _mm256_mullo_epi32(self.0, rhs.0) })
-    }
-}
-
-impl Mul for F32x8 {
-    type Output = F32x8;
-    #[inline(always)]
-    fn mul(self, rhs: F32x8) -> F32x8 {
-        F32x8(unsafe { _mm256_mul_ps(self.0, rhs.0) })
-    }
-}
-
-impl Mul for F64x4 {
-    type Output = F64x4;
-    #[inline(always)]
-    fn mul(self, rhs: F64x4) -> F64x4 {
-        F64x4(unsafe { _mm256_mul_pd(self.0, rhs.0) })
-    }
-}
