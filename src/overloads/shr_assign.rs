@@ -36,17 +36,6 @@ impl ShrAssign<i32> for F64x1 {
     }
 }
 
-impl ShrAssign<i32> for I16x8 {
-    #[inline(always)]
-    fn shr_assign(&mut self, rhs: i32) {
-        macro_rules! call {
-            ($rhs:expr) => {
-                *self = unsafe { I16x8(_mm_srai_epi16(self.0, $rhs)) }
-            };
-        }
-        constify_imm8!(rhs, call)
-    }
-}
 impl ShrAssign<i32> for I16x16 {
     #[inline(always)]
     fn shr_assign(&mut self, rhs: i32) {
@@ -58,17 +47,7 @@ impl ShrAssign<i32> for I16x16 {
         constify_imm8!(rhs, call)
     }
 }
-impl ShrAssign<i32> for I32x4 {
-    #[inline(always)]
-    fn shr_assign(&mut self, rhs: i32) {
-        macro_rules! call {
-            ($rhs:expr) => {
-                *self = unsafe { I32x4(_mm_srai_epi32(self.0, $rhs)) }
-            };
-        }
-        constify_imm8!(rhs, call)
-    }
-}
+
 impl ShrAssign<i32> for I32x4_41 {
     #[inline(always)]
     fn shr_assign(&mut self, rhs: i32) {

@@ -52,7 +52,6 @@ impl BitAnd for F64x1 {
     }
 }
 
-
 impl BitAnd for I16x16 {
     type Output = I16x16;
 
@@ -104,7 +103,6 @@ impl BitAnd for F32x8 {
     }
 }
 
-
 impl BitAnd for F64x4 {
     type Output = F64x4;
 
@@ -113,4 +111,3 @@ impl BitAnd for F64x4 {
         F64x4(unsafe { _mm256_and_pd(self.0, rhs.0) })
     }
 }
-

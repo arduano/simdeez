@@ -35,7 +35,6 @@ impl AddAssign for F64x2 {
     }
 }
 
-
 impl Add for I16x8 {
     type Output = I16x8;
 
@@ -44,7 +43,6 @@ impl Add for I16x8 {
         I16x8(unsafe { _mm_add_epi16(self.0, rhs.0) })
     }
 }
-
 
 impl Add for I32x4 {
     type Output = I32x4;
@@ -175,7 +173,6 @@ impl DivAssign for F64x2 {
     }
 }
 
-
 impl Div for F32x4 {
     type Output = F32x4;
 
@@ -193,7 +190,6 @@ impl Div for F64x2 {
         F64x2(unsafe { _mm_div_pd(self.0, rhs.0) })
     }
 }
-
 
 impl IndexMut<usize> for I16x8 {
     #[inline(always)]
@@ -331,7 +327,6 @@ impl MulAssign for F64x2 {
     }
 }
 
-
 impl Mul for I16x8 {
     type Output = I16x8;
 
@@ -378,7 +373,6 @@ impl Mul for F64x2 {
         F64x2(unsafe { _mm_mul_pd(self.0, rhs.0) })
     }
 }
-
 
 impl Not for I16x8 {
     type Output = I16x8;
@@ -480,5 +474,257 @@ impl BitOr for F64x2 {
     #[inline(always)]
     fn bitor(self, rhs: F64x2) -> F64x2 {
         F64x2(unsafe { _mm_or_pd(self.0, rhs.0) })
+    }
+}
+
+impl ShlAssign<i32> for I16x8 {
+    #[inline(always)]
+    fn shl_assign(&mut self, rhs: i32) {
+        macro_rules! call {
+            ($rhs:expr) => {
+                *self = unsafe { I16x8(_mm_slli_epi16(self.0, $rhs)) }
+            };
+        }
+        constify_imm8!(rhs, call)
+    }
+}
+
+impl ShlAssign<i32> for I32x4 {
+    #[inline(always)]
+    fn shl_assign(&mut self, rhs: i32) {
+        macro_rules! call {
+            ($rhs:expr) => {
+                *self = unsafe { I32x4(_mm_slli_epi32(self.0, $rhs)) }
+            };
+        }
+        constify_imm8!(rhs, call)
+    }
+}
+
+impl Shl<i32> for I16x8 {
+    type Output = I16x8;
+
+    #[inline(always)]
+    fn shl(self, rhs: i32) -> I16x8 {
+        macro_rules! call {
+            ($rhs:expr) => {
+                unsafe { I16x8(_mm_slli_epi16(self.0, $rhs)) }
+            };
+        }
+        constify_imm8!(rhs, call)
+    }
+}
+impl Shl<i32> for I32x4 {
+    type Output = I32x4;
+
+    #[inline(always)]
+    fn shl(self, rhs: i32) -> I32x4 {
+        macro_rules! call {
+            ($rhs:expr) => {
+                unsafe { I32x4(_mm_slli_epi32(self.0, $rhs)) }
+            };
+        }
+        constify_imm8!(rhs, call)
+    }
+}
+
+impl ShrAssign<i32> for I16x8 {
+    #[inline(always)]
+    fn shr_assign(&mut self, rhs: i32) {
+        macro_rules! call {
+            ($rhs:expr) => {
+                *self = unsafe { I16x8(_mm_srai_epi16(self.0, $rhs)) }
+            };
+        }
+        constify_imm8!(rhs, call)
+    }
+}
+
+impl ShrAssign<i32> for I32x4 {
+    #[inline(always)]
+    fn shr_assign(&mut self, rhs: i32) {
+        macro_rules! call {
+            ($rhs:expr) => {
+                *self = unsafe { I32x4(_mm_srai_epi32(self.0, $rhs)) }
+            };
+        }
+        constify_imm8!(rhs, call)
+    }
+}
+
+impl Shr<i32> for I16x8 {
+    type Output = I16x8;
+
+    #[inline(always)]
+    fn shr(self, rhs: i32) -> I16x8 {
+        macro_rules! call {
+            ($rhs:expr) => {
+                unsafe { I16x8(_mm_srai_epi16(self.0, $rhs)) }
+            };
+        }
+        constify_imm8!(rhs, call)
+    }
+}
+impl Shr<i32> for I32x4 {
+    type Output = I32x4;
+
+    #[inline(always)]
+    fn shr(self, rhs: i32) -> I32x4 {
+        macro_rules! call {
+            ($rhs:expr) => {
+                unsafe { I32x4(_mm_srai_epi32(self.0, $rhs)) }
+            };
+        }
+        constify_imm8!(rhs, call)
+    }
+}
+
+impl SubAssign for I16x8 {
+    #[inline(always)]
+    fn sub_assign(&mut self, rhs: I16x8) {
+        *self = I16x8(unsafe { _mm_sub_epi16(self.0, rhs.0) })
+    }
+}
+
+impl SubAssign for I32x4 {
+    #[inline(always)]
+    fn sub_assign(&mut self, rhs: I32x4) {
+        *self = I32x4(unsafe { _mm_sub_epi32(self.0, rhs.0) })
+    }
+}
+
+impl SubAssign for I64x2 {
+    #[inline(always)]
+    fn sub_assign(&mut self, rhs: I64x2) {
+        *self = I64x2(unsafe { _mm_sub_epi64(self.0, rhs.0) })
+    }
+}
+
+impl SubAssign for F32x4 {
+    #[inline(always)]
+    fn sub_assign(&mut self, rhs: F32x4) {
+        *self = F32x4(unsafe { _mm_sub_ps(self.0, rhs.0) })
+    }
+}
+
+impl SubAssign for F64x2 {
+    #[inline(always)]
+    fn sub_assign(&mut self, rhs: F64x2) {
+        *self = F64x2(unsafe { _mm_sub_pd(self.0, rhs.0) })
+    }
+}
+
+impl Sub for I16x8 {
+    type Output = I16x8;
+
+    #[inline(always)]
+    fn sub(self, rhs: I16x8) -> I16x8 {
+        I16x8(unsafe { _mm_sub_epi16(self.0, rhs.0) })
+    }
+}
+impl Sub for I32x4 {
+    type Output = I32x4;
+
+    #[inline(always)]
+    fn sub(self, rhs: I32x4) -> I32x4 {
+        I32x4(unsafe { _mm_sub_epi32(self.0, rhs.0) })
+    }
+}
+impl Sub for I64x2 {
+    type Output = I64x2;
+
+    #[inline(always)]
+    fn sub(self, rhs: I64x2) -> I64x2 {
+        I64x2(unsafe { _mm_sub_epi64(self.0, rhs.0) })
+    }
+}
+impl Sub for F32x4 {
+    type Output = F32x4;
+
+    #[inline(always)]
+    fn sub(self, rhs: F32x4) -> F32x4 {
+        F32x4(unsafe { _mm_sub_ps(self.0, rhs.0) })
+    }
+}
+
+impl Sub for F64x2 {
+    type Output = F64x2;
+
+    #[inline(always)]
+    fn sub(self, rhs: F64x2) -> F64x2 {
+        F64x2(unsafe { _mm_sub_pd(self.0, rhs.0) })
+    }
+}
+
+impl BitXorAssign for I16x8 {
+    #[inline(always)]
+    fn bitxor_assign(&mut self, rhs: I16x8) {
+        *self = I16x8(unsafe { _mm_xor_si128(self.0, rhs.0) })
+    }
+}
+impl BitXorAssign for I32x4 {
+    #[inline(always)]
+    fn bitxor_assign(&mut self, rhs: I32x4) {
+        *self = I32x4(unsafe { _mm_xor_si128(self.0, rhs.0) })
+    }
+}
+impl BitXorAssign for I64x2 {
+    #[inline(always)]
+    fn bitxor_assign(&mut self, rhs: I64x2) {
+        *self = I64x2(unsafe { _mm_xor_si128(self.0, rhs.0) })
+    }
+}
+
+impl BitXorAssign for F32x4 {
+    #[inline(always)]
+    fn bitxor_assign(&mut self, rhs: F32x4) {
+        *self = F32x4(unsafe { _mm_xor_ps(self.0, rhs.0) })
+    }
+}
+impl BitXorAssign for F64x2 {
+    #[inline(always)]
+    fn bitxor_assign(&mut self, rhs: F64x2) {
+        *self = F64x2(unsafe { _mm_xor_pd(self.0, rhs.0) })
+    }
+}
+
+impl BitXor for I16x8 {
+    type Output = I16x8;
+
+    #[inline(always)]
+    fn bitxor(self, rhs: I16x8) -> I16x8 {
+        I16x8(unsafe { _mm_xor_si128(self.0, rhs.0) })
+    }
+}
+impl BitXor for I32x4 {
+    type Output = I32x4;
+
+    #[inline(always)]
+    fn bitxor(self, rhs: I32x4) -> I32x4 {
+        I32x4(unsafe { _mm_xor_si128(self.0, rhs.0) })
+    }
+}
+impl BitXor for I64x2 {
+    type Output = I64x2;
+
+    #[inline(always)]
+    fn bitxor(self, rhs: I64x2) -> I64x2 {
+        I64x2(unsafe { _mm_xor_si128(self.0, rhs.0) })
+    }
+}
+impl BitXor for F32x4 {
+    type Output = F32x4;
+
+    #[inline(always)]
+    fn bitxor(self, rhs: F32x4) -> F32x4 {
+        F32x4(unsafe { _mm_xor_ps(self.0, rhs.0) })
+    }
+}
+impl BitXor for F64x2 {
+    type Output = F64x2;
+
+    #[inline(always)]
+    fn bitxor(self, rhs: F64x2) -> F64x2 {
+        F64x2(unsafe { _mm_xor_pd(self.0, rhs.0) })
     }
 }

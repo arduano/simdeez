@@ -28,7 +28,6 @@ impl Div for F32x8 {
     }
 }
 
-
 impl Div for F64x4 {
     type Output = F64x4;
 

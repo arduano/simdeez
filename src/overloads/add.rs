@@ -45,7 +45,6 @@ impl Add for F64x1 {
     }
 }
 
-
 impl Add for I16x16 {
     type Output = I16x16;
 
@@ -88,7 +87,6 @@ impl Add for I64x4 {
         I64x4(unsafe { _mm256_add_epi64(self.0, rhs.0) })
     }
 }
-
 
 impl Add for F32x8 {
     type Output = F32x8;

@@ -46,7 +46,6 @@ impl Index<usize> for F64x1 {
     }
 }
 
-
 impl Index<usize> for I16x16 {
     type Output = i16;
 
@@ -108,7 +107,6 @@ impl Index<usize> for F32x8 {
         &arr[i]
     }
 }
-
 
 impl Index<usize> for F64x4 {
     type Output = f64;

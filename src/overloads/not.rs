@@ -47,7 +47,6 @@ impl Not for F64x1 {
     }
 }
 
-
 impl Not for I16x16 {
     type Output = I16x16;
 

@@ -42,7 +42,6 @@ impl BitAndAssign for F64x1 {
     }
 }
 
-
 impl BitAndAssign for I16x16 {
     #[inline(always)]
     fn bitand_assign(&mut self, rhs: I16x16) {
@@ -82,7 +81,6 @@ impl BitAndAssign for F32x8 {
         *self = F32x8(unsafe { _mm256_and_ps(self.0, rhs.0) })
     }
 }
-
 
 impl BitAndAssign for F64x4 {
     #[inline(always)]

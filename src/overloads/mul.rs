@@ -54,7 +54,6 @@ impl Mul for I16x16 {
     }
 }
 
-
 impl Mul for I32x4_41 {
     type Output = I32x4_41;
 
@@ -71,7 +70,6 @@ impl Mul for I32x8 {
     }
 }
 
-
 impl Mul for F32x8 {
     type Output = F32x8;
     #[inline(always)]
@@ -80,7 +78,6 @@ impl Mul for F32x8 {
     }
 }
 
-
 impl Mul for F64x4 {
     type Output = F64x4;
     #[inline(always)]
@@ -88,4 +85,3 @@ impl Mul for F64x4 {
         F64x4(unsafe { _mm256_mul_pd(self.0, rhs.0) })
     }
 }
-

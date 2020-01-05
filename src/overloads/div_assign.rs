@@ -15,14 +15,12 @@ impl DivAssign for F64x1 {
     }
 }
 
-
 impl DivAssign for F32x8 {
     #[inline(always)]
     fn div_assign(&mut self, rhs: F32x8) {
         *self = F32x8(unsafe { _mm256_div_ps(self.0, rhs.0) })
     }
 }
-
 
 impl DivAssign for F64x4 {
     #[inline(always)]

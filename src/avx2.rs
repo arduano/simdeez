@@ -638,9 +638,9 @@ impl Simd for Avx2 {
     }
 
     cfg_if::cfg_if! {
-        if #[cfg(feature = "sleef")] 
+        if #[cfg(feature = "sleef")]
         {
-            
+
             #[inline(always)]
             unsafe fn sin_ps(a: Self::Vf32) -> Self::Vf32 {
                 let sin1 = F32x4(sleef_sys::Sleef_sinf4_u10sse4(_mm_loadu_ps(&a[0])));
@@ -766,7 +766,7 @@ impl Simd for Avx2 {
                 F32x8(_mm256_loadu2_m128(&cos2[0], &cos1[0]))
             }
 
-            
+
             #[inline(always)]
             unsafe fn tanh_ps(a: Self::Vf32) -> Self::Vf32 {
                 let tan1 = F32x4(sleef_sys::Sleef_tanhf4_u10sse4(_mm_loadu_ps(&a[0])));

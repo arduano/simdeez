@@ -103,7 +103,6 @@ impl BitOr for F32x8 {
     }
 }
 
-
 impl BitOr for F64x4 {
     type Output = F64x4;
 
