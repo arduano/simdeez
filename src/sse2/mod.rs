@@ -1,5 +1,10 @@
 use super::*;
 use core::mem;
+#[cfg(target_arch = "x86")]
+use core::arch::x86::*;
+
+#[cfg(target_arch = "x86_64")]
+use core::arch::x86_64::*;
 
 mod overloads;
 mod sse2;

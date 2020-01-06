@@ -1,7 +1,6 @@
 use super::*;
 use core::mem;
 
-
 pub struct Sse2;
 impl Simd for Sse2 {
     type Vi16 = I16x8;

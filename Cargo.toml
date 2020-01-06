@@ -11,6 +11,7 @@ repository = "https://github.com/jackmott/simdeez"
 categories = ["hardware-support","science","game-engines"]
 edition="2018"
 
+
 [features]
 sleef = ["sleef-sys"]
 
@@ -21,9 +22,5 @@ sleef-sys = {version = "0.1.2", optional=true}
 cfg-if = "0.1.10"
 
 [dev-dependencies]
-criterion = "0.3.0"
 rand = "0.7.2"
-[[bench]]
-name = "benchmarks"
-harness = false
 
