@@ -133,6 +133,7 @@ use core::ops::*;
 #[macro_use]
 mod macros;
 
+pub mod avx;
 pub mod avx2;
 pub mod libm;
 pub mod scalar;
@@ -514,6 +515,7 @@ pub trait Simd {
 
 /// Generates a generic version of your function (fn_name), and versions for:
 /// * AVX2 (fn_name_avx2)
+/// * AVX (fn_name_avx)
 /// * SSE41 (fn_name_sse41)
 /// * SSE2 (fn_name_sse2)
 /// * Scalar fallback (fn_name_scalar)
@@ -540,6 +542,10 @@ macro_rules! simd_runtime_generate {
                 $vis unsafe fn [<$fn_name _sse41>]($($arg:$typ,)*) $(-> $rt)? {
                 $fn_name::<Sse41>($($arg,)*)
             }
+            #[target_feature(enable = "avx")]
+            $vis  unsafe fn [<$fn_name _avx>]($($arg:$typ,)*) $(-> $rt)? {
+                $fn_name::<Avx>($($arg,)*)
+            }
             #[target_feature(enable = "avx2")]
             $vis  unsafe fn [<$fn_name _avx2>]($($arg:$typ,)*) $(-> $rt)? {
                 $fn_name::<Avx2>($($arg,)*)
@@ -547,6 +553,8 @@ macro_rules! simd_runtime_generate {
             $vis  fn [<$fn_name _runtime_select>]($($arg:$typ,)*) $(-> $rt)? {
                 if is_x86_feature_detected!("avx2") {
                     unsafe { [<$fn_name _avx2>]($($arg,)*) }
+                } else if is_x86_feature_detected!("avx") {
+                    unsafe { [<$fn_name _avx>]($($arg,)*) }
                 } else if is_x86_feature_detected!("sse4.1") {
                     unsafe { [<$fn_name _sse41>]($($arg,)*) }
                 } else if is_x86_feature_detected!("sse2") {

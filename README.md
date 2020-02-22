@@ -11,7 +11,7 @@ Refer to the excellent [Intel Intrinsics Guide](https://software.intel.com/sites
 
 # Features
 
-* SSE2, SSE41, and AVX2, and scalar fallback
+* SSE2, SSE41, AVX (work in progress), and AVX2, and scalar fallback
 * Can be used with compile time or run time selection
 * No runtime overhead
 * Uses familiar intel intrinsic naming conventions, easy to port. 
@@ -52,6 +52,7 @@ use simdeez::*;
     use simdeez::scalar::*;
     use simdeez::sse2::*;
     use simdeez::sse41::*;
+    use simdeez::avx::*;
     use simdeez::avx2::*;
     // If you want your SIMD function to use use runtime feature detection to call
     // the fastest available version, use the simd_runtime_generate macro:
@@ -97,6 +98,7 @@ This will generate 5 functions for you:
 * `distance_scalar`  a scalar fallback
 * `distance_sse2`    SSE2 version
 * `distance_sse41`   SSE41 version
+* `distance_avx`     AVX version
 * `distance_avx2`    AVX2 version
 * `distance_runtime_select`  // picks the fastest of the above at runtime
 
