@@ -1,3 +1,6 @@
+#[cfg(feature = "sleef")]
+use crate::sse41::{F32x4, F64x2};
+
 use super::*;
 use core::mem;
 
