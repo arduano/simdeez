@@ -2,6 +2,7 @@ extern crate simdeez;
 
 #[cfg(test)]
 mod tests {
+    use simdeez::avx::*;
     use simdeez::avx2::*;
     use simdeez::scalar::*;
     use simdeez::*;
@@ -59,6 +60,11 @@ mod tests {
     unsafe fn distance_avx2(x1: &[f32], y1: &[f32], x2: &[f32], y2: &[f32]) -> Vec<f32> {
         distance::<Avx2>(x1, y1, x2, y2)
     }
+    //Call distance as an AVX2 function
+    #[target_feature(enable = "avx")]
+    unsafe fn distance_avx(x1: &[f32], y1: &[f32], x2: &[f32], y2: &[f32]) -> Vec<f32> {
+        distance::<Avx>(x1, y1, x2, y2)
+    }
     //Call distance as scalar
     unsafe fn distance_scalar(x1: &[f32], y1: &[f32], x2: &[f32], y2: &[f32]) -> Vec<f32> {
         distance::<Scalar>(x1, y1, x2, y2)
@@ -77,10 +83,13 @@ mod tests {
             println!("sse41 dist:{:?}", distances_sse41);
             let distances_avx2 = distance_avx2(&x1, &y1, &x2, &y2);
             println!("avx2 dist:{:?}", distances_avx2);
+            let distances_avx = distance_avx(&x1, &y1, &x2, &y2);
+            println!("avx dist:{:?}", distances_avx);
             let distance_scalar = distance_scalar(&x1, &y1, &x2, &y2);
             for i in 0..8 {
                 assert_eq!(distances_sse2[i], distances_sse41[i]);
-                assert_eq!(distances_sse41[i], distances_avx2[i]);
+                assert_eq!(distances_sse41[i], distances_avx[i]);
+                assert_eq!(distances_avx[i], distances_avx2[i]);
                 assert_eq!(distances_sse2[i], distance_scalar[i]);
             }
         }
@@ -107,6 +116,11 @@ mod tests {
     unsafe fn sample_avx2() -> i32 {
         sample::<Avx2>()
     }
+    // Make an avx version of sample
+    #[target_feature(enable = "avx")]
+    unsafe fn sample_avx() -> i32 {
+        sample::<Avx>()
+    }
     #[target_feature(enable = "sse4.1")]
     unsafe fn sample_sse41() -> i32 {
         sample::<Sse41>()
@@ -118,7 +132,8 @@ mod tests {
     fn consistency() {
         unsafe {
             assert_eq!(sample_sse2(), sample_sse41());
-            assert_eq!(sample_sse41(), sample_avx2());
+            assert_eq!(sample_sse41(), sample_avx());
+            assert_eq!(sample_avx(), sample_avx2());
             assert_eq!(sample_scalar(), sample_avx2());
         }
     }
