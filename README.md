@@ -11,7 +11,7 @@ Refer to the excellent [Intel Intrinsics Guide](https://software.intel.com/sites
 
 # Features
 
-* SSE2, SSE41, AVX (work in progress), and AVX2, and scalar fallback
+* SSE2, SSE41, AVX and AVX2, and scalar fallback
 * Can be used with compile time or run time selection
 * No runtime overhead
 * Uses familiar intel intrinsic naming conventions, easy to port. 
