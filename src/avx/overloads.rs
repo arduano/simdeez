@@ -2,70 +2,24 @@ use crate::sse2::{I16x8, I32x4, I64x2};
 use super::*;
 
 
-/// Split two 256-wide vectors into halves, run method on both, join results into original type
-macro_rules! m256i_run_on_halves_2_simd {
-    ($method:ident, $arg1:ident, $arg2:ident, $halve_type:ident, $output_type:ident) => {
-        unsafe {
-            let arg1_low = $halve_type(_mm256_extractf128_si256($arg1.0, 0));
-            let arg1_hi = $halve_type(_mm256_extractf128_si256($arg1.0, 1));
-
-            let arg2_low = $halve_type(_mm256_extractf128_si256($arg2.0, 0));
-            let arg2_hi = $halve_type(_mm256_extractf128_si256($arg2.0, 1));
-
-            let low_result = arg1_low.$method(arg2_low);
-            let hi_result = arg1_hi.$method(arg2_hi);
-
-            $output_type(_mm256_setr_m128i(low_result.0, hi_result.0))
-        }
-    };
-}
-
-/// Split one 256-wide vector into halves, run method on it, join results into original type
-macro_rules! m256i_run_on_halves_1_simd {
-    // Methods with two arguments, where first is simd vector getting split and second is not
-    ($method:ident, $arg1:ident, $arg2:ident, $halve_type:ident, $output_type:ident) => {
-        unsafe {
-            let arg1_low = $halve_type(_mm256_extractf128_si256($arg1.0, 0));
-            let arg1_hi = $halve_type(_mm256_extractf128_si256($arg1.0, 1));
-
-            let low_result = arg1_low.$method($arg2);
-            let hi_result = arg1_hi.$method($arg2);
-
-            $output_type(_mm256_setr_m128i(low_result.0, hi_result.0))
-        }
-    };
-    // Methods with one argument
-    ($method:ident, $arg1:ident, $halve_type:ident, $output_type:ident) => {
-        unsafe {
-            let arg1_low = $halve_type(_mm256_extractf128_si256($arg1.0, 0));
-            let arg1_hi = $halve_type(_mm256_extractf128_si256($arg1.0, 1));
-
-            let low_result = arg1_low.$method();
-            let hi_result = arg1_hi.$method();
-
-            $output_type(_mm256_setr_m128i(low_result.0, hi_result.0))
-        }
-    };
-}
-
 impl AddAssign for I16x16 {
     #[inline(always)]
     fn add_assign(&mut self, rhs: I16x16) {
-        *self = m256i_run_on_halves_2_simd!(add, self, rhs, I16x8, Self);
+        *self = m256i_run_on_halves_2_simd!(Add::add, self, rhs, I16x8, Self);
     }
 }
 
 impl AddAssign for I32x8 {
     #[inline(always)]
     fn add_assign(&mut self, rhs: I32x8) {
-        *self = m256i_run_on_halves_2_simd!(add, self, rhs, I32x4, Self);
+        *self = m256i_run_on_halves_2_simd!(Add::add, self, rhs, I32x4, Self);
     }
 }
 
 impl AddAssign for I64x4 {
     #[inline(always)]
     fn add_assign(&mut self, rhs: I64x4) {
-        *self = m256i_run_on_halves_2_simd!(add, self, rhs, I64x2, Self);
+        *self = m256i_run_on_halves_2_simd!(Add::add, self, rhs, I64x2, Self);
     }
 }
 impl AddAssign for F32x8 {
@@ -86,7 +40,7 @@ impl Add for I16x16 {
 
     #[inline(always)]
     fn add(self, rhs: I16x16) -> I16x16 {
-        m256i_run_on_halves_2_simd!(add, self, rhs, I16x8, I16x16)
+        m256i_run_on_halves_2_simd!(Add::add, self, rhs, I16x8, I16x16)
     }
 }
 
@@ -96,7 +50,7 @@ impl Add for I32x8 {
 
     #[inline(always)]
     fn add(self, rhs: I32x8) -> I32x8 {
-        m256i_run_on_halves_2_simd!(add, self, rhs, I32x4, I32x8)
+        m256i_run_on_halves_2_simd!(Add::add, self, rhs, I32x4, I32x8)
     }
 }
 
@@ -106,7 +60,7 @@ impl Add for I64x4 {
 
     #[inline(always)]
     fn add(self, rhs: I64x4) -> I64x4 {
-        m256i_run_on_halves_2_simd!(add, self, rhs, I64x2, Self)
+        m256i_run_on_halves_2_simd!(Add::add, self, rhs, I64x2, Self)
     }
 }
 
@@ -130,14 +84,14 @@ impl Add for F64x4 {
 impl BitAndAssign for I16x16 {
     #[inline(always)]
     fn bitand_assign(&mut self, rhs: I16x16) {
-        *self = m256i_run_on_halves_2_simd!(bitand, self, rhs, I16x8, Self);
+        *self = m256i_run_on_halves_2_simd!(BitAnd::bitand, self, rhs, I16x8, Self);
     }
 }
 
 impl BitAndAssign for I32x8 {
     #[inline(always)]
     fn bitand_assign(&mut self, rhs: I32x8) {
-        *self = m256i_run_on_halves_2_simd!(bitand, self, rhs, I32x4, Self);
+        *self = m256i_run_on_halves_2_simd!(BitAnd::bitand, self, rhs, I32x4, Self);
     }
 }
 
@@ -145,7 +99,7 @@ impl BitAndAssign for I32x8 {
 impl BitAndAssign for I64x4 {
     #[inline(always)]
     fn bitand_assign(&mut self, rhs: I64x4) {
-        *self = m256i_run_on_halves_2_simd!(bitand, self, rhs, I64x2, Self);
+        *self = m256i_run_on_halves_2_simd!(BitAnd::bitand, self, rhs, I64x2, Self);
     }
 }
 
@@ -167,7 +121,7 @@ impl BitAnd for I16x16 {
 
     #[inline(always)]
     fn bitand(self, rhs: I16x16) -> I16x16 {
-        m256i_run_on_halves_2_simd!(bitand, self, rhs, I16x8, Self)
+        m256i_run_on_halves_2_simd!(BitAnd::bitand, self, rhs, I16x8, Self)
     }
 }
 
@@ -176,7 +130,7 @@ impl BitAnd for I32x8 {
 
     #[inline(always)]
     fn bitand(self, rhs: I32x8) -> I32x8 {
-        m256i_run_on_halves_2_simd!(bitand, self, rhs, I32x4, Self)
+        m256i_run_on_halves_2_simd!(BitAnd::bitand, self, rhs, I32x4, Self)
     }
 }
 
@@ -186,7 +140,7 @@ impl BitAnd for I64x4 {
 
     #[inline(always)]
     fn bitand(self, rhs: I64x4) -> I64x4 {
-        m256i_run_on_halves_2_simd!(bitand, self, rhs, I64x2, Self)
+        m256i_run_on_halves_2_simd!(BitAnd::bitand, self, rhs, I64x2, Self)
     }
 }
 impl BitAnd for F32x8 {
@@ -342,14 +296,14 @@ impl Index<usize> for F64x4 {
 impl MulAssign for I16x16 {
     #[inline(always)]
     fn mul_assign(&mut self, rhs: I16x16) {
-        *self = m256i_run_on_halves_2_simd!(mul, self, rhs, I16x8, Self);
+        *self = m256i_run_on_halves_2_simd!(Mul::mul, self, rhs, I16x8, Self);
     }
 }
 
 impl MulAssign for I32x8 {
     #[inline(always)]
     fn mul_assign(&mut self, rhs: I32x8) {
-        *self = m256i_run_on_halves_2_simd!(mul, self, rhs, I32x4, Self);
+        *self = m256i_run_on_halves_2_simd!(Mul::mul, self, rhs, I32x4, Self);
     }
 }
 
@@ -371,7 +325,7 @@ impl Mul for I16x16 {
 
     #[inline(always)]
     fn mul(self, rhs: I16x16) -> I16x16 {
-        m256i_run_on_halves_2_simd!(mul, self, rhs, I16x8, Self)
+        m256i_run_on_halves_2_simd!(Mul::mul, self, rhs, I16x8, Self)
     }
 }
 
@@ -379,7 +333,7 @@ impl Mul for I32x8 {
     type Output = I32x8;
     #[inline(always)]
     fn mul(self, rhs: I32x8) -> I32x8 {
-        m256i_run_on_halves_2_simd!(mul, self, rhs, I32x4, Self)
+        m256i_run_on_halves_2_simd!(Mul::mul, self, rhs, I32x4, Self)
     }
 }
 
@@ -403,7 +357,7 @@ impl Not for I16x16 {
 
     #[inline(always)]
     fn not(self) -> I16x16 {
-        m256i_run_on_halves_1_simd!(not, self, I16x8, Self)
+        m256i_run_on_halves_1_simd!(Not::not, self, I16x8, Self)
     }
 }
 
@@ -413,7 +367,7 @@ impl Not for I32x8 {
 
     #[inline(always)]
     fn not(self) -> I32x8 {
-        m256i_run_on_halves_1_simd!(not, self, I32x4, Self)
+        m256i_run_on_halves_1_simd!(Not::not, self, I32x4, Self)
     }
 }
 
@@ -423,19 +377,19 @@ impl Not for I64x4 {
 
     #[inline(always)]
     fn not(self) -> I64x4 {
-        m256i_run_on_halves_1_simd!(not, self, I64x2, Self)
+        m256i_run_on_halves_1_simd!(Not::not, self, I64x2, Self)
     }
 }
 impl BitOrAssign for I16x16 {
     #[inline(always)]
     fn bitor_assign(&mut self, rhs: I16x16) {
-        *self = m256i_run_on_halves_2_simd!(bitor, self, rhs, I16x8, Self);
+        *self = m256i_run_on_halves_2_simd!(BitOr::bitor, self, rhs, I16x8, Self);
     }
 }
 impl BitOrAssign for I32x8 {
     #[inline(always)]
     fn bitor_assign(&mut self, rhs: I32x8) {
-        *self = m256i_run_on_halves_2_simd!(bitor, self, rhs, I32x4, Self);
+        *self = m256i_run_on_halves_2_simd!(BitOr::bitor, self, rhs, I32x4, Self);
     }
 }
 
@@ -443,7 +397,7 @@ impl BitOrAssign for I32x8 {
 impl BitOrAssign for I64x4 {
     #[inline(always)]
     fn bitor_assign(&mut self, rhs: I64x4) {
-        *self = m256i_run_on_halves_2_simd!(bitor, self, rhs, I64x2, Self);
+        *self = m256i_run_on_halves_2_simd!(BitOr::bitor, self, rhs, I64x2, Self);
     }
 }
 
@@ -466,7 +420,7 @@ impl BitOr for I16x16 {
 
     #[inline(always)]
     fn bitor(self, rhs: I16x16) -> I16x16 {
-        m256i_run_on_halves_2_simd!(bitor, self, rhs, I16x8, Self)
+        m256i_run_on_halves_2_simd!(BitOr::bitor, self, rhs, I16x8, Self)
     }
 }
 
@@ -476,7 +430,7 @@ impl BitOr for I32x8 {
 
     #[inline(always)]
     fn bitor(self, rhs: I32x8) -> I32x8 {
-        m256i_run_on_halves_2_simd!(bitor, self, rhs, I32x4, Self)
+        m256i_run_on_halves_2_simd!(BitOr::bitor, self, rhs, I32x4, Self)
     }
 }
 
@@ -486,7 +440,7 @@ impl BitOr for I64x4 {
 
     #[inline(always)]
     fn bitor(self, rhs: I64x4) -> I64x4 {
-        m256i_run_on_halves_2_simd!(bitor, self, rhs, I64x2, Self)
+        m256i_run_on_halves_2_simd!(BitOr::bitor, self, rhs, I64x2, Self)
     }
 }
 
@@ -510,7 +464,7 @@ impl BitOr for F64x4 {
 impl ShlAssign<i32> for I16x16 {
     #[inline(always)]
     fn shl_assign(&mut self, rhs: i32) {
-        *self = m256i_run_on_halves_1_simd!(shl, self, rhs, I16x8, Self);
+        *self = m256i_run_on_halves_1_simd!(Shl::shl, self, rhs, I16x8, Self);
     }
 }
 
@@ -518,7 +472,7 @@ impl ShlAssign<i32> for I16x16 {
 impl ShlAssign<i32> for I32x8 {
     #[inline(always)]
     fn shl_assign(&mut self, rhs: i32) {
-        *self = m256i_run_on_halves_1_simd!(shl, self, rhs, I32x4, Self);
+        *self = m256i_run_on_halves_1_simd!(Shl::shl, self, rhs, I32x4, Self);
     }
 }
 impl Shl<i32> for I16x16 {
@@ -526,7 +480,7 @@ impl Shl<i32> for I16x16 {
 
     #[inline(always)]
     fn shl(self, rhs: i32) -> I16x16 {
-        m256i_run_on_halves_1_simd!(shl, self, rhs, I16x8, Self)
+        m256i_run_on_halves_1_simd!(Shl::shl, self, rhs, I16x8, Self)
     }
 }
 
@@ -536,14 +490,14 @@ impl Shl<i32> for I32x8 {
 
     #[inline(always)]
     fn shl(self, rhs: i32) -> I32x8 {
-        m256i_run_on_halves_1_simd!(shl, self, rhs, I32x4, Self)
+        m256i_run_on_halves_1_simd!(Shl::shl, self, rhs, I32x4, Self)
     }
 }
 
 impl ShrAssign<i32> for I16x16 {
     #[inline(always)]
     fn shr_assign(&mut self, rhs: i32) {
-        *self = m256i_run_on_halves_1_simd!(shr, self, rhs, I16x8, Self);
+        *self = m256i_run_on_halves_1_simd!(Shr::shr, self, rhs, I16x8, Self);
     }
 }
 
@@ -552,7 +506,7 @@ impl ShrAssign<i32> for I16x16 {
 impl ShrAssign<i32> for I32x8 {
     #[inline(always)]
     fn shr_assign(&mut self, rhs: i32) {
-        *self = m256i_run_on_halves_1_simd!(shr, self, rhs, I32x4, Self);
+        *self = m256i_run_on_halves_1_simd!(Shr::shr, self, rhs, I32x4, Self);
     }
 }
 impl Shr<i32> for I16x16 {
@@ -560,7 +514,7 @@ impl Shr<i32> for I16x16 {
 
     #[inline(always)]
     fn shr(self, rhs: i32) -> I16x16 {
-        m256i_run_on_halves_1_simd!(shr, self, rhs, I16x8, Self)
+        m256i_run_on_halves_1_simd!(Shr::shr, self, rhs, I16x8, Self)
     }
 }
 
@@ -569,19 +523,19 @@ impl Shr<i32> for I32x8 {
 
     #[inline(always)]
     fn shr(self, rhs: i32) -> I32x8 {
-        m256i_run_on_halves_1_simd!(shr, self, rhs, I32x4, Self)
+        m256i_run_on_halves_1_simd!(Shr::shr, self, rhs, I32x4, Self)
     }
 }
 impl SubAssign for I16x16 {
     #[inline(always)]
     fn sub_assign(&mut self, rhs: I16x16) {
-        *self = m256i_run_on_halves_2_simd!(sub, self, rhs, I16x8, Self);
+        *self = m256i_run_on_halves_2_simd!(Sub::sub, self, rhs, I16x8, Self);
     }
 }
 impl SubAssign for I32x8 {
     #[inline(always)]
     fn sub_assign(&mut self, rhs: I32x8) {
-        *self = m256i_run_on_halves_2_simd!(sub, self, rhs, I32x4, Self);
+        *self = m256i_run_on_halves_2_simd!(Sub::sub, self, rhs, I32x4, Self);
     }
 }
 
@@ -589,7 +543,7 @@ impl SubAssign for I32x8 {
 impl SubAssign for I64x4 {
     #[inline(always)]
     fn sub_assign(&mut self, rhs: I64x4) {
-        *self = m256i_run_on_halves_2_simd!(sub, self, rhs, I64x2, Self);
+        *self = m256i_run_on_halves_2_simd!(Sub::sub, self, rhs, I64x2, Self);
     }
 }
 
@@ -611,7 +565,7 @@ impl Sub for I16x16 {
 
     #[inline(always)]
     fn sub(self, rhs: I16x16) -> I16x16 {
-        m256i_run_on_halves_2_simd!(sub, self, rhs, I16x8, Self)
+        m256i_run_on_halves_2_simd!(Sub::sub, self, rhs, I16x8, Self)
     }
 }
 impl Sub for I32x8 {
@@ -619,7 +573,7 @@ impl Sub for I32x8 {
 
     #[inline(always)]
     fn sub(self, rhs: I32x8) -> I32x8 {
-        m256i_run_on_halves_2_simd!(sub, self, rhs, I32x4, Self)
+        m256i_run_on_halves_2_simd!(Sub::sub, self, rhs, I32x4, Self)
     }
 }
 impl Sub for I64x4 {
@@ -627,7 +581,7 @@ impl Sub for I64x4 {
 
     #[inline(always)]
     fn sub(self, rhs: I64x4) -> I64x4 {
-        m256i_run_on_halves_2_simd!(sub, self, rhs, I64x2, Self)
+        m256i_run_on_halves_2_simd!(Sub::sub, self, rhs, I64x2, Self)
     }
 }
 
@@ -652,14 +606,14 @@ impl Sub for F64x4 {
 impl BitXorAssign for I16x16 {
     #[inline(always)]
     fn bitxor_assign(&mut self, rhs: I16x16) {
-        *self = m256i_run_on_halves_2_simd!(bitxor, self, rhs, I16x8, Self);
+        *self = m256i_run_on_halves_2_simd!(BitXor::bitxor, self, rhs, I16x8, Self);
     }
 }
 
 impl BitXorAssign for I32x8 {
     #[inline(always)]
     fn bitxor_assign(&mut self, rhs: I32x8) {
-        *self = m256i_run_on_halves_2_simd!(bitxor, self, rhs, I32x4, Self);
+        *self = m256i_run_on_halves_2_simd!(BitXor::bitxor, self, rhs, I32x4, Self);
     }
 }
 
@@ -667,7 +621,7 @@ impl BitXorAssign for I32x8 {
 impl BitXorAssign for I64x4 {
     #[inline(always)]
     fn bitxor_assign(&mut self, rhs: I64x4) {
-        *self = m256i_run_on_halves_2_simd!(bitxor, self, rhs, I64x2, Self);
+        *self = m256i_run_on_halves_2_simd!(BitXor::bitxor, self, rhs, I64x2, Self);
     }
 }
 
@@ -689,7 +643,7 @@ impl BitXor for I16x16 {
 
     #[inline(always)]
     fn bitxor(self, rhs: I16x16) -> I16x16 {
-        m256i_run_on_halves_2_simd!(bitxor, self, rhs, I16x8, Self)
+        m256i_run_on_halves_2_simd!(BitXor::bitxor, self, rhs, I16x8, Self)
     }
 }
 
@@ -698,7 +652,7 @@ impl BitXor for I32x8 {
 
     #[inline(always)]
     fn bitxor(self, rhs: I32x8) -> I32x8 {
-        m256i_run_on_halves_2_simd!(bitxor, self, rhs, I32x4, Self)
+        m256i_run_on_halves_2_simd!(BitXor::bitxor, self, rhs, I32x4, Self)
     }
 }
 
@@ -708,7 +662,7 @@ impl BitXor for I64x4 {
 
     #[inline(always)]
     fn bitxor(self, rhs: I64x4) -> I64x4 {
-        m256i_run_on_halves_2_simd!(bitxor, self, rhs, I64x2, Self)
+        m256i_run_on_halves_2_simd!(BitXor::bitxor, self, rhs, I64x2, Self)
     }
 }
 

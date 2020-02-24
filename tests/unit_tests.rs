@@ -68,6 +68,7 @@ mod tests {
             set1_sse2(floats, ints);
             set1_sse41(floats, ints);
             set1_avx2(floats, ints);
+            set1_avx(floats, ints);
             set1_scalar(floats, ints);
         }
     }
@@ -258,6 +259,7 @@ mod tests {
         unsafe {
             blendv_sse41();
             blendv_avx2();
+            blendv_avx();
             blendv_sse2();
             blendv_scalar();
         }
@@ -329,6 +331,7 @@ mod tests {
     fn maskload_test() {
         unsafe {
             maskload_avx2();
+            maskload_avx();
             maskload_sse2();
             maskload_sse41();
             maskload_scalar();
@@ -392,6 +395,7 @@ mod tests {
     #[test]
     fn maskstore_test() {
         unsafe {
+            maskstore_avx();
             maskstore_avx2();
             maskstore_sse2();
             maskstore_sse41();
@@ -418,10 +422,12 @@ mod tests {
 
         unsafe {
             let avx2_res = sum_simdeez_horizontal_avx2(&x);
+            let avx_res = sum_simdeez_horizontal_avx(&x);
             let sse41_res = sum_simdeez_horizontal_sse41(&x);
             let sse_res = sum_simdeez_horizontal_sse2(&x);
             let scalar_res = sum_simdeez_horizontal_scalar(&x);
             assert_delta!(avx2_res, sse41_res, 0.01);
+            assert_delta!(avx_res, sse41_res, 0.01);
             assert_delta!(sse_res, sse41_res, 0.01);
             assert_delta!(sse_res, scalar_res, 0.01);
         }
@@ -445,9 +451,11 @@ mod tests {
 
         unsafe {
             let avx2_res = sum_simdeez_horizontal_pd_avx2(&x);
+            let avx_res = sum_simdeez_horizontal_pd_avx(&x);
             let sse41_res = sum_simdeez_horizontal_pd_sse41(&x);
             let sse_res = sum_simdeez_horizontal_pd_sse2(&x);
             let scalar_res = sum_simdeez_horizontal_pd_scalar(&x);
+            assert_delta!(avx_res, sse41_res, 0.01);
             assert_delta!(avx2_res, sse41_res, 0.01);
             assert_delta!(sse_res, sse41_res, 0.01);
             assert_delta!(sse_res, scalar_res, 0.01);
@@ -461,6 +469,9 @@ mod tests {
     }
     unsafe fn setlanetest_avx2() -> f32 {
         setlanetest::<Avx2>()
+    }
+    unsafe fn setlanetest_avx() -> f32 {
+        setlanetest::<Avx>()
     }
 
     #[inline(always)]
