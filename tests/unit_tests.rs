@@ -107,6 +107,7 @@ mod tests {
         unsafe {
             sub_sse2(floats, ints);
             sub_sse41(floats, ints);
+            sub_avx(floats, ints);
             sub_avx2(floats, ints);
             sub_scalar(floats, ints);
         }
