@@ -108,4 +108,13 @@ mod tests {
 
     gen_quickcheck_2_simd!(cmpeq_f32, (|a, b| if a == b { !0u32 } else { 0u32 } as f32 ), S::cmpeq_ps, f32, VF32_WIDTH, set1_ps);
     gen_quickcheck_2_simd!(cmpeq_f64, (|a, b| if a == b { !0u64 } else { 0u64 } as f64 ), S::cmpeq_pd, f64, VF64_WIDTH, set1_pd);
+
+    gen_quickcheck_2_simd!(min_f32, f32::min, S::min_ps, f32, VF32_WIDTH, set1_ps);
+    gen_quickcheck_2_simd!(max_f32, f32::max, S::max_ps, f32, VF32_WIDTH, set1_ps);
+
+    gen_quickcheck_2_simd!(min_f64, f64::min, S::min_pd, f64, VF64_WIDTH, set1_pd);
+    gen_quickcheck_2_simd!(max_f64, f64::max, S::max_pd, f64, VF64_WIDTH, set1_pd);
+
+    gen_quickcheck_2_simd!(min_i32, Ord::min, S::min_epi32, i32, VI32_WIDTH, set1_epi32);
+    gen_quickcheck_2_simd!(max_i32, Ord::max, S::max_epi32, i32, VI32_WIDTH, set1_epi32);
 }
