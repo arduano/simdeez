@@ -11,6 +11,39 @@ mod tests {
     use simdeez::sse2::*;
     use simdeez::sse41::*;
 
+    trait SpecialEq {
+        fn equivalent(a: Self, b: Self) -> bool;
+    }
+
+    impl SpecialEq for f64 {
+        fn equivalent(a: Self, b: Self) -> bool {
+            if a.is_nan() && b.is_nan() {
+                a.to_bits() == b.to_bits()
+            } else {
+                (a - b).abs() < 0.00000001
+            }
+        }
+    }
+    impl SpecialEq for f32 {
+        fn equivalent(a: Self, b: Self) -> bool {
+            if a.is_nan() && b.is_nan() {
+                a.to_bits() == b.to_bits()
+            } else {
+                (a - b).abs() < 0.00000001
+            }
+        }
+    }
+    impl SpecialEq for i32 {
+        fn equivalent(a: Self, b: Self) -> bool {
+            a == b
+        }
+    }
+    impl SpecialEq for i64 {
+        fn equivalent(a: Self, b: Self) -> bool {
+            a == b
+        }
+    }
+
     macro_rules! gen_quickcheck_2_simd {
         ($fn_name:ident, $operation_scalar:expr, $operation_simd:expr, $ty:ty, $width:ident, $set_fn:ident) => {
             simd_runtime_generate!(
@@ -22,7 +55,7 @@ mod tests {
                     let result_scalar = $operation_scalar(a, b);
 
                     for i in 0..S::$width {
-                        if result_simd[i] != result_scalar {
+                        if !SpecialEq::equivalent(result_simd[i], result_scalar) {
                             println!(
                                 "Values didn't match. Reference: {:?} Simdeez: {:?}",
                                 result_scalar,
@@ -106,8 +139,19 @@ mod tests {
 
     // Equality/ordering/min/max
 
-    gen_quickcheck_2_simd!(cmpeq_f32, (|a, b| if a == b { !0u32 } else { 0u32 } as f32 ), S::cmpeq_ps, f32, VF32_WIDTH, set1_ps);
-    gen_quickcheck_2_simd!(cmpeq_f64, (|a, b| if a == b { !0u64 } else { 0u64 } as f64 ), S::cmpeq_pd, f64, VF64_WIDTH, set1_pd);
+    gen_quickcheck_2_simd!(cmpeq_f32, (|a, b| f32::from_bits(if a == b { !0u32 } else { 0u32 })), S::cmpeq_ps, f32, VF32_WIDTH, set1_ps);
+    gen_quickcheck_2_simd!(cmpneq_f32, (|a, b| f32::from_bits(if a != b { !0u32 } else { 0u32 })), S::cmpneq_ps, f32, VF32_WIDTH, set1_ps);
+    gen_quickcheck_2_simd!(cmpge_f32, (|a, b| f32::from_bits(if a >= b { !0u32 } else { 0u32 })), S::cmpge_ps, f32, VF32_WIDTH, set1_ps);
+    gen_quickcheck_2_simd!(cmpgt_f32, (|a, b| f32::from_bits(if a > b { !0u32 } else { 0u32 })), S::cmpgt_ps, f32, VF32_WIDTH, set1_ps);
+    gen_quickcheck_2_simd!(cmple_f32, (|a, b| f32::from_bits(if a <= b { !0u32 } else { 0u32 })), S::cmple_ps, f32, VF32_WIDTH, set1_ps);
+    gen_quickcheck_2_simd!(cmplt_f32, (|a, b| f32::from_bits(if a < b { !0u32 } else { 0u32 })), S::cmplt_ps, f32, VF32_WIDTH, set1_ps);
+
+    gen_quickcheck_2_simd!(cmpeq_f64, (|a, b| f64::from_bits(if a == b { !0u64 } else { 0u64 })), S::cmpeq_pd, f64, VF64_WIDTH, set1_pd);
+    gen_quickcheck_2_simd!(cmpneq_f64, (|a, b| f64::from_bits(if a != b { !0u64 } else { 0u64 })), S::cmpneq_pd, f64, VF64_WIDTH, set1_pd);
+    gen_quickcheck_2_simd!(cmpge_f64, (|a, b| f64::from_bits(if a >= b { !0u64 } else { 0u64 })), S::cmpge_pd, f64, VF64_WIDTH, set1_pd);
+    gen_quickcheck_2_simd!(cmpgt_f64, (|a, b| f64::from_bits(if a > b { !0u64 } else { 0u64 })), S::cmpgt_pd, f64, VF64_WIDTH, set1_pd);
+    gen_quickcheck_2_simd!(cmple_f64, (|a, b| f64::from_bits(if a <= b { !0u64 } else { 0u64 })), S::cmple_pd, f64, VF64_WIDTH, set1_pd);
+    gen_quickcheck_2_simd!(cmplt_f64, (|a, b| f64::from_bits(if a < b { !0u64 } else { 0u64 })), S::cmplt_pd, f64, VF64_WIDTH, set1_pd);
 
     gen_quickcheck_2_simd!(cmpeq_i32, (|a, b| if a == b { !0i32 } else { 0i32 }), S::cmpeq_epi32, i32, VI32_WIDTH, set1_epi32);
     gen_quickcheck_2_simd!(cmpneq_i32, (|a, b| if a != b { !0i32 } else { 0i32 }), S::cmpneq_epi32, i32, VI32_WIDTH, set1_epi32);
@@ -132,8 +176,10 @@ mod tests {
     gen_quickcheck_2_simd!(min_i32, Ord::min, S::min_epi32, i32, VI32_WIDTH, set1_epi32);
     gen_quickcheck_2_simd!(max_i32, Ord::max, S::max_epi32, i32, VI32_WIDTH, set1_epi32);
 
-    // Other
+    // Bitwise
 
     gen_quickcheck_2_simd!(andnot_i32, (|a: i32, b: i32| !a & b), S::andnot_epi32, i32, VI32_WIDTH, set1_epi32);
     gen_quickcheck_2_simd!(andnot_i64, (|a: i64, b: i64| !a & b), S::andnot_epi64, i64, VI64_WIDTH, set1_epi64);
+    gen_quickcheck_2_simd!(andnot_f32, (|a: f32, b: f32| f32::from_bits((!a.to_bits()) & b.to_bits()) ), S::andnot_ps, f32, VF32_WIDTH, set1_ps);
+    gen_quickcheck_2_simd!(andnot_f64, (|a: f64, b: f64| f64::from_bits((!a.to_bits()) & b.to_bits()) ), S::andnot_pd, f64, VF64_WIDTH, set1_pd);
 }
