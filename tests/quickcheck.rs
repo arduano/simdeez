@@ -52,7 +52,7 @@ mod tests {
     macro_rules! gen_quickcheck_2_simd {
         ($fn_name:ident, $operation_scalar:expr, $operation_simd:expr, $ty:ty, $width:ident, $set_fn:ident) => {
             simd_runtime_generate!(
-                fn $fn_name(a: $ty, b: $ty) -> bool {
+                fn $fn_name(info: &str, a: $ty, b: $ty) -> bool {
                     let a_simd = S::$set_fn(a);
                     let b_simd = S::$set_fn(b);
 
@@ -62,7 +62,8 @@ mod tests {
                     for i in 0..S::$width {
                         if !SpecialEq::equivalent(result_simd[i], result_scalar) {
                             println!(
-                                "Values didn't match. Reference: {:?} Simdeez: {:?}",
+                                "Results didn't match ({}). Reference: {:?}; Simdeez: {:?}",
+                                info,
                                 result_scalar,
                                 result_simd
                             );
@@ -85,24 +86,19 @@ mod tests {
                         let mut ok = true;
 
                         unsafe {
-                            println!("Testing scalar:");
-                            ok &= [<$fn_name _scalar>](a, b);
+                            ok &= [<$fn_name _scalar>]("scalar", a, b);
 
                             if is_x86_feature_detected!("sse2"){
-                                println!("\n Testing sse2:");
-                                ok &= [<$fn_name _sse2>](a, b);
+                                ok &= [<$fn_name _sse2>]("sse2", a, b);
                             }
                             if is_x86_feature_detected!("sse4.1"){
-                                println!("\n Testing sse41:");
-                                ok &= [<$fn_name _sse41>](a, b);
+                                ok &= [<$fn_name _sse41>]("sse41", a, b);
                             }
                             if is_x86_feature_detected!("avx"){
-                                println!("\n Testing avx:");
-                                ok &= [<$fn_name _avx>](a, b);
+                                ok &= [<$fn_name _avx>]("avx", a, b);
                             }
                             if is_x86_feature_detected!("avx2"){
-                                println!("\n Testing avx2:");
-                                ok &= [<$fn_name _avx2>](a, b);
+                                ok &= [<$fn_name _avx2>]("avx2", a, b);
                             }
                         }
 
@@ -194,7 +190,7 @@ mod tests {
     macro_rules! gen_quickcheck_3_simd {
         ($fn_name:ident, $operation_scalar:expr, $operation_simd:expr, $ty:ty, $width:ident, $set_fn:ident) => {
             simd_runtime_generate!(
-                fn $fn_name(a: $ty, b: $ty, c: $ty) -> bool {
+                fn $fn_name(info: &str, a: $ty, b: $ty, c: $ty) -> bool {
                     let a_simd = S::$set_fn(a);
                     let b_simd = S::$set_fn(b);
                     let c_simd = S::$set_fn(b);
@@ -205,7 +201,8 @@ mod tests {
                     for i in 0..S::$width {
                         if !SpecialEq::equivalent(result_simd[i], result_scalar) {
                             println!(
-                                "values didn't match. reference: {:?} simdeez: {:?}",
+                                "Results didn't match ({}). Reference: {:?}; Simdeez: {:?}",
+                                info,
                                 result_scalar,
                                 result_simd
                             );
@@ -229,24 +226,19 @@ mod tests {
                         let mut ok = true;
 
                         unsafe {
-                            println!("testing scalar:");
-                            ok &= [<$fn_name _scalar>](a, b, c);
+                            ok &= [<$fn_name _scalar>]("scalar", a, b, c);
 
                             if is_x86_feature_detected!("sse2"){
-                                println!("\n testing sse2:");
-                                ok &= [<$fn_name _sse2>](a, b, c);
+                                ok &= [<$fn_name _sse2>]("sse2", a, b, c);
                             }
                             if is_x86_feature_detected!("sse4.1"){
-                                println!("\n testing sse41:");
-                                ok &= [<$fn_name _sse41>](a, b, c);
+                                ok &= [<$fn_name _sse41>]("sse41", a, b, c);
                             }
                             if is_x86_feature_detected!("avx"){
-                                println!("\n testing avx:");
-                                ok &= [<$fn_name _avx>](a, b, c);
+                                ok &= [<$fn_name _avx>]("avx", a, b, c);
                             }
                             if is_x86_feature_detected!("avx2"){
-                                println!("\n testing avx2:");
-                                ok &= [<$fn_name _avx2>](a, b, c);
+                                ok &= [<$fn_name _avx2>]("avx2", a, b, c);
                             }
                         }
 
@@ -277,14 +269,15 @@ mod tests {
     macro_rules! gen_quickcheck_1_simd {
         ($fn_name:ident, $operation_scalar:expr, $operation_simd:expr, $ty:ty, $width:ident, $set_fn:ident, $discard_value_lambda:expr) => {
             simd_runtime_generate!(
-                fn $fn_name(a: $ty) -> bool {
+                fn $fn_name(info: &str, a: $ty) -> bool {
                     let result_simd = $operation_simd(S::$set_fn(a));
                     let result_scalar = $operation_scalar(a);
 
                     for i in 0..S::$width {
                         if !SpecialEq::equivalent(result_simd[i], result_scalar) {
                             println!(
-                                "Values didn't match. Reference: {:?} Simdeez: {:?}",
+                                "Results didn't match ({}). Reference: {:?}; Simdeez: {:?}",
+                                info,
                                 result_scalar,
                                 result_simd
                             );
@@ -308,24 +301,19 @@ mod tests {
                         let mut ok = true;
 
                         unsafe {
-                            println!("testing scalar:");
-                            ok &= [<$fn_name _scalar>](a);
+                            ok &= [<$fn_name _scalar>]("scalar", a);
 
                             if is_x86_feature_detected!("sse2"){
-                                println!("\n testing sse2:");
-                                ok &= [<$fn_name _sse2>](a);
+                                ok &= [<$fn_name _sse2>]("sse2", a);
                             }
                             if is_x86_feature_detected!("sse4.1"){
-                                println!("\n testing sse41:");
-                                ok &= [<$fn_name _sse41>](a);
+                                ok &= [<$fn_name _sse41>]("sse41", a);
                             }
                             if is_x86_feature_detected!("avx"){
-                                println!("\n testing avx:");
-                                ok &= [<$fn_name _avx>](a);
+                                ok &= [<$fn_name _avx>]("avx", a);
                             }
                             if is_x86_feature_detected!("avx2"){
-                                println!("\n testing avx2:");
-                                ok &= [<$fn_name _avx2>](a);
+                                ok &= [<$fn_name _avx2>]("avx2", a);
                             }
                         }
 
