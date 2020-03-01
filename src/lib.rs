@@ -99,6 +99,7 @@
 //! * `distance_scalar`  a scalar fallback
 //! * `distance_sse2`    SSE2 version
 //! * `distance_sse41`   SSE41 version
+//! * `distance_avx`     AVX version
 //! * `distance_avx2`    AVX2 version
 //! * `distance_runtime_select`  picks the fastest of the above at runtime
 //!
