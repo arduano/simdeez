@@ -331,4 +331,22 @@ mod tests {
 
     gen_quickcheck_1_simd!(sqrt_f32, f32::sqrt, S::sqrt_ps, f32, VF32_WIDTH, set1_ps, |a: f32| a.is_sign_negative());
     gen_quickcheck_1_simd!(sqrt_f64, f64::sqrt, S::sqrt_pd, f64, VF64_WIDTH, set1_pd, |a: f64| a.is_sign_negative());
+
+    gen_quickcheck_1_simd!(floor_f32, f32::floor, S::floor_ps, f32, VF32_WIDTH, set1_ps, |_| false);
+    gen_quickcheck_1_simd!(floor_f64, f64::floor, S::floor_pd, f64, VF64_WIDTH, set1_pd, |_| false);
+
+    gen_quickcheck_1_simd!(ceil_f32, f32::ceil, S::ceil_ps, f32, VF32_WIDTH, set1_ps, |_| false);
+    gen_quickcheck_1_simd!(ceil_f64, f64::ceil, S::ceil_pd, f64, VF64_WIDTH, set1_pd, |_| false);
+
+    gen_quickcheck_1_simd!(round_f32, f32::round, S::round_ps, f32, VF32_WIDTH, set1_ps, |_| false);
+    gen_quickcheck_1_simd!(round_f64, f64::round, S::round_pd, f64, VF64_WIDTH, set1_pd, |_| false);
+
+    gen_quickcheck_1_simd!(fast_floor_f32, f32::floor, S::fast_floor_ps, f32, VF64_WIDTH, set1_ps, |_| false);
+    gen_quickcheck_1_simd!(fast_ceil_f32, f32::ceil, S::fast_ceil_ps, f32, VF32_WIDTH, set1_ps, |_| false);
+    gen_quickcheck_1_simd!(fast_round_f32, f32::round, S::fast_round_ps, f32, VF32_WIDTH, set1_ps, |_| false);
+
+    // These would require accepting more imprecision not to fail
+    // gen_quickcheck_1_simd!(rcp_f32, (|a| 1.0f32 / a), S::rcp_ps, f32, VF32_WIDTH, set1_ps, |_| false);
+    // gen_quickcheck_1_simd!(rsqrt_f32, (|a: f32| 1.0 / a.sqrt()), S::rsqrt_ps, f32, VF32_WIDTH, set1_ps, |a: f32| a.is_sign_negative());
+    // gen_quickcheck_1_simd!(rsqrt_f64, (|a: f64| 1.0/ a.sqrt()), S::rsqrt_pd, f64, VF64_WIDTH, set1_pd, |a: f64| a.is_sign_negative());
 }
