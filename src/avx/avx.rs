@@ -1,11 +1,13 @@
 #[cfg(feature = "sleef")]
 use crate::sse41::{F32x4, F64x2};
 
+use crate::sse41::{I16x8, I32x4_41, I64x2_41, Sse41};
+
 use super::*;
 use core::mem;
 
-pub struct Avx2;
-impl Simd for Avx2 {
+pub struct Avx;
+impl Simd for Avx {
     type Vi16 = I16x16;
     type Vi32 = I32x8;
     type Vf32 = F32x8;
@@ -30,7 +32,7 @@ impl Simd for Avx2 {
     }
     #[inline(always)]
     unsafe fn mullo_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 {
-        I16x16(_mm256_mullo_epi16(a.0, b.0))
+        m256i_run_on_halves_2_simd!(Sse41::mullo_epi16, a, b, I16x8, I16x16)
     }
     #[inline(always)]
     unsafe fn andnot_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
@@ -42,11 +44,11 @@ impl Simd for Avx2 {
     }
     #[inline(always)]
     unsafe fn andnot_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        I32x8(_mm256_andnot_si256(a.0, b.0))
+        m256i_run_on_halves_2_simd!(Sse41::andnot_epi32, a, b, I32x4_41, I32x8)
     }
     #[inline(always)]
     unsafe fn andnot_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
-        I64x4(_mm256_andnot_si256(a.0, b.0))
+        m256i_run_on_halves_2_simd!(Sse41::andnot_epi64, a, b, I64x2_41, I64x4)
     }
     #[inline(always)]
     unsafe fn blendv_epi32(a: Self::Vi32, b: Self::Vi32, mask: Self::Vi32) -> Self::Vi32 {
@@ -98,51 +100,51 @@ impl Simd for Avx2 {
     }
     #[inline(always)]
     unsafe fn cmpeq_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        I32x8(_mm256_cmpeq_epi32(a.0, b.0))
+        m256i_run_on_halves_2_simd!(Sse41::cmpeq_epi32, a, b, I32x4_41, I32x8)
     }
     #[inline(always)]
     unsafe fn cmpneq_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        Self::not_epi32(I32x8(_mm256_cmpeq_epi32(a.0, b.0)))
+        m256i_run_on_halves_2_simd!(Sse41::cmpneq_epi32, a, b, I32x4_41, I32x8)
     }
     #[inline(always)]
     unsafe fn cmpge_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        Self::not_epi32(I32x8(_mm256_cmpgt_epi32(b.0, a.0)))
+        m256i_run_on_halves_2_simd!(Sse41::cmpge_epi32, a, b, I32x4_41, I32x8)
     }
     #[inline(always)]
     unsafe fn cmpgt_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        I32x8(_mm256_cmpgt_epi32(a.0, b.0))
+        m256i_run_on_halves_2_simd!(Sse41::cmpgt_epi32, a, b, I32x4_41, I32x8)
     }
     #[inline(always)]
     unsafe fn cmple_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        Self::not_epi32(I32x8(_mm256_cmpgt_epi32(a.0, b.0)))
+        m256i_run_on_halves_2_simd!(Sse41::cmple_epi32, a, b, I32x4_41, I32x8)
     }
     #[inline(always)]
     unsafe fn cmplt_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        I32x8(_mm256_cmpgt_epi32(b.0, a.0))
+        m256i_run_on_halves_2_simd!(Sse41::cmplt_epi32, a, b, I32x4_41, I32x8)
     }
     #[inline(always)]
     unsafe fn cmpeq_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
-        I64x4(_mm256_cmpeq_epi64(a.0, b.0))
+        m256i_run_on_halves_2_simd!(Sse41::cmpeq_epi64, a, b, I64x2_41, I64x4)
     }
     #[inline(always)]
     unsafe fn cmpneq_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
-        Self::not_epi64(I64x4(_mm256_cmpeq_epi64(a.0, b.0)))
+        m256i_run_on_halves_2_simd!(Sse41::cmpneq_epi64, a, b, I64x2_41, I64x4)
     }
     #[inline(always)]
     unsafe fn cmpge_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
-        Self::not_epi64(I64x4(_mm256_cmpgt_epi64(b.0, a.0)))
+        m256i_run_on_halves_2_simd!(Sse41::cmpge_epi64, a, b, I64x2_41, I64x4)
     }
     #[inline(always)]
     unsafe fn cmpgt_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
-        I64x4(_mm256_cmpgt_epi64(a.0, b.0))
+        m256i_run_on_halves_2_simd!(Sse41::cmpgt_epi64, a, b, I64x2_41, I64x4)
     }
     #[inline(always)]
     unsafe fn cmple_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
-        Self::not_epi64(I64x4(_mm256_cmpgt_epi64(a.0, b.0)))
+        m256i_run_on_halves_2_simd!(Sse41::cmple_epi64, a, b, I64x2_41, I64x4)
     }
     #[inline(always)]
     unsafe fn cmplt_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
-        I64x4(_mm256_cmpgt_epi64(b.0, a.0))
+        m256i_run_on_halves_2_simd!(Sse41::cmplt_epi64, a, b, I64x2_41, I64x4)
     }
     #[inline(always)]
     unsafe fn cmpeq_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
@@ -226,35 +228,47 @@ impl Simd for Avx2 {
     }
     #[inline(always)]
     unsafe fn fmadd_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32 {
-        F32x8(_mm256_fmadd_ps(a.0, b.0, c.0))
+        F32x8(_mm256_add_ps(_mm256_mul_ps(a.0, b.0), c.0))
     }
     #[inline(always)]
     unsafe fn fnmadd_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32 {
-        F32x8(_mm256_fnmadd_ps(a.0, b.0, c.0))
+        F32x8(_mm256_add_ps(
+            _mm256_mul_ps(_mm256_set1_ps(-1.0), _mm256_mul_ps(a.0, b.0)),
+            c.0,
+        ))
     }
     #[inline(always)]
     unsafe fn fmadd_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64 {
-        F64x4(_mm256_fmadd_pd(a.0, b.0, c.0))
+        F64x4(_mm256_add_pd(_mm256_mul_pd(a.0, b.0), c.0))
     }
     #[inline(always)]
     unsafe fn fnmadd_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64 {
-        F64x4(_mm256_fnmadd_pd(a.0, b.0, c.0))
+        F64x4(_mm256_add_pd(
+            _mm256_mul_pd(_mm256_set1_pd(-1.0), _mm256_mul_pd(a.0, b.0)),
+            c.0,
+        ))
     }
     #[inline(always)]
     unsafe fn fmsub_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32 {
-        F32x8(_mm256_fmsub_ps(a.0, b.0, c.0))
+        F32x8(_mm256_sub_ps(_mm256_mul_ps(a.0, b.0), c.0))
     }
     #[inline(always)]
     unsafe fn fnmsub_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32 {
-        F32x8(_mm256_fnmsub_ps(a.0, b.0, c.0))
+        F32x8(_mm256_sub_ps(
+            _mm256_mul_ps(_mm256_set1_ps(-1.0), _mm256_mul_ps(a.0, b.0)),
+            c.0,
+        ))
     }
     #[inline(always)]
     unsafe fn fmsub_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64 {
-        F64x4(_mm256_fmsub_pd(a.0, b.0, c.0))
+        F64x4(_mm256_sub_pd(_mm256_mul_pd(a.0, b.0), c.0))
     }
     #[inline(always)]
     unsafe fn fnmsub_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64 {
-        F64x4(_mm256_fnmsub_pd(a.0, b.0, c.0))
+        F64x4(_mm256_sub_pd(
+            _mm256_mul_pd(_mm256_set1_pd(-1.0), _mm256_mul_pd(a.0, b.0)),
+            c.0,
+        ))
     }
     #[inline(always)]
     unsafe fn horizontal_add_ps(a: Self::Vf32) -> f32 {
@@ -277,11 +291,31 @@ impl Simd for Avx2 {
     }
     #[inline(always)]
     unsafe fn i32gather_epi32(arr: &[i32], index: Self::Vi32) -> Self::Vi32 {
-        I32x8(_mm256_i32gather_epi32(&arr[0] as *const i32, index.0, 4))
+        let index_as_arr = mem::transmute::<I32x8, [i32; 8]>(index);
+        I32x8(_mm256_set_epi32(
+            arr[index_as_arr[7] as usize],
+            arr[index_as_arr[6] as usize],
+            arr[index_as_arr[5] as usize],
+            arr[index_as_arr[4] as usize],
+            arr[index_as_arr[3] as usize],
+            arr[index_as_arr[2] as usize],
+            arr[index_as_arr[1] as usize],
+            arr[index_as_arr[0] as usize],
+        ))
     }
     #[inline(always)]
     unsafe fn i32gather_ps(arr: &[f32], index: Self::Vi32) -> Self::Vf32 {
-        F32x8(_mm256_i32gather_ps(&arr[0] as *const f32, index.0, 4))
+        let index_as_arr = mem::transmute::<I32x8, [i32; 8]>(index);
+        F32x8(_mm256_set_ps(
+            arr[index_as_arr[7] as usize],
+            arr[index_as_arr[6] as usize],
+            arr[index_as_arr[5] as usize],
+            arr[index_as_arr[4] as usize],
+            arr[index_as_arr[3] as usize],
+            arr[index_as_arr[2] as usize],
+            arr[index_as_arr[1] as usize],
+            arr[index_as_arr[0] as usize],
+        ))
     }
     #[inline(always)]
     unsafe fn load_ps(a: &f32) -> Self::Vf32 {
@@ -321,11 +355,27 @@ impl Simd for Avx2 {
     }
     #[inline(always)]
     unsafe fn maskload_epi32(mem_addr: &i32, mask: Self::Vi32) -> Self::Vi32 {
-        I32x8(_mm256_maskload_epi32(mem_addr as *const i32, mask.0))
+        let mut result = I32x8(_mm256_setzero_si256());
+        let ptr = mem_addr as *const i32;
+        result[0] = if mask[0] != 0 { *ptr } else { 0 };
+        result[1] = if mask[1] != 0 { *ptr.offset(1) } else { 0 };
+        result[2] = if mask[2] != 0 { *ptr.offset(2) } else { 0 };
+        result[3] = if mask[3] != 0 { *ptr.offset(3) } else { 0 };
+        result[4] = if mask[4] != 0 { *ptr.offset(4) } else { 0 };
+        result[5] = if mask[5] != 0 { *ptr.offset(5) } else { 0 };
+        result[6] = if mask[6] != 0 { *ptr.offset(6) } else { 0 };
+        result[7] = if mask[7] != 0 { *ptr.offset(7) } else { 0 };
+        result
     }
     #[inline(always)]
     unsafe fn maskload_epi64(mem_addr: &i64, mask: Self::Vi64) -> Self::Vi64 {
-        I64x4(_mm256_maskload_epi64(mem_addr as *const i64, mask.0))
+        let mut result = I64x4(_mm256_setzero_si256());
+        let ptr = mem_addr as *const i64;
+        result[0] = if mask[0] != 0 { *ptr } else { 0 };
+        result[1] = if mask[1] != 0 { *ptr.offset(1) } else { 0 };
+        result[2] = if mask[2] != 0 { *ptr.offset(2) } else { 0 };
+        result[3] = if mask[3] != 0 { *ptr.offset(3) } else { 0 };
+        result
     }
     #[inline(always)]
     unsafe fn maskload_ps(mem_addr: &f32, mask: Self::Vi32) -> Self::Vf32 {
@@ -373,11 +423,47 @@ impl Simd for Avx2 {
     }
     #[inline(always)]
     unsafe fn maskstore_epi32(mem_addr: &mut i32, mask: Self::Vi32, a: Self::Vi32) {
-        _mm256_maskstore_epi32(mem_addr as *mut i32, mask.0, a.0)
+        let ptr = mem_addr as *mut i32;
+        if mask[0] != 0 {
+            *ptr = a[0]
+        };
+        if mask[1] != 0 {
+            *ptr.offset(1) = a[1]
+        };
+        if mask[2] != 0 {
+            *ptr.offset(2) = a[2]
+        };
+        if mask[3] != 0 {
+            *ptr.offset(3) = a[3]
+        };
+        if mask[4] != 0 {
+            *ptr.offset(4) = a[4]
+        };
+        if mask[5] != 0 {
+            *ptr.offset(5) = a[5]
+        };
+        if mask[6] != 0 {
+            *ptr.offset(6) = a[6]
+        };
+        if mask[7] != 0 {
+            *ptr.offset(7) = a[7]
+        };
     }
     #[inline(always)]
     unsafe fn maskstore_epi64(mem_addr: &mut i64, mask: Self::Vi64, a: Self::Vi64) {
-        _mm256_maskstore_epi64(mem_addr as *mut i64, mask.0, a.0)
+        let ptr = mem_addr as *mut i64;
+        if mask[0] != 0 {
+            *ptr = a[0]
+        };
+        if mask[1] != 0 {
+            *ptr.offset(1) = a[1]
+        };
+        if mask[2] != 0 {
+            *ptr.offset(2) = a[2]
+        };
+        if mask[3] != 0 {
+            *ptr.offset(3) = a[3]
+        };
     }
     #[inline(always)]
     unsafe fn maskstore_ps(mem_addr: &mut f32, mask: Self::Vi32, a: Self::Vf32) {
@@ -389,11 +475,11 @@ impl Simd for Avx2 {
     }
     #[inline(always)]
     unsafe fn max_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        I32x8(_mm256_max_epi32(a.0, b.0))
+        m256i_run_on_halves_2_simd!(Sse41::max_epi32, a, b, I32x4_41, I32x8)
     }
     #[inline(always)]
     unsafe fn min_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        I32x8(_mm256_min_epi32(a.0, b.0))
+        m256i_run_on_halves_2_simd!(Sse41::min_epi32, a, b, I32x4_41, I32x8)
     }
     #[inline(always)]
     unsafe fn max_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
@@ -413,7 +499,7 @@ impl Simd for Avx2 {
     }
     #[inline(always)]
     unsafe fn mullo_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        I32x8(_mm256_mullo_epi32(a.0, b.0))
+        m256i_run_on_halves_2_simd!(Sse41::mullo_epi32, a, b, I32x4_41, I32x8)
     }
     #[inline(always)]
     unsafe fn rcp_ps(a: Self::Vf32) -> Self::Vf32 {
@@ -474,38 +560,23 @@ impl Simd for Avx2 {
     }
     #[inline(always)]
     unsafe fn srai_epi64(a: Self::Vi64, amt_const: i32) -> Self::Vi64 {
-        // instruction does not exist. Split into 32-bit shifts
-        if amt_const <= 32 {
-            let bb = _mm_set_epi32(0, 0, 0, amt_const);
-            let sra = _mm256_sra_epi32(a.0, bb); // a >> b signed dwords
-            let srl = _mm256_srl_epi64(a.0, bb); // a >> b unsigned qwords
-            let mask = _mm256_setr_epi32(0, -1, 0, -1, 0, -1, 0, -1); // mask for signed high part
-            Self::blendv_epi64(I64x4(srl), I64x4(sra), I64x4(mask))
-        } else {
-            // b > 32
-            let bm32 = _mm_set_epi32(0, 0, 0, amt_const - 32);
-            let sign = _mm256_srai_epi32(a.0, 31); // sign of a
-            let sra2 = _mm256_sra_epi32(a.0, bm32); // a >> (b-32) signed dwords
-            let sra3 = _mm256_srli_epi64(sra2, 32); // a >> (b-32) >> 32 (second shift unsigned qword)
-            let mask = _mm256_setr_epi32(0, -1, 0, -1, 0, -1, 0, -1); // mask for high part containing only sign
-            Self::blendv_epi64(I64x4(sra3), I64x4(sign), I64x4(mask))
-        }
+        m256i_run_on_halves_1_simd!(Sse41::srai_epi64, a, amt_const, I64x2_41, I64x4)
     }
     #[inline(always)]
     unsafe fn srli_epi32(a: Self::Vi32, amt_const: i32) -> Self::Vi32 {
-        I32x8(_mm256_srli_epi32(a.0, amt_const))
+        m256i_run_on_halves_1_simd!(Sse41::srli_epi32, a, amt_const, I32x4_41, I32x8)
     }
     #[inline(always)]
     unsafe fn sra_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32 {
-        I32x8(_mm256_sra_epi32(a.0, _mm_set1_epi32(amt)))
+        m256i_run_on_halves_1_simd!(Sse41::sra_epi32, a, amt, I32x4_41, I32x8)
     }
     #[inline(always)]
     unsafe fn srl_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32 {
-        I32x8(_mm256_srl_epi32(a.0, _mm_set1_epi32(amt)))
+        m256i_run_on_halves_1_simd!(Sse41::srl_epi32, a, amt, I32x4_41, I32x8)
     }
     #[inline(always)]
     unsafe fn sll_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32 {
-        I32x8(_mm256_sll_epi32(a.0, _mm_set1_epi32(amt)))
+        m256i_run_on_halves_1_simd!(Sse41::sll_epi32, a, amt, I32x4_41, I32x8)
     }
 
     #[inline(always)]
@@ -526,12 +597,7 @@ impl Simd for Avx2 {
     }
     #[inline(always)]
     unsafe fn shuffle_epi32(a: Self::Vi32, imm8: i32) -> I32x8 {
-        macro_rules! call {
-            ($imm8:expr) => {
-                I32x8(_mm256_shuffle_epi32(a.0, $imm8))
-            };
-        }
-        constify_imm8!(imm8, call)
+        m256i_run_on_halves_1_simd!(Sse41::shuffle_epi32, a, imm8, I32x4_41, I32x8)
     }
     cfg_if::cfg_if! {
         if #[cfg(feature = "sleef")]

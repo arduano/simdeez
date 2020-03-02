@@ -312,6 +312,52 @@ macro_rules! constify_imm2 {
     };
 }
 
+/// Split two 256-wide vectors into halves, run function on both, join results into original type
+macro_rules! m256i_run_on_halves_2_simd {
+    ($function:expr, $arg1:ident, $arg2:ident, $halve_type:ident, $output_type:ident) => {
+        {
+            let arg1_low = $halve_type(_mm256_extractf128_si256($arg1.0, 0));
+            let arg1_hi = $halve_type(_mm256_extractf128_si256($arg1.0, 1));
+
+            let arg2_low = $halve_type(_mm256_extractf128_si256($arg2.0, 0));
+            let arg2_hi = $halve_type(_mm256_extractf128_si256($arg2.0, 1));
+
+            let low_result = $function(arg1_low, arg2_low);
+            let hi_result = $function(arg1_hi, arg2_hi);
+
+            $output_type(_mm256_setr_m128i(low_result.0, hi_result.0))
+        }
+    };
+}
+
+/// Split one 256-wide vector into halves, run function on it, join results into original type
+macro_rules! m256i_run_on_halves_1_simd {
+    // For functions with two arguments, where first is simd vector getting split and second is not
+    ($function:expr, $arg1:ident, $arg2:ident, $halve_type:ident, $output_type:ident) => {
+        {
+            let arg1_low = $halve_type(_mm256_extractf128_si256($arg1.0, 0));
+            let arg1_hi = $halve_type(_mm256_extractf128_si256($arg1.0, 1));
+
+            let low_result = $function(arg1_low, $arg2);
+            let hi_result = $function(arg1_hi, $arg2);
+
+            $output_type(_mm256_setr_m128i(low_result.0, hi_result.0))
+        }
+    };
+    // For functions with one argument
+    ($function:expr, $arg1:ident, $halve_type:ident, $output_type:ident) => {
+        {
+            let arg1_low = $halve_type(_mm256_extractf128_si256($arg1.0, 0));
+            let arg1_hi = $halve_type(_mm256_extractf128_si256($arg1.0, 1));
+
+            let low_result = $function(arg1_low);
+            let hi_result = $function(arg1_hi);
+
+            $output_type(_mm256_setr_m128i(low_result.0, hi_result.0))
+        }
+    };
+}
+
 #[cfg(test)]
 macro_rules! assert_approx_eq {
     ($a:expr, $b:expr, $eps:expr) => {{
