@@ -42,7 +42,6 @@ impl Add for I16x16 {
     }
 }
 
-
 impl Add for I32x8 {
     type Output = I32x8;
 
@@ -51,7 +50,6 @@ impl Add for I32x8 {
         I32x8(unsafe { _mm256_add_epi32(self.0, rhs.0) })
     }
 }
-
 
 impl Add for I64x4 {
     type Output = I64x4;
@@ -93,7 +91,6 @@ impl BitAndAssign for I32x8 {
     }
 }
 
-
 impl BitAndAssign for I64x4 {
     #[inline(always)]
     fn bitand_assign(&mut self, rhs: I64x4) {
@@ -131,7 +128,6 @@ impl BitAnd for I32x8 {
         I32x8(unsafe { _mm256_and_si256(self.0, rhs.0) })
     }
 }
-
 
 impl BitAnd for I64x4 {
     type Output = I64x4;
@@ -199,7 +195,6 @@ impl IndexMut<usize> for I16x16 {
     }
 }
 
-
 impl IndexMut<usize> for I32x8 {
     #[inline(always)]
     fn index_mut(&mut self, i: usize) -> &mut i32 {
@@ -208,7 +203,6 @@ impl IndexMut<usize> for I32x8 {
         &mut arr[i]
     }
 }
-
 
 impl IndexMut<usize> for I64x4 {
     #[inline(always)]
@@ -235,7 +229,6 @@ impl IndexMut<usize> for F64x4 {
         &mut arr[i]
     }
 }
-
 
 impl Index<usize> for I16x16 {
     type Output = i16;
@@ -289,7 +282,6 @@ impl Index<usize> for F64x4 {
         &arr[i]
     }
 }
-
 
 impl MulAssign for I16x16 {
     #[inline(always)]
@@ -359,7 +351,6 @@ impl Not for I16x16 {
     }
 }
 
-
 impl Not for I32x8 {
     type Output = I32x8;
 
@@ -368,7 +359,6 @@ impl Not for I32x8 {
         unsafe { I32x8(_mm256_xor_si256(self.0, _mm256_set1_epi32(-1))) }
     }
 }
-
 
 impl Not for I64x4 {
     type Output = I64x4;
@@ -390,7 +380,6 @@ impl BitOrAssign for I32x8 {
         *self = I32x8(unsafe { _mm256_or_si256(self.0, rhs.0) })
     }
 }
-
 
 impl BitOrAssign for I64x4 {
     #[inline(always)]
@@ -422,7 +411,6 @@ impl BitOr for I16x16 {
     }
 }
 
-
 impl BitOr for I32x8 {
     type Output = I32x8;
 
@@ -431,7 +419,6 @@ impl BitOr for I32x8 {
         I32x8(unsafe { _mm256_or_si256(self.0, rhs.0) })
     }
 }
-
 
 impl BitOr for I64x4 {
     type Output = I64x4;
@@ -471,7 +458,6 @@ impl ShlAssign<i32> for I16x16 {
     }
 }
 
-
 impl ShlAssign<i32> for I32x8 {
     #[inline(always)]
     fn shl_assign(&mut self, rhs: i32) {
@@ -496,7 +482,6 @@ impl Shl<i32> for I16x16 {
         constify_imm8!(rhs, call)
     }
 }
-
 
 impl Shl<i32> for I32x8 {
     type Output = I32x8;
@@ -523,8 +508,6 @@ impl ShrAssign<i32> for I16x16 {
         constify_imm8!(rhs, call)
     }
 }
-
-
 
 impl ShrAssign<i32> for I32x8 {
     #[inline(always)]
@@ -576,7 +559,6 @@ impl SubAssign for I32x8 {
         *self = I32x8(unsafe { _mm256_sub_epi32(self.0, rhs.0) })
     }
 }
-
 
 impl SubAssign for I64x4 {
     #[inline(always)]
@@ -655,7 +637,6 @@ impl BitXorAssign for I32x8 {
     }
 }
 
-
 impl BitXorAssign for I64x4 {
     #[inline(always)]
     fn bitxor_assign(&mut self, rhs: I64x4) {
@@ -693,7 +674,6 @@ impl BitXor for I32x8 {
         I32x8(unsafe { _mm256_xor_si256(self.0, rhs.0) })
     }
 }
-
 
 impl BitXor for I64x4 {
     type Output = I64x4;

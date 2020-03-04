@@ -35,7 +35,6 @@ impl AddAssign for F64x1 {
     }
 }
 
-
 impl Add for I16x1 {
     type Output = I16x1;
 
@@ -123,7 +122,6 @@ impl BitAndAssign for F64x1 {
     }
 }
 
-
 // -- Bitwise And
 
 impl BitAnd for I16x1 {
@@ -191,7 +189,6 @@ impl DivAssign for F64x1 {
     }
 }
 
-
 impl Div for F32x1 {
     type Output = F32x1;
 
@@ -209,7 +206,6 @@ impl Div for F64x1 {
         F64x1(self.0 / rhs.0)
     }
 }
-
 
 impl IndexMut<usize> for I16x1 {
     #[inline(always)]
@@ -324,8 +320,6 @@ impl MulAssign for F64x1 {
         *self = F64x1(self.0 * rhs.0);
     }
 }
-
-
 
 impl Mul for I16x1 {
     type Output = I16x1;
@@ -460,7 +454,6 @@ impl BitOrAssign for F64x1 {
     }
 }
 
-
 impl BitOr for I16x1 {
     type Output = I16x1;
     #[inline(always)]
@@ -548,8 +541,6 @@ impl ShlAssign<i32> for F64x1 {
     }
 }
 
-
-
 impl Shl<i32> for I16x1 {
     type Output = I16x1;
 
@@ -596,7 +587,6 @@ impl Shl<i32> for F64x1 {
         F64x1(f64::from_bits(bits))
     }
 }
-
 
 impl ShrAssign<i32> for I16x1 {
     #[inline(always)]
@@ -682,8 +672,6 @@ impl Shr<i32> for F64x1 {
     }
 }
 
-
-
 impl SubAssign for I16x1 {
     #[inline(always)]
     fn sub_assign(&mut self, rhs: I16x1) {
@@ -718,9 +706,6 @@ impl SubAssign for F64x1 {
         *self = F64x1(self.0 - rhs.0);
     }
 }
-
-
-
 
 impl Sub for I16x1 {
     type Output = I16x1;
@@ -767,9 +752,6 @@ impl Sub for F64x1 {
     }
 }
 
-
-
-
 impl BitXorAssign for I16x1 {
     #[inline(always)]
     fn bitxor_assign(&mut self, rhs: I16x1) {
@@ -810,7 +792,6 @@ impl BitXorAssign for F64x1 {
         *self = F64x1(f64::from_bits(result));
     }
 }
-
 
 impl BitXor for I16x1 {
     type Output = I16x1;
@@ -862,15 +843,3 @@ impl BitXor for F64x1 {
         F64x1(f64::from_bits(result))
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

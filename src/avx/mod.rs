@@ -1,10 +1,10 @@
 use super::*;
 use core::mem;
 
-mod overloads;
 mod avx;
-pub use self::overloads::*;
+mod overloads;
 pub use self::avx::*;
+pub use self::overloads::*;
 
 #[derive(Copy, Debug, Clone)]
 pub struct I16x16(pub __m256i);
@@ -15,7 +15,6 @@ impl SimdSmallInt<I16x16, i16> for I16x16 {}
 pub struct I32x8(pub __m256i);
 impl SimdBase<I32x8, i32> for I32x8 {}
 impl SimdSmallInt<I32x8, i32> for I32x8 {}
-
 
 #[derive(Copy, Debug, Clone)]
 pub struct I64x4(pub __m256i);
