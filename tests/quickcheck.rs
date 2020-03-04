@@ -1,18 +1,18 @@
 /// QuickCheck tests
-/// 
+///
 /// TODO: test shifts
 #[cfg(test)]
 mod tests {
     use core::ops::*;
 
-    use quickcheck::{TestResult, quickcheck};
+    use quickcheck::{quickcheck, TestResult};
 
-    use simdeez::*;
-    use simdeez::avx2::*;
     use simdeez::avx::*;
+    use simdeez::avx2::*;
     use simdeez::scalar::*;
     use simdeez::sse2::*;
     use simdeez::sse41::*;
+    use simdeez::*;
 
     trait SpecialEq {
         fn equivalent(a: Self, b: Self) -> bool;
@@ -63,9 +63,7 @@ mod tests {
                         if !SpecialEq::equivalent(result_simd[i], result_scalar) {
                             println!(
                                 "Results didn't match ({}). Reference: {:?}; Simdeez: {:?}",
-                                info,
-                                result_scalar,
-                                result_simd
+                                info, result_scalar, result_simd
                             );
 
                             return false;
@@ -130,43 +128,253 @@ mod tests {
     gen_quickcheck_2_simd!(add_i64, Add::add, Add::add, i64, VI64_WIDTH, set1_epi64);
     gen_quickcheck_2_simd!(sub_i64, Sub::sub, Sub::sub, i64, VI64_WIDTH, set1_epi64);
 
-    gen_quickcheck_2_simd!(bitand_i32, BitAnd::bitand, BitAnd::bitand, i32, VI32_WIDTH, set1_epi32);
-    gen_quickcheck_2_simd!(bitor_i32, BitOr::bitor, BitOr::bitor, i32, VI32_WIDTH, set1_epi32);
-    gen_quickcheck_2_simd!(bitxor_i32, BitXor::bitxor, BitXor::bitxor, i32, VI32_WIDTH, set1_epi32);
+    gen_quickcheck_2_simd!(
+        bitand_i32,
+        BitAnd::bitand,
+        BitAnd::bitand,
+        i32,
+        VI32_WIDTH,
+        set1_epi32
+    );
+    gen_quickcheck_2_simd!(
+        bitor_i32,
+        BitOr::bitor,
+        BitOr::bitor,
+        i32,
+        VI32_WIDTH,
+        set1_epi32
+    );
+    gen_quickcheck_2_simd!(
+        bitxor_i32,
+        BitXor::bitxor,
+        BitXor::bitxor,
+        i32,
+        VI32_WIDTH,
+        set1_epi32
+    );
 
-    gen_quickcheck_2_simd!(bitand_i64, BitAnd::bitand, BitAnd::bitand, i64, VI64_WIDTH, set1_epi64);
-    gen_quickcheck_2_simd!(bitor_i64, BitOr::bitor, BitOr::bitor, i64, VI64_WIDTH, set1_epi64);
-    gen_quickcheck_2_simd!(bitxor_i64, BitXor::bitxor, BitXor::bitxor, i64, VI64_WIDTH, set1_epi64);
+    gen_quickcheck_2_simd!(
+        bitand_i64,
+        BitAnd::bitand,
+        BitAnd::bitand,
+        i64,
+        VI64_WIDTH,
+        set1_epi64
+    );
+    gen_quickcheck_2_simd!(
+        bitor_i64,
+        BitOr::bitor,
+        BitOr::bitor,
+        i64,
+        VI64_WIDTH,
+        set1_epi64
+    );
+    gen_quickcheck_2_simd!(
+        bitxor_i64,
+        BitXor::bitxor,
+        BitXor::bitxor,
+        i64,
+        VI64_WIDTH,
+        set1_epi64
+    );
 
     // Equality/ordering/min/max
 
-    gen_quickcheck_2_simd!(cmpeq_f32, (|a, b| f32::from_bits(if a == b { !0u32 } else { 0u32 })), S::cmpeq_ps, f32, VF32_WIDTH, set1_ps);
-    gen_quickcheck_2_simd!(cmpneq_f32, (|a, b| f32::from_bits(if a != b { !0u32 } else { 0u32 })), S::cmpneq_ps, f32, VF32_WIDTH, set1_ps);
-    gen_quickcheck_2_simd!(cmpge_f32, (|a, b| f32::from_bits(if a >= b { !0u32 } else { 0u32 })), S::cmpge_ps, f32, VF32_WIDTH, set1_ps);
-    gen_quickcheck_2_simd!(cmpgt_f32, (|a, b| f32::from_bits(if a > b { !0u32 } else { 0u32 })), S::cmpgt_ps, f32, VF32_WIDTH, set1_ps);
-    gen_quickcheck_2_simd!(cmple_f32, (|a, b| f32::from_bits(if a <= b { !0u32 } else { 0u32 })), S::cmple_ps, f32, VF32_WIDTH, set1_ps);
-    gen_quickcheck_2_simd!(cmplt_f32, (|a, b| f32::from_bits(if a < b { !0u32 } else { 0u32 })), S::cmplt_ps, f32, VF32_WIDTH, set1_ps);
+    gen_quickcheck_2_simd!(
+        cmpeq_f32,
+        (|a, b| f32::from_bits(if a == b { !0u32 } else { 0u32 })),
+        S::cmpeq_ps,
+        f32,
+        VF32_WIDTH,
+        set1_ps
+    );
+    gen_quickcheck_2_simd!(
+        cmpneq_f32,
+        (|a, b| f32::from_bits(if a != b { !0u32 } else { 0u32 })),
+        S::cmpneq_ps,
+        f32,
+        VF32_WIDTH,
+        set1_ps
+    );
+    gen_quickcheck_2_simd!(
+        cmpge_f32,
+        (|a, b| f32::from_bits(if a >= b { !0u32 } else { 0u32 })),
+        S::cmpge_ps,
+        f32,
+        VF32_WIDTH,
+        set1_ps
+    );
+    gen_quickcheck_2_simd!(
+        cmpgt_f32,
+        (|a, b| f32::from_bits(if a > b { !0u32 } else { 0u32 })),
+        S::cmpgt_ps,
+        f32,
+        VF32_WIDTH,
+        set1_ps
+    );
+    gen_quickcheck_2_simd!(
+        cmple_f32,
+        (|a, b| f32::from_bits(if a <= b { !0u32 } else { 0u32 })),
+        S::cmple_ps,
+        f32,
+        VF32_WIDTH,
+        set1_ps
+    );
+    gen_quickcheck_2_simd!(
+        cmplt_f32,
+        (|a, b| f32::from_bits(if a < b { !0u32 } else { 0u32 })),
+        S::cmplt_ps,
+        f32,
+        VF32_WIDTH,
+        set1_ps
+    );
 
-    gen_quickcheck_2_simd!(cmpeq_f64, (|a, b| f64::from_bits(if a == b { !0u64 } else { 0u64 })), S::cmpeq_pd, f64, VF64_WIDTH, set1_pd);
-    gen_quickcheck_2_simd!(cmpneq_f64, (|a, b| f64::from_bits(if a != b { !0u64 } else { 0u64 })), S::cmpneq_pd, f64, VF64_WIDTH, set1_pd);
-    gen_quickcheck_2_simd!(cmpge_f64, (|a, b| f64::from_bits(if a >= b { !0u64 } else { 0u64 })), S::cmpge_pd, f64, VF64_WIDTH, set1_pd);
-    gen_quickcheck_2_simd!(cmpgt_f64, (|a, b| f64::from_bits(if a > b { !0u64 } else { 0u64 })), S::cmpgt_pd, f64, VF64_WIDTH, set1_pd);
-    gen_quickcheck_2_simd!(cmple_f64, (|a, b| f64::from_bits(if a <= b { !0u64 } else { 0u64 })), S::cmple_pd, f64, VF64_WIDTH, set1_pd);
-    gen_quickcheck_2_simd!(cmplt_f64, (|a, b| f64::from_bits(if a < b { !0u64 } else { 0u64 })), S::cmplt_pd, f64, VF64_WIDTH, set1_pd);
+    gen_quickcheck_2_simd!(
+        cmpeq_f64,
+        (|a, b| f64::from_bits(if a == b { !0u64 } else { 0u64 })),
+        S::cmpeq_pd,
+        f64,
+        VF64_WIDTH,
+        set1_pd
+    );
+    gen_quickcheck_2_simd!(
+        cmpneq_f64,
+        (|a, b| f64::from_bits(if a != b { !0u64 } else { 0u64 })),
+        S::cmpneq_pd,
+        f64,
+        VF64_WIDTH,
+        set1_pd
+    );
+    gen_quickcheck_2_simd!(
+        cmpge_f64,
+        (|a, b| f64::from_bits(if a >= b { !0u64 } else { 0u64 })),
+        S::cmpge_pd,
+        f64,
+        VF64_WIDTH,
+        set1_pd
+    );
+    gen_quickcheck_2_simd!(
+        cmpgt_f64,
+        (|a, b| f64::from_bits(if a > b { !0u64 } else { 0u64 })),
+        S::cmpgt_pd,
+        f64,
+        VF64_WIDTH,
+        set1_pd
+    );
+    gen_quickcheck_2_simd!(
+        cmple_f64,
+        (|a, b| f64::from_bits(if a <= b { !0u64 } else { 0u64 })),
+        S::cmple_pd,
+        f64,
+        VF64_WIDTH,
+        set1_pd
+    );
+    gen_quickcheck_2_simd!(
+        cmplt_f64,
+        (|a, b| f64::from_bits(if a < b { !0u64 } else { 0u64 })),
+        S::cmplt_pd,
+        f64,
+        VF64_WIDTH,
+        set1_pd
+    );
 
-    gen_quickcheck_2_simd!(cmpeq_i32, (|a, b| if a == b { !0i32 } else { 0i32 }), S::cmpeq_epi32, i32, VI32_WIDTH, set1_epi32);
-    gen_quickcheck_2_simd!(cmpneq_i32, (|a, b| if a != b { !0i32 } else { 0i32 }), S::cmpneq_epi32, i32, VI32_WIDTH, set1_epi32);
-    gen_quickcheck_2_simd!(cmpge_i32, (|a, b| if a >= b { !0i32 } else { 0i32 }), S::cmpge_epi32, i32, VI32_WIDTH, set1_epi32);
-    gen_quickcheck_2_simd!(cmpgt_i32, (|a, b| if a > b { !0i32 } else { 0i32 }), S::cmpgt_epi32, i32, VI32_WIDTH, set1_epi32);
-    gen_quickcheck_2_simd!(cmple_i32, (|a, b| if a <= b { !0i32 } else { 0i32 }), S::cmple_epi32, i32, VI32_WIDTH, set1_epi32);
-    gen_quickcheck_2_simd!(cmplt_i32, (|a, b| if a < b { !0i32 } else { 0i32 }), S::cmplt_epi32, i32, VI32_WIDTH, set1_epi32);
+    gen_quickcheck_2_simd!(
+        cmpeq_i32,
+        (|a, b| if a == b { !0i32 } else { 0i32 }),
+        S::cmpeq_epi32,
+        i32,
+        VI32_WIDTH,
+        set1_epi32
+    );
+    gen_quickcheck_2_simd!(
+        cmpneq_i32,
+        (|a, b| if a != b { !0i32 } else { 0i32 }),
+        S::cmpneq_epi32,
+        i32,
+        VI32_WIDTH,
+        set1_epi32
+    );
+    gen_quickcheck_2_simd!(
+        cmpge_i32,
+        (|a, b| if a >= b { !0i32 } else { 0i32 }),
+        S::cmpge_epi32,
+        i32,
+        VI32_WIDTH,
+        set1_epi32
+    );
+    gen_quickcheck_2_simd!(
+        cmpgt_i32,
+        (|a, b| if a > b { !0i32 } else { 0i32 }),
+        S::cmpgt_epi32,
+        i32,
+        VI32_WIDTH,
+        set1_epi32
+    );
+    gen_quickcheck_2_simd!(
+        cmple_i32,
+        (|a, b| if a <= b { !0i32 } else { 0i32 }),
+        S::cmple_epi32,
+        i32,
+        VI32_WIDTH,
+        set1_epi32
+    );
+    gen_quickcheck_2_simd!(
+        cmplt_i32,
+        (|a, b| if a < b { !0i32 } else { 0i32 }),
+        S::cmplt_epi32,
+        i32,
+        VI32_WIDTH,
+        set1_epi32
+    );
 
-    gen_quickcheck_2_simd!(cmpeq_i64, (|a, b| if a == b { !0i64 } else { 0i64 }), S::cmpeq_epi64, i64, VI64_WIDTH, set1_epi64);
-    gen_quickcheck_2_simd!(cmpneq_i64, (|a, b| if a != b { !0i64 } else { 0i64 }), S::cmpneq_epi64, i64, VI64_WIDTH, set1_epi64);
-    gen_quickcheck_2_simd!(cmpge_i64, (|a, b| if a >= b { !0i64 } else { 0i64 }), S::cmpge_epi64, i64, VI64_WIDTH, set1_epi64);
-    gen_quickcheck_2_simd!(cmpgt_i64, (|a, b| if a > b { !0i64 } else { 0i64 }), S::cmpgt_epi64, i64, VI64_WIDTH, set1_epi64);
-    gen_quickcheck_2_simd!(cmple_i64, (|a, b| if a <= b { !0i64 } else { 0i64 }), S::cmple_epi64, i64, VI64_WIDTH, set1_epi64);
-    gen_quickcheck_2_simd!(cmplt_i64, (|a, b| if a < b { !0i64 } else { 0i64 }), S::cmplt_epi64, i64, VI64_WIDTH, set1_epi64);
+    gen_quickcheck_2_simd!(
+        cmpeq_i64,
+        (|a, b| if a == b { !0i64 } else { 0i64 }),
+        S::cmpeq_epi64,
+        i64,
+        VI64_WIDTH,
+        set1_epi64
+    );
+    gen_quickcheck_2_simd!(
+        cmpneq_i64,
+        (|a, b| if a != b { !0i64 } else { 0i64 }),
+        S::cmpneq_epi64,
+        i64,
+        VI64_WIDTH,
+        set1_epi64
+    );
+    gen_quickcheck_2_simd!(
+        cmpge_i64,
+        (|a, b| if a >= b { !0i64 } else { 0i64 }),
+        S::cmpge_epi64,
+        i64,
+        VI64_WIDTH,
+        set1_epi64
+    );
+    gen_quickcheck_2_simd!(
+        cmpgt_i64,
+        (|a, b| if a > b { !0i64 } else { 0i64 }),
+        S::cmpgt_epi64,
+        i64,
+        VI64_WIDTH,
+        set1_epi64
+    );
+    gen_quickcheck_2_simd!(
+        cmple_i64,
+        (|a, b| if a <= b { !0i64 } else { 0i64 }),
+        S::cmple_epi64,
+        i64,
+        VI64_WIDTH,
+        set1_epi64
+    );
+    gen_quickcheck_2_simd!(
+        cmplt_i64,
+        (|a, b| if a < b { !0i64 } else { 0i64 }),
+        S::cmplt_epi64,
+        i64,
+        VI64_WIDTH,
+        set1_epi64
+    );
 
     gen_quickcheck_2_simd!(min_f32, f32::min, S::min_ps, f32, VF32_WIDTH, set1_ps);
     gen_quickcheck_2_simd!(max_f32, f32::max, S::max_ps, f32, VF32_WIDTH, set1_ps);
@@ -179,11 +387,38 @@ mod tests {
 
     // Bitwise
 
-    gen_quickcheck_2_simd!(andnot_i32, (|a: i32, b: i32| !a & b), S::andnot_epi32, i32, VI32_WIDTH, set1_epi32);
-    gen_quickcheck_2_simd!(andnot_i64, (|a: i64, b: i64| !a & b), S::andnot_epi64, i64, VI64_WIDTH, set1_epi64);
-    gen_quickcheck_2_simd!(andnot_f32, (|a: f32, b: f32| f32::from_bits((!a.to_bits()) & b.to_bits()) ), S::andnot_ps, f32, VF32_WIDTH, set1_ps);
-    gen_quickcheck_2_simd!(andnot_f64, (|a: f64, b: f64| f64::from_bits((!a.to_bits()) & b.to_bits()) ), S::andnot_pd, f64, VF64_WIDTH, set1_pd);
-
+    gen_quickcheck_2_simd!(
+        andnot_i32,
+        (|a: i32, b: i32| !a & b),
+        S::andnot_epi32,
+        i32,
+        VI32_WIDTH,
+        set1_epi32
+    );
+    gen_quickcheck_2_simd!(
+        andnot_i64,
+        (|a: i64, b: i64| !a & b),
+        S::andnot_epi64,
+        i64,
+        VI64_WIDTH,
+        set1_epi64
+    );
+    gen_quickcheck_2_simd!(
+        andnot_f32,
+        (|a: f32, b: f32| f32::from_bits((!a.to_bits()) & b.to_bits())),
+        S::andnot_ps,
+        f32,
+        VF32_WIDTH,
+        set1_ps
+    );
+    gen_quickcheck_2_simd!(
+        andnot_f64,
+        (|a: f64, b: f64| f64::from_bits((!a.to_bits()) & b.to_bits())),
+        S::andnot_pd,
+        f64,
+        VF64_WIDTH,
+        set1_pd
+    );
 
     // Triple argument operations (e.g., fused multiply-add)
 
@@ -202,9 +437,7 @@ mod tests {
                         if !SpecialEq::equivalent(result_simd[i], result_scalar) {
                             println!(
                                 "Results didn't match ({}). Reference: {:?}; Simdeez: {:?}",
-                                info,
-                                result_scalar,
-                                result_simd
+                                info, result_scalar, result_simd
                             );
 
                             return false;
@@ -251,18 +484,73 @@ mod tests {
         };
     }
 
-    gen_quickcheck_3_simd!(fmadd_f32, (|a, b, c| a * b + c), S::fmadd_ps, f32, VF32_WIDTH, set1_ps);
-    gen_quickcheck_3_simd!(fmadd_f64, (|a, b, c| a * b + c), S::fmadd_pd, f64, VF64_WIDTH, set1_pd);
+    gen_quickcheck_3_simd!(
+        fmadd_f32,
+        (|a, b, c| a * b + c),
+        S::fmadd_ps,
+        f32,
+        VF32_WIDTH,
+        set1_ps
+    );
+    gen_quickcheck_3_simd!(
+        fmadd_f64,
+        (|a, b, c| a * b + c),
+        S::fmadd_pd,
+        f64,
+        VF64_WIDTH,
+        set1_pd
+    );
 
-    gen_quickcheck_3_simd!(fnmadd_f32, (|a, b, c| -1.0f32 * a * b + c), S::fnmadd_ps, f32, VF32_WIDTH, set1_ps);
-    gen_quickcheck_3_simd!(fnmadd_f64, (|a, b, c| -1.0f64 * a * b + c), S::fnmadd_pd, f64, VF64_WIDTH, set1_pd);
+    gen_quickcheck_3_simd!(
+        fnmadd_f32,
+        (|a, b, c| -1.0f32 * a * b + c),
+        S::fnmadd_ps,
+        f32,
+        VF32_WIDTH,
+        set1_ps
+    );
+    gen_quickcheck_3_simd!(
+        fnmadd_f64,
+        (|a, b, c| -1.0f64 * a * b + c),
+        S::fnmadd_pd,
+        f64,
+        VF64_WIDTH,
+        set1_pd
+    );
 
-    gen_quickcheck_3_simd!(fmsub_f32, (|a, b, c| a * b - c), S::fmsub_ps, f32, VF32_WIDTH, set1_ps);
-    gen_quickcheck_3_simd!(fmsub_f64, (|a, b, c| a * b - c), S::fmsub_pd, f64, VF64_WIDTH, set1_pd);
+    gen_quickcheck_3_simd!(
+        fmsub_f32,
+        (|a, b, c| a * b - c),
+        S::fmsub_ps,
+        f32,
+        VF32_WIDTH,
+        set1_ps
+    );
+    gen_quickcheck_3_simd!(
+        fmsub_f64,
+        (|a, b, c| a * b - c),
+        S::fmsub_pd,
+        f64,
+        VF64_WIDTH,
+        set1_pd
+    );
 
-    gen_quickcheck_3_simd!(fnmsub_f32, (|a, b, c| -1.0f32 * a * b - c), S::fnmsub_ps, f32, VF32_WIDTH, set1_ps);
-    gen_quickcheck_3_simd!(fnmsub_f64, (|a, b, c| -1.0f64 * a * b - c), S::fnmsub_pd, f64, VF64_WIDTH, set1_pd);
-
+    gen_quickcheck_3_simd!(
+        fnmsub_f32,
+        (|a, b, c| -1.0f32 * a * b - c),
+        S::fnmsub_ps,
+        f32,
+        VF32_WIDTH,
+        set1_ps
+    );
+    gen_quickcheck_3_simd!(
+        fnmsub_f64,
+        (|a, b, c| -1.0f64 * a * b - c),
+        S::fnmsub_pd,
+        f64,
+        VF64_WIDTH,
+        set1_pd
+    );
 
     // Single argument operations
 
@@ -277,9 +565,7 @@ mod tests {
                         if !SpecialEq::equivalent(result_simd[i], result_scalar) {
                             println!(
                                 "Results didn't match ({}). Reference: {:?}; Simdeez: {:?}",
-                                info,
-                                result_scalar,
-                                result_simd
+                                info, result_scalar, result_simd
                             );
 
                             return false;
@@ -326,24 +612,128 @@ mod tests {
         };
     }
 
-    gen_quickcheck_1_simd!(abs_f32, f32::abs, S::abs_ps, f32, VF32_WIDTH, set1_ps, |_| false);
-    gen_quickcheck_1_simd!(abs_f64, f64::abs, S::abs_pd, f64, VF64_WIDTH, set1_pd, |_| false);
+    gen_quickcheck_1_simd!(
+        abs_f32,
+        f32::abs,
+        S::abs_ps,
+        f32,
+        VF32_WIDTH,
+        set1_ps,
+        |_| false
+    );
+    gen_quickcheck_1_simd!(
+        abs_f64,
+        f64::abs,
+        S::abs_pd,
+        f64,
+        VF64_WIDTH,
+        set1_pd,
+        |_| false
+    );
 
-    gen_quickcheck_1_simd!(sqrt_f32, f32::sqrt, S::sqrt_ps, f32, VF32_WIDTH, set1_ps, |a: f32| a.is_sign_negative());
-    gen_quickcheck_1_simd!(sqrt_f64, f64::sqrt, S::sqrt_pd, f64, VF64_WIDTH, set1_pd, |a: f64| a.is_sign_negative());
+    gen_quickcheck_1_simd!(
+        sqrt_f32,
+        f32::sqrt,
+        S::sqrt_ps,
+        f32,
+        VF32_WIDTH,
+        set1_ps,
+        |a: f32| a.is_sign_negative()
+    );
+    gen_quickcheck_1_simd!(
+        sqrt_f64,
+        f64::sqrt,
+        S::sqrt_pd,
+        f64,
+        VF64_WIDTH,
+        set1_pd,
+        |a: f64| a.is_sign_negative()
+    );
 
-    gen_quickcheck_1_simd!(floor_f32, f32::floor, S::floor_ps, f32, VF32_WIDTH, set1_ps, |_| false);
-    gen_quickcheck_1_simd!(floor_f64, f64::floor, S::floor_pd, f64, VF64_WIDTH, set1_pd, |_| false);
+    gen_quickcheck_1_simd!(
+        floor_f32,
+        f32::floor,
+        S::floor_ps,
+        f32,
+        VF32_WIDTH,
+        set1_ps,
+        |_| false
+    );
+    gen_quickcheck_1_simd!(
+        floor_f64,
+        f64::floor,
+        S::floor_pd,
+        f64,
+        VF64_WIDTH,
+        set1_pd,
+        |_| false
+    );
 
-    gen_quickcheck_1_simd!(ceil_f32, f32::ceil, S::ceil_ps, f32, VF32_WIDTH, set1_ps, |_| false);
-    gen_quickcheck_1_simd!(ceil_f64, f64::ceil, S::ceil_pd, f64, VF64_WIDTH, set1_pd, |_| false);
+    gen_quickcheck_1_simd!(
+        ceil_f32,
+        f32::ceil,
+        S::ceil_ps,
+        f32,
+        VF32_WIDTH,
+        set1_ps,
+        |_| false
+    );
+    gen_quickcheck_1_simd!(
+        ceil_f64,
+        f64::ceil,
+        S::ceil_pd,
+        f64,
+        VF64_WIDTH,
+        set1_pd,
+        |_| false
+    );
 
-    gen_quickcheck_1_simd!(round_f32, f32::round, S::round_ps, f32, VF32_WIDTH, set1_ps, |_| false);
-    gen_quickcheck_1_simd!(round_f64, f64::round, S::round_pd, f64, VF64_WIDTH, set1_pd, |_| false);
+    gen_quickcheck_1_simd!(
+        round_f32,
+        f32::round,
+        S::round_ps,
+        f32,
+        VF32_WIDTH,
+        set1_ps,
+        |_| false
+    );
+    gen_quickcheck_1_simd!(
+        round_f64,
+        f64::round,
+        S::round_pd,
+        f64,
+        VF64_WIDTH,
+        set1_pd,
+        |_| false
+    );
 
-    gen_quickcheck_1_simd!(fast_floor_f32, f32::floor, S::fast_floor_ps, f32, VF64_WIDTH, set1_ps, |_| false);
-    gen_quickcheck_1_simd!(fast_ceil_f32, f32::ceil, S::fast_ceil_ps, f32, VF32_WIDTH, set1_ps, |_| false);
-    gen_quickcheck_1_simd!(fast_round_f32, f32::round, S::fast_round_ps, f32, VF32_WIDTH, set1_ps, |_| false);
+    gen_quickcheck_1_simd!(
+        fast_floor_f32,
+        f32::floor,
+        S::fast_floor_ps,
+        f32,
+        VF64_WIDTH,
+        set1_ps,
+        |_| false
+    );
+    gen_quickcheck_1_simd!(
+        fast_ceil_f32,
+        f32::ceil,
+        S::fast_ceil_ps,
+        f32,
+        VF32_WIDTH,
+        set1_ps,
+        |_| false
+    );
+    gen_quickcheck_1_simd!(
+        fast_round_f32,
+        f32::round,
+        S::fast_round_ps,
+        f32,
+        VF32_WIDTH,
+        set1_ps,
+        |_| false
+    );
 
     // These would require accepting more imprecision not to fail
     // gen_quickcheck_1_simd!(rcp_f32, (|a| 1.0f32 / a), S::rcp_ps, f32, VF32_WIDTH, set1_ps, |_| false);

@@ -1,6 +1,5 @@
 use super::*;
 
-
 impl AddAssign for I32x4_41 {
     #[inline(always)]
     fn add_assign(&mut self, rhs: I32x4_41) {

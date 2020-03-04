@@ -2,8 +2,8 @@ extern crate simdeez;
 
 #[cfg(test)]
 mod tests {
-    use simdeez::avx2::*;
     use simdeez::avx::*;
+    use simdeez::avx2::*;
     use simdeez::scalar::*;
     use simdeez::sse2::*;
     use simdeez::sse41::*;

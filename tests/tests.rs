@@ -5,9 +5,9 @@ mod tests {
     use simdeez::avx::*;
     use simdeez::avx2::*;
     use simdeez::scalar::*;
-    use simdeez::*;
     use simdeez::sse2::*;
     use simdeez::sse41::*;
+    use simdeez::*;
     use std::*;
 
     // If using runtime feature detection, you will want to be sure this inlines
