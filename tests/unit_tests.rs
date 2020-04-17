@@ -17,16 +17,16 @@ mod tests {
         ($x:expr, $y:expr, $d:expr) => {
             if $x.is_nan() && $y.is_nan() {
             } else if $x.is_nan() {
-                assert!(false);
+                assert!(false, "{} != NaN", $y);
             } else if $y.is_nan() {
-                assert!(false);
+                assert!(false, "{} != NaN", $x);
             } else if $x.is_infinite() && $y.is_infinite() {
             } else if $x.is_infinite() {
-                assert!(false);
+                assert!(false, "{} != infinity", $y);
             } else if $y.is_infinite() {
-                assert!(false);
+                assert!(false, "{} != infinity", $x);
             } else {
-                assert!(($x - $y).abs() < $d);
+                assert!(($x - $y).abs() < $d, "{} != {}", $x, $y);
             }
         };
     }
@@ -74,16 +74,21 @@ mod tests {
     }
     simd_runtime_generate!(
         fn sub(floats: &Vec<f32>, ints: &Vec<i32>) {
-            for i in 0..ints.len() {
-                let a = S::sub_epi32(S::set1_epi32(ints[i]), S::set1_epi32(ints[i]));
-                for j in 0..S::VI32_WIDTH {
-                    assert_eq!(a[j], ints[i] - ints[i]);
+            for &int1 in ints {
+                for &int2 in ints {
+                    let a = S::sub_epi32(S::set1_epi32(int1), S::set1_epi32(int2));
+                    let expected = int1.wrapping_sub(int2);
+                    for j in 0..S::VI32_WIDTH {
+                        assert_eq!(a[j], expected, "{} - {} != {}", int1, int2, a[j]);
+                    }
                 }
             }
-            for i in 0..floats.len() {
-                let b = S::sub_ps(S::set1_ps(floats[i]), S::set1_ps(floats[i]));
-                for j in 0..S::VF32_WIDTH {
-                    assert_delta!(b[j], floats[i] - floats[i], 0.001);
+            for &float1 in floats {
+                for &float2 in floats {
+                    let b = S::sub_ps(S::set1_ps(float1), S::set1_ps(float2));
+                    for j in 0..S::VF32_WIDTH {
+                        assert_delta!(b[j], float1 - float2, 0.001);
+                    }
                 }
             }
         }
