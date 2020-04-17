@@ -23,7 +23,7 @@ mod tests {
             if (a.is_nan() && b.is_nan()) || (a.is_infinite() && b.is_infinite()) {
                 a.to_bits() == b.to_bits()
             } else {
-                (a - b).abs() < 0.00000001
+                (a - b).abs() < 0.01
             }
         }
     }
@@ -32,7 +32,7 @@ mod tests {
             if (a.is_nan() && b.is_nan()) || (a.is_infinite() && b.is_infinite()) {
                 a.to_bits() == b.to_bits()
             } else {
-                (a - b).abs() < 0.00000001
+                (a - b).abs() < 0.01
             }
         }
     }
