@@ -3,21 +3,21 @@ use super::*;
 impl AddAssign for I16x1 {
     #[inline(always)]
     fn add_assign(&mut self, rhs: I16x1) {
-        *self = I16x1(self.0 + rhs.0);
+        *self = I16x1(self.0.wrapping_add(rhs.0));
     }
 }
 
 impl AddAssign for I32x1 {
     #[inline(always)]
     fn add_assign(&mut self, rhs: I32x1) {
-        *self = I32x1(self.0 + rhs.0);
+        *self = I32x1(self.0.wrapping_add(rhs.0));
     }
 }
 
 impl AddAssign for I64x1 {
     #[inline(always)]
     fn add_assign(&mut self, rhs: I64x1) {
-        *self = I64x1(self.0 + rhs.0);
+        *self = I64x1(self.0.wrapping_add(rhs.0));
     }
 }
 
@@ -40,7 +40,7 @@ impl Add for I16x1 {
 
     #[inline(always)]
     fn add(self, rhs: I16x1) -> I16x1 {
-        I16x1(self.0 + rhs.0)
+        I16x1(self.0.wrapping_add(rhs.0))
     }
 }
 
@@ -49,7 +49,7 @@ impl Add for I32x1 {
 
     #[inline(always)]
     fn add(self, rhs: I32x1) -> I32x1 {
-        I32x1(self.0 + rhs.0)
+        I32x1(self.0.wrapping_add(rhs.0))
     }
 }
 
@@ -58,7 +58,7 @@ impl Add for I64x1 {
 
     #[inline(always)]
     fn add(self, rhs: I64x1) -> I64x1 {
-        I64x1(self.0 + rhs.0)
+        I64x1(self.0.wrapping_add(rhs.0))
     }
 }
 
@@ -675,21 +675,21 @@ impl Shr<i32> for F64x1 {
 impl SubAssign for I16x1 {
     #[inline(always)]
     fn sub_assign(&mut self, rhs: I16x1) {
-        *self = I16x1(self.0 - rhs.0);
+        *self = I16x1(self.0.wrapping_sub(rhs.0));
     }
 }
 
 impl SubAssign for I32x1 {
     #[inline(always)]
     fn sub_assign(&mut self, rhs: I32x1) {
-        *self = I32x1(self.0 - rhs.0);
+        *self = I32x1(self.0.wrapping_sub(rhs.0));
     }
 }
 
 impl SubAssign for I64x1 {
     #[inline(always)]
     fn sub_assign(&mut self, rhs: I64x1) {
-        *self = I64x1(self.0 - rhs.0);
+        *self = I64x1(self.0.wrapping_sub(rhs.0));
     }
 }
 
@@ -712,7 +712,7 @@ impl Sub for I16x1 {
 
     #[inline(always)]
     fn sub(self, rhs: I16x1) -> I16x1 {
-        I16x1(self.0 - rhs.0)
+        I16x1(self.0.wrapping_sub(rhs.0))
     }
 }
 
@@ -721,7 +721,7 @@ impl Sub for I32x1 {
 
     #[inline(always)]
     fn sub(self, rhs: I32x1) -> I32x1 {
-        I32x1(self.0 - rhs.0)
+        I32x1(self.0.wrapping_sub(rhs.0))
     }
 }
 
@@ -730,7 +730,7 @@ impl Sub for I64x1 {
 
     #[inline(always)]
     fn sub(self, rhs: I64x1) -> I64x1 {
-        I64x1(self.0 - rhs.0)
+        I64x1(self.0.wrapping_sub(rhs.0))
     }
 }
 
