@@ -122,11 +122,7 @@
 #[cfg(test)]
 extern crate std;
 pub extern crate paste;
-#[cfg(target_arch = "x86")]
-use core::arch::x86::*;
 
-#[cfg(target_arch = "x86_64")]
-use core::arch::x86_64::*;
 
 use core::fmt::Debug;
 use core::ops::*;
@@ -134,12 +130,17 @@ use core::ops::*;
 #[macro_use]
 mod macros;
 
-pub mod avx;
-pub mod avx2;
 pub mod libm;
 pub mod scalar;
+#[cfg(any(target_arch = "x86_64",target_arch = "x86"))]
 pub mod sse2;
+#[cfg(any(target_arch = "x86_64",target_arch = "x86"))]
 pub mod sse41;
+#[cfg(target_arch = "x86_64")]
+pub mod avx2;
+#[cfg(target_arch = "wasm32")]
+pub mod wasm32;
+
 
 /// Grouping all the constraints shared by associated types in
 /// the Simd trait into this marker trait drastically reduces
