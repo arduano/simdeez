@@ -445,11 +445,7 @@ impl Simd for Avx2 {
     unsafe fn set1_epi32(a: i32) -> Self::Vi32 {
         I32x8(_mm256_set1_epi32(a))
     }
-    #[inline(always)]
-    unsafe fn set1_epi64(a: i64) -> Self::Vi64 {
-        I64x4(_mm256_set1_epi64x(a))
-    }
-    #[inline(always)]
+   #[inline(always)]
     unsafe fn set1_ps(a: f32) -> Self::Vf32 {
         F32x8(_mm256_set1_ps(a))
     }

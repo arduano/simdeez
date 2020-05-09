@@ -565,10 +565,6 @@ impl Simd for Scalar {
         I32x1(a)
     }
     #[inline(always)]
-    unsafe fn set1_epi64(a: i64) -> Self::Vi64 {
-        I64x1(a)
-    }
-    #[inline(always)]
     unsafe fn set1_pd(a: f64) -> Self::Vf64 {
         F64x1(a)
     }
