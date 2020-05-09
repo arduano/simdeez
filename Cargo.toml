@@ -1,6 +1,6 @@
 [package]
 name = "simdeez"
-version = "1.0.0"
+version = "1.0.1"
 authors = ["Jack Mott <jack.mott@gmail.com>"]
 description = "SIMD library to abstract over different instruction sets and widths"
 license = "Apache-2.0/MIT"
@@ -18,7 +18,7 @@ sleef = ["sleef-sys"]
 [dependencies]
 paste = "0.1.7"
 # To build this, we need nightly, cmake installed, and clang dlls in the clang dll path
-sleef-sys = {git ="https://github.com/jackmott/sleef-sys.git", optional=true}
+sleef-sys = {version ="0.1.2", optional=true}
 cfg-if = "0.1.10"
 
 [dev-dependencies]
