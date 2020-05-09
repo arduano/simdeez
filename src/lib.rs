@@ -132,14 +132,15 @@ mod macros;
 
 pub mod libm;
 pub mod scalar;
-#[cfg(target_feature="sse2")]
+#[cfg(any(target_arch = "x86_64",target_arch = "x86"))]
 pub mod sse2;
-#[cfg(target_feature="sse4.1")]
+#[cfg(any(target_arch = "x86_64",target_arch = "x86"))]
 pub mod sse41;
-#[cfg(target_feature="avx2")]
+#[cfg(target_arch = "x86_64")]
 pub mod avx2;
-#[cfg(target_arch = "wasm32")]
-pub mod wasm32;
+// coming soon
+//#[cfg(target_arch = "wasm32")]
+//pub mod wasm32;
 
 
 /// Grouping all the constraints shared by associated types in
