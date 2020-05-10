@@ -7,11 +7,6 @@
 //!
 #![deny(warnings)]
 
-#![cfg_attr(
-    all(target_arch = "wasm32", not(feature = "stable")),
-    feature(core_intrinsics)
-)]
-
 mod math;
 
 use core::{f32, f64};

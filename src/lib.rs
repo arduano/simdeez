@@ -117,6 +117,11 @@
 //! You may also forgoe the macros if you know what you are doing, just keep in mind there are lots
 //! of arcane subtleties with inlining and target_features that must be managed. See how the macros
 //! expand for more detail.
+#![cfg_attr(
+    all(target_arch = "wasm32", not(feature = "stable")),
+    feature(core_intrinsics)
+)]
+
 #![no_std]
 #[macro_use]
 #[cfg(test)]
