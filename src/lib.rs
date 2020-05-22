@@ -142,10 +142,12 @@ pub mod sse2;
 #[cfg(any(target_arch = "x86_64",target_arch = "x86"))]
 pub mod sse41;
 #[cfg(target_arch = "x86_64")]
+
 pub mod avx2;
 // coming soon
 //#[cfg(target_arch = "wasm32")]
 //pub mod wasm32;
+//pub mod avx;
 
 
 /// Grouping all the constraints shared by associated types in
@@ -600,20 +602,14 @@ macro_rules! simd_runtime_generate {
             #[target_feature(enable = "sse4.1")]
                 $vis unsafe fn [<$fn_name _sse41>]($($arg:$typ,)*) $(-> $rt)? {
                 $fn_name::<Sse41>($($arg,)*)
-            }
-            #[target_feature(enable = "avx")]
-            $vis  unsafe fn [<$fn_name _avx>]($($arg:$typ,)*) $(-> $rt)? {
-                $fn_name::<Avx>($($arg,)*)
-            }
+            }            
             #[target_feature(enable = "avx2")]
             $vis  unsafe fn [<$fn_name _avx2>]($($arg:$typ,)*) $(-> $rt)? {
                 $fn_name::<Avx2>($($arg,)*)
             }
             $vis  fn [<$fn_name _runtime_select>]($($arg:$typ,)*) $(-> $rt)? {
                 if is_x86_feature_detected!("avx2") {
-                    unsafe { [<$fn_name _avx2>]($($arg,)*) }
-                } else if is_x86_feature_detected!("avx") {
-                    unsafe { [<$fn_name _avx>]($($arg,)*) }
+                    unsafe { [<$fn_name _avx2>]($($arg,)*) }             
                 } else if is_x86_feature_detected!("sse4.1") {
                     unsafe { [<$fn_name _sse41>]($($arg,)*) }
                 } else if is_x86_feature_detected!("sse2") {

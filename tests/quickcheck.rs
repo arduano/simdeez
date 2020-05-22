@@ -6,8 +6,7 @@ mod tests {
     use core::ops::*;
 
     use quickcheck::{quickcheck, TestResult};
-
-    use simdeez::avx::*;
+    
     use simdeez::avx2::*;
     use simdeez::scalar::*;
     use simdeez::sse2::*;
@@ -91,10 +90,7 @@ mod tests {
                             }
                             if is_x86_feature_detected!("sse4.1"){
                                 ok &= [<$fn_name _sse41>]("sse41", a, b);
-                            }
-                            if is_x86_feature_detected!("avx"){
-                                ok &= [<$fn_name _avx>]("avx", a, b);
-                            }
+                            }                           
                             if is_x86_feature_detected!("avx2"){
                                 ok &= [<$fn_name _avx2>]("avx2", a, b);
                             }
@@ -125,9 +121,7 @@ mod tests {
     gen_quickcheck_2_simd!(mul_i32, Mul::mul, Mul::mul, i32, VI32_WIDTH, set1_epi32);
     gen_quickcheck_2_simd!(sub_i32, Sub::sub, Sub::sub, i32, VI32_WIDTH, set1_epi32);
 
-    gen_quickcheck_2_simd!(add_i64, Add::add, Add::add, i64, VI64_WIDTH, set1_epi64);
-    gen_quickcheck_2_simd!(sub_i64, Sub::sub, Sub::sub, i64, VI64_WIDTH, set1_epi64);
-
+    
     gen_quickcheck_2_simd!(
         bitand_i32,
         BitAnd::bitand,
@@ -153,30 +147,7 @@ mod tests {
         set1_epi32
     );
 
-    gen_quickcheck_2_simd!(
-        bitand_i64,
-        BitAnd::bitand,
-        BitAnd::bitand,
-        i64,
-        VI64_WIDTH,
-        set1_epi64
-    );
-    gen_quickcheck_2_simd!(
-        bitor_i64,
-        BitOr::bitor,
-        BitOr::bitor,
-        i64,
-        VI64_WIDTH,
-        set1_epi64
-    );
-    gen_quickcheck_2_simd!(
-        bitxor_i64,
-        BitXor::bitxor,
-        BitXor::bitxor,
-        i64,
-        VI64_WIDTH,
-        set1_epi64
-    );
+    
 
     // Equality/ordering/min/max
 
@@ -327,54 +298,7 @@ mod tests {
         set1_epi32
     );
 
-    gen_quickcheck_2_simd!(
-        cmpeq_i64,
-        (|a, b| if a == b { !0i64 } else { 0i64 }),
-        S::cmpeq_epi64,
-        i64,
-        VI64_WIDTH,
-        set1_epi64
-    );
-    gen_quickcheck_2_simd!(
-        cmpneq_i64,
-        (|a, b| if a != b { !0i64 } else { 0i64 }),
-        S::cmpneq_epi64,
-        i64,
-        VI64_WIDTH,
-        set1_epi64
-    );
-    gen_quickcheck_2_simd!(
-        cmpge_i64,
-        (|a, b| if a >= b { !0i64 } else { 0i64 }),
-        S::cmpge_epi64,
-        i64,
-        VI64_WIDTH,
-        set1_epi64
-    );
-    gen_quickcheck_2_simd!(
-        cmpgt_i64,
-        (|a, b| if a > b { !0i64 } else { 0i64 }),
-        S::cmpgt_epi64,
-        i64,
-        VI64_WIDTH,
-        set1_epi64
-    );
-    gen_quickcheck_2_simd!(
-        cmple_i64,
-        (|a, b| if a <= b { !0i64 } else { 0i64 }),
-        S::cmple_epi64,
-        i64,
-        VI64_WIDTH,
-        set1_epi64
-    );
-    gen_quickcheck_2_simd!(
-        cmplt_i64,
-        (|a, b| if a < b { !0i64 } else { 0i64 }),
-        S::cmplt_epi64,
-        i64,
-        VI64_WIDTH,
-        set1_epi64
-    );
+  
 
     gen_quickcheck_2_simd!(min_f32, f32::min, S::min_ps, f32, VF32_WIDTH, set1_ps);
     gen_quickcheck_2_simd!(max_f32, f32::max, S::max_ps, f32, VF32_WIDTH, set1_ps);
@@ -395,14 +319,7 @@ mod tests {
         VI32_WIDTH,
         set1_epi32
     );
-    gen_quickcheck_2_simd!(
-        andnot_i64,
-        (|a: i64, b: i64| !a & b),
-        S::andnot_epi64,
-        i64,
-        VI64_WIDTH,
-        set1_epi64
-    );
+   
     gen_quickcheck_2_simd!(
         andnot_f32,
         (|a: f32, b: f32| f32::from_bits((!a.to_bits()) & b.to_bits())),
@@ -466,10 +383,7 @@ mod tests {
                             }
                             if is_x86_feature_detected!("sse4.1"){
                                 ok &= [<$fn_name _sse41>]("sse41", a, b, c);
-                            }
-                            if is_x86_feature_detected!("avx"){
-                                ok &= [<$fn_name _avx>]("avx", a, b, c);
-                            }
+                            }                            
                             if is_x86_feature_detected!("avx2"){
                                 ok &= [<$fn_name _avx2>]("avx2", a, b, c);
                             }
@@ -594,10 +508,7 @@ mod tests {
                             }
                             if is_x86_feature_detected!("sse4.1"){
                                 ok &= [<$fn_name _sse41>]("sse41", a);
-                            }
-                            if is_x86_feature_detected!("avx"){
-                                ok &= [<$fn_name _avx>]("avx", a);
-                            }
+                            }                            
                             if is_x86_feature_detected!("avx2"){
                                 ok &= [<$fn_name _avx2>]("avx2", a);
                             }
