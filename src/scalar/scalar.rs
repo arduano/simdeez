@@ -297,8 +297,16 @@ impl Simd for Scalar {
         I32x1((a.0 + 0.5).floor() as i32)
     }
     #[inline(always)]
+    unsafe fn cvtpd_epi64(a: Self::Vf64) -> Self::Vi64 {
+        I64x1((a.0 + 0.5).floor() as i64)
+    }
+    #[inline(always)]
     unsafe fn cvtepi32_ps(a: Self::Vi32) -> Self::Vf32 {
         F32x1(a.0 as f32)
+    }
+    #[inline(always)]
+    unsafe fn cvtepi64_pd(a: Self::Vi64) -> Self::Vf64 {
+        F64x1(a.0 as f64)
     }
     #[inline(always)]
     unsafe fn ceil_ps(a: Self::Vf32) -> Self::Vf32 {
@@ -371,6 +379,10 @@ impl Simd for Scalar {
     #[inline(always)]
     unsafe fn i32gather_epi32(arr: &[i32], index: Self::Vi32) -> Self::Vi32 {
         I32x1(arr[index.0 as usize])
+    }
+    #[inline(always)]
+    unsafe fn i64gather_epi64(arr: &[i64], index: Self::Vi64) -> Self::Vi64 {
+        I64x1(arr[index.0 as usize])
     }
     #[inline(always)]
     unsafe fn i32gather_ps(arr: &[f32], index: Self::Vi32) -> Self::Vf32 {

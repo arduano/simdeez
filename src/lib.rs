@@ -308,6 +308,10 @@ pub trait Simd {
         a + b
     }
     #[inline(always)]
+    unsafe fn add_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
+        a + b
+    }
+    #[inline(always)]
     unsafe fn add_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
         a + b
     }
@@ -388,9 +392,12 @@ pub trait Simd {
     unsafe fn cmple_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
     unsafe fn cmplt_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
     unsafe fn cvtepi32_ps(a: Self::Vi32) -> Self::Vf32;
+    unsafe fn cvtepi64_pd(a: Self::Vi64) -> Self::Vf64;
+
     /// Currently scalar will have different results in some cases depending on the
     /// current SSE rounding mode.
     unsafe fn cvtps_epi32(a: Self::Vf32) -> Self::Vi32;
+    unsafe fn cvtpd_epi64(a: Self::Vf64) -> Self::Vi64;
     unsafe fn floor_ps(a: Self::Vf32) -> Self::Vf32;
     unsafe fn floor_pd(a: Self::Vf64) -> Self::Vf64;
     /// When using Sse2, fastround uses a faster version of floor
@@ -447,6 +454,7 @@ pub trait Simd {
     /// Sse2 and Sse41 paths will simulate a gather by breaking out and
     /// doing scalar array accesses, because gather doesn't exist until Avx2.
     unsafe fn i32gather_epi32(arr: &[i32], index: Self::Vi32) -> Self::Vi32;
+    unsafe fn i64gather_epi64(arr: &[i64], index: Self::Vi64) -> Self::Vi64;
     /// Sse2 and Sse41 paths will simulate a gather by breaking out and
     /// doing scalar array accesses, because gather doesn't exist until Avx2.
     unsafe fn i32gather_ps(arr: &[f32], index: Self::Vi32) -> Self::Vf32;
@@ -530,6 +538,9 @@ pub trait Simd {
     /// amt does not have to be a constant, but may be slower than the slli version
     unsafe fn sll_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32;
     unsafe fn sub_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
+        a - b
+    }
+    unsafe fn sub_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
         a - b
     }
     unsafe fn sub_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {

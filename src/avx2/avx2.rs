@@ -198,8 +198,21 @@ impl Simd for Avx2 {
         F32x8(_mm256_cvtepi32_ps(a.0))
     }
     #[inline(always)]
+    unsafe fn cvtepi64_pd(a: Self::Vi64) -> Self::Vf64 {
+        let x = _mm256_add_epi64(a.0, _mm256_castpd_si256(_mm256_set1_pd(core::mem::transmute::<i64,f64>(0x0018000000000000))));
+        F64x4(_mm256_sub_pd(_mm256_castsi256_pd(x), _mm256_set1_pd(core::mem::transmute::<i64,f64>(0x0018000000000000))))
+    }
+    #[inline(always)]
     unsafe fn cvtps_epi32(a: Self::Vf32) -> Self::Vi32 {
         I32x8(_mm256_cvtps_epi32(a.0))
+    }
+    #[inline(always)]
+    unsafe fn cvtpd_epi64(a: Self::Vf64) -> Self::Vi64 {
+        let x = _mm256_add_pd(a.0, _mm256_set1_pd(core::mem::transmute::<i64,f64>(0x0018000000000000)));
+        I64x4(_mm256_sub_epi64(
+            _mm256_castpd_si256(x),
+            _mm256_castpd_si256(_mm256_set1_pd(core::mem::transmute::<i64,f64>(0x0018000000000000)))
+        ))
     }
     #[inline(always)]
     unsafe fn ceil_ps(a: Self::Vf32) -> Self::Vf32 {
@@ -279,6 +292,10 @@ impl Simd for Avx2 {
     #[inline(always)]
     unsafe fn i32gather_epi32(arr: &[i32], index: Self::Vi32) -> Self::Vi32 {
         I32x8(_mm256_i32gather_epi32(&arr[0] as *const i32, index.0, 4))
+    }
+    #[inline(always)]
+    unsafe fn i64gather_epi64(arr: &[i64], index: Self::Vi64) -> Self::Vi64 {
+        I64x4(_mm256_i64gather_epi64(&arr[0] as *const i64, index.0, 8))
     }
     #[inline(always)]
     unsafe fn i32gather_ps(arr: &[f32], index: Self::Vi32) -> Self::Vf32 {
