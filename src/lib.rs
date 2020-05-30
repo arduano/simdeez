@@ -511,6 +511,7 @@ pub trait Simd {
     unsafe fn round_ps(a: Self::Vf32) -> Self::Vf32;
     unsafe fn round_pd(a: Self::Vf64) -> Self::Vf64;
     unsafe fn set1_epi32(a: i32) -> Self::Vi32;
+    unsafe fn set1_epi64(a: i64) -> Self::Vi64;
     unsafe fn set1_ps(a: f32) -> Self::Vf32;
     unsafe fn set1_pd(a: f64) -> Self::Vf64;
     unsafe fn setzero_ps() -> Self::Vf32;

@@ -578,6 +578,10 @@ impl Simd for Sse2 {
     unsafe fn set1_epi32(a: i32) -> Self::Vi32 {
         I32x4(_mm_set1_epi32(a))
     }
+    #[inline(always)]
+    unsafe fn set1_epi64(a: i64) -> Self::Vi64 {              
+        I64x2(_mm_set1_epi64x(a))
+    }
    #[inline(always)]
     unsafe fn set1_pd(a: f64) -> Self::Vf64 {
         F64x2(_mm_set1_pd(a))
