@@ -191,7 +191,7 @@ pub trait SimdSmallInt<T, U>:
 /// f32 and f64 share these constraints, grouping
 /// them here speeds up compile times considerably
 pub trait SimdFloat<T, U>:
-    SimdBase<T, U> + Mul<T, Output = T> + Div<T, Output = T> + MulAssign<T> + DivAssign<T>
+    SimdBase<T, U> + Mul<T, Output = T> + Div<T, Output = T> + MulAssign<T> + DivAssign<T> + Not<Output = T>
 {
 }
 
@@ -323,6 +323,15 @@ pub trait Simd {
     unsafe fn and_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
         a & b
     }
+    #[inline(always)]
+    unsafe fn and_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
+        a & b
+    }
+    #[inline(always)]
+    unsafe fn and_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        a & b
+    }
+
     unsafe fn abs_ps(a: Self::Vf32) -> Self::Vf32;
     unsafe fn abs_pd(a: Self::Vf64) -> Self::Vf64;
     unsafe fn mullo_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16;

@@ -401,6 +401,23 @@ impl Not for I64x2 {
     }
 }
 
+impl Not for F32x4 {
+    type Output = F32x4;
+
+    #[inline(always)]
+    fn not(self) -> F32x4 {
+        unsafe { F32x4(_mm_castsi128_ps(_mm_xor_si128(_mm_castps_si128(self.0), _mm_set1_epi32(-1)))) }
+    }
+}
+impl Not for F64x2 {
+    type Output = F64x2;
+
+    #[inline(always)]
+    fn not(self) -> F64x2 {
+        unsafe { F64x2(_mm_castsi128_pd(_mm_xor_si128(_mm_castpd_si128(self.0), _mm_set1_epi64x(-1)))) }
+    }
+}
+
 impl BitOrAssign for I16x8 {
     #[inline(always)]
     fn bitor_assign(&mut self, rhs: I16x8) {

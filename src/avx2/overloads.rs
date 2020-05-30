@@ -368,6 +368,25 @@ impl Not for I64x4 {
         unsafe { I64x4(_mm256_xor_si256(self.0, _mm256_set1_epi64x(-1))) }
     }
 }
+
+
+impl Not for F32x8 {
+    type Output = F32x8;
+
+    #[inline(always)]
+    fn not(self) -> F32x8 {
+        unsafe { F32x8(_mm256_castsi256_ps(_mm256_xor_si256(_mm256_castps_si256(self.0), _mm256_set1_epi32(-1)))) }
+    }
+}
+impl Not for F64x4 {
+    type Output = F64x4;
+
+    #[inline(always)]
+    fn not(self) -> F64x4 {
+        unsafe { F64x4(_mm256_castsi256_pd(_mm256_xor_si256(_mm256_castpd_si256(self.0), _mm256_set1_epi64x(-1)))) }
+    }
+}
+
 impl BitOrAssign for I16x16 {
     #[inline(always)]
     fn bitor_assign(&mut self, rhs: I16x16) {
