@@ -415,6 +415,7 @@ pub trait Simd {
     /// an i32.  This is a big performance boost if you don't need
     /// a complete floor.
     unsafe fn fast_floor_ps(a: Self::Vf32) -> Self::Vf32;
+    unsafe fn fast_floor_pd(a: Self::Vf64) -> Self::Vf64;
     /// Actual FMA instructions will be used when Avx2 is used,
     /// otherwise a mul and add are used to replicate it, allowing you to
     /// just always use FMA in your code and get best perf in both cases.
@@ -514,6 +515,7 @@ pub trait Simd {
     unsafe fn min_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
     /// Mullo is implemented for Sse2 by combining other Sse2 operations.
     unsafe fn mullo_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
+    unsafe fn mullo_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
     unsafe fn rcp_ps(a: Self::Vf32) -> Self::Vf32;
     /// Round is implemented for Sse2 by combining other Sse2 operations.
     unsafe fn round_ps(a: Self::Vf32) -> Self::Vf32;

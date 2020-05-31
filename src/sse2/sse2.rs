@@ -272,6 +272,14 @@ impl Simd for Sse2 {
         F32x4(_mm_sub_ps(fi, j))
     }
     #[inline(always)]
+    unsafe fn fast_floor_pd(a: Self::Vf64) -> Self::Vf64 {
+        let i = Self::cvtpd_epi64(a);        
+        let fi = Self::cvtepi64_pd(i);
+        let igx = _mm_cmpgt_pd(fi.0, a.0);
+        let j = _mm_and_pd(igx, _mm_set1_pd(1.0));
+        F64x2(_mm_sub_pd(fi.0, j))
+    }
+    #[inline(always)]
     unsafe fn fast_ceil_ps(a: Self::Vf32) -> Self::Vf32 {
         let i = _mm_cvttps_epi32(a.0);
         let fi = _mm_cvtepi32_ps(i);
@@ -572,6 +580,13 @@ impl Simd for Sse2 {
             _mm_shuffle_epi32(tmp1, mm_shuffle!(0, 0, 2, 0) as i32),
             _mm_shuffle_epi32(tmp2, mm_shuffle!(0, 0, 2, 0) as i32),
         )) /* shuffle results to [63..0] and pack */
+    }
+    #[inline(always)]
+    unsafe fn mullo_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
+        let mut result = Self::setzero_epi64();
+        result[0] = a[0]*b[0];
+        result[1] = a[1]*b[1];
+        result
     }
     #[inline(always)]
     unsafe fn rcp_ps(a: Self::Vf32) -> Self::Vf32 {

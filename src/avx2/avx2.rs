@@ -239,6 +239,10 @@ impl Simd for Avx2 {
         F32x8(_mm256_floor_ps(a.0))
     }
     #[inline(always)]
+    unsafe fn fast_floor_pd(a: Self::Vf64) -> Self::Vf64 {
+        F64x4(_mm256_floor_pd(a.0))
+    }
+    #[inline(always)]
     unsafe fn fmadd_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32 {
         F32x8(_mm256_fmadd_ps(a.0, b.0, c.0))
     }
@@ -432,6 +436,15 @@ impl Simd for Avx2 {
     #[inline(always)]
     unsafe fn mullo_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         I32x8(_mm256_mullo_epi32(a.0, b.0))
+    }
+    #[inline(always)]
+    unsafe fn mullo_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
+        let mut result = Self::setzero_epi64();
+        result[0] = a[0]*b[0];
+        result[1] = a[1]*b[1];
+        result[2] = a[2]*b[2];
+        result[3] = a[3]*b[3];
+        result
     }
     #[inline(always)]
     unsafe fn rcp_ps(a: Self::Vf32) -> Self::Vf32 {

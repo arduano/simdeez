@@ -329,6 +329,10 @@ impl Simd for Scalar {
         F32x1(a.0.floor())
     }
     #[inline(always)]
+    unsafe fn fast_floor_pd(a: Self::Vf64) -> Self::Vf64 {
+        F64x1(a.0.floor())
+    }
+    #[inline(always)]
     unsafe fn fast_ceil_ps(a: Self::Vf32) -> Self::Vf32 {
         F32x1(a.0.ceil())
     }
@@ -558,6 +562,10 @@ impl Simd for Scalar {
     }
     #[inline(always)]
     unsafe fn mullo_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
+        a * b
+    }
+    #[inline(always)]
+    unsafe fn mullo_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
         a * b
     }
     #[inline(always)]
