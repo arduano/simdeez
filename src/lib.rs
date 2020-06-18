@@ -390,7 +390,7 @@ pub trait Simd {
     unsafe fn cmpge_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
     unsafe fn cmpgt_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
     unsafe fn cmple_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
-    unsafe fn cmplt_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
+    unsafe fn cmplt_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;    
     unsafe fn cvtepi32_ps(a: Self::Vi32) -> Self::Vf32;
     unsafe fn cvtepi64_pd(a: Self::Vi64) -> Self::Vf64;
 
@@ -461,6 +461,7 @@ pub trait Simd {
     unsafe fn i32gather_ps(arr: &[f32], index: Self::Vi32) -> Self::Vf32;
     unsafe fn load_ps(a: &f32) -> Self::Vf32;
     unsafe fn load_pd(a: &f64) -> Self::Vf64;
+    unsafe fn load_epi16(a: &i16) -> Self::Vi16;
     unsafe fn load_epi32(a: &i32) -> Self::Vi32;
     unsafe fn load_epi64(a: &i64) -> Self::Vi64;
     unsafe fn loadu_ps(a: &f32) -> Self::Vf32;

@@ -328,6 +328,11 @@ impl Simd for Sse41 {
         F32x4(_mm_load_ps(a as *const f32))
     }
     #[inline(always)]
+    unsafe fn load_epi16(a: &i16) -> Self::Vi16 {
+        let m = mem::transmute::<&i16, &__m128i>(a);
+        I16x8(_mm_load_si128(m))
+    }
+    #[inline(always)]
     unsafe fn load_epi32(a: &i32) -> Self::Vi32 {
         let m = mem::transmute::<&i32, &__m128i>(a);
         I32x4_41(_mm_load_si128(m))

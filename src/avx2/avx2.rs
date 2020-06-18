@@ -314,6 +314,11 @@ impl Simd for Avx2 {
         F64x4(_mm256_load_pd(a as *const f64))
     }
     #[inline(always)]
+    unsafe fn load_epi16(a: &i16) -> Self::Vi16 {
+        let m = mem::transmute::<&i16, &__m256i>(a);
+        I16x16(_mm256_load_si256(m))
+    }
+    #[inline(always)]
     unsafe fn load_epi32(a: &i32) -> Self::Vi32 {
         let m = mem::transmute::<&i32, &__m256i>(a);
         I32x8(_mm256_load_si256(m))

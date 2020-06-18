@@ -205,7 +205,7 @@ impl Simd for Sse2 {
     #[inline(always)]
     unsafe fn cmplt_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
         F64x2(_mm_cmplt_pd(a.0, b.0))
-    }
+    }    
     #[inline(always)]
     unsafe fn cvtps_epi32(a: Self::Vf32) -> Self::Vi32 {
         I32x4(_mm_cvtps_epi32(a.0))
@@ -393,6 +393,11 @@ impl Simd for Sse2 {
     #[inline(always)]
     unsafe fn load_ps(a: &f32) -> Self::Vf32 {
         F32x4(_mm_load_ps(a as *const f32))
+    }
+    #[inline(always)]
+    unsafe fn load_epi16(a: &i16) -> Self::Vi16 {
+        let m = mem::transmute::<&i16, &__m128i>(a);
+        I16x8(_mm_load_si128(m))
     }
     #[inline(always)]
     unsafe fn load_epi32(a: &i32) -> Self::Vi32 {
