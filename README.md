@@ -65,18 +65,25 @@ use simdeez::*;
 
         let mut result: Vec<f32> = Vec::with_capacity(x1.len());
         result.set_len(x1.len()); // for efficiency
+        
+        /// Set each slice to the same length for iteration efficiency
+        let mut x1 = &x1[..x1.len()];
+        let mut y1 = &y1[..x1.len()];
+        let mut x2 = &x2[..x1.len()];
+        let mut y2 = &y2[..x1.len()];
+        let mut res = &mut result[..x1.len()];
 
         // Operations have to be done in terms of the vector width
         // so that it will work with any size vector.
         // the width of a vector type is provided as a constant
         // so the compiler is free to optimize it more.
         // S::VF32_WIDTH is a constant, 4 when using SSE, 8 when using AVX2, etc
-        for i in (0..x1.len()).step_by(S::VF32_WIDTH) {
-            //load data from your vec into a SIMD value
-            let xv1 = S::loadu_ps(&x1[i]);
-            let yv1 = S::loadu_ps(&y1[i]);
-            let xv2 = S::loadu_ps(&x2[i]);
-            let yv2 = S::loadu_ps(&y2[i]);
+        while x1.len() >= S::VF32_WIDTH {
+            //load data from your vec into an SIMD value
+            let xv1 = S::loadu_ps(&x1[0]);
+            let yv1 = S::loadu_ps(&y1[0]);
+            let xv2 = S::loadu_ps(&x2[0]);
+            let yv2 = S::loadu_ps(&y2[0]);
 
             // Use the usual intrinsic syntax if you prefer
             let mut xdiff = S::sub_ps(xv1, xv2);
@@ -86,8 +93,28 @@ use simdeez::*;
             ydiff *= ydiff;
             let distance = S::sqrt_ps(xdiff + ydiff);
             // Store the SIMD value into the result vec
-            S::storeu_ps(&mut result[i], distance);
+            S::storeu_ps(&mut res[0], distance);
+            
+            // Move each slice to the next position
+            x1 = &x1[S::VF32_WIDTH..];
+            y1 = &y1[S::VF32_WIDTH..];
+            x2 = &x2[S::VF32_WIDTH..];
+            y2 = &y2[S::VF32_WIDTH..];
+            res = &mut res[S::VF32_WIDTH..];
         }
+        
+        // (Optional) Compute the remaining elements. Not necessary if you are sure the length
+        // of your data is always a multiple of the maximum S::VF32_WIDTH you compile for (4 for SSE, 8 for AVX2, etc).
+        // This can be asserted using `assert_eq!(x1.len() % S::VF32_WIDTH, 0);`
+        for i in 0..x1.len() {
+            let mut xdiff = x1[i] - x2[i];
+            let mut ydiff = y1[i] - y2[i];
+            xdiff *= xdiff;
+            ydiff *= ydiff;
+            let distance = (xdiff + ydiff).sqrt();
+            res[i] = distance;
+        }
+        
         result
     });
 fn main() {
