@@ -15,19 +15,25 @@ mod tests {
     unsafe fn distance<S: Simd>(x1: &[f32], y1: &[f32], x2: &[f32], y2: &[f32]) -> Vec<f32> {
         let mut result: Vec<f32> = Vec::with_capacity(x1.len());
         result.set_len(x1.len()); // for efficiency
+        
+        /// Set each slice to the same length for iteration efficiency
+        let mut x1 = &x1[..x1.len()];
+        let mut y1 = &y1[..x1.len()];
+        let mut x2 = &x2[..x1.len()];
+        let mut y2 = &y2[..x1.len()];
+        let mut res = &mut result[..x1.len()];
 
         // Operations have to be done in terms of the vector width
         // so that it will work with any size vector.
         // the width of a vector type is provided as a constant
         // so the compiler is free to optimize it more.
-        let mut i = 0;
         //S::VF32_WIDTH is a constant, 4 when using SSE, 8 when using AVX2, etc
-        while i < x1.len() {
+        while x1.len() >= S::VF32_WIDTH {
             //load data from your vec into a SIMD value
-            let xv1 = S::loadu_ps(&x1[i]);
-            let yv1 = S::loadu_ps(&y1[i]);
-            let xv2 = S::loadu_ps(&x2[i]);
-            let yv2 = S::loadu_ps(&y2[i]);
+            let xv1 = S::loadu_ps(&x1[0]);
+            let yv1 = S::loadu_ps(&y1[0]);
+            let xv2 = S::loadu_ps(&x2[0]);
+            let yv2 = S::loadu_ps(&y2[0]);
 
             // Use the usual intrinsic syntax if you prefer
             let mut xdiff = S::sub_ps(xv1, xv2);
@@ -37,9 +43,14 @@ mod tests {
             ydiff *= ydiff;
             let distance = S::sqrt_ps(xdiff + ydiff);
             // Store the SIMD value into the result vec
-            S::storeu_ps(&mut result[i], distance);
-            // Increment i by the vector width
-            i += S::VF32_WIDTH
+            S::storeu_ps(&mut res[0], distance);
+            
+            // Move each slice to the next position
+            x1 = &x1[S::VF32_WIDTH..];
+            y1 = &y1[S::VF32_WIDTH..];
+            x2 = &x2[S::VF32_WIDTH..];
+            y2 = &y2[S::VF32_WIDTH..];
+            res = &mut res[S::VF32_WIDTH..];
         }
         result
     }
