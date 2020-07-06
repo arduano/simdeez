@@ -43,7 +43,7 @@ mod tests {
             ydiff *= ydiff;
             let distance = S::sqrt_ps(xdiff + ydiff);
             // Store the SIMD value into the result vec
-            S::storeu_ps(&mut result[i], distance);
+            S::storeu_ps(&mut res[0], distance);
             
             // Move each slice to the next position
             x1 = &x1[S::VF32_WIDTH..];
