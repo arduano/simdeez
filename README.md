@@ -52,7 +52,6 @@ use simdeez::*;
     use simdeez::scalar::*;
     use simdeez::sse2::*;
     use simdeez::sse41::*;
-    use simdeez::avx::*;
     use simdeez::avx2::*;
     // If you want your SIMD function to use use runtime feature detection to call
     // the fastest available version, use the simd_runtime_generate macro:
