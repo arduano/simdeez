@@ -105,7 +105,7 @@ use simdeez::*;
         
         // (Optional) Compute the remaining elements. Not necessary if you are sure the length
         // of your data is always a multiple of the maximum S::VF32_WIDTH you compile for (4 for SSE, 8 for AVX2, etc).
-        // This can be asserted using `assert_eq!(x1.len() % S::VF32_WIDTH, 0);`
+        // This can be asserted by putting `assert_eq!(x1.len(), 0);` here
         for i in 0..x1.len() {
             let mut xdiff = x1[i] - x2[i];
             let mut ydiff = y1[i] - y2[i];
