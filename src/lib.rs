@@ -635,7 +635,7 @@ pub trait Simd {
 /// from above that the cpu supports. (fn_name_runtime_select)
 #[macro_export]
 macro_rules! simd_runtime_generate {
-  ($vis:vis fn $fn_name:ident ($($arg:ident:$typ:ty),*) $(-> $rt:ty)? $body:block  ) => {
+  ($vis:vis fn $fn_name:ident ($($arg:ident:$typ:ty),* $(,)? ) $(-> $rt:ty)? $body:block  ) => {
         #[inline(always)]
         $vis unsafe fn $fn_name<S: Simd>($($arg:$typ,)*) $(-> $rt)?
             $body
@@ -679,7 +679,7 @@ macro_rules! simd_runtime_generate {
 /// (fn_name_compiletime)
 #[macro_export]
 macro_rules! simd_compiletime_generate {
- ($vis:vis fn $fn_name:ident ($($arg:ident:$typ:ty),*) $(-> $rt:ty)? $body:block  ) => {
+ ($vis:vis fn $fn_name:ident ($($arg:ident:$typ:ty),* $(,)? ) $(-> $rt:ty)? $body:block  ) => {
         #[inline(always)]
         $vis unsafe fn $fn_name<S: Simd>($($arg:$typ,)*) $(-> $rt)?
             $body
