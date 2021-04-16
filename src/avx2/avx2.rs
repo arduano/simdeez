@@ -481,7 +481,7 @@ impl Simd for Avx2 {
         I32x8(_mm256_set1_epi32(a))
     }
     #[inline(always)]
-    unsafe fn set1_epi64(a: i64) -> Self::Vi64 {              
+    unsafe fn set1_epi64(a: i64) -> Self::Vi64 {
         I64x4(_mm256_set1_epi64x(a))
     }
    #[inline(always)]
@@ -529,7 +529,12 @@ impl Simd for Avx2 {
     }
     #[inline(always)]
     unsafe fn srli_epi32(a: Self::Vi32, amt_const: i32) -> Self::Vi32 {
-        I32x8(_mm256_srli_epi32(a.0, amt_const))
+        macro_rules! call {
+            ($amt_const:expr) => {
+                I32x8(_mm256_srli_epi32(a.0, $amt_const))
+            };
+        }
+        constify_imm8!(amt_const, call)
     }
     #[inline(always)]
     unsafe fn sra_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32 {
