@@ -637,7 +637,7 @@ pub trait Simd: Sync + Send {
 macro_rules! simd_runtime_generate {
   ($vis:vis fn $fn_name:ident ($($arg:ident:$typ:ty),* $(,)? ) $(-> $rt:ty)? $body:block  ) => {
         #[inline(always)]
-        $vis unsafe fn $fn_name<S: Simd>($($arg:$typ,)*) $(-> $rt)?
+        $vis unsafe fn $fn_name<S: 'static + Simd>($($arg:$typ,)*) $(-> $rt)?
             $body
 
         paste::item! {
