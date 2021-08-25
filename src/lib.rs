@@ -223,7 +223,7 @@ pub trait SimdFloat<T, U>:
 }
 
 /// The abstract SIMD trait which is implemented by Avx2, Sse41, etc
-pub trait Simd {
+pub trait Simd: Sync + Send {
     /// Vector of i16s.  Corresponds to __m128i when used
     /// with the Sse impl, __m256i when used with Avx2, or a single i16
     /// when used with Scalar.
