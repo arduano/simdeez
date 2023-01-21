@@ -1,6 +1,6 @@
 //! libm in pure Rust
 //!
-//! This is pulled from  https://github.com/rust-lang-nursery/libm
+//! This is pulled from <https://github.com/rust-lang-nursery/libm>
 //! Maintainers of that project have gone dark, and I had to fix some things
 //! so I just pulled it into simdeez.
 //! This is all just to support no_std
