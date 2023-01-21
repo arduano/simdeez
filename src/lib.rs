@@ -223,7 +223,7 @@ pub trait SimdFloat<T, U>:
 }
 
 /// The abstract SIMD trait which is implemented by Avx2, Sse41, etc
-pub trait Simd {
+pub trait Simd: Sync + Send {
     /// Vector of i16s.  Corresponds to __m128i when used
     /// with the Sse impl, __m256i when used with Avx2, or a single i16
     /// when used with Scalar.
@@ -637,7 +637,7 @@ pub trait Simd {
 macro_rules! simd_runtime_generate {
   ($vis:vis fn $fn_name:ident ($($arg:ident:$typ:ty),* $(,)? ) $(-> $rt:ty)? $body:block  ) => {
         #[inline(always)]
-        $vis unsafe fn $fn_name<S: Simd>($($arg:$typ,)*) $(-> $rt)?
+        $vis unsafe fn $fn_name<S: 'static + Simd>($($arg:$typ,)*) $(-> $rt)?
             $body
 
         paste::item! {
