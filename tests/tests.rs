@@ -126,10 +126,20 @@ mod tests {
         sample::<Scalar>()
     }
     #[test]
-    fn consistency() {
+    fn consistency_sse2_sse41() {
         unsafe {
             assert_eq!(sample_sse2(), sample_sse41());            
+        }
+    }
+    #[test]
+    fn consistency_sse2_avx2() {
+        unsafe {
             assert_eq!(sample_sse2(), sample_avx2());
+        }
+    }
+    #[test]
+    fn consistency_scalar_avx2() {
+        unsafe {
             assert_eq!(sample_scalar(), sample_avx2());
         }
     }
