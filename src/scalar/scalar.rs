@@ -795,3 +795,24 @@ impl Simd for Scalar {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    union Converter {
+        simd: I64x1,
+        i64_1: [i64; 1],
+    }
+
+    #[test]
+    fn test_scalar_slli_epi64() {
+        unsafe {
+            let lanes = Scalar::set1_epi64(123456);
+            let converter = Converter { simd: Scalar::slli_epi64(lanes, 0) };
+            assert_eq!(converter.i64_1, [123456]);
+            let got = Converter { simd: Scalar::slli_epi64(lanes, 3) };
+            assert_eq!(got.i64_1, [987648]);
+        }
+    }
+}

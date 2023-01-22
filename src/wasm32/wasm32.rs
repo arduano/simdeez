@@ -811,3 +811,23 @@ impl Simd for Sse2 {
     }
 }
 
+#[cfg(all(test, target_feature = "sse2"))]
+mod test {
+    use super::*;
+
+    union Converter {
+        simd: I64x2,
+        i64_2: [i64; 2],
+    }
+
+    #[test]
+    fn test_wasm_slli_epi64() {
+        unsafe {
+            let lanes = Sse2::set1_epi64(123456);
+            let converter = Converter { simd: Sse2::slli_epi64(lanes, 0) };
+            assert_eq!(converter.i64_2, [123456, 123456]);
+            let got = Converter { simd: Sse2::slli_epi64(lanes, 3) };
+            assert_eq!(got.i64_2, [987648, 987648]);
+        }
+    }
+}

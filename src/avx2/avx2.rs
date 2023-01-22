@@ -790,3 +790,24 @@ impl Simd for Avx2 {
         }
     }
 }
+
+#[cfg(all(test, target_feature = "avx2"))]
+mod test {
+    use super::*;
+
+    union Converter {
+        simd: I64x4,
+        i64_4: [i64; 4],
+    }
+
+    #[test]
+    fn test_avx2_slli_epi64() {
+        unsafe {
+            let lanes = Avx2::set1_epi64(123456);
+            let converter = Converter { simd: Avx2::slli_epi64(lanes, 0) };
+            assert_eq!(converter.i64_4, [123456, 123456, 123456, 123456]);
+            let got = Converter { simd: Avx2::slli_epi64(lanes, 3) };
+            assert_eq!(got.i64_4, [987648, 987648, 987648, 987648]);
+        }
+    }
+}
