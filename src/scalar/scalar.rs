@@ -628,6 +628,13 @@ impl Simd for Scalar {
         ))
     }
     #[inline(always)]
+    unsafe fn slli_epi64(a: Self::Vi64, amt_const: i32) -> Self::Vi64 {
+        //Transmute to unsigned so we don't get sign bits in the shift
+        I64x1(mem::transmute::<u64, i64>(
+            mem::transmute::<i64, u64>(a.0) << amt_const,
+        ))
+    }
+    #[inline(always)]
     unsafe fn sra_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32 {
         a >> amt
     }

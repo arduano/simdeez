@@ -634,6 +634,17 @@ impl Simd for Sse2 {
         }
         constify_imm8!(amt_const, call)
     }
+
+    #[inline(always)]
+    unsafe fn slli_epi64(a: Self::Vi64, amt_const: i32) -> Self::Vi64 {
+        macro_rules! call {
+            ($amt_const:expr) => {
+                I64x2(_mm_slli_epi64(a.0, $amt_const))
+            };
+        }
+        constify_imm8!(amt_const, call)
+    }
+
     #[inline(always)]
     unsafe fn sra_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32 {
         I32x4(_mm_sra_epi32(a.0, _mm_set1_epi32(amt)))
@@ -799,3 +810,4 @@ impl Simd for Sse2 {
         }
     }
 }
+

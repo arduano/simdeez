@@ -560,6 +560,8 @@ pub trait Simd: Sync + Send {
     unsafe fn srai_epi64(a: Self::Vi64, amt_const: i32) -> Self::Vi64;
     /// amt must be a constant
     unsafe fn srli_epi32(a: Self::Vi32, amt_const: i32) -> Self::Vi32;
+    /// amt must be a constant
+    unsafe fn slli_epi64(a: Self::Vi64, amt_const: i32) -> Self::Vi64;
 
     /// amt does not have to be a constant, but may be slower than the srai version
     unsafe fn sra_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32;
