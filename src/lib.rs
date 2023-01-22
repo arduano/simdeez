@@ -686,21 +686,21 @@ macro_rules! simd_compiletime_generate {
 
         paste::item! {
             #[cfg(target_feature = "avx2")]
-            $vis fn [<$fn_name _compiletime>]($($arg:$typ,)*) $(-> $rt)? {
+            $vis unsafe fn [<$fn_name _compiletime>]($($arg:$typ,)*) $(-> $rt)? {
                 unsafe { $fn_name::<Avx2>($($arg,)*) }
             }
 
             #[cfg(all(target_feature = "sse4.1",not(target_feature = "avx2")))]
-            $vis fn [<$fn_name _compiletime>]($($arg:$typ,)*) $(-> $rt)? {
+            $vis unsafe fn [<$fn_name _compiletime>]($($arg:$typ,)*) $(-> $rt)? {
                 unsafe { $fn_name::<Sse41>($($arg,)*) }
             }
             #[cfg(all(target_feature = "sse2",not(any(target_feature="sse4.1",target_feature = "avx2"))))]
-            $vis fn [<$fn_name _compiletime>]($($arg:$typ,)*) $(-> $rt)? {
+            $vis unsafe fn [<$fn_name _compiletime>]($($arg:$typ,)*) $(-> $rt)? {
                unsafe { $fn_name::<Sse2>($($arg,)*) }
             }
 
             #[cfg(not(any(target_feature="sse4.1",target_feature = "avx2",target_feature="sse2")))]
-            $vis fn [<$fn_name _compiletime>]($($arg:$typ,)*) $(-> $rt)? {
+            $vis unsafe fn [<$fn_name _compiletime>]($($arg:$typ,)*) $(-> $rt)? {
                unsafe { $fn_name::<Scalar>($($arg,)*) }
             }
 
