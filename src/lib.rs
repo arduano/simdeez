@@ -121,7 +121,7 @@
 //! # }
 //! ```
 //!
-//! This will generate 5 functions for you:
+//! This will generate 5 unsafe functions for you:
 //! * `distance<S:Simd>` the generic version of your function
 //! * `distance_scalar`  a scalar fallback
 //! * `distance_sse2`    SSE2 version
@@ -631,7 +631,7 @@ pub trait Simd: Sync + Send {
 /// * SSE41 (fn_name_sse41)
 /// * SSE2 (fn_name_sse2)
 /// * Scalar fallback (fn_name_scalar)
-/// Finally, it also generates a function which will select at runtime the fastest version
+/// Finally, it also generates a unsafe function which will select at runtime the fastest version
 /// from above that the cpu supports. (fn_name_runtime_select)
 #[macro_export]
 macro_rules! simd_runtime_generate {
@@ -674,7 +674,7 @@ macro_rules! simd_runtime_generate {
 
 }
 
-/// Generates a generic version of your function (fn_name)
+/// Generates a generic unsafe version of your function (fn_name)
 /// And the fastest version supported by your rust compilation settings
 /// (fn_name_compiletime)
 #[macro_export]
