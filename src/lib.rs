@@ -118,6 +118,9 @@
 //!         result
 //!     });
 //! # fn main() {
+//!     unsafe {
+//!         let _dist = distance_runtime_select(&0.0, &0.0, &10.0, &10.0);
+//!     }
 //! # }
 //! ```
 //!
