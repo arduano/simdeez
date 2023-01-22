@@ -125,22 +125,34 @@ mod tests {
     unsafe fn sample_scalar() -> i32 {
         sample::<Scalar>()
     }
+
+    #[cfg(target_arch = "x86_64")]
     #[test]
     fn consistency_sse2_sse41() {
-        unsafe {
-            assert_eq!(sample_sse2(), sample_sse41());            
+        if is_x86_feature_detected!("sse2") && is_x86_feature_detected!("sse4.1") {
+            unsafe {
+                assert_eq!(sample_sse2(), sample_sse41());            
+            }
         }
     }
+
+    #[cfg(target_arch = "x86_64")]
     #[test]
     fn consistency_sse2_avx2() {
-        unsafe {
-            assert_eq!(sample_sse2(), sample_avx2());
+        if is_x86_feature_detected!("sse2") && is_x86_feature_detected!("avx2") {
+            unsafe {
+                assert_eq!(sample_sse2(), sample_avx2());
+            }
         }
     }
+
+    #[cfg(target_arch = "x86_64")]
     #[test]
     fn consistency_scalar_avx2() {
-        unsafe {
-            assert_eq!(sample_scalar(), sample_avx2());
+        if is_x86_feature_detected!("avx2") {
+            unsafe {
+                assert_eq!(sample_scalar(), sample_avx2());
+            }
         }
     }
 }
