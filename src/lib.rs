@@ -309,11 +309,20 @@ pub trait Simd: Sync + Send {
     unsafe fn slli_epi32(a: Self::Vi32, amt_const: i32) -> Self::Vi32 {
         a << amt_const
     }
+    /*
+    TODO: Fix this compile error
+    expected Simd::Vi64, found core::ops::Shl::Output
+    |
+    = note: expected associated type `<Self as Simd>::Vi64`
+               found associated type `<<Self as Simd>::Vi64 as core::ops::Shl<i32>>::Output`
+
     /// amt must be a constant
     #[inline(always)]
-    unsafe fn slli_epi64(a: Self::Vi64, amt_const: i32) -> Self::Vi64 {
+    unsafe fn slli_epi64(a: Self::Vi64, amt_const: i32) -> Self::Vi64 
+        where <Self as Simd>::Vi64: core::ops::Shl<i32> {
         a << amt_const
     }
+    */
     /// amt must be a constant
     #[inline(always)]
     unsafe fn srai_epi32(a: Self::Vi32, amt_const: i32) -> Self::Vi32 {

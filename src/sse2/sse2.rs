@@ -869,4 +869,13 @@ mod test {
             assert_eq!(got.i64_2, [987648, 987648]);
         }
     }
+
+    #[test]
+    fn test_sse2_ops_shl() {
+        unsafe {
+            let lanes = Sse2::set1_epi64(123456);
+            let got = Converter { simd: lanes << 3 };
+            assert_eq!(got.i64_2, [987648, 987648]);
+        }
+    }
 }

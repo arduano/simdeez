@@ -826,4 +826,13 @@ mod test {
             assert_eq!(got.i64_4, [987648, 987648, 987648, 987648]);
         }
     }
+
+    #[test]
+    fn test_avx_ops_shl() {
+        unsafe {
+            let lanes = Avx::set1_epi64(123456);
+            let got = Converter { simd: lanes << 3 };
+            assert_eq!(got.i64_4, [987648, 987648, 987648, 987648]);
+        }
+    }
 }

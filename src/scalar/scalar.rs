@@ -815,4 +815,13 @@ mod test {
             assert_eq!(got.i64_1, [987648]);
         }
     }
+
+    #[test]
+    fn test_scalar_ops_shl () {
+        unsafe {
+            let lanes = Scalar::set1_epi64(123456);
+            let got = Converter { simd: lanes << 3 };
+            assert_eq!(got.i64_1, [987648]);
+        }
+    }
 }
