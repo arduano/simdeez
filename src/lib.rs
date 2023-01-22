@@ -660,13 +660,13 @@ macro_rules! simd_runtime_generate {
             }
             $vis unsafe fn [<$fn_name _runtime_select>]($($arg:$typ,)*) $(-> $rt)? {
                 if is_x86_feature_detected!("avx2") {
-                    unsafe { [<$fn_name _avx2>]($($arg,)*) }             
+                    [<$fn_name _avx2>]($($arg,)*)
                 } else if is_x86_feature_detected!("sse4.1") {
-                    unsafe { [<$fn_name _sse41>]($($arg,)*) }
+                    [<$fn_name _sse41>]($($arg,)*)
                 } else if is_x86_feature_detected!("sse2") {
-                    unsafe { [<$fn_name _sse2>]($($arg,)*) }
+                    [<$fn_name _sse2>]($($arg,)*)
                 } else {
-                    unsafe { [<$fn_name _scalar>]($($arg,)*) }
+                    [<$fn_name _scalar>]($($arg,)*)
                 }
             }
         }
@@ -687,21 +687,21 @@ macro_rules! simd_compiletime_generate {
         paste::item! {
             #[cfg(target_feature = "avx2")]
             $vis unsafe fn [<$fn_name _compiletime>]($($arg:$typ,)*) $(-> $rt)? {
-                unsafe { $fn_name::<Avx2>($($arg,)*) }
+                $fn_name::<Avx2>($($arg,)*)
             }
 
             #[cfg(all(target_feature = "sse4.1",not(target_feature = "avx2")))]
             $vis unsafe fn [<$fn_name _compiletime>]($($arg:$typ,)*) $(-> $rt)? {
-                unsafe { $fn_name::<Sse41>($($arg,)*) }
+                $fn_name::<Sse41>($($arg,)*)
             }
             #[cfg(all(target_feature = "sse2",not(any(target_feature="sse4.1",target_feature = "avx2"))))]
             $vis unsafe fn [<$fn_name _compiletime>]($($arg:$typ,)*) $(-> $rt)? {
-               unsafe { $fn_name::<Sse2>($($arg,)*) }
+               $fn_name::<Sse2>($($arg,)*)
             }
 
             #[cfg(not(any(target_feature="sse4.1",target_feature = "avx2",target_feature="sse2")))]
             $vis unsafe fn [<$fn_name _compiletime>]($($arg:$typ,)*) $(-> $rt)? {
-               unsafe { $fn_name::<Scalar>($($arg,)*) }
+               $fn_name::<Scalar>($($arg,)*)
             }
 
 
