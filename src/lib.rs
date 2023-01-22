@@ -658,7 +658,7 @@ macro_rules! simd_runtime_generate {
             $vis  unsafe fn [<$fn_name _avx2>]($($arg:$typ,)*) $(-> $rt)? {
                 $fn_name::<Avx2>($($arg,)*)
             }
-            $vis  fn [<$fn_name _runtime_select>]($($arg:$typ,)*) $(-> $rt)? {
+            $vis unsafe fn [<$fn_name _runtime_select>]($($arg:$typ,)*) $(-> $rt)? {
                 if is_x86_feature_detected!("avx2") {
                     unsafe { [<$fn_name _avx2>]($($arg,)*) }             
                 } else if is_x86_feature_detected!("sse4.1") {
