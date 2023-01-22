@@ -120,9 +120,12 @@ use simdeez::*;
         result
     });
 fn main() {
+    unsafe {
+        let _dist = distance_runtime_select(&0.0, &0.0, &10.0, &10.0);
+    }
 }
 ```
-This will generate 5 functions for you:
+This will generate 5 unsafe functions for you:
 * `distance<S:Simd>` the generic version of your function
 * `distance_scalar`  a scalar fallback
 * `distance_sse2`    SSE2 version

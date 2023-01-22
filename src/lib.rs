@@ -118,10 +118,13 @@
 //!         result
 //!     });
 //! # fn main() {
+//!     unsafe {
+//!         let _dist = distance_runtime_select(&0.0, &0.0, &10.0, &10.0);
+//!     }
 //! # }
 //! ```
 //!
-//! This will generate 5 functions for you:
+//! This will generate 5 unsafe functions for you:
 //! * `distance<S:Simd>` the generic version of your function
 //! * `distance_scalar`  a scalar fallback
 //! * `distance_sse2`    SSE2 version
@@ -631,7 +634,7 @@ pub trait Simd: Sync + Send {
 /// * SSE41 (fn_name_sse41)
 /// * SSE2 (fn_name_sse2)
 /// * Scalar fallback (fn_name_scalar)
-/// Finally, it also generates a function which will select at runtime the fastest version
+/// Finally, it also generates a unsafe function which will select at runtime the fastest version
 /// from above that the cpu supports. (fn_name_runtime_select)
 #[macro_export]
 macro_rules! simd_runtime_generate {
@@ -658,15 +661,15 @@ macro_rules! simd_runtime_generate {
             $vis  unsafe fn [<$fn_name _avx2>]($($arg:$typ,)*) $(-> $rt)? {
                 $fn_name::<Avx2>($($arg,)*)
             }
-            $vis  fn [<$fn_name _runtime_select>]($($arg:$typ,)*) $(-> $rt)? {
+            $vis unsafe fn [<$fn_name _runtime_select>]($($arg:$typ,)*) $(-> $rt)? {
                 if is_x86_feature_detected!("avx2") {
-                    unsafe { [<$fn_name _avx2>]($($arg,)*) }             
+                    [<$fn_name _avx2>]($($arg,)*)
                 } else if is_x86_feature_detected!("sse4.1") {
-                    unsafe { [<$fn_name _sse41>]($($arg,)*) }
+                    [<$fn_name _sse41>]($($arg,)*)
                 } else if is_x86_feature_detected!("sse2") {
-                    unsafe { [<$fn_name _sse2>]($($arg,)*) }
+                    [<$fn_name _sse2>]($($arg,)*)
                 } else {
-                    unsafe { [<$fn_name _scalar>]($($arg,)*) }
+                    [<$fn_name _scalar>]($($arg,)*)
                 }
             }
         }
@@ -674,7 +677,7 @@ macro_rules! simd_runtime_generate {
 
 }
 
-/// Generates a generic version of your function (fn_name)
+/// Generates a generic unsafe version of your function (fn_name)
 /// And the fastest version supported by your rust compilation settings
 /// (fn_name_compiletime)
 #[macro_export]
@@ -686,22 +689,22 @@ macro_rules! simd_compiletime_generate {
 
         paste::item! {
             #[cfg(target_feature = "avx2")]
-            $vis fn [<$fn_name _compiletime>]($($arg:$typ,)*) $(-> $rt)? {
-                unsafe { $fn_name::<Avx2>($($arg,)*) }
+            $vis unsafe fn [<$fn_name _compiletime>]($($arg:$typ,)*) $(-> $rt)? {
+                $fn_name::<Avx2>($($arg,)*)
             }
 
             #[cfg(all(target_feature = "sse4.1",not(target_feature = "avx2")))]
-            $vis fn [<$fn_name _compiletime>]($($arg:$typ,)*) $(-> $rt)? {
-                unsafe { $fn_name::<Sse41>($($arg,)*) }
+            $vis unsafe fn [<$fn_name _compiletime>]($($arg:$typ,)*) $(-> $rt)? {
+                $fn_name::<Sse41>($($arg,)*)
             }
             #[cfg(all(target_feature = "sse2",not(any(target_feature="sse4.1",target_feature = "avx2"))))]
-            $vis fn [<$fn_name _compiletime>]($($arg:$typ,)*) $(-> $rt)? {
-               unsafe { $fn_name::<Sse2>($($arg,)*) }
+            $vis unsafe fn [<$fn_name _compiletime>]($($arg:$typ,)*) $(-> $rt)? {
+               $fn_name::<Sse2>($($arg,)*)
             }
 
             #[cfg(not(any(target_feature="sse4.1",target_feature = "avx2",target_feature="sse2")))]
-            $vis fn [<$fn_name _compiletime>]($($arg:$typ,)*) $(-> $rt)? {
-               unsafe { $fn_name::<Scalar>($($arg,)*) }
+            $vis unsafe fn [<$fn_name _compiletime>]($($arg:$typ,)*) $(-> $rt)? {
+               $fn_name::<Scalar>($($arg,)*)
             }
 
 
