@@ -504,6 +504,16 @@ impl Shl<i32> for I32x8 {
     }
 }
 
+impl Shl<i32> for I64x4 {
+    type Output = I64x4;
+
+    #[inline(always)]
+    fn shl(self, rhs: i32) -> I64x4 {
+        unsafe { m256i_run_on_halves_1_simd!(Shl::shl, self, rhs, I64x2_41, Self) }
+    }
+}
+
+
 impl ShrAssign<i32> for I16x16 {
     #[inline(always)]
     fn shr_assign(&mut self, rhs: i32) {

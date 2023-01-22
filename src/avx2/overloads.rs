@@ -516,6 +516,20 @@ impl Shl<i32> for I32x8 {
     }
 }
 
+impl Shl<i32> for I64x4 {
+    type Output = I64x4;
+
+    #[inline(always)]
+    fn shl(self, rhs: i32) -> I64x4 {
+        macro_rules! call {
+            ($rhs:expr) => {
+                unsafe { I64x4(_mm256_slli_epi64(self.0, $rhs)) }
+            };
+        }
+        constify_imm8!(rhs, call)
+    }
+}
+
 impl ShrAssign<i32> for I16x16 {
     #[inline(always)]
     fn shr_assign(&mut self, rhs: i32) {

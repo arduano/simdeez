@@ -514,6 +514,7 @@ impl Shl<i32> for I16x8 {
         constify_imm8!(rhs, call)
     }
 }
+
 impl Shl<i32> for I32x4 {
     type Output = I32x4;
 
@@ -522,6 +523,20 @@ impl Shl<i32> for I32x4 {
         macro_rules! call {
             ($rhs:expr) => {
                 unsafe { I32x4(_mm_slli_epi32(self.0, $rhs)) }
+            };
+        }
+        constify_imm8!(rhs, call)
+    }
+}
+
+impl Shl<i32> for I64x2 {
+    type Output = I64x2;
+
+    #[inline(always)]
+    fn shl(self, rhs: i32) -> I64x2 {
+        macro_rules! call {
+            ($rhs:expr) => {
+                unsafe { I64x2(_mm_slli_epi64(self.0, $rhs)) }
             };
         }
         constify_imm8!(rhs, call)

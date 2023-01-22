@@ -311,6 +311,11 @@ pub trait Simd: Sync + Send {
     }
     /// amt must be a constant
     #[inline(always)]
+    unsafe fn slli_epi64(a: Self::Vi64, amt_const: i32) -> Self::Vi64 {
+        a << amt_const
+    }
+    /// amt must be a constant
+    #[inline(always)]
     unsafe fn srai_epi32(a: Self::Vi32, amt_const: i32) -> Self::Vi32 {
         a >> amt_const
     }
