@@ -1,15 +1,15 @@
 [package]
 name = "simdeez"
-version = "1.0.7"
+version = "1.0.8"
 authors = ["Jack Mott <jack.mott@gmail.com>"]
 description = "SIMD library to abstract over different instruction sets and widths"
 license = "Apache-2.0/MIT"
 documentation = "https://docs.rs/simdeez/"
 readme = "README.md"
-keywords = ["SIMD", "avx2", "sse", "performance","no_std"]
+keywords = ["SIMD", "avx2", "sse", "performance", "no_std"]
 repository = "https://github.com/jackmott/simdeez"
-categories = ["hardware-support","science","game-engines"]
-edition="2018"
+categories = ["hardware-support", "science", "game-engines"]
+edition = "2018"
 
 
 [features]
@@ -18,7 +18,7 @@ sleef = ["sleef-sys"]
 [dependencies]
 paste = "0.1.7"
 # To build this, we need nightly, cmake installed, and clang dlls in the clang dll path
-sleef-sys = {version ="0.1.2", optional=true}
+sleef-sys = { version = "0.1.2", optional = true }
 cfg-if = "0.1.10"
 
 [dev-dependencies]
@@ -29,4 +29,3 @@ rand = "0.7.3"
 [[bench]]
 name = "sseby2"
 harness = false
-

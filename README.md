@@ -2,6 +2,8 @@ A library that abstracts over SIMD instruction sets, including ones with differi
 SIMDeez is designed to allow you to write a function one time and produce SSE2, SSE41, and AVX2 versions of the function.
 You can either have the version you want chosen at compile time or automatically at runtime.
 
+Originally developped by @jackmott, however I volunteered to take over ownership.
+
 If there are intrinsics you need that are not currently implemented, create an issue
 and I'll add them. PRs to add more intrinsics are welcome. Currently things are well fleshed out for i32, i64, f32, and f64 types.
 
@@ -14,9 +16,9 @@ Refer to the excellent [Intel Intrinsics Guide](https://software.intel.com/sites
 * SSE2, SSE41, AVX and AVX2, and scalar fallback
 * Can be used with compile time or run time selection
 * No runtime overhead
-* Uses familiar intel intrinsic naming conventions, easy to port. 
+* Uses familiar intel intrinsic naming conventions, easy to port.
   * `_mm_add_ps(a,b)` becomes `add_ps(a,b)`
-* Fills in missing intrinsics in older APIs with fast SIMD workarounds. 
+* Fills in missing intrinsics in older APIs with fast SIMD workarounds.
   * ceil, floor, round,blend etc
 * Can be used by `#[no_std]` projects
 * Operator overloading: `let sum = va + vb` or `s *= s`
@@ -65,7 +67,7 @@ use simdeez::*;
 
         let mut result: Vec<f32> = Vec::with_capacity(x1.len());
         result.set_len(x1.len()); // for efficiency
-        
+
         /// Set each slice to the same length for iteration efficiency
         let mut x1 = &x1[..x1.len()];
         let mut y1 = &y1[..x1.len()];
@@ -94,7 +96,7 @@ use simdeez::*;
             let distance = S::sqrt_ps(xdiff + ydiff);
             // Store the SIMD value into the result vec
             S::storeu_ps(&mut res[0], distance);
-            
+
             // Move each slice to the next position
             x1 = &x1[S::VF32_WIDTH..];
             y1 = &y1[S::VF32_WIDTH..];
@@ -102,7 +104,7 @@ use simdeez::*;
             y2 = &y2[S::VF32_WIDTH..];
             res = &mut res[S::VF32_WIDTH..];
         }
-        
+
         // (Optional) Compute the remaining elements. Not necessary if you are sure the length
         // of your data is always a multiple of the maximum S::VF32_WIDTH you compile for (4 for SSE, 8 for AVX2, etc).
         // This can be asserted by putting `assert_eq!(x1.len(), 0);` here
@@ -114,7 +116,7 @@ use simdeez::*;
             let distance = (xdiff + ydiff).sqrt();
             res[i] = distance;
         }
-        
+
         result
     });
 fn main() {
