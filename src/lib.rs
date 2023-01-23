@@ -65,7 +65,7 @@
 //!
 //!         let mut result: Vec<f32> = Vec::with_capacity(x1.len());
 //!         result.set_len(x1.len()); // for efficiency
-//!         
+//!
 //!         /// Set each slice to the same length for iteration efficiency
 //!         let mut x1 = &x1[..x1.len()];
 //!         let mut y1 = &y1[..x1.len()];
@@ -94,7 +94,7 @@
 //!             let distance = S::sqrt_ps(xdiff + ydiff);
 //!             // Store the SIMD value into the result vec
 //!             S::storeu_ps(&mut res[0], distance);
-//!             
+//!
 //!             // Move each slice to the next position
 //!             x1 = &x1[S::VF32_WIDTH..];
 //!             y1 = &y1[S::VF32_WIDTH..];
@@ -102,7 +102,7 @@
 //!             y2 = &y2[S::VF32_WIDTH..];
 //!             res = &mut res[S::VF32_WIDTH..];
 //!         }
-//!         
+//!
 //!         // (Optional) Compute the remaining elements. Not necessary if you are sure the length
 //!         // of your data is always a multiple of the maximum S::VF32_WIDTH you compile for (4 for SSE, 8 for AVX2, etc).
 //!         // This can be asserted by putting `assert_eq!(x1.len(), 0);` here
@@ -114,7 +114,7 @@
 //!             let distance = (xdiff + ydiff).sqrt();
 //!             res[i] = distance;
 //!         }
-//!         
+//!
 //!         result
 //!     });
 //! # fn main() {
@@ -148,7 +148,7 @@
     all(target_arch = "wasm32", not(feature = "stable")),
     feature(core_intrinsics)
 )]
-#![no_std]
+#![cfg_attr(feature = "no_std", no_std)]
 #[macro_use]
 #[cfg(test)]
 extern crate std;
@@ -160,9 +160,10 @@ use core::ops::*;
 #[macro_use]
 mod macros;
 
+mod libm_ext;
+
 #[cfg(target_arch = "x86_64")]
 pub mod avx2;
-pub mod libm;
 pub mod scalar;
 #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
 pub mod sse2;

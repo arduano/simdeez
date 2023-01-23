@@ -1,7 +1,7 @@
 use super::*;
 use core::mem;
 
-use libm::{F32Ext, F64Ext};
+use libm_ext::FloatExt;
 
 pub struct Scalar;
 impl Simd for Scalar {
@@ -18,11 +18,11 @@ impl Simd for Scalar {
 
     #[inline(always)]
     unsafe fn abs_ps(a: Self::Vf32) -> Self::Vf32 {
-        F32x1(a.0.abs())
+        F32x1(a.0.m_abs())
     }
     #[inline(always)]
     unsafe fn abs_pd(a: Self::Vf64) -> Self::Vf64 {
-        F64x1(a.0.abs())
+        F64x1(a.0.m_abs())
     }
     #[inline(always)]
     unsafe fn mullo_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 {
@@ -294,11 +294,11 @@ impl Simd for Scalar {
     }
     #[inline(always)]
     unsafe fn cvtps_epi32(a: Self::Vf32) -> Self::Vi32 {
-        I32x1((a.0 + 0.5).floor() as i32)
+        I32x1((a.0 + 0.5).m_floor() as i32)
     }
     #[inline(always)]
     unsafe fn cvtpd_epi64(a: Self::Vf64) -> Self::Vi64 {
-        I64x1((a.0 + 0.5).floor() as i64)
+        I64x1((a.0 + 0.5).m_floor() as i64)
     }
     #[inline(always)]
     unsafe fn cvtepi32_ps(a: Self::Vi32) -> Self::Vf32 {
@@ -310,35 +310,35 @@ impl Simd for Scalar {
     }
     #[inline(always)]
     unsafe fn ceil_ps(a: Self::Vf32) -> Self::Vf32 {
-        F32x1(a.0.ceil())
+        F32x1(a.0.m_ceil())
     }
     #[inline(always)]
     unsafe fn ceil_pd(a: Self::Vf64) -> Self::Vf64 {
-        F64x1(a.0.ceil())
+        F64x1(a.0.m_ceil())
     }
     #[inline(always)]
     unsafe fn floor_ps(a: Self::Vf32) -> Self::Vf32 {
-        F32x1(a.0.floor())
+        F32x1(a.0.m_floor())
     }
     #[inline(always)]
     unsafe fn floor_pd(a: Self::Vf64) -> Self::Vf64 {
-        F64x1(a.0.floor())
+        F64x1(a.0.m_floor())
     }
     #[inline(always)]
     unsafe fn fast_floor_ps(a: Self::Vf32) -> Self::Vf32 {
-        F32x1(a.0.floor())
+        F32x1(a.0.m_floor())
     }
     #[inline(always)]
     unsafe fn fast_floor_pd(a: Self::Vf64) -> Self::Vf64 {
-        F64x1(a.0.floor())
+        F64x1(a.0.m_floor())
     }
     #[inline(always)]
     unsafe fn fast_ceil_ps(a: Self::Vf32) -> Self::Vf32 {
-        F32x1(a.0.ceil())
+        F32x1(a.0.m_ceil())
     }
     #[inline(always)]
     unsafe fn fast_round_ps(a: Self::Vf32) -> Self::Vf32 {
-        F32x1(a.0.round())
+        F32x1(a.0.m_round())
     }
     #[inline(always)]
     unsafe fn fmadd_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32 {
@@ -578,11 +578,11 @@ impl Simd for Scalar {
     }
     #[inline(always)]
     unsafe fn round_ps(a: Self::Vf32) -> Self::Vf32 {
-        F32x1(a.0.round())
+        F32x1(a.0.m_round())
     }
     #[inline(always)]
     unsafe fn round_pd(a: Self::Vf64) -> Self::Vf64 {
-        F64x1(a.0.round())
+        F64x1(a.0.m_round())
     }
     #[inline(always)]
     unsafe fn set1_epi32(a: i32) -> Self::Vi32 {
@@ -643,19 +643,19 @@ impl Simd for Scalar {
     }
     #[inline(always)]
     unsafe fn sqrt_ps(a: Self::Vf32) -> Self::Vf32 {
-        F32x1(a.0.sqrt())
+        F32x1(a.0.m_sqrt())
     }
     #[inline(always)]
     unsafe fn rsqrt_ps(a: Self::Vf32) -> Self::Vf32 {
-        F32x1(1.0 / a.0.sqrt())
+        F32x1(1.0 / a.0.m_sqrt())
     }
     #[inline(always)]
     unsafe fn sqrt_pd(a: Self::Vf64) -> Self::Vf64 {
-        F64x1(a.0.sqrt())
+        F64x1(a.0.m_sqrt())
     }
     #[inline(always)]
     unsafe fn rsqrt_pd(a: Self::Vf64) -> Self::Vf64 {
-        F64x1(1.0 / a.0.sqrt())
+        F64x1(1.0 / a.0.m_sqrt())
     }
     #[inline(always)]
     unsafe fn shuffle_epi32(a: Self::Vi32, _imm8: i32) -> Self::Vi32 {
