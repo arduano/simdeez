@@ -32,6 +32,6 @@ jobs:
           args: --all -- --deny "warnings"
 
       - uses: actions-rs/cargo@v1
-        name: Check code formatting
+        name: Run tests
         with:
           command: test
