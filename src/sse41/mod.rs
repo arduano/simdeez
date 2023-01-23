@@ -7,10 +7,10 @@ use core::mem;
 use core::arch::x86_64::*;
 
 mod overloads;
-mod sse41;
+mod simd;
 pub use self::overloads::*;
+pub use self::simd::*;
 pub use self::sse2::*;
-pub use self::sse41::*;
 
 #[derive(Copy, Debug, Clone)]
 pub struct I64x2_41(pub __m128i);

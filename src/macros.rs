@@ -11,6 +11,8 @@ macro_rules! constify_imm8 {
         #[allow(overflowing_literals)]
         // Cannot use shorthad like x @ 0...254 => $expand!(x),
         // because some intrinsics expect u32 whereas others i32!
+        #[allow(clippy::suspicious_op_assign_impl)]
+        #[allow(clippy::suspicious_arithmetic_impl)]
         match ($imm8) & 0b1111_1111 {
             0 => $expand!(0),
             1 => $expand!(1),

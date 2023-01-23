@@ -78,19 +78,19 @@ impl Simd for Scalar {
     }
     #[inline(always)]
     unsafe fn castps_epi32(a: Self::Vf32) -> Self::Vi32 {
-        I32x1(mem::transmute::<f32, i32>(a.0))
+        I32x1(a.0.to_bits() as i32)
     }
     #[inline(always)]
     unsafe fn castpd_epi64(a: Self::Vf64) -> Self::Vi64 {
-        I64x1(mem::transmute::<f64, i64>(a.0))
+        I64x1(a.0.to_bits() as i64)
     }
     #[inline(always)]
     unsafe fn castepi32_ps(a: Self::Vi32) -> Self::Vf32 {
-        F32x1(mem::transmute::<i32, f32>(a.0))
+        F32x1(f32::from_bits(a.0 as u32))
     }
     #[inline(always)]
     unsafe fn castepi64_pd(a: Self::Vi64) -> Self::Vf64 {
-        F64x1(mem::transmute::<i64, f64>(a.0))
+        F64x1(f64::from_bits(a.0 as u64))
     }
     #[inline(always)]
     unsafe fn castps_pd(a: Self::Vf32) -> Self::Vf64 {
@@ -199,7 +199,7 @@ impl Simd for Scalar {
     #[inline(always)]
     unsafe fn cmpeq_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
         if a.0 == b.0 {
-            F32x1(mem::transmute::<i32, f32>(-1))
+            F32x1(f32::from_bits(u32::MAX))
         } else {
             F32x1(0.0)
         }
@@ -207,7 +207,7 @@ impl Simd for Scalar {
     #[inline(always)]
     unsafe fn cmpneq_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
         if a.0 != b.0 {
-            F32x1(mem::transmute::<i32, f32>(-1))
+            F32x1(f32::from_bits(u32::MAX))
         } else {
             F32x1(0.0)
         }
@@ -215,7 +215,7 @@ impl Simd for Scalar {
     #[inline(always)]
     unsafe fn cmpge_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
         if a.0 >= b.0 {
-            F32x1(mem::transmute::<i32, f32>(-1))
+            F32x1(f32::from_bits(u32::MAX))
         } else {
             F32x1(0.0)
         }
@@ -223,7 +223,7 @@ impl Simd for Scalar {
     #[inline(always)]
     unsafe fn cmpgt_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
         if a.0 > b.0 {
-            F32x1(mem::transmute::<i32, f32>(-1))
+            F32x1(f32::from_bits(u32::MAX))
         } else {
             F32x1(0.0)
         }
@@ -231,7 +231,7 @@ impl Simd for Scalar {
     #[inline(always)]
     unsafe fn cmple_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
         if a.0 <= b.0 {
-            F32x1(mem::transmute::<i32, f32>(-1))
+            F32x1(f32::from_bits(u32::MAX))
         } else {
             F32x1(0.0)
         }
@@ -239,7 +239,7 @@ impl Simd for Scalar {
     #[inline(always)]
     unsafe fn cmplt_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
         if a.0 < b.0 {
-            F32x1(mem::transmute::<i32, f32>(-1))
+            F32x1(f32::from_bits(u32::MAX))
         } else {
             F32x1(0.0)
         }
@@ -247,7 +247,7 @@ impl Simd for Scalar {
     #[inline(always)]
     unsafe fn cmpeq_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
         if a.0 == b.0 {
-            F64x1(mem::transmute::<i64, f64>(-1))
+            F64x1(f64::from_bits(u64::MAX))
         } else {
             F64x1(0.0)
         }
@@ -255,7 +255,7 @@ impl Simd for Scalar {
     #[inline(always)]
     unsafe fn cmpneq_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
         if a.0 != b.0 {
-            F64x1(mem::transmute::<i64, f64>(-1))
+            F64x1(f64::from_bits(u64::MAX))
         } else {
             F64x1(0.0)
         }
@@ -263,7 +263,7 @@ impl Simd for Scalar {
     #[inline(always)]
     unsafe fn cmpge_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
         if a.0 >= b.0 {
-            F64x1(mem::transmute::<i64, f64>(-1))
+            F64x1(f64::from_bits(u64::MAX))
         } else {
             F64x1(0.0)
         }
@@ -271,7 +271,7 @@ impl Simd for Scalar {
     #[inline(always)]
     unsafe fn cmpgt_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
         if a.0 > b.0 {
-            F64x1(mem::transmute::<i64, f64>(-1))
+            F64x1(f64::from_bits(u64::MAX))
         } else {
             F64x1(0.0)
         }
@@ -279,7 +279,7 @@ impl Simd for Scalar {
     #[inline(always)]
     unsafe fn cmple_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
         if a.0 <= b.0 {
-            F64x1(mem::transmute::<i64, f64>(-1))
+            F64x1(f64::from_bits(u64::MAX))
         } else {
             F64x1(0.0)
         }
@@ -287,7 +287,7 @@ impl Simd for Scalar {
     #[inline(always)]
     unsafe fn cmplt_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
         if a.0 < b.0 {
-            F64x1(mem::transmute::<i64, f64>(-1))
+            F64x1(f64::from_bits(u64::MAX))
         } else {
             F64x1(0.0)
         }
