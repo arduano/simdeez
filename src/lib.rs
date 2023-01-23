@@ -62,7 +62,7 @@
 //!         y1: &[f32],
 //!         x2: &[f32],
 //!         y2: &[f32]) -> Vec<f32> {
-//! 
+//!
 //!         let mut result: Vec<f32> = Vec::with_capacity(x1.len());
 //!         result.set_len(x1.len()); // for efficiency
 //!         
@@ -72,7 +72,7 @@
 //!         let mut x2 = &x2[..x1.len()];
 //!         let mut y2 = &y2[..x1.len()];
 //!         let mut res = &mut result[..x1.len()];
-//! 
+//!
 //!         // Operations have to be done in terms of the vector width
 //!         // so that it will work with any size vector.
 //!         // the width of a vector type is provided as a constant
@@ -84,7 +84,7 @@
 //!             let yv1 = S::loadu_ps(&y1[0]);
 //!             let xv2 = S::loadu_ps(&x2[0]);
 //!             let yv2 = S::loadu_ps(&y2[0]);
-//! 
+//!
 //!             // Use the usual intrinsic syntax if you prefer
 //!             let mut xdiff = S::sub_ps(xv1, xv2);
 //!             // Or use operater overloading if you like
@@ -148,13 +148,11 @@
     all(target_arch = "wasm32", not(feature = "stable")),
     feature(core_intrinsics)
 )]
-
 #![no_std]
 #[macro_use]
 #[cfg(test)]
 extern crate std;
 pub extern crate paste;
-
 
 use core::fmt::Debug;
 use core::ops::*;
@@ -162,20 +160,18 @@ use core::ops::*;
 #[macro_use]
 mod macros;
 
+#[cfg(target_arch = "x86_64")]
+pub mod avx2;
 pub mod libm;
 pub mod scalar;
-#[cfg(any(target_arch = "x86_64",target_arch = "x86"))]
+#[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
 pub mod sse2;
-#[cfg(any(target_arch = "x86_64",target_arch = "x86"))]
+#[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
 pub mod sse41;
-#[cfg(target_arch = "x86_64")]
-
-pub mod avx2;
 // coming soon
 //#[cfg(target_arch = "wasm32")]
 //pub mod wasm32;
 //pub mod avx;
-
 
 /// Grouping all the constraints shared by associated types in
 /// the Simd trait into this marker trait drastically reduces
@@ -218,7 +214,12 @@ pub trait SimdSmallInt<T, U>:
 /// f32 and f64 share these constraints, grouping
 /// them here speeds up compile times considerably
 pub trait SimdFloat<T, U>:
-    SimdBase<T, U> + Mul<T, Output = T> + Div<T, Output = T> + MulAssign<T> + DivAssign<T> + Not<Output = T>
+    SimdBase<T, U>
+    + Mul<T, Output = T>
+    + Div<T, Output = T>
+    + MulAssign<T>
+    + DivAssign<T>
+    + Not<Output = T>
 {
 }
 
@@ -417,7 +418,7 @@ pub trait Simd: Sync + Send {
     unsafe fn cmpge_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
     unsafe fn cmpgt_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
     unsafe fn cmple_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
-    unsafe fn cmplt_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;    
+    unsafe fn cmplt_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
     unsafe fn cvtepi32_ps(a: Self::Vi32) -> Self::Vf32;
     unsafe fn cvtepi64_pd(a: Self::Vi64) -> Self::Vf64;
 
@@ -653,14 +654,14 @@ macro_rules! simd_runtime_generate {
             #[target_feature(enable = "sse4.1")]
                 $vis unsafe fn [<$fn_name _sse41>]($($arg:$typ,)*) $(-> $rt)? {
                 $fn_name::<Sse41>($($arg,)*)
-            }            
+            }
             #[target_feature(enable = "avx2")]
             $vis  unsafe fn [<$fn_name _avx2>]($($arg:$typ,)*) $(-> $rt)? {
                 $fn_name::<Avx2>($($arg,)*)
             }
             $vis  fn [<$fn_name _runtime_select>]($($arg:$typ,)*) $(-> $rt)? {
                 if is_x86_feature_detected!("avx2") {
-                    unsafe { [<$fn_name _avx2>]($($arg,)*) }             
+                    unsafe { [<$fn_name _avx2>]($($arg,)*) }
                 } else if is_x86_feature_detected!("sse4.1") {
                     unsafe { [<$fn_name _sse41>]($($arg,)*) }
                 } else if is_x86_feature_detected!("sse2") {

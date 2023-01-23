@@ -1,7 +1,6 @@
 use super::*;
 use core::mem;
 
-
 pub struct Sse2;
 impl Simd for Sse2 {
     type Vi16 = I16x8;
@@ -205,17 +204,22 @@ impl Simd for Sse2 {
     #[inline(always)]
     unsafe fn cmplt_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
         F64x2(_mm_cmplt_pd(a.0, b.0))
-    }    
+    }
     #[inline(always)]
     unsafe fn cvtps_epi32(a: Self::Vf32) -> Self::Vi32 {
         I32x4(_mm_cvtps_epi32(a.0))
     }
     #[inline(always)]
     unsafe fn cvtpd_epi64(a: Self::Vf64) -> Self::Vi64 {
-        let x = _mm_add_pd(a.0, _mm_set1_pd(core::mem::transmute::<i64,f64>(0x0018000000000000)));
+        let x = _mm_add_pd(
+            a.0,
+            _mm_set1_pd(core::mem::transmute::<i64, f64>(0x0018000000000000)),
+        );
         I64x2(_mm_sub_epi64(
             _mm_castpd_si128(x),
-            _mm_castpd_si128(_mm_set1_pd(core::mem::transmute::<i64,f64>(0x0018000000000000)))
+            _mm_castpd_si128(_mm_set1_pd(core::mem::transmute::<i64, f64>(
+                0x0018000000000000,
+            ))),
         ))
     }
     #[inline(always)]
@@ -224,8 +228,16 @@ impl Simd for Sse2 {
     }
     #[inline(always)]
     unsafe fn cvtepi64_pd(a: Self::Vi64) -> Self::Vf64 {
-        let x = _mm_add_epi64(a.0, _mm_castpd_si128(_mm_set1_pd(core::mem::transmute::<i64,f64>(0x0018000000000000))));
-        F64x2(_mm_sub_pd(_mm_castsi128_pd(x), _mm_set1_pd(core::mem::transmute::<i64,f64>(0x0018000000000000))))
+        let x = _mm_add_epi64(
+            a.0,
+            _mm_castpd_si128(_mm_set1_pd(core::mem::transmute::<i64, f64>(
+                0x0018000000000000,
+            ))),
+        );
+        F64x2(_mm_sub_pd(
+            _mm_castsi128_pd(x),
+            _mm_set1_pd(core::mem::transmute::<i64, f64>(0x0018000000000000)),
+        ))
     }
     #[inline(always)]
     unsafe fn ceil_ps(a: Self::Vf32) -> Self::Vf32 {
@@ -273,7 +285,7 @@ impl Simd for Sse2 {
     }
     #[inline(always)]
     unsafe fn fast_floor_pd(a: Self::Vf64) -> Self::Vf64 {
-        let i = Self::cvtpd_epi64(a);        
+        let i = Self::cvtpd_epi64(a);
         let fi = Self::cvtepi64_pd(i);
         let igx = _mm_cmpgt_pd(fi.0, a.0);
         let j = _mm_and_pd(igx, _mm_set1_pd(1.0));
@@ -371,7 +383,7 @@ impl Simd for Sse2 {
     #[inline(always)]
     unsafe fn i64gather_epi64(arr: &[i64], index: Self::Vi64) -> Self::Vi64 {
         let index_as_arr = mem::transmute::<I64x2, [i64; 2]>(index);
-        I64x2(_mm_set_epi64x(            
+        I64x2(_mm_set_epi64x(
             arr[index_as_arr[1] as usize],
             arr[index_as_arr[0] as usize],
         ))
@@ -589,8 +601,8 @@ impl Simd for Sse2 {
     #[inline(always)]
     unsafe fn mullo_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
         let mut result = Self::setzero_epi64();
-        result[0] = a[0]*b[0];
-        result[1] = a[1]*b[1];
+        result[0] = a[0] * b[0];
+        result[1] = a[1] * b[1];
         result
     }
     #[inline(always)]
@@ -620,10 +632,10 @@ impl Simd for Sse2 {
         I32x4(_mm_set1_epi32(a))
     }
     #[inline(always)]
-    unsafe fn set1_epi64(a: i64) -> Self::Vi64 {              
+    unsafe fn set1_epi64(a: i64) -> Self::Vi64 {
         I64x2(_mm_set1_epi64x(a))
     }
-   #[inline(always)]
+    #[inline(always)]
     unsafe fn set1_pd(a: f64) -> Self::Vf64 {
         F64x2(_mm_set1_pd(a))
     }

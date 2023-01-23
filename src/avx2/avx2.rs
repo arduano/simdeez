@@ -4,7 +4,6 @@ use crate::sse41::{F32x4, F64x2};
 use super::*;
 use core::mem;
 
-
 pub struct Avx2;
 impl Simd for Avx2 {
     type Vi16 = I16x16;
@@ -199,8 +198,16 @@ impl Simd for Avx2 {
     }
     #[inline(always)]
     unsafe fn cvtepi64_pd(a: Self::Vi64) -> Self::Vf64 {
-        let x = _mm256_add_epi64(a.0, _mm256_castpd_si256(_mm256_set1_pd(core::mem::transmute::<i64,f64>(0x0018000000000000))));
-        F64x4(_mm256_sub_pd(_mm256_castsi256_pd(x), _mm256_set1_pd(core::mem::transmute::<i64,f64>(0x0018000000000000))))
+        let x = _mm256_add_epi64(
+            a.0,
+            _mm256_castpd_si256(_mm256_set1_pd(core::mem::transmute::<i64, f64>(
+                0x0018000000000000,
+            ))),
+        );
+        F64x4(_mm256_sub_pd(
+            _mm256_castsi256_pd(x),
+            _mm256_set1_pd(core::mem::transmute::<i64, f64>(0x0018000000000000)),
+        ))
     }
     #[inline(always)]
     unsafe fn cvtps_epi32(a: Self::Vf32) -> Self::Vi32 {
@@ -208,10 +215,15 @@ impl Simd for Avx2 {
     }
     #[inline(always)]
     unsafe fn cvtpd_epi64(a: Self::Vf64) -> Self::Vi64 {
-        let x = _mm256_add_pd(a.0, _mm256_set1_pd(core::mem::transmute::<i64,f64>(0x0018000000000000)));
+        let x = _mm256_add_pd(
+            a.0,
+            _mm256_set1_pd(core::mem::transmute::<i64, f64>(0x0018000000000000)),
+        );
         I64x4(_mm256_sub_epi64(
             _mm256_castpd_si256(x),
-            _mm256_castpd_si256(_mm256_set1_pd(core::mem::transmute::<i64,f64>(0x0018000000000000)))
+            _mm256_castpd_si256(_mm256_set1_pd(core::mem::transmute::<i64, f64>(
+                0x0018000000000000,
+            ))),
         ))
     }
     #[inline(always)]
@@ -445,10 +457,10 @@ impl Simd for Avx2 {
     #[inline(always)]
     unsafe fn mullo_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
         let mut result = Self::setzero_epi64();
-        result[0] = a[0]*b[0];
-        result[1] = a[1]*b[1];
-        result[2] = a[2]*b[2];
-        result[3] = a[3]*b[3];
+        result[0] = a[0] * b[0];
+        result[1] = a[1] * b[1];
+        result[2] = a[2] * b[2];
+        result[3] = a[3] * b[3];
         result
     }
     #[inline(always)]
@@ -484,7 +496,7 @@ impl Simd for Avx2 {
     unsafe fn set1_epi64(a: i64) -> Self::Vi64 {
         I64x4(_mm256_set1_epi64x(a))
     }
-   #[inline(always)]
+    #[inline(always)]
     unsafe fn set1_ps(a: f32) -> Self::Vf32 {
         F32x8(_mm256_set1_ps(a))
     }

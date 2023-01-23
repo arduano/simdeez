@@ -1,7 +1,7 @@
 extern crate simdeez;
 
 #[cfg(test)]
-mod tests {    
+mod tests {
     use simdeez::avx2::*;
     use simdeez::scalar::*;
     use simdeez::sse2::*;
@@ -15,7 +15,7 @@ mod tests {
     unsafe fn distance<S: Simd>(x1: &[f32], y1: &[f32], x2: &[f32], y2: &[f32]) -> Vec<f32> {
         let mut result: Vec<f32> = Vec::with_capacity(x1.len());
         result.set_len(x1.len()); // for efficiency
-        
+
         /// Set each slice to the same length for iteration efficiency
         let mut x1 = &x1[..x1.len()];
         let mut y1 = &y1[..x1.len()];
@@ -44,7 +44,7 @@ mod tests {
             let distance = S::sqrt_ps(xdiff + ydiff);
             // Store the SIMD value into the result vec
             S::storeu_ps(&mut res[0], distance);
-            
+
             // Move each slice to the next position
             x1 = &x1[S::VF32_WIDTH..];
             y1 = &y1[S::VF32_WIDTH..];
@@ -69,7 +69,7 @@ mod tests {
     #[target_feature(enable = "avx2")]
     unsafe fn distance_avx2(x1: &[f32], y1: &[f32], x2: &[f32], y2: &[f32]) -> Vec<f32> {
         distance::<Avx2>(x1, y1, x2, y2)
-    }    
+    }
     //Call distance as scalar
     unsafe fn distance_scalar(x1: &[f32], y1: &[f32], x2: &[f32], y2: &[f32]) -> Vec<f32> {
         distance::<Scalar>(x1, y1, x2, y2)
@@ -87,10 +87,10 @@ mod tests {
             let distances_sse41 = distance_sse41(&x1, &y1, &x2, &y2);
             println!("sse41 dist:{:?}", distances_sse41);
             let distances_avx2 = distance_avx2(&x1, &y1, &x2, &y2);
-            println!("avx2 dist:{:?}", distances_avx2);            
+            println!("avx2 dist:{:?}", distances_avx2);
             let distance_scalar = distance_scalar(&x1, &y1, &x2, &y2);
             for i in 0..8 {
-                assert_eq!(distances_sse2[i], distances_sse41[i]);                
+                assert_eq!(distances_sse2[i], distances_sse41[i]);
                 assert_eq!(distances_sse2[i], distances_avx2[i]);
                 assert_eq!(distances_sse2[i], distance_scalar[i]);
             }
@@ -117,7 +117,7 @@ mod tests {
     #[target_feature(enable = "avx2")]
     unsafe fn sample_avx2() -> i32 {
         sample::<Avx2>()
-    }  
+    }
     #[target_feature(enable = "sse4.1")]
     unsafe fn sample_sse41() -> i32 {
         sample::<Sse41>()
@@ -128,7 +128,7 @@ mod tests {
     #[test]
     fn consistency() {
         unsafe {
-            assert_eq!(sample_sse2(), sample_sse41());            
+            assert_eq!(sample_sse2(), sample_sse41());
             assert_eq!(sample_sse2(), sample_avx2());
             assert_eq!(sample_scalar(), sample_avx2());
         }

@@ -1,6 +1,6 @@
 use super::*;
-use core::mem;
 use core::arch::x86_64::*;
+use core::mem;
 
 mod avx2;
 mod overloads;
