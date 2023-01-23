@@ -6,7 +6,7 @@ mod tests {
     use simdeez::scalar::*;
     use simdeez::sse2::*;
     use simdeez::sse41::*;
-    use simdeez::*;
+
     use std::*;
 
     // If using runtime feature detection, you will want to be sure this inlines
@@ -16,7 +16,7 @@ mod tests {
         let mut result: Vec<f32> = Vec::with_capacity(x1.len());
         result.set_len(x1.len()); // for efficiency
 
-        /// Set each slice to the same length for iteration efficiency
+        // Set each slice to the same length for iteration efficiency
         let mut x1 = &x1[..x1.len()];
         let mut y1 = &y1[..x1.len()];
         let mut x2 = &x2[..x1.len()];

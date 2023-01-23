@@ -11,7 +11,6 @@ mod tests {
     use simdeez::scalar::*;
     use simdeez::sse2::*;
     use simdeez::sse41::*;
-    use simdeez::*;
 
     trait SpecialEq {
         fn equivalent(a: Self, b: Self) -> bool;

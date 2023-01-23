@@ -6,9 +6,7 @@ mod tests {
     use simdeez::scalar::*;
     use simdeez::sse2::*;
     use simdeez::sse41::*;
-    use simdeez::*;
-    use std::f32::*;
-    use std::f64::*;
+
     use std::*;
 
     // Macro for checking if f32/f64 are equal to within a delta
@@ -115,7 +113,7 @@ mod tests {
             sub_scalar(floats, ints);
         }
     }
-    simd_compiletime_generate!(
+    simd_runtime_generate!(
         fn cvt(floats: &Vec<f32>, ints: &Vec<i32>) {
             for i in 0..ints.len() {
                 let a = S::cvtepi32_ps(S::set1_epi32(ints[i]));
@@ -160,11 +158,10 @@ mod tests {
             f32::INFINITY,
         ];
         unsafe {
-            //cvt_compiletime(floats, ints);
-            //        cvt_sse2(floats,ints);
-            //        cvt_sse41(floats,ints);
-            //        cvt_avx2(floats,ints);
-            //        cvt_scalar(floats,ints);
+            cvt_sse2(floats, ints);
+            cvt_sse41(floats, ints);
+            cvt_avx2(floats, ints);
+            cvt_scalar(floats, ints);
         }
     }
     simd_runtime_generate!(
