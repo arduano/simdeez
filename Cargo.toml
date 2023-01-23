@@ -13,6 +13,7 @@ edition = "2018"
 
 
 [features]
+default = ["no_std"]
 sleef = ["sleef-sys"]
 no_std = ["dep:libm"]
 
