@@ -30,3 +30,8 @@ jobs:
         with:
           command: clippy
           args: --all -- --deny "warnings"
+
+      - uses: actions-rs/cargo@v1
+        name: Run tests
+        with:
+          command: test
