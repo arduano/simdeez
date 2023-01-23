@@ -141,6 +141,6 @@ produce 2 active functions via the `cfg` attribute feature:
 * `distance_compiletime`  the fastest instruction set availble for the given compile time
 feature set
 
-You may also forgoe the macros if you know what you are doing, just keep in mind there are lots
+You may also forgo the macros if you know what you are doing, just keep in mind there are lots
 of arcane subtleties with inlining and target_features that must be managed. See how the macros
 expand for more detail.
