@@ -614,7 +614,7 @@ impl Simd for Sse2 {
     #[inline(always)]
     unsafe fn round_pd(a: Self::Vf64) -> Self::Vf64 {
         let sign_mask = _mm_set1_pd(-0.0);
-        let magic = _mm_castsi128_pd(_mm_set_epi32(0, 0x43300000, 0, 0x43300000));
+        let magic = _mm_castsi128_pd(_mm_set_epi32(0x43300000, 0, 0x43300000, 0));
         let sign = _mm_and_pd(a.0, sign_mask);
         let signedmagic = _mm_or_pd(magic, sign);
         let b = _mm_add_pd(a.0, signedmagic);
