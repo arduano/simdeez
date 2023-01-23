@@ -1,0 +1,12 @@
+{
+  "editor.tabSize": 4,
+  "rust-analyzer.check.overrideCommand": [
+    "cargo",
+    "clippy",
+    "--all",
+    "--message-format=json",
+    "--all-targets",
+    "--features",
+    "no_std",
+  ]
+}

@@ -1,7 +1,7 @@
-#[cfg(not(no_std))]
+#[cfg(no_std)]
 mod no_std;
 
-#[cfg(no_std)]
+#[cfg(not(no_std))]
 mod with_std;
 
 /// Math support for `f32`

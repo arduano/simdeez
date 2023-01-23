@@ -14,14 +14,15 @@ edition = "2018"
 
 [features]
 sleef = ["sleef-sys"]
-no_std = []
+no_std = ["dep:libm"]
 
 [dependencies]
 paste = "0.1.7"
 # To build this, we need nightly, cmake installed, and clang dlls in the clang dll path
 sleef-sys = { version = "0.1.2", optional = true }
 cfg-if = "0.1.10"
-libm = "0.2.6"
+libm = { version = "0.2.6", optional = true }
+
 
 [dev-dependencies]
 criterion = "0.3.1"
