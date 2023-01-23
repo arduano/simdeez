@@ -30,7 +30,7 @@ mod tests {
 
     simd_runtime_generate!(
         fn set1(floats: &[f32], ints: &[i32]) {
-            for &int in ints.iter() {
+            for &int in ints {
                 let a = S::set1_epi32(int);
                 for j in 0..S::VI32_WIDTH {
                     assert_eq!(a[j], int);
@@ -115,13 +115,13 @@ mod tests {
     }
     simd_runtime_generate!(
         fn cvt(floats: &[f32], ints: &[i32]) {
-            for &int in ints.iter() {
+            for &int in ints {
                 let a = S::cvtepi32_ps(S::set1_epi32(int));
                 for j in 0..S::VI32_WIDTH {
                     assert_delta!(a[j], int as f32, 0.001);
                 }
             }
-            for &float in floats.iter() {
+            for &float in floats {
                 let b = S::cvtps_epi32(S::set1_ps(float));
                 for j in 0..S::VF32_WIDTH {
                     let x = float;
