@@ -196,6 +196,7 @@ pub trait SimdBase<T, U>:
     + core::marker::Sync
     + core::marker::Send
 {
+    const WIDTH: usize;
 }
 
 /// 16 and 32 bit int types share all of these
@@ -252,13 +253,19 @@ pub trait Simd: Sync + Send {
     /// when used with Scalar.
     type Vf64: SimdFloat<Self::Vf64, f64>;
 
-    /// The width of the vector lane.  Necessary for creating
-    /// lane width agnostic code.
-    const VF32_WIDTH: usize;
-    const VF64_WIDTH: usize;
-    const VI16_WIDTH: usize;
-    const VI32_WIDTH: usize;
-    const VI64_WIDTH: usize;
+    // The width of the vector lane.  Necessary for creating
+    // lane width agnostic code.
+    #[deprecated(note = "The VF32_WIDTH is deprecated, please use the Vf32::WIDTH instead.")]
+    const VF32_WIDTH: usize = Self::Vf32::WIDTH;
+    #[deprecated(note = "The VF64_WIDTH is deprecated, please use the Vf64::WIDTH instead.")]
+    const VF64_WIDTH: usize = Self::Vf64::WIDTH;
+    #[deprecated(note = "The VI16_WIDTH is deprecated, please use the Vi16::WIDTH instead.")]
+    const VI16_WIDTH: usize = Self::Vi16::WIDTH;
+    #[deprecated(note = "The VI32_WIDTH is deprecated, please use the Vi32::WIDTH instead.")]
+    const VI32_WIDTH: usize = Self::Vi32::WIDTH;
+    #[deprecated(note = "The VI64_WIDTH is deprecated, please use the Vi64::WIDTH instead.")]
+    const VI64_WIDTH: usize = Self::Vi64::WIDTH;
+
     #[inline(always)]
     unsafe fn mul_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
         a * b
