@@ -1,0 +1,32 @@
+on: [pull_request]
+
+name: Lints
+
+jobs:
+  clippy:
+    name: Clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        name: Initialize Cargo
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+          components: rustfmt, clippy
+
+      - uses: Swatinem/rust-cache@v2
+        name: Cargo Cache
+
+      - uses: actions-rs/cargo@v1
+        name: Check code formatting
+        with:
+          command: fmt
+          args: --all -- --check
+
+      - uses: actions-rs/cargo@v1
+        name: Check code with clippy
+        with:
+          command: clippy
+          args: --all -- --deny "warnings"

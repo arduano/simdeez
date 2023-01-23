@@ -200,13 +200,11 @@ impl Simd for Avx2 {
     unsafe fn cvtepi64_pd(a: Self::Vi64) -> Self::Vf64 {
         let x = _mm256_add_epi64(
             a.0,
-            _mm256_castpd_si256(_mm256_set1_pd(core::mem::transmute::<i64, f64>(
-                0x0018000000000000,
-            ))),
+            _mm256_castpd_si256(_mm256_set1_pd(f64::from_bits(0x0018000000000000u64))),
         );
         F64x4(_mm256_sub_pd(
             _mm256_castsi256_pd(x),
-            _mm256_set1_pd(core::mem::transmute::<i64, f64>(0x0018000000000000)),
+            _mm256_set1_pd(f64::from_bits(0x0018000000000000u64)),
         ))
     }
     #[inline(always)]
@@ -215,15 +213,10 @@ impl Simd for Avx2 {
     }
     #[inline(always)]
     unsafe fn cvtpd_epi64(a: Self::Vf64) -> Self::Vi64 {
-        let x = _mm256_add_pd(
-            a.0,
-            _mm256_set1_pd(core::mem::transmute::<i64, f64>(0x0018000000000000)),
-        );
+        let x = _mm256_add_pd(a.0, _mm256_set1_pd(f64::from_bits(0x0018000000000000u64)));
         I64x4(_mm256_sub_epi64(
             _mm256_castpd_si256(x),
-            _mm256_castpd_si256(_mm256_set1_pd(core::mem::transmute::<i64, f64>(
-                0x0018000000000000,
-            ))),
+            _mm256_castpd_si256(_mm256_set1_pd(f64::from_bits(0x0018000000000000u64))),
         ))
     }
     #[inline(always)]

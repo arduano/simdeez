@@ -21,7 +21,7 @@ fn double_load() -> __m256 {
 }
 
 fn criterion_benchmark(c: &mut Criterion) {
-    c.bench_function("double load", |f| f.iter(|| double_load()));
+    c.bench_function("double load", |f| f.iter(double_load));
 }
 
 criterion_group!(benches, criterion_benchmark);

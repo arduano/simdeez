@@ -7,9 +7,9 @@ use core::mem;
 use core::arch::x86_64::*;
 
 mod overloads;
-mod sse2;
+mod simd;
 pub use self::overloads::*;
-pub use self::sse2::*;
+pub use self::simd::*;
 
 #[derive(Copy, Debug, Clone)]
 pub struct I16x8(pub __m128i);

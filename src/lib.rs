@@ -148,6 +148,7 @@
     all(target_arch = "wasm32", not(feature = "stable")),
     feature(core_intrinsics)
 )]
+#![allow(clippy::missing_safety_doc)] // TODO: Work on the safety of functions
 #![cfg_attr(feature = "no_std", no_std)]
 #[macro_use]
 #[cfg(test)]

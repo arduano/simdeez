@@ -1,9 +1,9 @@
 use super::*;
 
 mod overloads;
-mod scalar;
+mod simd;
 pub use self::overloads::*;
-pub use self::scalar::*;
+pub use self::simd::*;
 
 // Newtypes for i16 vectors
 // We have to do this to allow for overloading of

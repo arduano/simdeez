@@ -29,17 +29,17 @@ mod tests {
     }
 
     simd_runtime_generate!(
-        fn set1(floats: &Vec<f32>, ints: &Vec<i32>) {
-            for i in 0..ints.len() {
-                let a = S::set1_epi32(ints[i]);
+        fn set1(floats: &[f32], ints: &[i32]) {
+            for &int in ints {
+                let a = S::set1_epi32(int);
                 for j in 0..S::VI32_WIDTH {
-                    assert_eq!(a[j], ints[i]);
+                    assert_eq!(a[j], int);
                 }
             }
-            for i in 0..floats.len() {
-                let b = S::set1_ps(floats[i]);
+            for &float in floats {
+                let b = S::set1_ps(float);
                 for j in 0..S::VF32_WIDTH {
-                    assert_delta!(b[j], floats[i], 0.001);
+                    assert_delta!(b[j], float, 0.001);
                 }
             }
         }
@@ -114,18 +114,17 @@ mod tests {
         }
     }
     simd_runtime_generate!(
-        fn cvt(floats: &Vec<f32>, ints: &Vec<i32>) {
-            for i in 0..ints.len() {
-                let a = S::cvtepi32_ps(S::set1_epi32(ints[i]));
+        fn cvt(floats: &[f32], ints: &[i32]) {
+            for &int in ints {
+                let a = S::cvtepi32_ps(S::set1_epi32(int));
                 for j in 0..S::VI32_WIDTH {
-                    assert_delta!(a[j], ints[i] as f32, 0.001);
+                    assert_delta!(a[j], int as f32, 0.001);
                 }
             }
-            for i in 0..floats.len() {
-                let b = S::cvtps_epi32(S::set1_ps(floats[i]));
+            for &float in floats {
+                let b = S::cvtps_epi32(S::set1_ps(float));
                 for j in 0..S::VF32_WIDTH {
-                    println!("i:{}", i);
-                    let x = floats[i];
+                    let x = float;
                     let rounded = (x + 0.5).floor();
                     assert_eq!(b[j], rounded as i32);
                 }

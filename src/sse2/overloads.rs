@@ -306,8 +306,8 @@ impl MulAssign for I32x4 {
         };
         *self = I32x4(unsafe {
             _mm_unpacklo_epi32(
-                _mm_shuffle_epi32(tmp1, mm_shuffle!(0, 0, 2, 0) as i32),
-                _mm_shuffle_epi32(tmp2, mm_shuffle!(0, 0, 2, 0) as i32),
+                _mm_shuffle_epi32(tmp1, mm_shuffle!(0, 0, 2, 0)),
+                _mm_shuffle_epi32(tmp2, mm_shuffle!(0, 0, 2, 0)),
             )
         }) /* shuffle results to [63..0] and pack */
     }
@@ -349,8 +349,8 @@ impl Mul for I32x4 {
         };
         I32x4(unsafe {
             _mm_unpacklo_epi32(
-                _mm_shuffle_epi32(tmp1, mm_shuffle!(0, 0, 2, 0) as i32),
-                _mm_shuffle_epi32(tmp2, mm_shuffle!(0, 0, 2, 0) as i32),
+                _mm_shuffle_epi32(tmp1, mm_shuffle!(0, 0, 2, 0)),
+                _mm_shuffle_epi32(tmp2, mm_shuffle!(0, 0, 2, 0)),
             )
         }) /* shuffle results to [63..0] and pack */
     }

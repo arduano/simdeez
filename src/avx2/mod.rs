@@ -2,10 +2,10 @@ use super::*;
 use core::arch::x86_64::*;
 use core::mem;
 
-mod avx2;
 mod overloads;
-pub use self::avx2::*;
+mod simd;
 pub use self::overloads::*;
+pub use self::simd::*;
 
 #[derive(Copy, Debug, Clone)]
 pub struct I16x16(pub __m256i);

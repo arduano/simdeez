@@ -55,6 +55,7 @@ mod tests {
                     let b_simd = S::$set_fn(b);
 
                     let result_simd = $operation_simd(a_simd, b_simd);
+                    #[allow(clippy::redundant_closure_call)]
                     let result_scalar = $operation_scalar(a, b);
 
                     for i in 0..S::$width {
@@ -342,6 +343,7 @@ mod tests {
                     let c_simd = S::$set_fn(b);
 
                     let result_simd = $operation_simd(a_simd, b_simd, c_simd);
+                    #[allow(clippy::redundant_closure_call)]
                     let result_scalar = $operation_scalar(a, b, c);
 
                     for i in 0..S::$width {
@@ -488,6 +490,7 @@ mod tests {
                 #[test]
                 fn [<test_ $fn_name>](){
                     fn prop(a: $ty) -> TestResult {
+                        #[allow(clippy::redundant_closure_call)]
                         if ($discard_value_lambda)(a){
                             return TestResult::discard();
                         }
