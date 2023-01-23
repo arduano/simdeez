@@ -12,6 +12,7 @@ mod tests {
     // If using runtime feature detection, you will want to be sure this inlines
     // so you can leverage target_feature attributes
     #[inline(always)]
+    #[allow(clippy::uninit_vec)]
     unsafe fn distance<S: Simd>(x1: &[f32], y1: &[f32], x2: &[f32], y2: &[f32]) -> Vec<f32> {
         let mut result: Vec<f32> = Vec::with_capacity(x1.len());
         result.set_len(x1.len()); // for efficiency
