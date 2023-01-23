@@ -14,8 +14,12 @@ pub use self::sse2::*;
 
 #[derive(Copy, Debug, Clone)]
 pub struct I64x2_41(pub __m128i);
-impl SimdBase<I64x2_41, i64> for I64x2_41 {}
+impl SimdBase<I64x2_41, i64> for I64x2_41 {
+    const WIDTH: usize = 2;
+}
 #[derive(Copy, Debug, Clone)]
 pub struct I32x4_41(pub __m128i);
-impl SimdBase<I32x4_41, i32> for I32x4_41 {}
+impl SimdBase<I32x4_41, i32> for I32x4_41 {
+    const WIDTH: usize = 4;
+}
 impl SimdSmallInt<I32x4_41, i32> for I32x4_41 {}
