@@ -33,7 +33,8 @@ impl ScalarNumber for f32 {
             return true;
         }
 
-        return (self - other).abs() < 0.00001;
+        // The epsilon is 0.01 because some functions are imprecise by definition.
+        (self - other).abs() < 0.01
     }
 }
 impl ScalarNumber for f64 {
@@ -46,7 +47,7 @@ impl ScalarNumber for f64 {
             return true;
         }
 
-        return (self - other).abs() < 0.00000001;
+        (self - other).abs() < 0.000000001
     }
 }
 

@@ -1,7 +1,7 @@
 use quickcheck::{Arbitrary, Gen, TestResult, Testable};
 
 use crate::{avx2::*, scalar::*};
-use crate::{tests::ArbitrarySimd, Simd, SimdBase};
+use crate::{tests::ArbitrarySimd, Simd, SimdBase, SimdFloat, SimdFloat32};
 
 use super::ScalarNumber;
 
@@ -248,12 +248,57 @@ macro_rules! make_tests {
     };
 }
 
-make_tests!(base, add, 2_arg);
-make_tests!(base, sub, 2_arg);
-make_tests!(base, mul, 2_arg);
+mod base {
+    use super::*;
 
-make_tests!(base, bit_and, 2_arg);
-make_tests!(base, bit_or, 2_arg);
-make_tests!(base, bit_xor, 2_arg);
+    make_tests!(base, add, 2_arg);
+    make_tests!(base, sub, 2_arg);
+    make_tests!(base, mul, 2_arg);
 
-make_tests!(base, bit_not, 1_arg);
+    make_tests!(base, bit_and, 2_arg);
+    make_tests!(base, bit_or, 2_arg);
+    make_tests!(base, bit_xor, 2_arg);
+
+    make_tests!(base, bit_not, 1_arg);
+
+    make_tests!(base, abs, 1_arg);
+
+    make_tests!(base, and_not, 2_arg);
+
+    make_tests!(base, cmp_eq, 2_arg);
+    make_tests!(base, cmp_neq, 2_arg);
+    make_tests!(base, cmp_lt, 2_arg);
+    make_tests!(base, cmp_lte, 2_arg);
+    make_tests!(base, cmp_gt, 2_arg);
+    make_tests!(base, cmp_gte, 2_arg);
+
+    make_tests!(base, min, 2_arg);
+    make_tests!(base, max, 2_arg);
+}
+
+mod float {
+    use super::*;
+
+    make_tests!(float, div, 2_arg);
+
+    make_tests!(float, ceil, 1_arg);
+    make_tests!(float, floor, 1_arg);
+    make_tests!(float, round, 1_arg);
+    make_tests!(float, fast_ceil, 1_arg);
+    make_tests!(float, fast_floor, 1_arg);
+    make_tests!(float, fast_round, 1_arg);
+
+    make_tests!(float, mul_add, 3_arg);
+    make_tests!(float, mul_sub, 3_arg);
+    make_tests!(float, neg_mul_add, 3_arg);
+    make_tests!(float, neg_mul_sub, 3_arg);
+
+    make_tests!(float, sqrt, 1_arg);
+    make_tests!(float, rsqrt, 1_arg);
+}
+
+mod float32 {
+    use super::*;
+
+    make_tests!(f32, fast_inverse, 1_arg);
+}

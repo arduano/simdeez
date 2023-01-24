@@ -72,7 +72,7 @@ impl SimdBase for I16x1 {
 
     #[inline(always)]
     unsafe fn and_not(self, rhs: Self) -> Self {
-        I16x1(self.0 & !rhs.0)
+        I16x1(!self.0 & rhs.0)
     }
 
     #[inline(always)]
@@ -231,7 +231,7 @@ impl SimdBase for I32x1 {
 
     #[inline(always)]
     unsafe fn and_not(self, rhs: Self) -> Self {
-        I32x1(self.0 & !rhs.0)
+        I32x1(!self.0 & rhs.0)
     }
 
     #[inline(always)]
@@ -402,7 +402,7 @@ impl SimdBase for I64x1 {
 
     #[inline(always)]
     unsafe fn and_not(self, rhs: Self) -> Self {
-        I64x1(self.0 & !rhs.0)
+        I64x1(!self.0 & rhs.0)
     }
 
     #[inline(always)]
@@ -573,7 +573,7 @@ impl SimdBase for F32x1 {
 
     #[inline(always)]
     unsafe fn and_not(self, rhs: Self) -> Self {
-        F32x1(((!self.0.to_bits()) & rhs.0.to_bits()) as f32)
+        F32x1(f32::from_bits((!self.0.to_bits()) & rhs.0.to_bits()))
     }
 
     #[inline(always)]
@@ -831,7 +831,7 @@ impl SimdBase for F64x1 {
 
     #[inline(always)]
     unsafe fn and_not(self, rhs: Self) -> Self {
-        F64x1(((!self.0.to_bits()) & rhs.0.to_bits()) as f64)
+        F64x1(f64::from_bits((!self.0.to_bits()) & rhs.0.to_bits()))
     }
 
     #[inline(always)]
