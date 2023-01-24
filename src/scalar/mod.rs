@@ -548,22 +548,22 @@ impl SimdBase for F32x1 {
 
     #[inline(always)]
     unsafe fn bit_and(self, rhs: Self) -> Self {
-        F32x1((self.0.to_bits() & rhs.0.to_bits()) as f32)
+        F32x1(f32::from_bits(self.0.to_bits() & rhs.0.to_bits()))
     }
 
     #[inline(always)]
     unsafe fn bit_or(self, rhs: Self) -> Self {
-        F32x1((self.0.to_bits() | rhs.0.to_bits()) as f32)
+        F32x1(f32::from_bits(self.0.to_bits() | rhs.0.to_bits()))
     }
 
     #[inline(always)]
     unsafe fn bit_xor(self, rhs: Self) -> Self {
-        F32x1((self.0.to_bits() ^ rhs.0.to_bits()) as f32)
+        F32x1(f32::from_bits(self.0.to_bits() ^ rhs.0.to_bits()))
     }
 
     #[inline(always)]
     unsafe fn bit_not(self) -> Self {
-        F32x1((!self.0.to_bits()) as f32)
+        F32x1(f32::from_bits(!self.0.to_bits()))
     }
 
     #[inline(always)]
@@ -806,22 +806,22 @@ impl SimdBase for F64x1 {
 
     #[inline(always)]
     unsafe fn bit_and(self, rhs: Self) -> Self {
-        F64x1((self.0.to_bits() & rhs.0.to_bits()) as f64)
+        F64x1(f64::from_bits(self.0.to_bits() & rhs.0.to_bits()))
     }
 
     #[inline(always)]
     unsafe fn bit_or(self, rhs: Self) -> Self {
-        F64x1((self.0.to_bits() | rhs.0.to_bits()) as f64)
+        F64x1(f64::from_bits(self.0.to_bits() | rhs.0.to_bits()))
     }
 
     #[inline(always)]
     unsafe fn bit_xor(self, rhs: Self) -> Self {
-        F64x1((self.0.to_bits() ^ rhs.0.to_bits()) as f64)
+        F64x1(f64::from_bits(self.0.to_bits() ^ rhs.0.to_bits()))
     }
 
     #[inline(always)]
     unsafe fn bit_not(self) -> Self {
-        F64x1((!self.0.to_bits()) as f64)
+        F64x1(f64::from_bits(!self.0.to_bits()))
     }
 
     #[inline(always)]

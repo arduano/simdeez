@@ -4,13 +4,51 @@ use crate::SimdBase;
 
 mod arithmetic;
 
-trait ScalarNumber: Arbitrary + PartialEq + Copy {}
+trait ScalarNumber: Arbitrary + PartialEq + Copy {
+    fn almost_eq(self, other: Self) -> bool;
+}
 
-impl ScalarNumber for i16 {}
-impl ScalarNumber for i32 {}
-impl ScalarNumber for i64 {}
-impl ScalarNumber for f32 {}
-impl ScalarNumber for f64 {}
+impl ScalarNumber for i16 {
+    fn almost_eq(self, other: Self) -> bool {
+        self == other
+    }
+}
+impl ScalarNumber for i32 {
+    fn almost_eq(self, other: Self) -> bool {
+        self == other
+    }
+}
+impl ScalarNumber for i64 {
+    fn almost_eq(self, other: Self) -> bool {
+        self == other
+    }
+}
+impl ScalarNumber for f32 {
+    fn almost_eq(self, other: Self) -> bool {
+        if self.is_nan() != other.is_nan() {
+            return false;
+        }
+
+        if self.is_nan() || other.is_nan() {
+            return true;
+        }
+
+        return (self - other).abs() < 0.00001;
+    }
+}
+impl ScalarNumber for f64 {
+    fn almost_eq(self, other: Self) -> bool {
+        if self.is_nan() != other.is_nan() {
+            return false;
+        }
+
+        if self.is_nan() || other.is_nan() {
+            return true;
+        }
+
+        return (self - other).abs() < 0.00000001;
+    }
+}
 
 #[derive(Clone, Copy, Debug)]
 struct ArbitrarySimd<Scalar, S: SimdBase<Scalar = Scalar>>(S);

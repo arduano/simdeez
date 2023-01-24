@@ -601,7 +601,7 @@ impl SimdBase for F32x8 {
 
     #[inline(always)]
     unsafe fn bit_not(self) -> Self {
-        self.bit_xor(I32x8::set1(-1).cast_f32())
+        self.bit_xor(I32x8::set1(-1).bitcast_f32())
     }
 
     #[inline(always)]
@@ -841,7 +841,7 @@ impl SimdBase for F64x4 {
 
     #[inline(always)]
     unsafe fn bit_not(self) -> Self {
-        self.bit_xor(I64x4::set1(-1).cast_f64())
+        self.bit_xor(I64x4::set1(-1).bitcast_f64())
     }
 
     #[inline(always)]

@@ -28,7 +28,7 @@ fn check_function_1_arg<N: ScalarNumber, S: 'static + SimdBase<Scalar = N>>(
                 for i in 0..S::WIDTH {
                     expected[i] = (self.check)(arbitrary.0[i]);
 
-                    if expected[i] != result[i] {
+                    if !expected[i].almost_eq(result[i]) {
                         success = false;
                     }
                 }
@@ -74,7 +74,7 @@ fn check_function_2_arg<N: ScalarNumber, S: 'static + SimdBase<Scalar = N>>(
                 for i in 0..S::WIDTH {
                     expected[i] = (self.check)(arbitrary1.0[i], arbitrary2.0[i]);
 
-                    if expected[i] != result[i] {
+                    if !expected[i].almost_eq(result[i]) {
                         success = false;
                     }
                 }
@@ -121,7 +121,7 @@ fn check_function_3_arg<N: ScalarNumber, S: 'static + SimdBase<Scalar = N>>(
                 for i in 0..S::WIDTH {
                     expected[i] = (self.check)(arbitrary1.0[i], arbitrary2.0[i], arbitrary3.0[i]);
 
-                    if expected[i] != result[i] {
+                    if !expected[i].almost_eq(result[i]) {
                         success = false;
                     }
                 }
@@ -143,47 +143,92 @@ fn check_function_3_arg<N: ScalarNumber, S: 'static + SimdBase<Scalar = N>>(
     quickcheck(checker)
 }
 
+macro_rules! build_checker {
+    ($sub:ident, $f:ident, check_function_1_arg) => {
+        |x| {
+            type S = <Scalar as Simd>::$sub;
+            unsafe {
+                let x = S::from_underlying_value(x);
+                let result = S::$f(x);
+                result.underlying_value()
+            }
+        }
+    };
+    ($sub:ident, $f:ident, check_function_2_arg) => {
+        |x, y| {
+            type S = <Scalar as Simd>::$sub;
+            unsafe {
+                let x = S::from_underlying_value(x);
+                let y = S::from_underlying_value(y);
+                let result = S::$f(x, y);
+                result.underlying_value()
+            }
+        }
+    };
+    ($sub:ident, $f:ident, check_function_3_arg) => {
+        |x, y, z| {
+            type S = <Scalar as Simd>::$sub;
+            unsafe {
+                let x = S::from_underlying_value(x);
+                let y = S::from_underlying_value(y);
+                let z = S::from_underlying_value(z);
+                let result = S::$f(x, y, z);
+                result.underlying_value()
+            }
+        }
+    };
+}
+
+macro_rules! check_fn_against_scalar {
+    ($checker:ident, $simd:ident, $sub:ident, $f:ident) => {
+        $checker(
+            <$simd as Simd>::$sub::$f,
+            build_checker!($sub, $f, $checker),
+        );
+    };
+}
+
 macro_rules! check_function {
-    (base, $checker:ident, $simd:ident, $f:ident, $check:expr) => {
-        $checker(<$simd as Simd>::Vi16::$f, $check);
-        $checker(<$simd as Simd>::Vi32::$f, $check);
-        $checker(<$simd as Simd>::Vi64::$f, $check);
-        $checker(<$simd as Simd>::Vf32::$f, $check);
-        $checker(<$simd as Simd>::Vf64::$f, $check);
+    (base, $checker:ident, $simd:ident, $f:ident) => {
+        check_fn_against_scalar!($checker, $simd, Vi16, $f);
+        check_fn_against_scalar!($checker, $simd, Vi32, $f);
+        check_fn_against_scalar!($checker, $simd, Vi64, $f);
+        check_fn_against_scalar!($checker, $simd, Vf32, $f);
+        check_fn_against_scalar!($checker, $simd, Vf64, $f);
     };
-    (int, $checker:ident, $simd:ident, $f:ident, $check:expr) => {
-        $checker(<$simd as Simd>::Vi16::$f, $check);
-        $checker(<$simd as Simd>::Vi32::$f, $check);
-        $checker(<$simd as Simd>::Vi64::$f, $check);
+    (int, $checker:ident, $simd:ident, $f:ident) => {
+        check_fn_against_scalar!($checker, $simd, Vi16, $f);
+        check_fn_against_scalar!($checker, $simd, Vi32, $f);
+        check_fn_against_scalar!($checker, $simd, Vi64, $f);
     };
-    (float, $checker:ident, $simd:ident, $f:ident, $check:expr) => {
-        $checker(<$simd as Simd>::Vf32::$f, $check);
-        $checker(<$simd as Simd>::Vf64::$f, $check);
+    (float, $checker:ident, $simd:ident, $f:ident) => {
+        check_fn_against_scalar!($checker, $simd, Vf32, $f);
+        check_fn_against_scalar!($checker, $simd, Vf64, $f);
     };
-    (i16, $checker:ident, $simd:ident, $f:ident, $check:expr) => {
-        $checker(<$simd as Simd>::Vi16::$f, $check);
+    (i16, $checker:ident, $simd:ident, $f:ident) => {
+        check_fn_against_scalar!($checker, $simd, Vi16, $f);
     };
-    (i32, $checker:ident, $simd:ident, $f:ident, $check:expr) => {
-        $checker(<$simd as Simd>::Vi32::$f, $check);
+    (i32, $checker:ident, $simd:ident, $f:ident) => {
+        check_fn_against_scalar!($checker, $simd, Vi32, $f);
     };
-    (i64, $checker:ident, $simd:ident, $f:ident, $check:expr) => {
-        $checker(<$simd as Simd>::Vi64::$f, $check);
+    (i64, $checker:ident, $simd:ident, $f:ident) => {
+        check_fn_against_scalar!($checker, $simd, Vi64, $f);
     };
-    (f32, $checker:ident, $simd:ident, $f:ident, $check:expr) => {
-        $checker(<$simd as Simd>::Vf32::$f, $check);
+    (f32, $checker:ident, $simd:ident, $f:ident) => {
+        check_fn_against_scalar!($checker, $simd, Vf32, $f);
     };
-    (f64, $checker:ident, $simd:ident, $f:ident, $check:expr) => {
-        $checker(<$simd as Simd>::Vf64::$f, $check);
+    (f64, $checker:ident, $simd:ident, $f:ident) => {
+        check_fn_against_scalar!($checker, $simd, Vf64, $f);
     };
 
-    ($kind:ident, $simd:ident, $f:ident, |$a1:ident| $($check:tt)+) => {
-        check_function!($kind, check_function_1_arg, $simd, $f, |$a1| $($check)+);
+    ($kind:ident, $simd:ident, $f:ident, 1_arg) => {
+        check_function!($kind, check_function_1_arg, $simd, $f);
     };
-    ($kind:ident, $simd:ident, $f:ident, |$a1:ident, $a2:ident| $($check:tt)+) => {
-        check_function!($kind, check_function_2_arg, $simd, $f, |$a1, $a2| $($check)+);
+    ($kind:ident, $simd:ident, $f:ident, 2_arg) => {
+        check_function!($kind, check_function_2_arg, $simd, $f);
     };
-    ($kind:ident, $simd:ident, $f:ident, |$a1:ident, $a2:ident, $a3:ident| $($check:tt)+) => {
-        check_function!($kind, check_function_3_arg, $simd, $f, |$a1, $a2, $a3| $($check)+);
+    ($kind:ident, $simd:ident, $f:ident, 3_arg) => {
+        check_function!($kind, check_function_3_arg, $simd, $f);
     };
 }
 
@@ -203,9 +248,12 @@ macro_rules! make_tests {
     };
 }
 
-#[test]
-fn test_add() {
-    assert_eq!(1, 1);
-}
+make_tests!(base, add, 2_arg);
+make_tests!(base, sub, 2_arg);
+make_tests!(base, mul, 2_arg);
 
-make_tests!(base, add, |x, y| x + y);
+make_tests!(base, bit_and, 2_arg);
+make_tests!(base, bit_or, 2_arg);
+make_tests!(base, bit_xor, 2_arg);
+
+make_tests!(base, bit_not, 1_arg);
