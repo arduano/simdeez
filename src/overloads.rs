@@ -122,24 +122,31 @@ macro_rules! impl_simd_base_overloads {
                 unsafe { &mut (*self.transmute_into_array_mut())[index] }
             }
         }
+
+        impl core::fmt::Debug for $s {
+            fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+                let array = unsafe { self.transmute_into_array_ref() };
+                write!(f, "{}([{:?}])", stringify!($s), array)
+            }
+        }
     };
 }
 
-macro_rules! impl_simd_small_int_overloads {
+macro_rules! impl_simd_int_overloads {
     ($s:ident) => {
         impl Shl<i32> for $s {
             type Output = Self;
 
             #[inline(always)]
             fn shl(self, rhs: i32) -> Self {
-                unsafe { SimdSmallInt::shl(self, rhs) }
+                unsafe { SimdInt::shl(self, rhs) }
             }
         }
 
         impl ShlAssign<i32> for $s {
             #[inline(always)]
             fn shl_assign(&mut self, rhs: i32) {
-                *self = unsafe { SimdSmallInt::shl(*self, rhs) };
+                *self = unsafe { SimdInt::shl(*self, rhs) };
             }
         }
 
@@ -148,50 +155,14 @@ macro_rules! impl_simd_small_int_overloads {
 
             #[inline(always)]
             fn shr(self, rhs: i32) -> Self {
-                unsafe { SimdSmallInt::shr(self, rhs) }
+                unsafe { SimdInt::shr(self, rhs) }
             }
         }
 
         impl ShrAssign<i32> for $s {
             #[inline(always)]
             fn shr_assign(&mut self, rhs: i32) {
-                *self = unsafe { SimdSmallInt::shr(*self, rhs) };
-            }
-        }
-    };
-}
-
-macro_rules! impl_simd_large_int_overloads {
-    ($s:ident) => {
-        impl Shl<i32> for $s {
-            type Output = Self;
-
-            #[inline(always)]
-            fn shl(self, rhs: i32) -> Self {
-                unsafe { SimdInt64::shl(self, rhs) }
-            }
-        }
-
-        impl ShlAssign<i32> for $s {
-            #[inline(always)]
-            fn shl_assign(&mut self, rhs: i32) {
-                *self = unsafe { SimdInt64::shl(*self, rhs) };
-            }
-        }
-
-        impl Shr<i32> for $s {
-            type Output = Self;
-
-            #[inline(always)]
-            fn shr(self, rhs: i32) -> Self {
-                unsafe { SimdInt64::shr(self, rhs) }
-            }
-        }
-
-        impl ShrAssign<i32> for $s {
-            #[inline(always)]
-            fn shr_assign(&mut self, rhs: i32) {
-                *self = unsafe { SimdInt64::shr(*self, rhs) };
+                *self = unsafe { SimdInt::shr(*self, rhs) };
             }
         }
     };

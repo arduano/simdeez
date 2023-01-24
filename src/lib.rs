@@ -186,27 +186,27 @@ pub trait Simd: Sync + Send {
     /// Vector of i16s.  Corresponds to __m128i when used
     /// with the Sse impl, __m256i when used with Avx2, or a single i16
     /// when used with Scalar.
-    type Vi16: SimdSmallInt<Scalar = i16>;
+    type Vi16: SimdInt16;
 
     /// Vector of i32s.  Corresponds to __m128i when used
     /// with the Sse impl, __m256i when used with Avx2, or a single i32
     /// when used with Scalar.
-    type Vi32: SimdSmallInt<Scalar = i32>;
+    type Vi32: SimdInt32<SimdF32 = Self::Vf32>;
 
     /// Vector of i64s.  Corresponds to __m128i when used
     /// with the Sse impl, __m256i when used with Avx2, or a single i64
     /// when used with Scalar.
-    type Vi64: SimdBase<Scalar = i64>;
+    type Vi64: SimdInt64<SimdF64 = Self::Vf64>;
 
     /// Vector of f32s.  Corresponds to __m128 when used
     /// with the Sse impl, __m256 when used with Avx2, or a single f32
     /// when used with Scalar.
-    type Vf32: SimdFloat<Scalar = f32>;
+    type Vf32: SimdFloat32<SimdI32 = Self::Vi32>;
 
     /// Vector of f64s.  Corresponds to __m128d when used
     /// with the Sse impl, __m256d when used with Avx2, or a single f64
     /// when used with Scalar.
-    type Vf64: SimdFloat<Scalar = f64>;
+    type Vf64: SimdFloat64<SimdI64 = Self::Vi64>;
 
     // The width of the vector lane.  Necessary for creating
     // lane width agnostic code.
@@ -328,122 +328,251 @@ pub trait Simd: Sync + Send {
         a & b
     }
 
-    unsafe fn abs_ps(a: Self::Vf32) -> Self::Vf32;
-    unsafe fn abs_pd(a: Self::Vf64) -> Self::Vf64;
+    unsafe fn abs_ps(a: Self::Vf32) -> Self::Vf32 {
+        a.abs()
+    }
+    unsafe fn abs_pd(a: Self::Vf64) -> Self::Vf64 {
+        a.abs()
+    }
+
     unsafe fn mullo_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16;
-    unsafe fn andnot_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
-    unsafe fn andnot_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
-    unsafe fn andnot_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
-    unsafe fn andnot_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
+
+    unsafe fn andnot_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
+        a.and_not(b)
+    }
+    unsafe fn andnot_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        a.and_not(b)
+    }
+    unsafe fn andnot_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
+        a.and_not(b)
+    }
+    unsafe fn andnot_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
+        a.and_not(b)
+    }
+
     /// Note SSE2 will select B only when all bits are 1, while SSE41 and AVX2 only
     /// check the high bit. To maintain portability ensure all bits are 1 when using
     /// blend. Results of comparison operations adhere to this.
-    unsafe fn blendv_epi32(a: Self::Vi32, b: Self::Vi32, mask: Self::Vi32) -> Self::Vi32;
+    unsafe fn blendv_epi32(a: Self::Vi32, b: Self::Vi32, mask: Self::Vi32) -> Self::Vi32 {
+        a.blendv(b, mask)
+    }
     /// Note SSE2 will select B only when all bits are 1, while SSE41 and AVX2 only
     /// check the high bit. To maintain portability ensure all bits are 1 when using
     /// blend. Results of comparison operations adhere to this.
-    unsafe fn blendv_epi64(a: Self::Vi64, b: Self::Vi64, mask: Self::Vi64) -> Self::Vi64;
+    unsafe fn blendv_epi64(a: Self::Vi64, b: Self::Vi64, mask: Self::Vi64) -> Self::Vi64 {
+        a.blendv(b, mask)
+    }
     /// Note SSE2 will select B only when all bits are 1, while SSE41 and AVX2 only
     /// check the high bit. To maintain portability ensure all bits are 1 when using
     /// blend. Results of comparison operations adhere to this.
-    unsafe fn blendv_ps(a: Self::Vf32, b: Self::Vf32, mask: Self::Vf32) -> Self::Vf32;
+    unsafe fn blendv_ps(a: Self::Vf32, b: Self::Vf32, mask: Self::Vf32) -> Self::Vf32 {
+        a.blendv(b, mask)
+    }
     /// Note SSE2 will select B only when all bits are 1, while SSE41 and AVX2 only
     /// check the high bit. To maintain portability ensure all bits are 1 when using
     /// blend. Results of comparison operations adhere to this.
-    unsafe fn blendv_pd(a: Self::Vf64, b: Self::Vf64, mask: Self::Vf64) -> Self::Vf64;
-    unsafe fn castps_epi32(a: Self::Vf32) -> Self::Vi32;
-    unsafe fn castpd_epi64(a: Self::Vf64) -> Self::Vi64;
-    unsafe fn castepi32_ps(a: Self::Vi32) -> Self::Vf32;
-    unsafe fn castepi64_pd(a: Self::Vi64) -> Self::Vf64;
+    unsafe fn blendv_pd(a: Self::Vf64, b: Self::Vf64, mask: Self::Vf64) -> Self::Vf64 {
+        a.blendv(b, mask)
+    }
+
+    unsafe fn castps_epi32(a: Self::Vf32) -> Self::Vi32 {
+        a.bitcast_i32()
+    }
+    unsafe fn castpd_epi64(a: Self::Vf64) -> Self::Vi64 {
+        a.bitcast_i64()
+    }
+    unsafe fn castepi32_ps(a: Self::Vi32) -> Self::Vf32 {
+        a.bitcast_f32()
+    }
+    unsafe fn castepi64_pd(a: Self::Vi64) -> Self::Vf64 {
+        a.bitcast_f64()
+    }
+
+    /// Converts the type of a f32 vector to a f64 vector without changing the underlying bits.
     unsafe fn castps_pd(a: Self::Vf32) -> Self::Vf64;
+    /// Converts the type of a f64 vector to a f32 vector without changing the underlying bits.
     unsafe fn castpd_ps(a: Self::Vf64) -> Self::Vf32;
-    unsafe fn ceil_ps(a: Self::Vf32) -> Self::Vf32;
-    unsafe fn ceil_pd(a: Self::Vf64) -> Self::Vf64;
-    unsafe fn cmpeq_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
-    unsafe fn cmpneq_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
-    unsafe fn cmpge_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
-    unsafe fn cmpgt_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
-    unsafe fn cmple_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
-    unsafe fn cmplt_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
-    unsafe fn cmpeq_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
-    unsafe fn cmpneq_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
-    unsafe fn cmpge_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
-    unsafe fn cmpgt_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
-    unsafe fn cmple_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
-    unsafe fn cmplt_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
-    unsafe fn cmpeq_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
-    unsafe fn cmpneq_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
-    unsafe fn cmpge_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
-    unsafe fn cmpgt_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
-    unsafe fn cmple_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
-    unsafe fn cmplt_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
-    unsafe fn cmpeq_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
-    unsafe fn cmpneq_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
-    unsafe fn cmpge_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
-    unsafe fn cmpgt_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
-    unsafe fn cmple_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
-    unsafe fn cmplt_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
-    unsafe fn cvtepi32_ps(a: Self::Vi32) -> Self::Vf32;
-    unsafe fn cvtepi64_pd(a: Self::Vi64) -> Self::Vf64;
 
     /// Currently scalar will have different results in some cases depending on the
     /// current SSE rounding mode.
-    unsafe fn cvtps_epi32(a: Self::Vf32) -> Self::Vi32;
-    unsafe fn cvtpd_epi64(a: Self::Vf64) -> Self::Vi64;
-    unsafe fn floor_ps(a: Self::Vf32) -> Self::Vf32;
-    unsafe fn floor_pd(a: Self::Vf64) -> Self::Vf64;
+    unsafe fn cvtps_epi32(a: Self::Vf32) -> Self::Vi32 {
+        a.cast_i32()
+    }
+    unsafe fn cvtpd_epi64(a: Self::Vf64) -> Self::Vi64 {
+        a.cast_i64()
+    }
+    unsafe fn cvtepi32_ps(a: Self::Vi32) -> Self::Vf32 {
+        a.cast_f32()
+    }
+    unsafe fn cvtepi64_pd(a: Self::Vi64) -> Self::Vf64 {
+        a.cast_f64()
+    }
+
+    unsafe fn cmpeq_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
+        a.cmp_eq(b)
+    }
+    unsafe fn cmpneq_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
+        a.cmp_neq(b)
+    }
+    unsafe fn cmpge_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
+        a.cmp_gte(b)
+    }
+    unsafe fn cmpgt_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
+        a.cmp_gt(b)
+    }
+    unsafe fn cmple_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
+        a.cmp_lte(b)
+    }
+    unsafe fn cmplt_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
+        a.cmp_lt(b)
+    }
+    unsafe fn cmpeq_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
+        a.cmp_eq(b)
+    }
+    unsafe fn cmpneq_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
+        a.cmp_neq(b)
+    }
+    unsafe fn cmpge_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
+        a.cmp_gte(b)
+    }
+    unsafe fn cmpgt_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
+        a.cmp_gt(b)
+    }
+    unsafe fn cmple_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
+        a.cmp_lte(b)
+    }
+    unsafe fn cmplt_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
+        a.cmp_lt(b)
+    }
+    unsafe fn cmpeq_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
+        a.cmp_eq(b)
+    }
+    unsafe fn cmpneq_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
+        a.cmp_neq(b)
+    }
+    unsafe fn cmpge_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
+        a.cmp_gte(b)
+    }
+    unsafe fn cmpgt_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
+        a.cmp_gt(b)
+    }
+    unsafe fn cmple_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
+        a.cmp_lte(b)
+    }
+    unsafe fn cmplt_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
+        a.cmp_lt(b)
+    }
+    unsafe fn cmpeq_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        a.cmp_eq(b)
+    }
+    unsafe fn cmpneq_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        a.cmp_neq(b)
+    }
+    unsafe fn cmpge_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        a.cmp_gte(b)
+    }
+    unsafe fn cmpgt_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        a.cmp_gt(b)
+    }
+    unsafe fn cmple_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        a.cmp_lte(b)
+    }
+    unsafe fn cmplt_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        a.cmp_lt(b)
+    }
+
+    unsafe fn ceil_ps(a: Self::Vf32) -> Self::Vf32 {
+        a.ceil()
+    }
+    unsafe fn ceil_pd(a: Self::Vf64) -> Self::Vf64 {
+        a.ceil()
+    }
+    unsafe fn floor_ps(a: Self::Vf32) -> Self::Vf32 {
+        a.floor()
+    }
+    unsafe fn floor_pd(a: Self::Vf64) -> Self::Vf64 {
+        a.floor()
+    }
     /// When using Sse2, fastround uses a faster version of floor
     /// that only works on floating point values small enough to fit in
     /// an i32.  This is a big performance boost if you don't need
     /// a complete floor.
-    unsafe fn fast_round_ps(a: Self::Vf32) -> Self::Vf32;
+    unsafe fn fast_round_ps(a: Self::Vf32) -> Self::Vf32 {
+        a.fast_round()
+    }
     /// When using Sse2, fastceil uses a faster version of floor
     /// that only works on floating point values small enough to fit in
     /// an i32.  This is a big performance boost if you don't need
     /// a complete floor.
-    unsafe fn fast_ceil_ps(a: Self::Vf32) -> Self::Vf32;
+    unsafe fn fast_ceil_ps(a: Self::Vf32) -> Self::Vf32 {
+        a.fast_ceil()
+    }
     /// When using Sse2, fastfloor uses a faster version of floor
     /// that only works on floating point values small enough to fit in
     /// an i32.  This is a big performance boost if you don't need
     /// a complete floor.
-    unsafe fn fast_floor_ps(a: Self::Vf32) -> Self::Vf32;
-    unsafe fn fast_floor_pd(a: Self::Vf64) -> Self::Vf64;
+    unsafe fn fast_floor_ps(a: Self::Vf32) -> Self::Vf32 {
+        a.fast_floor()
+    }
+    unsafe fn fast_floor_pd(a: Self::Vf64) -> Self::Vf64 {
+        a.fast_floor()
+    }
     /// Actual FMA instructions will be used when Avx2 is used,
     /// otherwise a mul and add are used to replicate it, allowing you to
     /// just always use FMA in your code and get best perf in both cases.
-    unsafe fn fmadd_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32;
+    unsafe fn fmadd_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32 {
+        a.mul_add(b, c)
+    }
     /// Actual FMA instructions will be used when Avx2 is used,
     /// otherwise a mul and add are used to replicate it, allowing you to
     /// just always use FMA in your code and get best perf in both cases.
-    unsafe fn fnmadd_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32;
+    unsafe fn fnmadd_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32 {
+        a.neg_mul_add(b, c)
+    }
     /// Actual FMA instructions will be used when Avx2 is used,
     /// otherwise a mul and add are used to replicate it, allowing you to
     /// just always use FMA in your code and get best perf in both cases.
-    unsafe fn fmadd_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64;
+    unsafe fn fmadd_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64 {
+        a.mul_add(b, c)
+    }
     /// Actual FMA instructions will be used when Avx2 is used,
     /// otherwise a mul and add are used to replicate it, allowing you to
     /// just always use FMA in your code and get best perf in both cases.
-    unsafe fn fnmadd_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64;
+    unsafe fn fnmadd_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64 {
+        a.neg_mul_add(b, c)
+    }
     /// Actual FMA instructions will be used when Avx2 is used,
     /// otherwise a mul and sub are used to replicate it, allowing you to
     /// just always use FMA in your code and get best perf in both cases.
-    unsafe fn fmsub_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32;
+    unsafe fn fmsub_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32 {
+        a.neg_mul_sub(b, c)
+    }
     /// Actual FMA instructions will be used when Avx2 is used,
     /// otherwise a mul and sub are used to replicate it, allowing you to
     /// just always use FMA in your code and get best perf in both cases.
-    unsafe fn fnmsub_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32;
+    unsafe fn fnmsub_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32 {
+        a.mul_sub(b, c)
+    }
     /// Actual FMA instructions will be used when Avx2 is used,
     /// otherwise a mul and sub are used to replicate it, allowing you to
     /// just always use FMA in your code and get best perf in both cases.
-    unsafe fn fmsub_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64;
+    unsafe fn fmsub_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64 {
+        a.neg_mul_sub(b, c)
+    }
     /// Actual FMA instructions will be used when Avx2 is used,
     /// otherwise a mul and sub are used to replicate it, allowing you to
     /// just always use FMA in your code and get best perf in both cases.
-    unsafe fn fnmsub_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64;
+    unsafe fn fnmsub_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64 {
+        a.mul_sub(b, c)
+    }
     /// Adds all lanes together. Distinct from h_add which adds pairs.
-    unsafe fn horizontal_add_ps(a: Self::Vf32) -> f32;
+    unsafe fn horizontal_add_ps(a: Self::Vf32) -> f32 {
+        a.horizontal_add()
+    }
     /// Adds all lanes together. Distinct from h_add which adds pairs.
-    unsafe fn horizontal_add_pd(a: Self::Vf64) -> f64;
+    unsafe fn horizontal_add_pd(a: Self::Vf64) -> f64 {
+        a.horizontal_add()
+    }
     /// Sse2 and Sse41 paths will simulate a gather by breaking out and
     /// doing scalar array accesses, because gather doesn't exist until Avx2.
     unsafe fn i32gather_epi32(arr: &[i32], index: Self::Vi32) -> Self::Vi32;
@@ -451,15 +580,44 @@ pub trait Simd: Sync + Send {
     /// Sse2 and Sse41 paths will simulate a gather by breaking out and
     /// doing scalar array accesses, because gather doesn't exist until Avx2.
     unsafe fn i32gather_ps(arr: &[f32], index: Self::Vi32) -> Self::Vf32;
-    unsafe fn load_ps(a: &f32) -> Self::Vf32;
-    unsafe fn load_pd(a: &f64) -> Self::Vf64;
-    unsafe fn load_epi16(a: &i16) -> Self::Vi16;
-    unsafe fn load_epi32(a: &i32) -> Self::Vi32;
-    unsafe fn load_epi64(a: &i64) -> Self::Vi64;
-    unsafe fn loadu_ps(a: &f32) -> Self::Vf32;
-    unsafe fn loadu_pd(a: &f64) -> Self::Vf64;
-    unsafe fn loadu_epi32(a: &i32) -> Self::Vi32;
-    unsafe fn loadu_epi64(a: &i64) -> Self::Vi64;
+
+    unsafe fn load_ps(a: &f32) -> Self::Vf32 {
+        // This function was originally highly unsafe, now it just defaults to set1
+        SimdBase::set1(*a)
+    }
+    unsafe fn load_pd(a: &f64) -> Self::Vf64 {
+        // This function was originally highly unsafe, now it just defaults to set1
+        SimdBase::set1(*a)
+    }
+    unsafe fn load_epi16(a: &i16) -> Self::Vi16 {
+        // This function was originally highly unsafe, now it just defaults to set1
+        SimdBase::set1(*a)
+    }
+    unsafe fn load_epi32(a: &i32) -> Self::Vi32 {
+        // This function was originally highly unsafe, now it just defaults to set1
+        SimdBase::set1(*a)
+    }
+    unsafe fn load_epi64(a: &i64) -> Self::Vi64 {
+        // This function was originally highly unsafe, now it just defaults to set1
+        SimdBase::set1(*a)
+    }
+    unsafe fn loadu_ps(a: &f32) -> Self::Vf32 {
+        // This function was originally highly unsafe, now it just defaults to set1
+        SimdBase::set1(*a)
+    }
+    unsafe fn loadu_pd(a: &f64) -> Self::Vf64 {
+        // This function was originally highly unsafe, now it just defaults to set1
+        SimdBase::set1(*a)
+    }
+    unsafe fn loadu_epi32(a: &i32) -> Self::Vi32 {
+        // This function was originally highly unsafe, now it just defaults to set1
+        SimdBase::set1(*a)
+    }
+    unsafe fn loadu_epi64(a: &i64) -> Self::Vi64 {
+        // This function was originally highly unsafe, now it just defaults to set1
+        SimdBase::set1(*a)
+    }
+
     /// Note, SSE2 and SSE4 will load when mask[i] is nonzero, where AVX2
     /// will store only when the high bit is set. To ensure portability
     /// ensure that the high bit is set.
@@ -476,62 +634,152 @@ pub trait Simd: Sync + Send {
     /// will store only when the high bit is set. To ensure portability
     /// ensure that the high bit is set.
     unsafe fn maskload_pd(mem_addr: &f64, mask: Self::Vi64) -> Self::Vf64;
-    unsafe fn store_ps(mem_addr: &mut f32, a: Self::Vf32);
-    unsafe fn store_pd(mem_addr: &mut f64, a: Self::Vf64);
-    unsafe fn store_epi32(mem_addr: &mut i32, a: Self::Vi32);
-    unsafe fn store_epi64(mem_addr: &mut i64, a: Self::Vi64);
-    unsafe fn storeu_ps(mem_addr: &mut f32, a: Self::Vf32);
-    unsafe fn storeu_pd(mem_addr: &mut f64, a: Self::Vf64);
-    unsafe fn storeu_epi32(mem_addr: &mut i32, a: Self::Vi32);
-    unsafe fn storeu_epi64(mem_addr: &mut i64, a: Self::Vi64);
+
+    unsafe fn store_ps(mem_addr: &mut f32, a: Self::Vf32) {
+        *mem_addr = a[0];
+    }
+    unsafe fn store_pd(mem_addr: &mut f64, a: Self::Vf64) {
+        *mem_addr = a[0];
+    }
+    unsafe fn store_epi32(mem_addr: &mut i32, a: Self::Vi32) {
+        *mem_addr = a[0];
+    }
+    unsafe fn store_epi64(mem_addr: &mut i64, a: Self::Vi64) {
+        *mem_addr = a[0];
+    }
+    unsafe fn storeu_ps(mem_addr: &mut f32, a: Self::Vf32) {
+        *mem_addr = a[0];
+    }
+    unsafe fn storeu_pd(mem_addr: &mut f64, a: Self::Vf64) {
+        *mem_addr = a[0];
+    }
+    unsafe fn storeu_epi32(mem_addr: &mut i32, a: Self::Vi32) {
+        *mem_addr = a[0];
+    }
+    unsafe fn storeu_epi64(mem_addr: &mut i64, a: Self::Vi64) {
+        *mem_addr = a[0];
+    }
+
     /// Note, SSE2 and SSE4 will store when mask[i] is nonzero, where AVX2
     /// will store only when the high bit is set. To ensure portability ensure the
     /// high bit is set.
-    unsafe fn maskstore_epi32(mem_addr: &mut i32, mask: Self::Vi32, a: Self::Vi32);
+    unsafe fn maskstore_epi32(mem_addr: &mut i32, mask: Self::Vi32, a: Self::Vi32) {
+        if mask[0] != 0 {
+            *mem_addr = a[0];
+        }
+    }
     /// Note, SSE2 and SSE4 will store when mask[i] is nonzero, where AVX2
     /// will store only when the high bit is set. To ensure portability ensure the
     /// high bit is set.
-    unsafe fn maskstore_epi64(mem_addr: &mut i64, mask: Self::Vi64, a: Self::Vi64);
+    unsafe fn maskstore_epi64(mem_addr: &mut i64, mask: Self::Vi64, a: Self::Vi64) {
+        if mask[0] != 0 {
+            *mem_addr = a[0];
+        }
+    }
     /// Note, SSE2 and SSE4 will store when mask[i] is nonzero, where AVX2
     /// will store only when the high bit is set. To ensure portability ensure the
     /// high bit is set.
-    unsafe fn maskstore_ps(mem_addr: &mut f32, mask: Self::Vi32, a: Self::Vf32);
+    unsafe fn maskstore_ps(mem_addr: &mut f32, mask: Self::Vi32, a: Self::Vf32) {
+        if mask[0] != 0 {
+            *mem_addr = a[0];
+        }
+    }
     /// Note, SSE2 and SSE4 will store when mask[i] is nonzero, where AVX2
     /// will store only when the high bit is set. To ensure portability ensure the
     /// high bit is set.
-    unsafe fn maskstore_pd(mem_addr: &mut f64, mask: Self::Vi64, a: Self::Vf64);
-    unsafe fn max_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
-    unsafe fn min_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
-    unsafe fn max_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
-    unsafe fn min_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
-    unsafe fn max_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
-    unsafe fn min_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
+    unsafe fn maskstore_pd(mem_addr: &mut f64, mask: Self::Vi64, a: Self::Vf64) {
+        if mask[0] != 0 {
+            *mem_addr = a[0];
+        }
+    }
+
+    unsafe fn max_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
+        a.max(b)
+    }
+    unsafe fn min_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
+        a.min(b)
+    }
+    unsafe fn max_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
+        a.max(b)
+    }
+    unsafe fn min_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
+        a.min(b)
+    }
+    unsafe fn max_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        a.max(b)
+    }
+    unsafe fn min_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        a.min(b)
+    }
+
     /// Mullo is implemented for Sse2 by combining other Sse2 operations.
     unsafe fn mullo_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
     unsafe fn mullo_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
-    unsafe fn rcp_ps(a: Self::Vf32) -> Self::Vf32;
+
+    unsafe fn rcp_ps(a: Self::Vf32) -> Self::Vf32 {
+        a.fast_inverse()
+    }
     /// Round is implemented for Sse2 by combining other Sse2 operations.
-    unsafe fn round_ps(a: Self::Vf32) -> Self::Vf32;
-    unsafe fn round_pd(a: Self::Vf64) -> Self::Vf64;
-    unsafe fn set1_epi32(a: i32) -> Self::Vi32;
-    unsafe fn set1_epi64(a: i64) -> Self::Vi64;
-    unsafe fn set1_ps(a: f32) -> Self::Vf32;
-    unsafe fn set1_pd(a: f64) -> Self::Vf64;
-    unsafe fn setzero_ps() -> Self::Vf32;
-    unsafe fn setzero_pd() -> Self::Vf64;
-    unsafe fn setzero_epi32() -> Self::Vi32;
-    unsafe fn setzero_epi64() -> Self::Vi64;
+    unsafe fn round_ps(a: Self::Vf32) -> Self::Vf32 {
+        a.round()
+    }
+    unsafe fn round_pd(a: Self::Vf64) -> Self::Vf64 {
+        a.round()
+    }
+    unsafe fn set1_epi32(a: i32) -> Self::Vi32 {
+        SimdBase::set1(a)
+    }
+    unsafe fn set1_epi64(a: i64) -> Self::Vi64 {
+        SimdBase::set1(a)
+    }
+    unsafe fn set1_ps(a: f32) -> Self::Vf32 {
+        SimdBase::set1(a)
+    }
+    unsafe fn set1_pd(a: f64) -> Self::Vf64 {
+        SimdBase::set1(a)
+    }
+    unsafe fn setzero_ps() -> Self::Vf32 {
+        SimdBase::zeroes()
+    }
+    unsafe fn setzero_pd() -> Self::Vf64 {
+        SimdBase::zeroes()
+    }
+    unsafe fn setzero_epi32() -> Self::Vi32 {
+        SimdBase::zeroes()
+    }
+    unsafe fn setzero_epi64() -> Self::Vi64 {
+        SimdBase::zeroes()
+    }
+
     /// amt must be a constant
-    unsafe fn srai_epi64(a: Self::Vi64, amt_const: i32) -> Self::Vi64;
+    unsafe fn srai_epi64(a: Self::Vi64, amt_const: i32) -> Self::Vi64 {
+        let shifted = a >> amt_const;
+        let ones: Self::Vi64 = SimdBase::set1(i64::MAX);
+        let mask = ones << (64 - amt_const);
+        shifted ^ mask
+    }
     /// amt must be a constant
-    unsafe fn srli_epi32(a: Self::Vi32, amt_const: i32) -> Self::Vi32;
+    unsafe fn srli_epi32(a: Self::Vi32, amt_const: i32) -> Self::Vi32 {
+        a >> amt_const
+    }
 
     /// amt does not have to be a constant, but may be slower than the srai version
-    unsafe fn sra_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32;
+    unsafe fn sra_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32 {
+        let shifted = a >> amt;
+        let ones: Self::Vi32 = SimdBase::set1(i32::MAX);
+        let mask = ones << (32 - amt);
+        shifted ^ mask
+    }
+
     /// amt does not have to be a constant, but may be slower than the srli version
-    unsafe fn srl_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32;
+    unsafe fn srl_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32 {
+        a >> amt
+    }
     /// amt does not have to be a constant, but may be slower than the slli version
-    unsafe fn sll_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32;
+    unsafe fn sll_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32 {
+        a << amt
+    }
+
     unsafe fn sub_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         a - b
     }
@@ -544,10 +792,22 @@ pub trait Simd: Sync + Send {
     unsafe fn sub_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
         a - b
     }
-    unsafe fn sqrt_ps(a: Self::Vf32) -> Self::Vf32;
-    unsafe fn rsqrt_ps(a: Self::Vf32) -> Self::Vf32;
-    unsafe fn sqrt_pd(a: Self::Vf64) -> Self::Vf64;
-    unsafe fn rsqrt_pd(a: Self::Vf64) -> Self::Vf64;
+
+    unsafe fn sqrt_ps(a: Self::Vf32) -> Self::Vf32 {
+        a.sqrt()
+    }
+    unsafe fn rsqrt_ps(a: Self::Vf32) -> Self::Vf32 {
+        a.rsqrt()
+    }
+    unsafe fn sqrt_pd(a: Self::Vf64) -> Self::Vf64 {
+        a.sqrt()
+    }
+    unsafe fn rsqrt_pd(a: Self::Vf64) -> Self::Vf64 {
+        a.rsqrt()
+    }
+
+    /// Using the shuffle function is undefined behavior because imm8 behaves differently on different
+    /// architectures.
     unsafe fn shuffle_epi32(a: Self::Vi32, imm8: i32) -> Self::Vi32;
 
     cfg_if::cfg_if! {

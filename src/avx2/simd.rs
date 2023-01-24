@@ -1,5 +1,5 @@
 #[cfg(feature = "sleef")]
-use crate::sse41::{F32x4, F64x2};
+use crate::sse41::{F32x4_41, F64x2_41};
 
 use super::*;
 use core::mem;
@@ -11,12 +11,6 @@ impl Simd for Avx2 {
     type Vf32 = F32x8;
     type Vf64 = F64x4;
     type Vi64 = I64x4;
-
-    const VF32_WIDTH: usize = 8;
-    const VF64_WIDTH: usize = 4;
-    const VI16_WIDTH: usize = 16;
-    const VI32_WIDTH: usize = 8;
-    const VI64_WIDTH: usize = 4;
 
     #[inline(always)]
     unsafe fn abs_ps(a: Self::Vf32) -> Self::Vf32 {

@@ -10,11 +10,6 @@ impl Simd for Scalar {
     type Vf32 = F32x1;
     type Vf64 = F64x1;
     type Vi64 = I64x1;
-    const VF32_WIDTH: usize = 1;
-    const VF64_WIDTH: usize = 1;
-    const VI16_WIDTH: usize = 1;
-    const VI32_WIDTH: usize = 1;
-    const VI64_WIDTH: usize = 1;
 
     #[inline(always)]
     unsafe fn abs_ps(a: Self::Vf32) -> Self::Vf32 {

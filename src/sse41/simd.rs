@@ -4,39 +4,33 @@ use core::mem;
 
 pub struct Sse41;
 impl Simd for Sse41 {
-    type Vi16 = I16x8;
+    type Vi16 = I16x8_41;
     type Vi32 = I32x4_41;
-    type Vf32 = F32x4;
-    type Vf64 = F64x2;
+    type Vf32 = F32x4_41;
+    type Vf64 = F64x2_41;
     type Vi64 = I64x2_41;
-
-    const VF32_WIDTH: usize = 4;
-    const VF64_WIDTH: usize = 2;
-    const VI16_WIDTH: usize = 8;
-    const VI32_WIDTH: usize = 4;
-    const VI64_WIDTH: usize = 2;
 
     #[inline(always)]
     unsafe fn abs_ps(a: Self::Vf32) -> Self::Vf32 {
         let b = _mm_set1_ps(-0.0f32);
-        F32x4(_mm_andnot_ps(b, a.0))
+        F32x4_41(_mm_andnot_ps(b, a.0))
     }
     #[inline(always)]
     unsafe fn abs_pd(a: Self::Vf64) -> Self::Vf64 {
         let b = _mm_set1_pd(-0.0f64);
-        F64x2(_mm_andnot_pd(b, a.0))
+        F64x2_41(_mm_andnot_pd(b, a.0))
     }
     #[inline(always)]
     unsafe fn mullo_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 {
-        I16x8(_mm_mullo_epi16(a.0, b.0))
+        I16x8_41(_mm_mullo_epi16(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn andnot_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        F32x4(_mm_andnot_ps(a.0, b.0))
+        F32x4_41(_mm_andnot_ps(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn andnot_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
-        F64x2(_mm_andnot_pd(a.0, b.0))
+        F64x2_41(_mm_andnot_pd(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn andnot_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
@@ -62,11 +56,11 @@ impl Simd for Sse41 {
     }
     #[inline(always)]
     unsafe fn blendv_ps(a: Self::Vf32, b: Self::Vf32, mask: Self::Vf32) -> Self::Vf32 {
-        F32x4(_mm_blendv_ps(a.0, b.0, mask.0))
+        F32x4_41(_mm_blendv_ps(a.0, b.0, mask.0))
     }
     #[inline(always)]
     unsafe fn blendv_pd(a: Self::Vf64, b: Self::Vf64, mask: Self::Vf64) -> Self::Vf64 {
-        F64x2(_mm_blendv_pd(a.0, b.0, mask.0))
+        F64x2_41(_mm_blendv_pd(a.0, b.0, mask.0))
     }
     #[inline(always)]
     unsafe fn castps_epi32(a: Self::Vf32) -> Self::Vi32 {
@@ -78,19 +72,19 @@ impl Simd for Sse41 {
     }
     #[inline(always)]
     unsafe fn castepi32_ps(a: Self::Vi32) -> Self::Vf32 {
-        F32x4(_mm_castsi128_ps(a.0))
+        F32x4_41(_mm_castsi128_ps(a.0))
     }
     #[inline(always)]
     unsafe fn castepi64_pd(a: Self::Vi64) -> Self::Vf64 {
-        F64x2(_mm_castsi128_pd(a.0))
+        F64x2_41(_mm_castsi128_pd(a.0))
     }
     #[inline(always)]
     unsafe fn castps_pd(a: Self::Vf32) -> Self::Vf64 {
-        F64x2(_mm_castps_pd(a.0))
+        F64x2_41(_mm_castps_pd(a.0))
     }
     #[inline(always)]
     unsafe fn castpd_ps(a: Self::Vf64) -> Self::Vf32 {
-        F32x4(_mm_castpd_ps(a.0))
+        F32x4_41(_mm_castpd_ps(a.0))
     }
     #[inline(always)]
     unsafe fn cmpeq_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
@@ -142,55 +136,55 @@ impl Simd for Sse41 {
     }
     #[inline(always)]
     unsafe fn cmpeq_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        F32x4(_mm_cmpeq_ps(a.0, b.0))
+        F32x4_41(_mm_cmpeq_ps(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn cmpneq_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        F32x4(_mm_cmpneq_ps(a.0, b.0))
+        F32x4_41(_mm_cmpneq_ps(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn cmpge_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        F32x4(_mm_cmpge_ps(a.0, b.0))
+        F32x4_41(_mm_cmpge_ps(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn cmpgt_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        F32x4(_mm_cmpgt_ps(a.0, b.0))
+        F32x4_41(_mm_cmpgt_ps(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn cmple_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        F32x4(_mm_cmple_ps(a.0, b.0))
+        F32x4_41(_mm_cmple_ps(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn cmplt_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        F32x4(_mm_cmplt_ps(a.0, b.0))
+        F32x4_41(_mm_cmplt_ps(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn cmpeq_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
-        F64x2(_mm_cmpeq_pd(a.0, b.0))
+        F64x2_41(_mm_cmpeq_pd(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn cmpneq_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
-        F64x2(_mm_cmpneq_pd(a.0, b.0))
+        F64x2_41(_mm_cmpneq_pd(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn cmpge_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
-        F64x2(_mm_cmpge_pd(a.0, b.0))
+        F64x2_41(_mm_cmpge_pd(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn cmpgt_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
-        F64x2(_mm_cmpgt_pd(a.0, b.0))
+        F64x2_41(_mm_cmpgt_pd(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn cmple_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
-        F64x2(_mm_cmple_pd(a.0, b.0))
+        F64x2_41(_mm_cmple_pd(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn cmplt_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
-        F64x2(_mm_cmplt_pd(a.0, b.0))
+        F64x2_41(_mm_cmplt_pd(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn cvtepi32_ps(a: Self::Vi32) -> Self::Vf32 {
-        F32x4(_mm_cvtepi32_ps(a.0))
+        F32x4_41(_mm_cvtepi32_ps(a.0))
     }
     #[inline(always)]
     unsafe fn cvtepi64_pd(a: Self::Vi64) -> Self::Vf64 {
@@ -198,7 +192,7 @@ impl Simd for Sse41 {
             a.0,
             _mm_castpd_si128(_mm_set1_pd(f64::from_bits(0x0018000000000000))),
         );
-        F64x2(_mm_sub_pd(
+        F64x2_41(_mm_sub_pd(
             _mm_castsi128_pd(x),
             _mm_set1_pd(f64::from_bits(0x0018000000000000)),
         ))
@@ -217,72 +211,72 @@ impl Simd for Sse41 {
     }
     #[inline(always)]
     unsafe fn floor_ps(a: Self::Vf32) -> Self::Vf32 {
-        F32x4(_mm_floor_ps(a.0))
+        F32x4_41(_mm_floor_ps(a.0))
     }
     #[inline(always)]
     unsafe fn floor_pd(a: Self::Vf64) -> Self::Vf64 {
-        F64x2(_mm_floor_pd(a.0))
+        F64x2_41(_mm_floor_pd(a.0))
     }
     #[inline(always)]
     unsafe fn ceil_ps(a: Self::Vf32) -> Self::Vf32 {
-        F32x4(_mm_ceil_ps(a.0))
+        F32x4_41(_mm_ceil_ps(a.0))
     }
     #[inline(always)]
     unsafe fn fast_ceil_ps(a: Self::Vf32) -> Self::Vf32 {
-        F32x4(_mm_ceil_ps(a.0))
+        F32x4_41(_mm_ceil_ps(a.0))
     }
     #[inline(always)]
     unsafe fn ceil_pd(a: Self::Vf64) -> Self::Vf64 {
-        F64x2(_mm_ceil_pd(a.0))
+        F64x2_41(_mm_ceil_pd(a.0))
     }
     #[inline(always)]
     unsafe fn fast_floor_ps(a: Self::Vf32) -> Self::Vf32 {
-        F32x4(_mm_floor_ps(a.0))
+        F32x4_41(_mm_floor_ps(a.0))
     }
     #[inline(always)]
     unsafe fn fast_floor_pd(a: Self::Vf64) -> Self::Vf64 {
-        F64x2(_mm_floor_pd(a.0))
+        F64x2_41(_mm_floor_pd(a.0))
     }
     #[inline(always)]
     unsafe fn fmadd_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32 {
-        F32x4(_mm_add_ps(_mm_mul_ps(a.0, b.0), c.0))
+        F32x4_41(_mm_add_ps(_mm_mul_ps(a.0, b.0), c.0))
     }
     #[inline(always)]
     unsafe fn fnmadd_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32 {
-        F32x4(_mm_add_ps(
+        F32x4_41(_mm_add_ps(
             _mm_mul_ps(_mm_set1_ps(-1.0), _mm_mul_ps(a.0, b.0)),
             c.0,
         ))
     }
     #[inline(always)]
     unsafe fn fmadd_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64 {
-        F64x2(_mm_add_pd(_mm_mul_pd(a.0, b.0), c.0))
+        F64x2_41(_mm_add_pd(_mm_mul_pd(a.0, b.0), c.0))
     }
     #[inline(always)]
     unsafe fn fnmadd_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64 {
-        F64x2(_mm_add_pd(
+        F64x2_41(_mm_add_pd(
             _mm_mul_pd(_mm_set1_pd(-1.0), _mm_mul_pd(a.0, b.0)),
             c.0,
         ))
     }
     #[inline(always)]
     unsafe fn fmsub_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32 {
-        F32x4(_mm_sub_ps(_mm_mul_ps(a.0, b.0), c.0))
+        F32x4_41(_mm_sub_ps(_mm_mul_ps(a.0, b.0), c.0))
     }
     #[inline(always)]
     unsafe fn fnmsub_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32 {
-        F32x4(_mm_sub_ps(
+        F32x4_41(_mm_sub_ps(
             _mm_mul_ps(_mm_set1_ps(-1.0), _mm_mul_ps(a.0, b.0)),
             c.0,
         ))
     }
     #[inline(always)]
     unsafe fn fmsub_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64 {
-        F64x2(_mm_sub_pd(_mm_mul_pd(a.0, b.0), c.0))
+        F64x2_41(_mm_sub_pd(_mm_mul_pd(a.0, b.0), c.0))
     }
     #[inline(always)]
     unsafe fn fnmsub_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64 {
-        F64x2(_mm_sub_pd(
+        F64x2_41(_mm_sub_pd(
             _mm_mul_pd(_mm_set1_pd(-1.0), _mm_mul_pd(a.0, b.0)),
             c.0,
         ))
@@ -318,7 +312,7 @@ impl Simd for Sse41 {
     #[inline(always)]
     unsafe fn i32gather_ps(arr: &[f32], index: Self::Vi32) -> Self::Vf32 {
         let index_as_arr = mem::transmute::<I32x4_41, [i32; 4]>(index);
-        F32x4(_mm_set_ps(
+        F32x4_41(_mm_set_ps(
             arr[index_as_arr[3] as usize],
             arr[index_as_arr[2] as usize],
             arr[index_as_arr[1] as usize],
@@ -327,16 +321,16 @@ impl Simd for Sse41 {
     }
     #[inline(always)]
     unsafe fn load_pd(a: &f64) -> Self::Vf64 {
-        F64x2(_mm_load_pd(a as *const f64))
+        F64x2_41(_mm_load_pd(a as *const f64))
     }
     #[inline(always)]
     unsafe fn load_ps(a: &f32) -> Self::Vf32 {
-        F32x4(_mm_load_ps(a as *const f32))
+        F32x4_41(_mm_load_ps(a as *const f32))
     }
     #[inline(always)]
     unsafe fn load_epi16(a: &i16) -> Self::Vi16 {
         let m = mem::transmute::<&i16, &__m128i>(a);
-        I16x8(_mm_load_si128(m))
+        I16x8_41(_mm_load_si128(m))
     }
     #[inline(always)]
     unsafe fn load_epi32(a: &i32) -> Self::Vi32 {
@@ -350,11 +344,11 @@ impl Simd for Sse41 {
     }
     #[inline(always)]
     unsafe fn loadu_ps(a: &f32) -> Self::Vf32 {
-        F32x4(_mm_loadu_ps(a as *const f32))
+        F32x4_41(_mm_loadu_ps(a as *const f32))
     }
     #[inline(always)]
     unsafe fn loadu_pd(a: &f64) -> Self::Vf64 {
-        F64x2(_mm_loadu_pd(a as *const f64))
+        F64x2_41(_mm_loadu_pd(a as *const f64))
     }
     #[inline(always)]
     unsafe fn loadu_epi32(a: &i32) -> Self::Vi32 {
@@ -386,7 +380,7 @@ impl Simd for Sse41 {
     }
     #[inline(always)]
     unsafe fn maskload_ps(mem_addr: &f32, mask: Self::Vi32) -> Self::Vf32 {
-        let mut result = F32x4(_mm_setzero_ps());
+        let mut result = F32x4_41(_mm_setzero_ps());
         let ptr = mem_addr as *const f32;
         result[0] = if mask[0] != 0 { *ptr } else { 0.0 };
         result[1] = if mask[1] != 0 { *ptr.offset(1) } else { 0.0 };
@@ -396,7 +390,7 @@ impl Simd for Sse41 {
     }
     #[inline(always)]
     unsafe fn maskload_pd(mem_addr: &f64, mask: Self::Vi64) -> Self::Vf64 {
-        let mut result = F64x2(_mm_setzero_pd());
+        let mut result = F64x2_41(_mm_setzero_pd());
         let ptr = mem_addr as *const f64;
         result[0] = if mask[0] != 0 { *ptr } else { 0.0 };
         result[1] = if mask[1] != 0 { *ptr.offset(1) } else { 0.0 };
@@ -500,19 +494,19 @@ impl Simd for Sse41 {
     }
     #[inline(always)]
     unsafe fn max_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        F32x4(_mm_max_ps(a.0, b.0))
+        F32x4_41(_mm_max_ps(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn min_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-        F32x4(_mm_min_ps(a.0, b.0))
+        F32x4_41(_mm_min_ps(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn max_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
-        F64x2(_mm_max_pd(a.0, b.0))
+        F64x2_41(_mm_max_pd(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn min_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
-        F64x2(_mm_min_pd(a.0, b.0))
+        F64x2_41(_mm_min_pd(a.0, b.0))
     }
     #[inline(always)]
     unsafe fn mullo_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
@@ -527,25 +521,25 @@ impl Simd for Sse41 {
     }
     #[inline(always)]
     unsafe fn rcp_ps(a: Self::Vf32) -> Self::Vf32 {
-        F32x4(_mm_rcp_ps(a.0))
+        F32x4_41(_mm_rcp_ps(a.0))
     }
     #[inline(always)]
     unsafe fn round_ps(a: Self::Vf32) -> Self::Vf32 {
-        F32x4(_mm_round_ps(
+        F32x4_41(_mm_round_ps(
             a.0,
             _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC,
         ))
     }
     #[inline(always)]
     unsafe fn fast_round_ps(a: Self::Vf32) -> Self::Vf32 {
-        F32x4(_mm_round_ps(
+        F32x4_41(_mm_round_ps(
             a.0,
             _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC,
         ))
     }
     #[inline(always)]
     unsafe fn round_pd(a: Self::Vf64) -> Self::Vf64 {
-        F64x2(_mm_round_pd(
+        F64x2_41(_mm_round_pd(
             a.0,
             _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC,
         ))
@@ -561,19 +555,19 @@ impl Simd for Sse41 {
     }
     #[inline(always)]
     unsafe fn set1_ps(a: f32) -> Self::Vf32 {
-        F32x4(_mm_set1_ps(a))
+        F32x4_41(_mm_set1_ps(a))
     }
     #[inline(always)]
     unsafe fn set1_pd(a: f64) -> Self::Vf64 {
-        F64x2(_mm_set1_pd(a))
+        F64x2_41(_mm_set1_pd(a))
     }
     #[inline(always)]
     unsafe fn setzero_pd() -> Self::Vf64 {
-        F64x2(_mm_setzero_pd())
+        F64x2_41(_mm_setzero_pd())
     }
     #[inline(always)]
     unsafe fn setzero_ps() -> Self::Vf32 {
-        F32x4(_mm_setzero_ps())
+        F32x4_41(_mm_setzero_ps())
     }
     #[inline(always)]
     unsafe fn setzero_epi32() -> Self::Vi32 {
@@ -625,19 +619,19 @@ impl Simd for Sse41 {
     }
     #[inline(always)]
     unsafe fn sqrt_ps(a: Self::Vf32) -> Self::Vf32 {
-        F32x4(_mm_sqrt_ps(a.0))
+        F32x4_41(_mm_sqrt_ps(a.0))
     }
     #[inline(always)]
     unsafe fn rsqrt_ps(a: Self::Vf32) -> Self::Vf32 {
-        F32x4(_mm_rsqrt_ps(a.0))
+        F32x4_41(_mm_rsqrt_ps(a.0))
     }
     #[inline(always)]
     unsafe fn sqrt_pd(a: Self::Vf64) -> Self::Vf64 {
-        F64x2(_mm_sqrt_pd(a.0))
+        F64x2_41(_mm_sqrt_pd(a.0))
     }
     #[inline(always)]
     unsafe fn rsqrt_pd(a: Self::Vf64) -> Self::Vf64 {
-        F64x2(_mm_div_pd(_mm_set1_pd(1.0), _mm_sqrt_pd(a.0)))
+        F64x2_41(_mm_div_pd(_mm_set1_pd(1.0), _mm_sqrt_pd(a.0)))
     }
     #[inline(always)]
     unsafe fn shuffle_epi32(a: Self::Vi32, imm8: i32) -> Self::Vi32 {
@@ -652,130 +646,130 @@ impl Simd for Sse41 {
             if #[cfg(feature = "sleef")] {
                 #[inline(always)]
                 unsafe fn sin_ps(a: Self::Vf32) -> Self::Vf32 {
-                    F32x4(sleef_sys::Sleef_sinf4_u10sse4(a.0))
+                    F32x4_41(sleef_sys::Sleef_sinf4_u10sse4(a.0))
                 }
                 #[inline(always)]
                 unsafe fn cos_ps(a: Self::Vf32) -> Self::Vf32 {
-                    F32x4(sleef_sys::Sleef_cosf4_u10sse4(a.0))
+                    F32x4_41(sleef_sys::Sleef_cosf4_u10sse4(a.0))
                 }
                 #[inline(always)]
                 unsafe fn fast_sin_ps(a: Self::Vf32) -> Self::Vf32 {
-                    F32x4(sleef_sys::Sleef_sinf4_u35sse4(a.0))
+                    F32x4_41(sleef_sys::Sleef_sinf4_u35sse4(a.0))
                 }
 
                 #[inline(always)]
                 unsafe fn fast_cos_ps(a: Self::Vf32) -> Self::Vf32 {
-                    F32x4(sleef_sys::Sleef_cosf4_u35sse4(a.0))
+                    F32x4_41(sleef_sys::Sleef_cosf4_u35sse4(a.0))
                 }
                 #[inline(always)]
                 unsafe fn asin_ps(a: Self::Vf32) -> Self::Vf32 {
-                    F32x4(sleef_sys::Sleef_asinf4_u10sse4(a.0))
+                    F32x4_41(sleef_sys::Sleef_asinf4_u10sse4(a.0))
                 }
                 #[inline(always)]
                 unsafe fn acos_ps(a: Self::Vf32) -> Self::Vf32 {
-                    F32x4(sleef_sys::Sleef_acosf4_u10sse4(a.0))
+                    F32x4_41(sleef_sys::Sleef_acosf4_u10sse4(a.0))
                 }
 
                 #[inline(always)]
                 unsafe fn fast_asin_ps(a: Self::Vf32) -> Self::Vf32 {
-                    F32x4(sleef_sys::Sleef_asinf4_u35sse4(a.0))
+                    F32x4_41(sleef_sys::Sleef_asinf4_u35sse4(a.0))
                 }
 
                 #[inline(always)]
                 unsafe fn fast_acos_ps(a: Self::Vf32) -> Self::Vf32 {
-                    F32x4(sleef_sys::Sleef_acosf4_u35sse4(a.0))
+                    F32x4_41(sleef_sys::Sleef_acosf4_u35sse4(a.0))
                 }
                 #[inline(always)]
                 unsafe fn tan_ps(a: Self::Vf32) -> Self::Vf32 {
-                    F32x4(sleef_sys::Sleef_tanf4_u10sse4(a.0))
+                    F32x4_41(sleef_sys::Sleef_tanf4_u10sse4(a.0))
                 }
 
                 #[inline(always)]
                 unsafe fn fast_tan_ps(a: Self::Vf32) -> Self::Vf32 {
-                    F32x4(sleef_sys::Sleef_tanf4_u35sse4(a.0))
+                    F32x4_41(sleef_sys::Sleef_tanf4_u35sse4(a.0))
                 }
                 #[inline(always)]
                 unsafe fn atan_ps(a: Self::Vf32) -> Self::Vf32 {
-                    F32x4(sleef_sys::Sleef_atanf4_u10sse4(a.0))
+                    F32x4_41(sleef_sys::Sleef_atanf4_u10sse4(a.0))
                 }
 
                 #[inline(always)]
                 unsafe fn fast_atan_ps(a: Self::Vf32) -> Self::Vf32 {
-                    F32x4(sleef_sys::Sleef_atanf4_u35sse4(a.0))
+                    F32x4_41(sleef_sys::Sleef_atanf4_u35sse4(a.0))
                 }
                 //hyperbolic
                 #[inline(always)]
                 unsafe fn sinh_ps(a: Self::Vf32) -> Self::Vf32 {
-                    F32x4(sleef_sys::Sleef_sinhf4_u10sse4(a.0))
+                    F32x4_41(sleef_sys::Sleef_sinhf4_u10sse4(a.0))
                 }
                 #[inline(always)]
                 unsafe fn cosh_ps(a: Self::Vf32) -> Self::Vf32 {
-                    F32x4(sleef_sys::Sleef_coshf4_u10sse4(a.0))
+                    F32x4_41(sleef_sys::Sleef_coshf4_u10sse4(a.0))
                 }
                 #[inline(always)]
                 unsafe fn fast_sinh_ps(a: Self::Vf32) -> Self::Vf32 {
-                    F32x4(sleef_sys::Sleef_sinhf4_u35sse4(a.0))
+                    F32x4_41(sleef_sys::Sleef_sinhf4_u35sse4(a.0))
                 }
 
                 #[inline(always)]
                 unsafe fn fast_cosh_ps(a: Self::Vf32) -> Self::Vf32 {
-                    F32x4(sleef_sys::Sleef_coshf4_u35sse4(a.0))
+                    F32x4_41(sleef_sys::Sleef_coshf4_u35sse4(a.0))
                 }
                 #[inline(always)]
                 unsafe fn asinh_ps(a: Self::Vf32) -> Self::Vf32 {
-                    F32x4(sleef_sys::Sleef_asinhf4_u10sse4(a.0))
+                    F32x4_41(sleef_sys::Sleef_asinhf4_u10sse4(a.0))
                 }
                 #[inline(always)]
                 unsafe fn acosh_ps(a: Self::Vf32) -> Self::Vf32 {
-                    F32x4(sleef_sys::Sleef_acoshf4_u10sse4(a.0))
+                    F32x4_41(sleef_sys::Sleef_acoshf4_u10sse4(a.0))
                 }
                 #[inline(always)]
                 unsafe fn tanh_ps(a: Self::Vf32) -> Self::Vf32 {
-                    F32x4(sleef_sys::Sleef_tanhf4_u10sse4(a.0))
+                    F32x4_41(sleef_sys::Sleef_tanhf4_u10sse4(a.0))
                 }
                 #[inline(always)]
                 unsafe fn fast_tanh_ps(a: Self::Vf32) -> Self::Vf32 {
-                    F32x4(sleef_sys::Sleef_tanhf4_u35sse4(a.0))
+                    F32x4_41(sleef_sys::Sleef_tanhf4_u35sse4(a.0))
                 }
                 #[inline(always)]
                 unsafe fn atanh_ps(a: Self::Vf32) -> Self::Vf32 {
-                    F32x4(sleef_sys::Sleef_atanhf4_u10sse4(a.0))
+                    F32x4_41(sleef_sys::Sleef_atanhf4_u10sse4(a.0))
                 }
                 #[inline(always)]
                 unsafe fn atan2_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-                    F32x4(sleef_sys::Sleef_atan2f4_u10sse4(a.0,b.0))
+                    F32x4_41(sleef_sys::Sleef_atan2f4_u10sse4(a.0,b.0))
                 }
                 #[inline(always)]
                 unsafe fn fast_atan2_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
-                    F32x4(sleef_sys::Sleef_atan2f4_u35sse4(a.0,b.0))
+                    F32x4_41(sleef_sys::Sleef_atan2f4_u35sse4(a.0,b.0))
                 }
                 #[inline(always)]
                 unsafe fn ln_ps(a: Self::Vf32) -> Self::Vf32 {
-                    F32x4(sleef_sys::Sleef_logf4_u10sse4(a.0))
+                    F32x4_41(sleef_sys::Sleef_logf4_u10sse4(a.0))
                 }
                 #[inline(always)]
                 unsafe fn fast_ln_ps(a: Self::Vf32) -> Self::Vf32 {
-                    F32x4(sleef_sys::Sleef_logf4_u35sse4(a.0))
+                    F32x4_41(sleef_sys::Sleef_logf4_u35sse4(a.0))
                 }
                 #[inline(always)]
                 unsafe fn log2_ps(a: Self::Vf32) -> Self::Vf32 {
-                    F32x4(sleef_sys::Sleef_log2f4_u10sse4(a.0))
+                    F32x4_41(sleef_sys::Sleef_log2f4_u10sse4(a.0))
                 }
                 #[inline(always)]
                 unsafe fn log10_ps(a: Self::Vf32) -> Self::Vf32 {
-                    F32x4(sleef_sys::Sleef_log10f4_u10sse4(a.0))
+                    F32x4_41(sleef_sys::Sleef_log10f4_u10sse4(a.0))
                 }
                 #[inline(always)]
                 unsafe fn hypot_ps(a:Self::Vf32,b:Self::Vf32) -> Self::Vf32 {
-                    F32x4(sleef_sys::Sleef_hypotf4_u05sse4(a.0,b.0))
+                    F32x4_41(sleef_sys::Sleef_hypotf4_u05sse4(a.0,b.0))
                 }
                 #[inline(always)]
                 unsafe fn fast_hypot_ps(a:Self::Vf32,b:Self::Vf32) -> Self::Vf32 {
-                    F32x4(sleef_sys::Sleef_hypotf4_u35sse4(a.0,b.0))
+                    F32x4_41(sleef_sys::Sleef_hypotf4_u35sse4(a.0,b.0))
                 }
                 #[inline(always)]
                 unsafe fn fmod_ps(a:Self::Vf32,b:Self::Vf32) -> Self::Vf32 {
-                    F32x4(sleef_sys::Sleef_fmodf4_sse4(a.0,b.0))
+                    F32x4_41(sleef_sys::Sleef_fmodf4_sse4(a.0,b.0))
                 }
         }
     }

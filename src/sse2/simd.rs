@@ -8,11 +8,6 @@ impl Simd for Sse2 {
     type Vf32 = F32x4;
     type Vf64 = F64x2;
     type Vi64 = I64x2;
-    const VF32_WIDTH: usize = 4;
-    const VF64_WIDTH: usize = 2;
-    const VI16_WIDTH: usize = 8;
-    const VI32_WIDTH: usize = 4;
-    const VI64_WIDTH: usize = 2;
 
     #[inline(always)]
     unsafe fn abs_ps(a: Self::Vf32) -> Self::Vf32 {
