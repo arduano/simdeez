@@ -109,6 +109,15 @@ macro_rules! impl_simd_base_overloads {
             }
         }
 
+        impl Neg for $s {
+            type Output = Self;
+
+            #[inline(always)]
+            fn neg(self) -> Self {
+                unsafe { Self::zeroes() - self }
+            }
+        }
+
         impl Index<usize> for $s {
             type Output = <Self as SimdBase>::Scalar;
 

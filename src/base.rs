@@ -28,7 +28,7 @@ pub trait SimdBase:
 
     /// The type of the transmuted array representation. This is to make indexing operations easier.
     /// We are unable to use `&[Self::Scalar; Self::WIDTH]` because constants are not allowed.
-    type ArrayRepresentation: Index<usize, Output = Self::Scalar> + IndexMut<usize>;
+    type ArrayRepresentation: Index<usize, Output = Self::Scalar> + IndexMut<usize> + Clone;
 
     /// The underlying intrinsic SIMD type.
     type UnderlyingType: Copy + Debug + core::marker::Sync + core::marker::Send;
@@ -116,6 +116,16 @@ pub trait SimdBase:
     }
 
     unsafe fn load_from_array(array: Self::ArrayRepresentation) -> Self;
+    unsafe fn as_array(&self) -> Self::ArrayRepresentation {
+        self.transmute_into_array_ref().clone()
+    }
+
+    unsafe fn load_from_ptr(ptr: *const Self::Scalar) -> Self;
+    unsafe fn copy_to_ptr(self, ptr: *mut Self::Scalar);
+
+    unsafe fn underlying_value(self) -> Self::UnderlyingType;
+    unsafe fn underlying_value_mut(&mut self) -> &mut Self::UnderlyingType;
+    unsafe fn from_underlying_value(value: Self::UnderlyingType) -> Self;
 }
 
 /// Operations shared by 16 and 32 bit int types

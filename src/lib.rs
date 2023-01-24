@@ -155,7 +155,9 @@
 extern crate std;
 pub extern crate paste;
 
-use core::fmt::Debug;
+#[cfg(test)]
+mod tests;
+
 use core::ops::*;
 
 #[macro_use]
@@ -186,27 +188,27 @@ pub trait Simd: Sync + Send {
     /// Vector of i16s.  Corresponds to __m128i when used
     /// with the Sse impl, __m256i when used with Avx2, or a single i16
     /// when used with Scalar.
-    type Vi16: SimdInt16;
+    type Vi16: SimdInt16<Scalar = i16>;
 
     /// Vector of i32s.  Corresponds to __m128i when used
     /// with the Sse impl, __m256i when used with Avx2, or a single i32
     /// when used with Scalar.
-    type Vi32: SimdInt32<SimdF32 = Self::Vf32>;
+    type Vi32: SimdInt32<SimdF32 = Self::Vf32, Scalar = i32>;
 
     /// Vector of i64s.  Corresponds to __m128i when used
     /// with the Sse impl, __m256i when used with Avx2, or a single i64
     /// when used with Scalar.
-    type Vi64: SimdInt64<SimdF64 = Self::Vf64>;
+    type Vi64: SimdInt64<SimdF64 = Self::Vf64, Scalar = i64>;
 
     /// Vector of f32s.  Corresponds to __m128 when used
     /// with the Sse impl, __m256 when used with Avx2, or a single f32
     /// when used with Scalar.
-    type Vf32: SimdFloat32<SimdI32 = Self::Vi32>;
+    type Vf32: SimdFloat32<SimdI32 = Self::Vi32, Scalar = f32>;
 
     /// Vector of f64s.  Corresponds to __m128d when used
     /// with the Sse impl, __m256d when used with Avx2, or a single f64
     /// when used with Scalar.
-    type Vf64: SimdFloat64<SimdI64 = Self::Vi64>;
+    type Vf64: SimdFloat64<SimdI64 = Self::Vi64, Scalar = f64>;
 
     // The width of the vector lane.  Necessary for creating
     // lane width agnostic code.

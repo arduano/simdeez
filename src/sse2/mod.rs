@@ -105,6 +105,26 @@ impl SimdBase for I16x8 {
     unsafe fn load_from_array(array: Self::ArrayRepresentation) -> Self {
         todo!()
     }
+
+    unsafe fn load_from_ptr(ptr: *const Self::Scalar) -> Self {
+        todo!()
+    }
+
+    unsafe fn copy_to_ptr(self, ptr: *mut Self::Scalar) {
+        todo!()
+    }
+
+    unsafe fn underlying_value(self) -> Self::UnderlyingType {
+        todo!()
+    }
+
+    unsafe fn underlying_value_mut(&mut self) -> &mut Self::UnderlyingType {
+        todo!()
+    }
+
+    unsafe fn from_underlying_value(value: Self::UnderlyingType) -> Self {
+        todo!()
+    }
 }
 
 impl SimdInt for I16x8 {
@@ -211,6 +231,26 @@ impl SimdBase for I32x4 {
     }
 
     unsafe fn load_from_array(array: Self::ArrayRepresentation) -> Self {
+        todo!()
+    }
+
+    unsafe fn load_from_ptr(ptr: *const Self::Scalar) -> Self {
+        todo!()
+    }
+
+    unsafe fn copy_to_ptr(self, ptr: *mut Self::Scalar) {
+        todo!()
+    }
+
+    unsafe fn underlying_value(self) -> Self::UnderlyingType {
+        todo!()
+    }
+
+    unsafe fn underlying_value_mut(&mut self) -> &mut Self::UnderlyingType {
+        todo!()
+    }
+
+    unsafe fn from_underlying_value(value: Self::UnderlyingType) -> Self {
         todo!()
     }
 }
@@ -331,6 +371,26 @@ impl SimdBase for I64x2 {
     unsafe fn load_from_array(array: Self::ArrayRepresentation) -> Self {
         todo!()
     }
+
+    unsafe fn load_from_ptr(ptr: *const Self::Scalar) -> Self {
+        todo!()
+    }
+
+    unsafe fn copy_to_ptr(self, ptr: *mut Self::Scalar) {
+        todo!()
+    }
+
+    unsafe fn underlying_value(self) -> Self::UnderlyingType {
+        todo!()
+    }
+
+    unsafe fn underlying_value_mut(&mut self) -> &mut Self::UnderlyingType {
+        todo!()
+    }
+
+    unsafe fn from_underlying_value(value: Self::UnderlyingType) -> Self {
+        todo!()
+    }
 }
 
 impl SimdInt for I64x2 {
@@ -447,6 +507,26 @@ impl SimdBase for F32x4 {
     }
 
     unsafe fn load_from_array(array: Self::ArrayRepresentation) -> Self {
+        todo!()
+    }
+
+    unsafe fn load_from_ptr(ptr: *const Self::Scalar) -> Self {
+        todo!()
+    }
+
+    unsafe fn copy_to_ptr(self, ptr: *mut Self::Scalar) {
+        todo!()
+    }
+
+    unsafe fn underlying_value(self) -> Self::UnderlyingType {
+        todo!()
+    }
+
+    unsafe fn underlying_value_mut(&mut self) -> &mut Self::UnderlyingType {
+        todo!()
+    }
+
+    unsafe fn from_underlying_value(value: Self::UnderlyingType) -> Self {
         todo!()
     }
 }
@@ -617,6 +697,26 @@ impl SimdBase for F64x2 {
     }
 
     unsafe fn load_from_array(array: Self::ArrayRepresentation) -> Self {
+        todo!()
+    }
+
+    unsafe fn load_from_ptr(ptr: *const Self::Scalar) -> Self {
+        todo!()
+    }
+
+    unsafe fn copy_to_ptr(self, ptr: *mut Self::Scalar) {
+        todo!()
+    }
+
+    unsafe fn underlying_value(self) -> Self::UnderlyingType {
+        todo!()
+    }
+
+    unsafe fn underlying_value_mut(&mut self) -> &mut Self::UnderlyingType {
+        todo!()
+    }
+
+    unsafe fn from_underlying_value(value: Self::UnderlyingType) -> Self {
         todo!()
     }
 }

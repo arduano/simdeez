@@ -4,6 +4,8 @@ mod simd;
 pub use self::overloads::*;
 pub use self::simd::*;
 
+use crate::libm_ext::FloatExt;
+
 // Newtypes for i16 vectors
 // We have to do this to allow for overloading of
 // __m128i etc
@@ -18,98 +20,146 @@ impl SimdBase for I16x1 {
     type ArrayRepresentation = [i16; 1];
     type UnderlyingType = i16;
 
+    #[inline(always)]
     unsafe fn zeroes() -> Self {
-        todo!()
+        I16x1(0)
     }
 
+    #[inline(always)]
     unsafe fn set1(x: Self::Scalar) -> Self {
-        todo!()
+        I16x1(x)
     }
 
+    #[inline(always)]
     unsafe fn add(self, rhs: Self) -> Self {
-        todo!()
+        I16x1(self.0 + rhs.0)
     }
 
+    #[inline(always)]
     unsafe fn sub(self, rhs: Self) -> Self {
-        todo!()
+        I16x1(self.0 - rhs.0)
     }
 
+    #[inline(always)]
     unsafe fn mul(self, rhs: Self) -> Self {
-        todo!()
+        I16x1(self.0 * rhs.0)
     }
 
+    #[inline(always)]
     unsafe fn bit_and(self, rhs: Self) -> Self {
-        todo!()
+        I16x1(self.0 & rhs.0)
     }
 
+    #[inline(always)]
     unsafe fn bit_or(self, rhs: Self) -> Self {
-        todo!()
+        I16x1(self.0 | rhs.0)
     }
 
+    #[inline(always)]
     unsafe fn bit_xor(self, rhs: Self) -> Self {
-        todo!()
+        I16x1(self.0 ^ rhs.0)
     }
 
+    #[inline(always)]
     unsafe fn bit_not(self) -> Self {
-        todo!()
+        I16x1(!self.0)
     }
 
+    #[inline(always)]
     unsafe fn abs(self) -> Self {
-        todo!()
+        I16x1(self.0.abs())
     }
 
+    #[inline(always)]
     unsafe fn and_not(self, rhs: Self) -> Self {
-        todo!()
+        I16x1(self.0 & !rhs.0)
     }
 
+    #[inline(always)]
     unsafe fn blendv(self, a: Self, b: Self) -> Self {
-        todo!()
+        I16x1(if self.0 != 0 { a.0 } else { b.0 })
     }
 
+    #[inline(always)]
     unsafe fn cmp_eq(self, rhs: Self) -> Self {
-        todo!()
+        I16x1(if self.0 == rhs.0 { -1 } else { 0 })
     }
 
+    #[inline(always)]
     unsafe fn cmp_neq(self, rhs: Self) -> Self {
-        todo!()
+        I16x1(if self.0 != rhs.0 { -1 } else { 0 })
     }
 
+    #[inline(always)]
     unsafe fn cmp_lt(self, rhs: Self) -> Self {
-        todo!()
+        I16x1(if self.0 < rhs.0 { -1 } else { 0 })
     }
 
+    #[inline(always)]
     unsafe fn cmp_lte(self, rhs: Self) -> Self {
-        todo!()
+        I16x1(if self.0 <= rhs.0 { -1 } else { 0 })
     }
 
+    #[inline(always)]
     unsafe fn cmp_gt(self, rhs: Self) -> Self {
-        todo!()
+        I16x1(if self.0 > rhs.0 { -1 } else { 0 })
     }
 
+    #[inline(always)]
     unsafe fn cmp_gte(self, rhs: Self) -> Self {
-        todo!()
+        I16x1(if self.0 >= rhs.0 { -1 } else { 0 })
     }
 
+    #[inline(always)]
     unsafe fn max(self, rhs: Self) -> Self {
-        todo!()
+        I16x1(self.0.max(rhs.0))
     }
 
+    #[inline(always)]
     unsafe fn min(self, rhs: Self) -> Self {
-        todo!()
+        I16x1(self.0.min(rhs.0))
     }
 
+    #[inline(always)]
     unsafe fn load_from_array(array: Self::ArrayRepresentation) -> Self {
-        todo!()
+        I16x1(array[0])
+    }
+
+    #[inline(always)]
+    unsafe fn load_from_ptr(ptr: *const Self::Scalar) -> Self {
+        I16x1(*ptr)
+    }
+
+    #[inline(always)]
+    unsafe fn copy_to_ptr(self, ptr: *mut Self::Scalar) {
+        *ptr = self.0;
+    }
+
+    #[inline(always)]
+    unsafe fn underlying_value(self) -> Self::UnderlyingType {
+        self.0
+    }
+
+    #[inline(always)]
+    unsafe fn underlying_value_mut(&mut self) -> &mut Self::UnderlyingType {
+        &mut self.0
+    }
+
+    #[inline(always)]
+    unsafe fn from_underlying_value(value: Self::UnderlyingType) -> Self {
+        I16x1(value)
     }
 }
 
 impl SimdInt for I16x1 {
+    #[inline(always)]
     unsafe fn shl(self, rhs: i32) -> Self {
-        todo!()
+        I16x1(self.0 << rhs)
     }
 
+    #[inline(always)]
     unsafe fn shr(self, rhs: i32) -> Self {
-        todo!()
+        I16x1(self.0 >> rhs)
     }
 }
 
@@ -129,110 +179,160 @@ impl SimdBase for I32x1 {
     type ArrayRepresentation = [i32; 1];
     type UnderlyingType = i32;
 
+    #[inline(always)]
     unsafe fn zeroes() -> Self {
-        todo!()
+        I32x1(0)
     }
 
+    #[inline(always)]
     unsafe fn set1(x: Self::Scalar) -> Self {
-        todo!()
+        I32x1(x)
     }
 
+    #[inline(always)]
     unsafe fn add(self, rhs: Self) -> Self {
-        todo!()
+        I32x1(self.0 + rhs.0)
     }
 
+    #[inline(always)]
     unsafe fn sub(self, rhs: Self) -> Self {
-        todo!()
+        I32x1(self.0 - rhs.0)
     }
 
+    #[inline(always)]
     unsafe fn mul(self, rhs: Self) -> Self {
-        todo!()
+        I32x1(self.0 * rhs.0)
     }
 
+    #[inline(always)]
     unsafe fn bit_and(self, rhs: Self) -> Self {
-        todo!()
+        I32x1(self.0 & rhs.0)
     }
 
+    #[inline(always)]
     unsafe fn bit_or(self, rhs: Self) -> Self {
-        todo!()
+        I32x1(self.0 | rhs.0)
     }
 
+    #[inline(always)]
     unsafe fn bit_xor(self, rhs: Self) -> Self {
-        todo!()
+        I32x1(self.0 ^ rhs.0)
     }
 
+    #[inline(always)]
     unsafe fn bit_not(self) -> Self {
-        todo!()
+        I32x1(!self.0)
     }
 
+    #[inline(always)]
     unsafe fn abs(self) -> Self {
-        todo!()
+        I32x1(self.0.abs())
     }
 
+    #[inline(always)]
     unsafe fn and_not(self, rhs: Self) -> Self {
-        todo!()
+        I32x1(self.0 & !rhs.0)
     }
 
+    #[inline(always)]
     unsafe fn blendv(self, a: Self, b: Self) -> Self {
-        todo!()
+        I32x1(if self.0 != 0 { a.0 } else { b.0 })
     }
 
+    #[inline(always)]
     unsafe fn cmp_eq(self, rhs: Self) -> Self {
-        todo!()
+        I32x1(if self.0 == rhs.0 { -1 } else { 0 })
     }
 
+    #[inline(always)]
     unsafe fn cmp_neq(self, rhs: Self) -> Self {
-        todo!()
+        I32x1(if self.0 != rhs.0 { -1 } else { 0 })
     }
 
+    #[inline(always)]
     unsafe fn cmp_lt(self, rhs: Self) -> Self {
-        todo!()
+        I32x1(if self.0 < rhs.0 { -1 } else { 0 })
     }
 
+    #[inline(always)]
     unsafe fn cmp_lte(self, rhs: Self) -> Self {
-        todo!()
+        I32x1(if self.0 <= rhs.0 { -1 } else { 0 })
     }
 
+    #[inline(always)]
     unsafe fn cmp_gt(self, rhs: Self) -> Self {
-        todo!()
+        I32x1(if self.0 > rhs.0 { -1 } else { 0 })
     }
 
+    #[inline(always)]
     unsafe fn cmp_gte(self, rhs: Self) -> Self {
-        todo!()
+        I32x1(if self.0 >= rhs.0 { -1 } else { 0 })
     }
 
+    #[inline(always)]
     unsafe fn max(self, rhs: Self) -> Self {
-        todo!()
+        I32x1(self.0.max(rhs.0))
     }
 
+    #[inline(always)]
     unsafe fn min(self, rhs: Self) -> Self {
-        todo!()
+        I32x1(self.0.min(rhs.0))
     }
 
+    #[inline(always)]
     unsafe fn load_from_array(array: Self::ArrayRepresentation) -> Self {
-        todo!()
+        I32x1(array[0])
+    }
+
+    #[inline(always)]
+    unsafe fn load_from_ptr(ptr: *const Self::Scalar) -> Self {
+        I32x1(*ptr)
+    }
+
+    #[inline(always)]
+    unsafe fn copy_to_ptr(self, ptr: *mut Self::Scalar) {
+        *ptr = self.0;
+    }
+
+    #[inline(always)]
+    unsafe fn underlying_value(self) -> Self::UnderlyingType {
+        self.0
+    }
+
+    #[inline(always)]
+    unsafe fn underlying_value_mut(&mut self) -> &mut Self::UnderlyingType {
+        &mut self.0
+    }
+
+    #[inline(always)]
+    unsafe fn from_underlying_value(value: Self::UnderlyingType) -> Self {
+        I32x1(value)
     }
 }
 
 impl SimdInt for I32x1 {
+    #[inline(always)]
     unsafe fn shl(self, rhs: i32) -> Self {
-        todo!()
+        I32x1(self.0 << rhs)
     }
 
+    #[inline(always)]
     unsafe fn shr(self, rhs: i32) -> Self {
-        todo!()
+        I32x1(self.0 >> rhs)
     }
 }
 
 impl SimdInt32 for I32x1 {
     type SimdF32 = F32x1;
 
+    #[inline(always)]
     unsafe fn bitcast_f32(self) -> Self::SimdF32 {
-        todo!()
+        F32x1(f32::from_bits(self.0 as u32))
     }
 
+    #[inline(always)]
     unsafe fn cast_f32(self) -> Self::SimdF32 {
-        todo!()
+        F32x1(self.0 as f32)
     }
 }
 
@@ -250,110 +350,160 @@ impl SimdBase for I64x1 {
     type ArrayRepresentation = [i64; 1];
     type UnderlyingType = i64;
 
+    #[inline(always)]
     unsafe fn zeroes() -> Self {
-        todo!()
+        I64x1(0)
     }
 
+    #[inline(always)]
     unsafe fn set1(x: Self::Scalar) -> Self {
-        todo!()
+        I64x1(x)
     }
 
+    #[inline(always)]
     unsafe fn add(self, rhs: Self) -> Self {
-        todo!()
+        I64x1(self.0 + rhs.0)
     }
 
+    #[inline(always)]
     unsafe fn sub(self, rhs: Self) -> Self {
-        todo!()
+        I64x1(self.0 - rhs.0)
     }
 
+    #[inline(always)]
     unsafe fn mul(self, rhs: Self) -> Self {
-        todo!()
+        I64x1(self.0 * rhs.0)
     }
 
+    #[inline(always)]
     unsafe fn bit_and(self, rhs: Self) -> Self {
-        todo!()
+        I64x1(self.0 & rhs.0)
     }
 
+    #[inline(always)]
     unsafe fn bit_or(self, rhs: Self) -> Self {
-        todo!()
+        I64x1(self.0 | rhs.0)
     }
 
+    #[inline(always)]
     unsafe fn bit_xor(self, rhs: Self) -> Self {
-        todo!()
+        I64x1(self.0 ^ rhs.0)
     }
 
+    #[inline(always)]
     unsafe fn bit_not(self) -> Self {
-        todo!()
+        I64x1(!self.0)
     }
 
+    #[inline(always)]
     unsafe fn abs(self) -> Self {
-        todo!()
+        I64x1(self.0.abs())
     }
 
+    #[inline(always)]
     unsafe fn and_not(self, rhs: Self) -> Self {
-        todo!()
+        I64x1(self.0 & !rhs.0)
     }
 
+    #[inline(always)]
     unsafe fn blendv(self, a: Self, b: Self) -> Self {
-        todo!()
+        I64x1(if self.0 != 0 { a.0 } else { b.0 })
     }
 
+    #[inline(always)]
     unsafe fn cmp_eq(self, rhs: Self) -> Self {
-        todo!()
+        I64x1(if self.0 == rhs.0 { -1 } else { 0 })
     }
 
+    #[inline(always)]
     unsafe fn cmp_neq(self, rhs: Self) -> Self {
-        todo!()
+        I64x1(if self.0 != rhs.0 { -1 } else { 0 })
     }
 
+    #[inline(always)]
     unsafe fn cmp_lt(self, rhs: Self) -> Self {
-        todo!()
+        I64x1(if self.0 < rhs.0 { -1 } else { 0 })
     }
 
+    #[inline(always)]
     unsafe fn cmp_lte(self, rhs: Self) -> Self {
-        todo!()
+        I64x1(if self.0 <= rhs.0 { -1 } else { 0 })
     }
 
+    #[inline(always)]
     unsafe fn cmp_gt(self, rhs: Self) -> Self {
-        todo!()
+        I64x1(if self.0 > rhs.0 { -1 } else { 0 })
     }
 
+    #[inline(always)]
     unsafe fn cmp_gte(self, rhs: Self) -> Self {
-        todo!()
+        I64x1(if self.0 >= rhs.0 { -1 } else { 0 })
     }
 
+    #[inline(always)]
     unsafe fn max(self, rhs: Self) -> Self {
-        todo!()
+        I64x1(self.0.max(rhs.0))
     }
 
+    #[inline(always)]
     unsafe fn min(self, rhs: Self) -> Self {
-        todo!()
+        I64x1(self.0.min(rhs.0))
     }
 
+    #[inline(always)]
     unsafe fn load_from_array(array: Self::ArrayRepresentation) -> Self {
-        todo!()
+        I64x1(array[0])
+    }
+
+    #[inline(always)]
+    unsafe fn load_from_ptr(ptr: *const Self::Scalar) -> Self {
+        I64x1(*ptr)
+    }
+
+    #[inline(always)]
+    unsafe fn copy_to_ptr(self, ptr: *mut Self::Scalar) {
+        *ptr = self.0;
+    }
+
+    #[inline(always)]
+    unsafe fn underlying_value(self) -> Self::UnderlyingType {
+        self.0
+    }
+
+    #[inline(always)]
+    unsafe fn underlying_value_mut(&mut self) -> &mut Self::UnderlyingType {
+        &mut self.0
+    }
+
+    #[inline(always)]
+    unsafe fn from_underlying_value(value: Self::UnderlyingType) -> Self {
+        I64x1(value)
     }
 }
 
 impl SimdInt for I64x1 {
+    #[inline(always)]
     unsafe fn shl(self, rhs: i32) -> Self {
-        todo!()
+        I64x1(self.0 << rhs)
     }
 
+    #[inline(always)]
     unsafe fn shr(self, rhs: i32) -> Self {
-        todo!()
+        I64x1(self.0 >> rhs)
     }
 }
 
 impl SimdInt64 for I64x1 {
     type SimdF64 = F64x1;
 
+    #[inline(always)]
     unsafe fn bitcast_f64(self) -> Self::SimdF64 {
-        todo!()
+        F64x1(f64::from_bits(self.0 as u64))
     }
 
+    #[inline(always)]
     unsafe fn cast_f64(self) -> Self::SimdF64 {
-        todo!()
+        F64x1(self.0 as f64)
     }
 }
 
@@ -371,162 +521,249 @@ impl SimdBase for F32x1 {
     type ArrayRepresentation = [f32; 1];
     type UnderlyingType = f32;
 
+    #[inline(always)]
     unsafe fn zeroes() -> Self {
-        todo!()
+        F32x1(0.0)
     }
 
+    #[inline(always)]
     unsafe fn set1(x: Self::Scalar) -> Self {
-        todo!()
+        F32x1(x)
     }
 
+    #[inline(always)]
     unsafe fn add(self, rhs: Self) -> Self {
-        todo!()
+        F32x1(self.0 + rhs.0)
     }
 
+    #[inline(always)]
     unsafe fn sub(self, rhs: Self) -> Self {
-        todo!()
+        F32x1(self.0 - rhs.0)
     }
 
+    #[inline(always)]
     unsafe fn mul(self, rhs: Self) -> Self {
-        todo!()
+        F32x1(self.0 * rhs.0)
     }
 
+    #[inline(always)]
     unsafe fn bit_and(self, rhs: Self) -> Self {
-        todo!()
+        F32x1((self.0.to_bits() & rhs.0.to_bits()) as f32)
     }
 
+    #[inline(always)]
     unsafe fn bit_or(self, rhs: Self) -> Self {
-        todo!()
+        F32x1((self.0.to_bits() | rhs.0.to_bits()) as f32)
     }
 
+    #[inline(always)]
     unsafe fn bit_xor(self, rhs: Self) -> Self {
-        todo!()
+        F32x1((self.0.to_bits() ^ rhs.0.to_bits()) as f32)
     }
 
+    #[inline(always)]
     unsafe fn bit_not(self) -> Self {
-        todo!()
+        F32x1((!self.0.to_bits()) as f32)
     }
 
+    #[inline(always)]
     unsafe fn abs(self) -> Self {
-        todo!()
+        F32x1(self.0.m_abs())
     }
 
+    #[inline(always)]
     unsafe fn and_not(self, rhs: Self) -> Self {
-        todo!()
+        F32x1(((!self.0.to_bits()) & rhs.0.to_bits()) as f32)
     }
 
+    #[inline(always)]
     unsafe fn blendv(self, a: Self, b: Self) -> Self {
-        todo!()
+        F32x1(if self.0.to_bits() != 0 { b.0 } else { a.0 })
     }
 
+    #[inline(always)]
     unsafe fn cmp_eq(self, rhs: Self) -> Self {
-        todo!()
+        F32x1(if self.0 == rhs.0 {
+            f32::from_bits(u32::MAX)
+        } else {
+            0.0
+        })
     }
 
+    #[inline(always)]
     unsafe fn cmp_neq(self, rhs: Self) -> Self {
-        todo!()
+        F32x1(if self.0 != rhs.0 {
+            f32::from_bits(u32::MAX)
+        } else {
+            0.0
+        })
     }
 
+    #[inline(always)]
     unsafe fn cmp_lt(self, rhs: Self) -> Self {
-        todo!()
+        F32x1(if self.0 < rhs.0 {
+            f32::from_bits(u32::MAX)
+        } else {
+            0.0
+        })
     }
 
+    #[inline(always)]
     unsafe fn cmp_lte(self, rhs: Self) -> Self {
-        todo!()
+        F32x1(if self.0 <= rhs.0 {
+            f32::from_bits(u32::MAX)
+        } else {
+            0.0
+        })
     }
 
+    #[inline(always)]
     unsafe fn cmp_gt(self, rhs: Self) -> Self {
-        todo!()
+        F32x1(if self.0 > rhs.0 {
+            f32::from_bits(u32::MAX)
+        } else {
+            0.0
+        })
     }
 
+    #[inline(always)]
     unsafe fn cmp_gte(self, rhs: Self) -> Self {
-        todo!()
+        F32x1(if self.0 >= rhs.0 {
+            f32::from_bits(u32::MAX)
+        } else {
+            0.0
+        })
     }
 
+    #[inline(always)]
     unsafe fn max(self, rhs: Self) -> Self {
-        todo!()
+        F32x1(self.0.max(rhs.0))
     }
 
+    #[inline(always)]
     unsafe fn min(self, rhs: Self) -> Self {
-        todo!()
+        F32x1(self.0.min(rhs.0))
     }
 
+    #[inline(always)]
     unsafe fn load_from_array(array: Self::ArrayRepresentation) -> Self {
-        todo!()
+        F32x1(array[0])
+    }
+
+    #[inline(always)]
+    unsafe fn load_from_ptr(ptr: *const Self::Scalar) -> Self {
+        F32x1(*ptr)
+    }
+
+    #[inline(always)]
+    unsafe fn copy_to_ptr(self, ptr: *mut Self::Scalar) {
+        *ptr = self.0;
+    }
+
+    #[inline(always)]
+    unsafe fn underlying_value(self) -> Self::UnderlyingType {
+        self.0
+    }
+
+    #[inline(always)]
+    unsafe fn underlying_value_mut(&mut self) -> &mut Self::UnderlyingType {
+        &mut self.0
+    }
+
+    #[inline(always)]
+    unsafe fn from_underlying_value(value: Self::UnderlyingType) -> Self {
+        F32x1(value)
     }
 }
 
 impl SimdFloat for F32x1 {
+    #[inline(always)]
     unsafe fn div(self, rhs: Self) -> Self {
-        todo!()
+        F32x1(self.0 / rhs.0)
     }
 
+    #[inline(always)]
     unsafe fn ceil(self) -> Self {
-        todo!()
+        F32x1(self.0.m_ceil())
     }
 
+    #[inline(always)]
     unsafe fn floor(self) -> Self {
-        todo!()
+        F32x1(self.0.m_floor())
     }
 
+    #[inline(always)]
     unsafe fn round(self) -> Self {
-        todo!()
+        F32x1(self.0.m_round())
     }
 
+    #[inline(always)]
     unsafe fn fast_ceil(self) -> Self {
-        todo!()
+        self.ceil()
     }
 
+    #[inline(always)]
     unsafe fn fast_floor(self) -> Self {
-        todo!()
+        self.floor()
     }
 
+    #[inline(always)]
     unsafe fn fast_round(self) -> Self {
-        todo!()
+        self.round()
     }
 
+    #[inline(always)]
     unsafe fn mul_add(self, a: Self, b: Self) -> Self {
-        todo!()
+        F32x1(self.0 * a.0 + b.0)
     }
 
+    #[inline(always)]
     unsafe fn mul_sub(self, a: Self, b: Self) -> Self {
-        todo!()
+        F32x1(self.0 * a.0 - b.0)
     }
 
+    #[inline(always)]
     unsafe fn neg_mul_add(self, a: Self, b: Self) -> Self {
-        todo!()
+        -self * a + b
     }
 
+    #[inline(always)]
     unsafe fn neg_mul_sub(self, a: Self, b: Self) -> Self {
-        todo!()
+        -self * a - b
     }
 
+    #[inline(always)]
     unsafe fn horizontal_add(self) -> Self::Scalar {
-        todo!()
+        self.0
     }
 
+    #[inline(always)]
     unsafe fn sqrt(self) -> Self {
-        todo!()
+        F32x1(self.0.m_sqrt())
     }
 
+    #[inline(always)]
     unsafe fn rsqrt(self) -> Self {
-        todo!()
+        F32x1(1.0 / self.0.m_sqrt())
     }
 }
 
 impl SimdFloat32 for F32x1 {
     type SimdI32 = I32x1;
 
+    #[inline(always)]
     unsafe fn bitcast_i32(self) -> Self::SimdI32 {
-        todo!()
+        I32x1(self.0.to_bits() as i32)
     }
 
+    #[inline(always)]
     unsafe fn cast_i32(self) -> Self::SimdI32 {
-        todo!()
+        I32x1(self.0 as i32)
     }
 
+    #[inline(always)]
     unsafe fn fast_inverse(self) -> Self {
-        todo!()
+        F32x1(self.0.recip())
     }
 }
 
@@ -542,157 +779,243 @@ impl SimdBase for F64x1 {
     type ArrayRepresentation = [f64; 1];
     type UnderlyingType = f64;
 
+    #[inline(always)]
     unsafe fn zeroes() -> Self {
-        todo!()
+        F64x1(0.0)
     }
 
+    #[inline(always)]
     unsafe fn set1(x: Self::Scalar) -> Self {
-        todo!()
+        F64x1(x)
     }
 
+    #[inline(always)]
     unsafe fn add(self, rhs: Self) -> Self {
-        todo!()
+        F64x1(self.0 + rhs.0)
     }
 
+    #[inline(always)]
     unsafe fn sub(self, rhs: Self) -> Self {
-        todo!()
+        F64x1(self.0 - rhs.0)
     }
 
+    #[inline(always)]
     unsafe fn mul(self, rhs: Self) -> Self {
-        todo!()
+        F64x1(self.0 * rhs.0)
     }
 
+    #[inline(always)]
     unsafe fn bit_and(self, rhs: Self) -> Self {
-        todo!()
+        F64x1((self.0.to_bits() & rhs.0.to_bits()) as f64)
     }
 
+    #[inline(always)]
     unsafe fn bit_or(self, rhs: Self) -> Self {
-        todo!()
+        F64x1((self.0.to_bits() | rhs.0.to_bits()) as f64)
     }
 
+    #[inline(always)]
     unsafe fn bit_xor(self, rhs: Self) -> Self {
-        todo!()
+        F64x1((self.0.to_bits() ^ rhs.0.to_bits()) as f64)
     }
 
+    #[inline(always)]
     unsafe fn bit_not(self) -> Self {
-        todo!()
+        F64x1((!self.0.to_bits()) as f64)
     }
 
+    #[inline(always)]
     unsafe fn abs(self) -> Self {
-        todo!()
+        F64x1(self.0.m_abs())
     }
 
+    #[inline(always)]
     unsafe fn and_not(self, rhs: Self) -> Self {
-        todo!()
+        F64x1(((!self.0.to_bits()) & rhs.0.to_bits()) as f64)
     }
 
+    #[inline(always)]
     unsafe fn blendv(self, a: Self, b: Self) -> Self {
-        todo!()
+        F64x1(if a.0 != 0.0 { self.0 } else { b.0 })
     }
 
+    #[inline(always)]
     unsafe fn cmp_eq(self, rhs: Self) -> Self {
-        todo!()
+        F64x1(if self.0 == rhs.0 {
+            f64::from_bits(u64::MAX)
+        } else {
+            0.0
+        })
     }
 
+    #[inline(always)]
     unsafe fn cmp_neq(self, rhs: Self) -> Self {
-        todo!()
+        F64x1(if self.0 != rhs.0 {
+            f64::from_bits(u64::MAX)
+        } else {
+            0.0
+        })
     }
 
+    #[inline(always)]
     unsafe fn cmp_lt(self, rhs: Self) -> Self {
-        todo!()
+        F64x1(if self.0 < rhs.0 {
+            f64::from_bits(u64::MAX)
+        } else {
+            0.0
+        })
     }
 
+    #[inline(always)]
     unsafe fn cmp_lte(self, rhs: Self) -> Self {
-        todo!()
+        F64x1(if self.0 <= rhs.0 {
+            f64::from_bits(u64::MAX)
+        } else {
+            0.0
+        })
     }
 
+    #[inline(always)]
     unsafe fn cmp_gt(self, rhs: Self) -> Self {
-        todo!()
+        F64x1(if self.0 > rhs.0 {
+            f64::from_bits(u64::MAX)
+        } else {
+            0.0
+        })
     }
 
+    #[inline(always)]
     unsafe fn cmp_gte(self, rhs: Self) -> Self {
-        todo!()
+        F64x1(if self.0 >= rhs.0 {
+            f64::from_bits(u64::MAX)
+        } else {
+            0.0
+        })
     }
 
+    #[inline(always)]
     unsafe fn max(self, rhs: Self) -> Self {
-        todo!()
+        F64x1(self.0.max(rhs.0))
     }
 
+    #[inline(always)]
     unsafe fn min(self, rhs: Self) -> Self {
-        todo!()
+        F64x1(self.0.min(rhs.0))
     }
 
+    #[inline(always)]
     unsafe fn load_from_array(array: Self::ArrayRepresentation) -> Self {
-        todo!()
+        F64x1(array[0])
+    }
+
+    #[inline(always)]
+    unsafe fn load_from_ptr(ptr: *const Self::Scalar) -> Self {
+        F64x1(*ptr)
+    }
+
+    #[inline(always)]
+    unsafe fn copy_to_ptr(self, ptr: *mut Self::Scalar) {
+        *ptr = self.0;
+    }
+
+    #[inline(always)]
+    unsafe fn underlying_value(self) -> Self::UnderlyingType {
+        self.0
+    }
+
+    #[inline(always)]
+    unsafe fn underlying_value_mut(&mut self) -> &mut Self::UnderlyingType {
+        &mut self.0
+    }
+
+    #[inline(always)]
+    unsafe fn from_underlying_value(value: Self::UnderlyingType) -> Self {
+        F64x1(value)
     }
 }
 
 impl SimdFloat for F64x1 {
+    #[inline(always)]
     unsafe fn div(self, rhs: Self) -> Self {
-        todo!()
+        F64x1(self.0 / rhs.0)
     }
 
+    #[inline(always)]
     unsafe fn ceil(self) -> Self {
-        todo!()
+        F64x1(self.0.m_ceil())
     }
 
+    #[inline(always)]
     unsafe fn floor(self) -> Self {
-        todo!()
+        F64x1(self.0.m_floor())
     }
 
+    #[inline(always)]
     unsafe fn round(self) -> Self {
-        todo!()
+        F64x1(self.0.m_round())
     }
 
+    #[inline(always)]
     unsafe fn fast_ceil(self) -> Self {
-        todo!()
+        self.ceil()
     }
 
+    #[inline(always)]
     unsafe fn fast_floor(self) -> Self {
-        todo!()
+        self.floor()
     }
 
+    #[inline(always)]
     unsafe fn fast_round(self) -> Self {
-        todo!()
+        self.round()
     }
 
+    #[inline(always)]
     unsafe fn mul_add(self, a: Self, b: Self) -> Self {
-        todo!()
+        self * a + b
     }
 
+    #[inline(always)]
     unsafe fn mul_sub(self, a: Self, b: Self) -> Self {
-        todo!()
+        self * a - b
     }
 
+    #[inline(always)]
     unsafe fn neg_mul_add(self, a: Self, b: Self) -> Self {
-        todo!()
+        -self * a + b
     }
 
+    #[inline(always)]
     unsafe fn neg_mul_sub(self, a: Self, b: Self) -> Self {
-        todo!()
+        -self * a - b
     }
 
+    #[inline(always)]
     unsafe fn horizontal_add(self) -> Self::Scalar {
-        todo!()
+        self.0
     }
 
+    #[inline(always)]
     unsafe fn sqrt(self) -> Self {
-        todo!()
+        F64x1(self.0.m_sqrt())
     }
 
+    #[inline(always)]
     unsafe fn rsqrt(self) -> Self {
-        todo!()
+        F64x1(1.0 / self.0.m_sqrt())
     }
 }
 
 impl SimdFloat64 for F64x1 {
     type SimdI64 = I64x1;
 
+    #[inline(always)]
     unsafe fn bitcast_i64(self) -> Self::SimdI64 {
-        todo!()
+        I64x1(self.0.to_bits() as i64)
     }
 
+    #[inline(always)]
     unsafe fn cast_i64(self) -> Self::SimdI64 {
-        todo!()
+        I64x1(self.0 as i64)
     }
 }

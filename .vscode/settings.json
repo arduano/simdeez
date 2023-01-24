@@ -6,7 +6,8 @@
     "--all",
     "--message-format=json",
     "--all-targets",
-    "--features",
-    "no_std",
+    "--no-default-features"
+    // "--features",
+    // "no_std",
   ]
 }
