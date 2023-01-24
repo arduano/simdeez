@@ -161,6 +161,12 @@ use core::ops::*;
 #[macro_use]
 mod macros;
 
+#[macro_use]
+mod overloads;
+
+mod base;
+pub use base::*;
+
 mod libm_ext;
 
 #[cfg(target_arch = "x86_64")]
@@ -175,83 +181,32 @@ pub mod sse41;
 //pub mod wasm32;
 //pub mod avx;
 
-/// Grouping all the constraints shared by associated types in
-/// the Simd trait into this marker trait drastically reduces
-/// compile time.
-pub trait SimdBase<T, U>:
-    Copy
-    + Debug
-    + IndexMut<usize>
-    + Add<T, Output = T>
-    + Sub<T, Output = T>
-    + AddAssign<T>
-    + SubAssign<T>
-    + BitAnd<T, Output = T>
-    + BitOr<T, Output = T>
-    + BitXor<T, Output = T>
-    + BitAndAssign<T>
-    + BitOrAssign<T>
-    + BitXorAssign<T>
-    + Index<usize, Output = U>
-    + core::marker::Sync
-    + core::marker::Send
-{
-    const WIDTH: usize;
-}
-
-/// 16 and 32 bit int types share all of these
-/// constraints, grouping them here speeds up
-/// compile times considerably
-pub trait SimdSmallInt<T, U>:
-    SimdBase<T, U>
-    + Mul<T, Output = T>
-    + MulAssign<T>
-    + Not<Output = T>
-    + Shl<i32, Output = T>
-    + ShlAssign<i32>
-    + Shr<i32, Output = T>
-    + ShrAssign<i32>
-{
-}
-
-/// f32 and f64 share these constraints, grouping
-/// them here speeds up compile times considerably
-pub trait SimdFloat<T, U>:
-    SimdBase<T, U>
-    + Mul<T, Output = T>
-    + Div<T, Output = T>
-    + MulAssign<T>
-    + DivAssign<T>
-    + Not<Output = T>
-{
-}
-
 /// The abstract SIMD trait which is implemented by Avx2, Sse41, etc
 pub trait Simd: Sync + Send {
     /// Vector of i16s.  Corresponds to __m128i when used
     /// with the Sse impl, __m256i when used with Avx2, or a single i16
     /// when used with Scalar.
-    type Vi16: SimdSmallInt<Self::Vi16, i16>;
+    type Vi16: SimdSmallInt<Scalar = i16>;
 
     /// Vector of i32s.  Corresponds to __m128i when used
     /// with the Sse impl, __m256i when used with Avx2, or a single i32
     /// when used with Scalar.
-    type Vi32: SimdSmallInt<Self::Vi32, i32>;
+    type Vi32: SimdSmallInt<Scalar = i32>;
 
     /// Vector of i64s.  Corresponds to __m128i when used
     /// with the Sse impl, __m256i when used with Avx2, or a single i64
     /// when used with Scalar.
-    type Vi64: SimdBase<Self::Vi64, i64> + Not<Output = Self::Vi64>;
+    type Vi64: SimdBase<Scalar = i64>;
 
     /// Vector of f32s.  Corresponds to __m128 when used
     /// with the Sse impl, __m256 when used with Avx2, or a single f32
     /// when used with Scalar.
-    type Vf32: SimdFloat<Self::Vf32, f32>;
+    type Vf32: SimdFloat<Scalar = f32>;
 
     /// Vector of f64s.  Corresponds to __m128d when used
     /// with the Sse impl, __m256d when used with Avx2, or a single f64
     /// when used with Scalar.
-    type Vf64: SimdFloat<Self::Vf64, f64>;
+    type Vf64: SimdFloat<Scalar = f64>;
 
     // The width of the vector lane.  Necessary for creating
     // lane width agnostic code.
