@@ -1,6 +1,6 @@
 use quickcheck::{Arbitrary, Gen, TestResult, Testable};
 
-use crate::{avx2::*, scalar::*, sse41::*};
+use crate::{avx2::*, scalar::*, sse41::*, sse2::*};
 use crate::{tests::ArbitrarySimd, Simd, SimdBase, SimdFloat};
 
 use super::ScalarNumber;
@@ -243,6 +243,11 @@ macro_rules! make_tests {
             #[test]
             fn [<$f _scalar>]() {
                 check_function!($kind, Scalar, $f, $($rest)+);
+            }
+
+            #[test]
+            fn [<$f _sse2>]() {
+                check_function!($kind, Sse2, $f, $($rest)+);
             }
 
             #[test]

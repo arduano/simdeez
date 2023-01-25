@@ -241,7 +241,9 @@ impl SimdBase for I32x8 {
 
     #[inline(always)]
     unsafe fn blendv(self, a: Self, b: Self) -> Self {
-        I32x8(_mm256_blendv_epi8(a.0, b.0, self.0))
+        self.cast_f32()
+            .blendv(a.cast_f32(), b.cast_f32())
+            .cast_i32()
     }
 
     #[inline(always)]
@@ -425,7 +427,9 @@ impl SimdBase for I64x4 {
 
     #[inline(always)]
     unsafe fn blendv(self, a: Self, b: Self) -> Self {
-        I64x4(_mm256_blendv_epi8(a.0, b.0, self.0))
+        self.cast_f64()
+            .blendv(a.cast_f64(), b.cast_f64())
+            .cast_i64()
     }
 
     #[inline(always)]

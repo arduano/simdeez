@@ -53,7 +53,7 @@ impl SimdBase for I16x8_41 {
     }
 
     unsafe fn bit_not(self) -> Self {
-        I16x8_41(_mm_xor_si128(self.0, _mm_set1_epi16(-1)))
+        Self::set1(-1).bit_xor(self)
     }
 
     unsafe fn abs(self) -> Self {
@@ -66,11 +66,10 @@ impl SimdBase for I16x8_41 {
     }
 
     unsafe fn blendv(self, a: Self, b: Self) -> Self {
-        let mask = _mm_cmpeq_epi16(a.0, _mm_set1_epi16(-1));
-        I16x8_41(_mm_or_si128(
-            _mm_and_si128(mask, b.0),
-            _mm_andnot_si128(mask, self.0),
-        ))
+        let mask = self.cmp_eq(Self::set1(-1));
+        let a = mask.bit_and(a);
+        let b = mask.and_not(b);
+        a.bit_or(b)
     }
 
     unsafe fn cmp_eq(self, rhs: Self) -> Self {
@@ -196,7 +195,7 @@ impl SimdBase for I32x4_41 {
     }
 
     unsafe fn bit_not(self) -> Self {
-        I32x4_41(_mm_xor_si128(self.0, _mm_set1_epi32(-1)))
+        Self::set1(-1).bit_xor(self)
     }
 
     unsafe fn abs(self) -> Self {
@@ -209,11 +208,9 @@ impl SimdBase for I32x4_41 {
     }
 
     unsafe fn blendv(self, a: Self, b: Self) -> Self {
-        let mask = _mm_cmpeq_epi32(a.0, _mm_set1_epi32(-1));
-        I32x4_41(_mm_or_si128(
-            _mm_and_si128(mask, b.0),
-            _mm_andnot_si128(mask, self.0),
-        ))
+        self.cast_f32()
+            .blendv(a.cast_f32(), b.cast_f32())
+            .cast_i32()
     }
 
     unsafe fn cmp_eq(self, rhs: Self) -> Self {
@@ -221,10 +218,7 @@ impl SimdBase for I32x4_41 {
     }
 
     unsafe fn cmp_neq(self, rhs: Self) -> Self {
-        I32x4_41(_mm_xor_si128(
-            _mm_cmpeq_epi32(self.0, rhs.0),
-            _mm_set1_epi32(-1),
-        ))
+        self.cmp_eq(rhs).bit_not()
     }
 
     unsafe fn cmp_lt(self, rhs: Self) -> Self {
@@ -232,10 +226,7 @@ impl SimdBase for I32x4_41 {
     }
 
     unsafe fn cmp_lte(self, rhs: Self) -> Self {
-        I32x4_41(_mm_xor_si128(
-            _mm_cmpgt_epi32(self.0, rhs.0),
-            _mm_set1_epi32(-1),
-        ))
+        self.cmp_gt(rhs).bit_not()
     }
 
     unsafe fn cmp_gt(self, rhs: Self) -> Self {
@@ -243,10 +234,7 @@ impl SimdBase for I32x4_41 {
     }
 
     unsafe fn cmp_gte(self, rhs: Self) -> Self {
-        I32x4_41(_mm_xor_si128(
-            _mm_cmplt_epi32(self.0, rhs.0),
-            _mm_set1_epi32(-1),
-        ))
+        self.cmp_lt(rhs).bit_not()
     }
 
     unsafe fn max(self, rhs: Self) -> Self {
@@ -342,7 +330,10 @@ impl SimdBase for I64x2_41 {
     }
 
     unsafe fn mul(self, rhs: Self) -> Self {
-        I64x2_41(_mm_mul_epi32(self.0, rhs.0))
+        let mut new = Self::zeroes();
+        new[0] = self[0] * rhs[0];
+        new[1] = self[1] * rhs[1];
+        new
     }
 
     unsafe fn bit_and(self, rhs: Self) -> Self {
@@ -358,7 +349,7 @@ impl SimdBase for I64x2_41 {
     }
 
     unsafe fn bit_not(self) -> Self {
-        I64x2_41(_mm_xor_si128(self.0, _mm_set1_epi32(-1)))
+        Self::set1(-1).bit_xor(self)
     }
 
     unsafe fn abs(self) -> Self {
@@ -371,7 +362,9 @@ impl SimdBase for I64x2_41 {
     }
 
     unsafe fn blendv(self, a: Self, b: Self) -> Self {
-        I64x2_41(_mm_blendv_epi8(a.0, b.0, self.0))
+        self.cast_f64()
+            .blendv(a.cast_f64(), b.cast_f64())
+            .cast_i64()
     }
 
     unsafe fn cmp_eq(self, rhs: Self) -> Self {
@@ -383,19 +376,31 @@ impl SimdBase for I64x2_41 {
     }
 
     unsafe fn cmp_lt(self, rhs: Self) -> Self {
-        self.cmp_gte(rhs).bit_not()
+        let mut new = Self::zeroes();
+        new[0] = if self[0] < rhs[0] { -1 } else { 0 };
+        new[1] = if self[1] < rhs[1] { -1 } else { 0 };
+        new
     }
 
     unsafe fn cmp_lte(self, rhs: Self) -> Self {
-        self.cmp_gt(rhs).bit_not()
+        let mut new = Self::zeroes();
+        new[0] = if self[0] <= rhs[0] { -1 } else { 0 };
+        new[1] = if self[1] <= rhs[1] { -1 } else { 0 };
+        new
     }
 
     unsafe fn cmp_gt(self, rhs: Self) -> Self {
-        I64x2_41(_mm_cmpgt_epi64(self.0, rhs.0))
+        let mut new = Self::zeroes();
+        new[0] = if self[0] > rhs[0] { -1 } else { 0 };
+        new[1] = if self[1] > rhs[1] { -1 } else { 0 };
+        new
     }
 
     unsafe fn cmp_gte(self, rhs: Self) -> Self {
-        self.cmp_gt(rhs).bit_or(self.cmp_eq(rhs))
+        let mut new = Self::zeroes();
+        new[0] = if self[0] >= rhs[0] { -1 } else { 0 };
+        new[1] = if self[1] >= rhs[1] { -1 } else { 0 };
+        new
     }
 
     unsafe fn max(self, rhs: Self) -> Self {
@@ -461,14 +466,8 @@ impl SimdInt64 for I64x2_41 {
     }
 
     unsafe fn cast_f64(self) -> Self::SimdF64 {
-        let x = _mm_add_epi64(
-            self.0,
-            _mm_castpd_si128(_mm_set1_pd(f64::from_bits(0x0018000000000000))),
-        );
-        F64x2_41(_mm_sub_pd(
-            _mm_castsi128_pd(x),
-            _mm_set1_pd(f64::from_bits(0x0018000000000000)),
-        ))
+        let x = self + Self::set1(0x0018000000000000);
+        x.bitcast_f64() - Self::set1(0x0018000000000000).bitcast_f64()
     }
 }
 
@@ -516,11 +515,11 @@ impl SimdBase for F32x4_41 {
     }
 
     unsafe fn bit_not(self) -> Self {
-        self.bit_xor(I32x4_41::set1(-1).bitcast_f32())
+        I32x4_41::set1(-1).bitcast_f32().bit_xor(self)
     }
 
     unsafe fn abs(self) -> Self {
-        F32x4_41(_mm_andnot_ps(_mm_set1_ps(-0.0), self.0))
+        Self::set1(-0.0).and_not(self)
     }
 
     unsafe fn and_not(self, rhs: Self) -> Self {
@@ -711,11 +710,11 @@ impl SimdBase for F64x2_41 {
     }
 
     unsafe fn bit_not(self) -> Self {
-        self.bit_xor(I64x2_41::set1(-1).bitcast_f64())
+        I64x2_41::set1(-1).bitcast_f64().bit_xor(self)
     }
 
     unsafe fn abs(self) -> Self {
-        F64x2_41(_mm_andnot_pd(_mm_set1_pd(-0.0), self.0))
+        Self::set1(-0.0).and_not(self)
     }
 
     unsafe fn and_not(self, rhs: Self) -> Self {
@@ -853,10 +852,7 @@ impl SimdFloat64 for F64x2_41 {
     }
 
     unsafe fn cast_i64(self) -> Self::SimdI64 {
-        let x = _mm_add_pd(self.0, _mm_set1_pd(f64::from_bits(0x0018000000000000)));
-        I64x2_41(_mm_sub_epi64(
-            _mm_castpd_si128(x),
-            _mm_castpd_si128(_mm_set1_pd(f64::from_bits(0x0018000000000000))),
-        ))
+        let x = self + Self::set1(f64::from_bits(0x0018000000000000));
+        x.bitcast_i64() - I64x2_41::set1(0x0018000000000000)
     }
 }
