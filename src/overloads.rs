@@ -9,14 +9,14 @@ macro_rules! impl_simd_base_overloads {
 
             #[inline(always)]
             fn add(self, rhs: Self) -> Self {
-                unsafe { SimdBase::add(self, rhs) }
+                SimdBase::add(self, rhs)
             }
         }
 
         impl AddAssign<Self> for $s {
             #[inline(always)]
             fn add_assign(&mut self, rhs: Self) {
-                *self = unsafe { SimdBase::add(*self, rhs) };
+                *self = SimdBase::add(*self, rhs);
             }
         }
 
@@ -25,14 +25,14 @@ macro_rules! impl_simd_base_overloads {
 
             #[inline(always)]
             fn sub(self, rhs: Self) -> Self {
-                unsafe { SimdBase::sub(self, rhs) }
+                SimdBase::sub(self, rhs)
             }
         }
 
         impl SubAssign<Self> for $s {
             #[inline(always)]
             fn sub_assign(&mut self, rhs: Self) {
-                *self = unsafe { SimdBase::sub(*self, rhs) };
+                *self = SimdBase::sub(*self, rhs);
             }
         }
 
@@ -41,14 +41,14 @@ macro_rules! impl_simd_base_overloads {
 
             #[inline(always)]
             fn mul(self, rhs: Self) -> Self {
-                unsafe { SimdBase::mul(self, rhs) }
+                SimdBase::mul(self, rhs)
             }
         }
 
         impl MulAssign<Self> for $s {
             #[inline(always)]
             fn mul_assign(&mut self, rhs: Self) {
-                *self = unsafe { SimdBase::mul(*self, rhs) };
+                *self = SimdBase::mul(*self, rhs);
             }
         }
 
@@ -57,14 +57,14 @@ macro_rules! impl_simd_base_overloads {
 
             #[inline(always)]
             fn bitand(self, rhs: Self) -> Self {
-                unsafe { SimdBase::bit_and(self, rhs) }
+                SimdBase::bit_and(self, rhs)
             }
         }
 
         impl BitAndAssign<Self> for $s {
             #[inline(always)]
             fn bitand_assign(&mut self, rhs: Self) {
-                *self = unsafe { SimdBase::bit_and(*self, rhs) };
+                *self = SimdBase::bit_and(*self, rhs);
             }
         }
 
@@ -73,14 +73,14 @@ macro_rules! impl_simd_base_overloads {
 
             #[inline(always)]
             fn bitor(self, rhs: Self) -> Self {
-                unsafe { SimdBase::bit_or(self, rhs) }
+                SimdBase::bit_or(self, rhs)
             }
         }
 
         impl BitOrAssign<Self> for $s {
             #[inline(always)]
             fn bitor_assign(&mut self, rhs: Self) {
-                *self = unsafe { SimdBase::bit_or(*self, rhs) };
+                *self = SimdBase::bit_or(*self, rhs);
             }
         }
 
@@ -89,14 +89,14 @@ macro_rules! impl_simd_base_overloads {
 
             #[inline(always)]
             fn bitxor(self, rhs: Self) -> Self {
-                unsafe { SimdBase::bit_xor(self, rhs) }
+                SimdBase::bit_xor(self, rhs)
             }
         }
 
         impl BitXorAssign<Self> for $s {
             #[inline(always)]
             fn bitxor_assign(&mut self, rhs: Self) {
-                *self = unsafe { SimdBase::bit_xor(*self, rhs) };
+                *self = SimdBase::bit_xor(*self, rhs);
             }
         }
 
@@ -105,7 +105,7 @@ macro_rules! impl_simd_base_overloads {
 
             #[inline(always)]
             fn not(self) -> Self {
-                unsafe { SimdBase::bit_not(self) }
+                SimdBase::bit_not(self)
             }
         }
 
@@ -134,8 +134,10 @@ macro_rules! impl_simd_base_overloads {
 
         impl core::fmt::Debug for $s {
             fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
-                let array = unsafe { self.transmute_into_array_ref() };
-                write!(f, "{}([{:?}])", stringify!($s), array)
+                unsafe {
+                    let array = self.transmute_into_array_ref();
+                    write!(f, "{}([{:?}])", stringify!($s), array)
+                }
             }
         }
     };
@@ -148,14 +150,14 @@ macro_rules! impl_simd_int_overloads {
 
             #[inline(always)]
             fn shl(self, rhs: i32) -> Self {
-                unsafe { SimdInt::shl(self, rhs) }
+                SimdInt::shl(self, rhs)
             }
         }
 
         impl ShlAssign<i32> for $s {
             #[inline(always)]
             fn shl_assign(&mut self, rhs: i32) {
-                *self = unsafe { SimdInt::shl(*self, rhs) };
+                *self = SimdInt::shl(*self, rhs);
             }
         }
 
@@ -164,14 +166,14 @@ macro_rules! impl_simd_int_overloads {
 
             #[inline(always)]
             fn shr(self, rhs: i32) -> Self {
-                unsafe { SimdInt::shr(self, rhs) }
+                SimdInt::shr(self, rhs)
             }
         }
 
         impl ShrAssign<i32> for $s {
             #[inline(always)]
             fn shr_assign(&mut self, rhs: i32) {
-                *self = unsafe { SimdInt::shr(*self, rhs) };
+                *self = SimdInt::shr(*self, rhs);
             }
         }
     };
@@ -184,14 +186,14 @@ macro_rules! impl_simd_float_overloads {
 
             #[inline(always)]
             fn div(self, rhs: Self) -> Self {
-                unsafe { SimdFloat::div(self, rhs) }
+                SimdFloat::div(self, rhs)
             }
         }
 
         impl DivAssign<Self> for $s {
             #[inline(always)]
             fn div_assign(&mut self, rhs: Self) {
-                *self = unsafe { SimdFloat::div(*self, rhs) };
+                *self = SimdFloat::div(*self, rhs);
             }
         }
     };

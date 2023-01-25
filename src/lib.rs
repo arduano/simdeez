@@ -149,7 +149,7 @@
     feature(core_intrinsics)
 )]
 #![allow(clippy::missing_safety_doc)] // TODO: Work on the safety of functions
-#![cfg_attr(feature = "no_std", no_std)]
+#![cfg_attr(all(feature = "no_std", not(test)), no_std)]
 #[macro_use]
 #[cfg(test)]
 extern crate std;

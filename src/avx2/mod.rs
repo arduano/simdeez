@@ -27,93 +27,93 @@ impl SimdBase for I16x16 {
     }
 
     #[inline(always)]
-    unsafe fn add(self, rhs: Self) -> Self {
-        I16x16(_mm256_add_epi16(self.0, rhs.0))
+    fn add(self, rhs: Self) -> Self {
+        unsafe { I16x16(_mm256_add_epi16(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn sub(self, rhs: Self) -> Self {
-        I16x16(_mm256_sub_epi16(self.0, rhs.0))
+    fn sub(self, rhs: Self) -> Self {
+        unsafe { I16x16(_mm256_sub_epi16(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn mul(self, rhs: Self) -> Self {
-        I16x16(_mm256_mullo_epi16(self.0, rhs.0))
+    fn mul(self, rhs: Self) -> Self {
+        unsafe { I16x16(_mm256_mullo_epi16(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn bit_and(self, rhs: Self) -> Self {
-        I16x16(_mm256_and_si256(self.0, rhs.0))
+    fn bit_and(self, rhs: Self) -> Self {
+        unsafe { I16x16(_mm256_and_si256(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn bit_or(self, rhs: Self) -> Self {
-        I16x16(_mm256_or_si256(self.0, rhs.0))
+    fn bit_or(self, rhs: Self) -> Self {
+        unsafe { I16x16(_mm256_or_si256(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn bit_xor(self, rhs: Self) -> Self {
-        I16x16(_mm256_xor_si256(self.0, rhs.0))
+    fn bit_xor(self, rhs: Self) -> Self {
+        unsafe { I16x16(_mm256_xor_si256(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn bit_not(self) -> Self {
-        self.bit_xor(Self::set1(-1))
+    fn bit_not(self) -> Self {
+        unsafe { self.bit_xor(Self::set1(-1)) }
     }
 
     #[inline(always)]
-    unsafe fn abs(self) -> Self {
-        I16x16(_mm256_abs_epi16(self.0))
+    fn abs(self) -> Self {
+        unsafe { I16x16(_mm256_abs_epi16(self.0)) }
     }
 
     #[inline(always)]
-    unsafe fn and_not(self, rhs: Self) -> Self {
-        I16x16(_mm256_andnot_si256(self.0, rhs.0))
+    fn and_not(self, rhs: Self) -> Self {
+        unsafe { I16x16(_mm256_andnot_si256(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn blendv(self, a: Self, b: Self) -> Self {
-        I16x16(_mm256_blendv_epi8(a.0, b.0, self.0))
+    fn blendv(self, a: Self, b: Self) -> Self {
+        unsafe { I16x16(_mm256_blendv_epi8(a.0, b.0, self.0)) }
     }
 
     #[inline(always)]
-    unsafe fn cmp_eq(self, rhs: Self) -> Self {
-        I16x16(_mm256_cmpeq_epi16(self.0, rhs.0))
+    fn cmp_eq(self, rhs: Self) -> Self {
+        unsafe { I16x16(_mm256_cmpeq_epi16(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn cmp_neq(self, rhs: Self) -> Self {
+    fn cmp_neq(self, rhs: Self) -> Self {
         self.cmp_eq(rhs).bit_not()
     }
 
     #[inline(always)]
-    unsafe fn cmp_lt(self, rhs: Self) -> Self {
-        I16x16(_mm256_cmpgt_epi16(rhs.0, self.0))
+    fn cmp_lt(self, rhs: Self) -> Self {
+        unsafe { I16x16(_mm256_cmpgt_epi16(rhs.0, self.0)) }
     }
 
     #[inline(always)]
-    unsafe fn cmp_lte(self, rhs: Self) -> Self {
+    fn cmp_lte(self, rhs: Self) -> Self {
         self.cmp_gt(rhs).bit_not()
     }
 
     #[inline(always)]
-    unsafe fn cmp_gt(self, rhs: Self) -> Self {
-        I16x16(_mm256_cmpgt_epi16(self.0, rhs.0))
+    fn cmp_gt(self, rhs: Self) -> Self {
+        unsafe { I16x16(_mm256_cmpgt_epi16(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn cmp_gte(self, rhs: Self) -> Self {
+    fn cmp_gte(self, rhs: Self) -> Self {
         self.cmp_lt(rhs).bit_not()
     }
 
     #[inline(always)]
-    unsafe fn max(self, rhs: Self) -> Self {
-        I16x16(_mm256_max_epi16(self.0, rhs.0))
+    fn max(self, rhs: Self) -> Self {
+        unsafe { I16x16(_mm256_max_epi16(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn min(self, rhs: Self) -> Self {
-        I16x16(_mm256_min_epi16(self.0, rhs.0))
+    fn min(self, rhs: Self) -> Self {
+        unsafe { I16x16(_mm256_min_epi16(self.0, rhs.0)) }
     }
 
     #[inline(always)]
@@ -149,25 +149,29 @@ impl SimdBase for I16x16 {
 
 impl SimdInt for I16x16 {
     #[inline(always)]
-    unsafe fn shl(self, rhs: i32) -> Self {
-        let rhs = _mm_cvtsi32_si128(rhs);
-        I16x16(_mm256_srl_epi16(self.0, rhs))
+    fn shl(self, rhs: i32) -> Self {
+        unsafe {
+            let rhs = _mm_cvtsi32_si128(rhs);
+            I16x16(_mm256_srl_epi16(self.0, rhs))
+        }
     }
 
     #[inline(always)]
-    unsafe fn shr(self, rhs: i32) -> Self {
-        let rhs = _mm_cvtsi32_si128(rhs);
-        I16x16(_mm256_sll_epi16(self.0, rhs))
+    fn shr(self, rhs: i32) -> Self {
+        unsafe {
+            let rhs = _mm_cvtsi32_si128(rhs);
+            I16x16(_mm256_sll_epi16(self.0, rhs))
+        }
     }
 
     #[inline(always)]
-    unsafe fn shl_const<const BY: i32>(self) -> Self {
-        I16x16(_mm256_slli_epi16(self.0, BY))
+    fn shl_const<const BY: i32>(self) -> Self {
+        unsafe { I16x16(_mm256_slli_epi16(self.0, BY)) }
     }
 
     #[inline(always)]
-    unsafe fn shr_const<const BY: i32>(self) -> Self {
-        I16x16(_mm256_srli_epi16(self.0, BY))
+    fn shr_const<const BY: i32>(self) -> Self {
+        unsafe { I16x16(_mm256_srli_epi16(self.0, BY)) }
     }
 }
 
@@ -195,95 +199,95 @@ impl SimdBase for I32x8 {
     }
 
     #[inline(always)]
-    unsafe fn add(self, rhs: Self) -> Self {
-        I32x8(_mm256_add_epi32(self.0, rhs.0))
+    fn add(self, rhs: Self) -> Self {
+        unsafe { I32x8(_mm256_add_epi32(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn sub(self, rhs: Self) -> Self {
-        I32x8(_mm256_sub_epi32(self.0, rhs.0))
+    fn sub(self, rhs: Self) -> Self {
+        unsafe { I32x8(_mm256_sub_epi32(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn mul(self, rhs: Self) -> Self {
-        I32x8(_mm256_mullo_epi32(self.0, rhs.0))
+    fn mul(self, rhs: Self) -> Self {
+        unsafe { I32x8(_mm256_mullo_epi32(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn bit_and(self, rhs: Self) -> Self {
-        I32x8(_mm256_and_si256(self.0, rhs.0))
+    fn bit_and(self, rhs: Self) -> Self {
+        unsafe { I32x8(_mm256_and_si256(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn bit_or(self, rhs: Self) -> Self {
-        I32x8(_mm256_or_si256(self.0, rhs.0))
+    fn bit_or(self, rhs: Self) -> Self {
+        unsafe { I32x8(_mm256_or_si256(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn bit_xor(self, rhs: Self) -> Self {
-        I32x8(_mm256_xor_si256(self.0, rhs.0))
+    fn bit_xor(self, rhs: Self) -> Self {
+        unsafe { I32x8(_mm256_xor_si256(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn bit_not(self) -> Self {
-        self.bit_xor(Self::set1(-1))
+    fn bit_not(self) -> Self {
+        unsafe { self.bit_xor(Self::set1(-1)) }
     }
 
     #[inline(always)]
-    unsafe fn abs(self) -> Self {
-        I32x8(_mm256_abs_epi32(self.0))
+    fn abs(self) -> Self {
+        unsafe { I32x8(_mm256_abs_epi32(self.0)) }
     }
 
     #[inline(always)]
-    unsafe fn and_not(self, rhs: Self) -> Self {
-        I32x8(_mm256_andnot_si256(self.0, rhs.0))
+    fn and_not(self, rhs: Self) -> Self {
+        unsafe { I32x8(_mm256_andnot_si256(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn blendv(self, a: Self, b: Self) -> Self {
+    fn blendv(self, a: Self, b: Self) -> Self {
         self.cast_f32()
             .blendv(a.cast_f32(), b.cast_f32())
             .cast_i32()
     }
 
     #[inline(always)]
-    unsafe fn cmp_eq(self, rhs: Self) -> Self {
-        I32x8(_mm256_cmpeq_epi32(self.0, rhs.0))
+    fn cmp_eq(self, rhs: Self) -> Self {
+        unsafe { I32x8(_mm256_cmpeq_epi32(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn cmp_neq(self, rhs: Self) -> Self {
+    fn cmp_neq(self, rhs: Self) -> Self {
         self.cmp_eq(rhs).bit_not()
     }
 
     #[inline(always)]
-    unsafe fn cmp_lt(self, rhs: Self) -> Self {
-        I32x8(_mm256_cmpgt_epi32(rhs.0, self.0))
+    fn cmp_lt(self, rhs: Self) -> Self {
+        unsafe { I32x8(_mm256_cmpgt_epi32(rhs.0, self.0)) }
     }
 
     #[inline(always)]
-    unsafe fn cmp_lte(self, rhs: Self) -> Self {
+    fn cmp_lte(self, rhs: Self) -> Self {
         self.cmp_gt(rhs).bit_not()
     }
 
     #[inline(always)]
-    unsafe fn cmp_gt(self, rhs: Self) -> Self {
-        I32x8(_mm256_cmpgt_epi32(self.0, rhs.0))
+    fn cmp_gt(self, rhs: Self) -> Self {
+        unsafe { I32x8(_mm256_cmpgt_epi32(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn cmp_gte(self, rhs: Self) -> Self {
+    fn cmp_gte(self, rhs: Self) -> Self {
         self.cmp_lt(rhs).bit_not()
     }
 
     #[inline(always)]
-    unsafe fn max(self, rhs: Self) -> Self {
-        I32x8(_mm256_max_epi32(self.0, rhs.0))
+    fn max(self, rhs: Self) -> Self {
+        unsafe { I32x8(_mm256_max_epi32(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn min(self, rhs: Self) -> Self {
-        I32x8(_mm256_min_epi32(self.0, rhs.0))
+    fn min(self, rhs: Self) -> Self {
+        unsafe { I32x8(_mm256_min_epi32(self.0, rhs.0)) }
     }
 
     #[inline(always)]
@@ -319,25 +323,29 @@ impl SimdBase for I32x8 {
 
 impl SimdInt for I32x8 {
     #[inline(always)]
-    unsafe fn shl(self, rhs: i32) -> Self {
-        let rhs = _mm_cvtsi32_si128(rhs);
-        I32x8(_mm256_sll_epi32(self.0, rhs))
+    fn shl(self, rhs: i32) -> Self {
+        unsafe {
+            let rhs = _mm_cvtsi32_si128(rhs);
+            I32x8(_mm256_sll_epi32(self.0, rhs))
+        }
     }
 
     #[inline(always)]
-    unsafe fn shr(self, rhs: i32) -> Self {
-        let rhs = _mm_cvtsi32_si128(rhs);
-        I32x8(_mm256_srl_epi32(self.0, rhs))
+    fn shr(self, rhs: i32) -> Self {
+        unsafe {
+            let rhs = _mm_cvtsi32_si128(rhs);
+            I32x8(_mm256_srl_epi32(self.0, rhs))
+        }
     }
 
     #[inline(always)]
-    unsafe fn shl_const<const BY: i32>(self) -> Self {
-        I32x8(_mm256_slli_epi32(self.0, BY))
+    fn shl_const<const BY: i32>(self) -> Self {
+        unsafe { I32x8(_mm256_slli_epi32(self.0, BY)) }
     }
 
     #[inline(always)]
-    unsafe fn shr_const<const BY: i32>(self) -> Self {
-        I32x8(_mm256_srli_epi32(self.0, BY))
+    fn shr_const<const BY: i32>(self) -> Self {
+        unsafe { I32x8(_mm256_srli_epi32(self.0, BY)) }
     }
 }
 
@@ -345,13 +353,13 @@ impl SimdInt32 for I32x8 {
     type SimdF32 = F32x8;
 
     #[inline(always)]
-    unsafe fn bitcast_f32(self) -> Self::SimdF32 {
-        F32x8(_mm256_castsi256_ps(self.0))
+    fn bitcast_f32(self) -> Self::SimdF32 {
+        unsafe { F32x8(_mm256_castsi256_ps(self.0)) }
     }
 
     #[inline(always)]
-    unsafe fn cast_f32(self) -> Self::SimdF32 {
-        F32x8(_mm256_cvtepi32_ps(self.0))
+    fn cast_f32(self) -> Self::SimdF32 {
+        unsafe { F32x8(_mm256_cvtepi32_ps(self.0)) }
     }
 }
 
@@ -377,100 +385,102 @@ impl SimdBase for I64x4 {
     }
 
     #[inline(always)]
-    unsafe fn add(self, rhs: Self) -> Self {
-        I64x4(_mm256_add_epi64(self.0, rhs.0))
+    fn add(self, rhs: Self) -> Self {
+        unsafe { I64x4(_mm256_add_epi64(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn sub(self, rhs: Self) -> Self {
-        I64x4(_mm256_sub_epi64(self.0, rhs.0))
+    fn sub(self, rhs: Self) -> Self {
+        unsafe { I64x4(_mm256_sub_epi64(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn mul(self, rhs: Self) -> Self {
-        I64x4(_mm256_mul_epi32(self.0, rhs.0))
+    fn mul(self, rhs: Self) -> Self {
+        unsafe { I64x4(_mm256_mul_epi32(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn bit_and(self, rhs: Self) -> Self {
-        I64x4(_mm256_and_si256(self.0, rhs.0))
+    fn bit_and(self, rhs: Self) -> Self {
+        unsafe { I64x4(_mm256_and_si256(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn bit_or(self, rhs: Self) -> Self {
-        I64x4(_mm256_or_si256(self.0, rhs.0))
+    fn bit_or(self, rhs: Self) -> Self {
+        unsafe { I64x4(_mm256_or_si256(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn bit_xor(self, rhs: Self) -> Self {
-        I64x4(_mm256_xor_si256(self.0, rhs.0))
+    fn bit_xor(self, rhs: Self) -> Self {
+        unsafe { I64x4(_mm256_xor_si256(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn bit_not(self) -> Self {
-        self.bit_xor(Self::set1(-1))
+    fn bit_not(self) -> Self {
+        unsafe { self.bit_xor(Self::set1(-1)) }
     }
 
     #[inline(always)]
-    unsafe fn abs(self) -> Self {
-        // Manually implemented `v < 0 ? -v : v`
-        let zero = I64x4::set1(0); // zero
-        let mask = self.cmp_lt(zero); // mask = v < 0
-        let neg = zero - self; // neg = -v
-        mask.blendv(self, neg) // mask ? neg : v
+    fn abs(self) -> Self {
+        unsafe {
+            // Manually implemented `v < 0 ? -v : v`
+            let zero = I64x4::set1(0); // zero
+            let mask = self.cmp_lt(zero); // mask = v < 0
+            let neg = zero - self; // neg = -v
+            mask.blendv(self, neg) // mask ? neg : v
+        }
     }
 
     #[inline(always)]
-    unsafe fn and_not(self, rhs: Self) -> Self {
-        I64x4(_mm256_andnot_si256(self.0, rhs.0))
+    fn and_not(self, rhs: Self) -> Self {
+        unsafe { I64x4(_mm256_andnot_si256(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn blendv(self, a: Self, b: Self) -> Self {
+    fn blendv(self, a: Self, b: Self) -> Self {
         self.cast_f64()
             .blendv(a.cast_f64(), b.cast_f64())
             .cast_i64()
     }
 
     #[inline(always)]
-    unsafe fn cmp_eq(self, rhs: Self) -> Self {
-        I64x4(_mm256_cmpeq_epi64(self.0, rhs.0))
+    fn cmp_eq(self, rhs: Self) -> Self {
+        unsafe { I64x4(_mm256_cmpeq_epi64(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn cmp_neq(self, rhs: Self) -> Self {
+    fn cmp_neq(self, rhs: Self) -> Self {
         self.cmp_eq(rhs).bit_not()
     }
 
     #[inline(always)]
-    unsafe fn cmp_lt(self, rhs: Self) -> Self {
-        I64x4(_mm256_cmpgt_epi64(rhs.0, self.0))
+    fn cmp_lt(self, rhs: Self) -> Self {
+        unsafe { I64x4(_mm256_cmpgt_epi64(rhs.0, self.0)) }
     }
 
     #[inline(always)]
-    unsafe fn cmp_lte(self, rhs: Self) -> Self {
+    fn cmp_lte(self, rhs: Self) -> Self {
         self.cmp_gt(rhs).bit_not()
     }
 
     #[inline(always)]
-    unsafe fn cmp_gt(self, rhs: Self) -> Self {
-        I64x4(_mm256_cmpgt_epi64(self.0, rhs.0))
+    fn cmp_gt(self, rhs: Self) -> Self {
+        unsafe { I64x4(_mm256_cmpgt_epi64(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn cmp_gte(self, rhs: Self) -> Self {
+    fn cmp_gte(self, rhs: Self) -> Self {
         self.cmp_lt(rhs).bit_not()
     }
 
     #[inline(always)]
-    unsafe fn max(self, rhs: Self) -> Self {
+    fn max(self, rhs: Self) -> Self {
         // Manually implemented `v > w ? v : w`
         let mask = self.cmp_gt(rhs); // mask = v > w
         mask.blendv(rhs, self) // mask ? w : v
     }
 
     #[inline(always)]
-    unsafe fn min(self, rhs: Self) -> Self {
+    fn min(self, rhs: Self) -> Self {
         // Manually implemented `v < w ? v : w`
         let mask = self.cmp_lt(rhs); // mask = v < w
         mask.blendv(rhs, self) // mask ? w : v
@@ -509,25 +519,29 @@ impl SimdBase for I64x4 {
 
 impl SimdInt for I64x4 {
     #[inline(always)]
-    unsafe fn shl(self, rhs: i32) -> Self {
-        let rhs = _mm_cvtsi32_si128(rhs);
-        I64x4(_mm256_sll_epi64(self.0, rhs))
+    fn shl(self, rhs: i32) -> Self {
+        unsafe {
+            let rhs = _mm_cvtsi32_si128(rhs);
+            I64x4(_mm256_sll_epi64(self.0, rhs))
+        }
     }
 
     #[inline(always)]
-    unsafe fn shr(self, rhs: i32) -> Self {
-        let rhs = _mm_cvtsi32_si128(rhs);
-        I64x4(_mm256_srl_epi64(self.0, rhs))
+    fn shr(self, rhs: i32) -> Self {
+        unsafe {
+            let rhs = _mm_cvtsi32_si128(rhs);
+            I64x4(_mm256_srl_epi64(self.0, rhs))
+        }
     }
 
     #[inline(always)]
-    unsafe fn shl_const<const BY: i32>(self) -> Self {
-        I64x4(_mm256_slli_epi64(self.0, BY))
+    fn shl_const<const BY: i32>(self) -> Self {
+        unsafe { I64x4(_mm256_slli_epi64(self.0, BY)) }
     }
 
     #[inline(always)]
-    unsafe fn shr_const<const BY: i32>(self) -> Self {
-        I64x4(_mm256_srli_epi64(self.0, BY))
+    fn shr_const<const BY: i32>(self) -> Self {
+        unsafe { I64x4(_mm256_srli_epi64(self.0, BY)) }
     }
 }
 
@@ -535,20 +549,22 @@ impl SimdInt64 for I64x4 {
     type SimdF64 = F64x4;
 
     #[inline(always)]
-    unsafe fn bitcast_f64(self) -> Self::SimdF64 {
-        F64x4(_mm256_castsi256_pd(self.0))
+    fn bitcast_f64(self) -> Self::SimdF64 {
+        unsafe { F64x4(_mm256_castsi256_pd(self.0)) }
     }
 
     #[inline(always)]
-    unsafe fn cast_f64(self) -> Self::SimdF64 {
-        let x = _mm256_add_epi64(
-            self.0,
-            _mm256_castpd_si256(_mm256_set1_pd(f64::from_bits(0x0018000000000000u64))),
-        );
-        F64x4(_mm256_sub_pd(
-            _mm256_castsi256_pd(x),
-            _mm256_set1_pd(f64::from_bits(0x0018000000000000u64)),
-        ))
+    fn cast_f64(self) -> Self::SimdF64 {
+        unsafe {
+            let x = _mm256_add_epi64(
+                self.0,
+                _mm256_castpd_si256(_mm256_set1_pd(f64::from_bits(0x0018000000000000u64))),
+            );
+            F64x4(_mm256_sub_pd(
+                _mm256_castsi256_pd(x),
+                _mm256_set1_pd(f64::from_bits(0x0018000000000000u64)),
+            ))
+        }
     }
 }
 
@@ -574,94 +590,96 @@ impl SimdBase for F32x8 {
     }
 
     #[inline(always)]
-    unsafe fn add(self, rhs: Self) -> Self {
-        F32x8(_mm256_add_ps(self.0, rhs.0))
+    fn add(self, rhs: Self) -> Self {
+        unsafe { F32x8(_mm256_add_ps(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn sub(self, rhs: Self) -> Self {
-        F32x8(_mm256_sub_ps(self.0, rhs.0))
+    fn sub(self, rhs: Self) -> Self {
+        unsafe { F32x8(_mm256_sub_ps(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn mul(self, rhs: Self) -> Self {
-        F32x8(_mm256_mul_ps(self.0, rhs.0))
+    fn mul(self, rhs: Self) -> Self {
+        unsafe { F32x8(_mm256_mul_ps(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn bit_and(self, rhs: Self) -> Self {
-        F32x8(_mm256_and_ps(self.0, rhs.0))
+    fn bit_and(self, rhs: Self) -> Self {
+        unsafe { F32x8(_mm256_and_ps(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn bit_or(self, rhs: Self) -> Self {
-        F32x8(_mm256_or_ps(self.0, rhs.0))
+    fn bit_or(self, rhs: Self) -> Self {
+        unsafe { F32x8(_mm256_or_ps(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn bit_xor(self, rhs: Self) -> Self {
-        F32x8(_mm256_xor_ps(self.0, rhs.0))
+    fn bit_xor(self, rhs: Self) -> Self {
+        unsafe { F32x8(_mm256_xor_ps(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn bit_not(self) -> Self {
-        self.bit_xor(I32x8::set1(-1).bitcast_f32())
+    fn bit_not(self) -> Self {
+        unsafe { self.bit_xor(I32x8::set1(-1).bitcast_f32()) }
     }
 
     #[inline(always)]
-    unsafe fn abs(self) -> Self {
-        let b = _mm256_set1_ps(-0.0f32);
-        F32x8(_mm256_andnot_ps(b, self.0))
+    fn abs(self) -> Self {
+        unsafe {
+            let b = _mm256_set1_ps(-0.0f32);
+            F32x8(_mm256_andnot_ps(b, self.0))
+        }
     }
 
     #[inline(always)]
-    unsafe fn and_not(self, rhs: Self) -> Self {
-        F32x8(_mm256_andnot_ps(self.0, rhs.0))
+    fn and_not(self, rhs: Self) -> Self {
+        unsafe { F32x8(_mm256_andnot_ps(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn blendv(self, a: Self, b: Self) -> Self {
-        F32x8(_mm256_blendv_ps(a.0, b.0, self.0))
+    fn blendv(self, a: Self, b: Self) -> Self {
+        unsafe { F32x8(_mm256_blendv_ps(a.0, b.0, self.0)) }
     }
 
     #[inline(always)]
-    unsafe fn cmp_eq(self, rhs: Self) -> Self {
-        F32x8(_mm256_cmp_ps(self.0, rhs.0, _CMP_EQ_OQ))
+    fn cmp_eq(self, rhs: Self) -> Self {
+        unsafe { F32x8(_mm256_cmp_ps(self.0, rhs.0, _CMP_EQ_OQ)) }
     }
 
     #[inline(always)]
-    unsafe fn cmp_neq(self, rhs: Self) -> Self {
-        F32x8(_mm256_cmp_ps(self.0, rhs.0, _CMP_NEQ_OQ))
+    fn cmp_neq(self, rhs: Self) -> Self {
+        unsafe { F32x8(_mm256_cmp_ps(self.0, rhs.0, _CMP_NEQ_OQ)) }
     }
 
     #[inline(always)]
-    unsafe fn cmp_lt(self, rhs: Self) -> Self {
-        F32x8(_mm256_cmp_ps(self.0, rhs.0, _CMP_LT_OQ))
+    fn cmp_lt(self, rhs: Self) -> Self {
+        unsafe { F32x8(_mm256_cmp_ps(self.0, rhs.0, _CMP_LT_OQ)) }
     }
 
     #[inline(always)]
-    unsafe fn cmp_lte(self, rhs: Self) -> Self {
-        F32x8(_mm256_cmp_ps(self.0, rhs.0, _CMP_LE_OQ))
+    fn cmp_lte(self, rhs: Self) -> Self {
+        unsafe { F32x8(_mm256_cmp_ps(self.0, rhs.0, _CMP_LE_OQ)) }
     }
 
     #[inline(always)]
-    unsafe fn cmp_gt(self, rhs: Self) -> Self {
-        F32x8(_mm256_cmp_ps(self.0, rhs.0, _CMP_GT_OQ))
+    fn cmp_gt(self, rhs: Self) -> Self {
+        unsafe { F32x8(_mm256_cmp_ps(self.0, rhs.0, _CMP_GT_OQ)) }
     }
 
     #[inline(always)]
-    unsafe fn cmp_gte(self, rhs: Self) -> Self {
-        F32x8(_mm256_cmp_ps(self.0, rhs.0, _CMP_GE_OQ))
+    fn cmp_gte(self, rhs: Self) -> Self {
+        unsafe { F32x8(_mm256_cmp_ps(self.0, rhs.0, _CMP_GE_OQ)) }
     }
 
     #[inline(always)]
-    unsafe fn max(self, rhs: Self) -> Self {
-        F32x8(_mm256_max_ps(self.0, rhs.0))
+    fn max(self, rhs: Self) -> Self {
+        unsafe { F32x8(_mm256_max_ps(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn min(self, rhs: Self) -> Self {
-        F32x8(_mm256_min_ps(self.0, rhs.0))
+    fn min(self, rhs: Self) -> Self {
+        unsafe { F32x8(_mm256_min_ps(self.0, rhs.0)) }
     }
 
     #[inline(always)]
@@ -697,79 +715,83 @@ impl SimdBase for F32x8 {
 
 impl SimdFloat for F32x8 {
     #[inline(always)]
-    unsafe fn div(self, rhs: Self) -> Self {
-        F32x8(_mm256_div_ps(self.0, rhs.0))
+    fn div(self, rhs: Self) -> Self {
+        unsafe { F32x8(_mm256_div_ps(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn ceil(self) -> Self {
-        F32x8(_mm256_ceil_ps(self.0))
+    fn ceil(self) -> Self {
+        unsafe { F32x8(_mm256_ceil_ps(self.0)) }
     }
 
     #[inline(always)]
-    unsafe fn floor(self) -> Self {
-        F32x8(_mm256_floor_ps(self.0))
+    fn floor(self) -> Self {
+        unsafe { F32x8(_mm256_floor_ps(self.0)) }
     }
 
     #[inline(always)]
-    unsafe fn round(self) -> Self {
-        F32x8(_mm256_round_ps(
-            self.0,
-            _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC,
-        ))
+    fn round(self) -> Self {
+        unsafe {
+            F32x8(_mm256_round_ps(
+                self.0,
+                _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC,
+            ))
+        }
     }
 
     #[inline(always)]
-    unsafe fn fast_ceil(self) -> Self {
+    fn fast_ceil(self) -> Self {
         self.ceil()
     }
 
     #[inline(always)]
-    unsafe fn fast_floor(self) -> Self {
+    fn fast_floor(self) -> Self {
         self.floor()
     }
 
     #[inline(always)]
-    unsafe fn fast_round(self) -> Self {
+    fn fast_round(self) -> Self {
         self.round()
     }
 
     #[inline(always)]
-    unsafe fn mul_add(self, a: Self, b: Self) -> Self {
-        F32x8(_mm256_fmadd_ps(self.0, a.0, b.0))
+    fn mul_add(self, a: Self, b: Self) -> Self {
+        unsafe { F32x8(_mm256_fmadd_ps(self.0, a.0, b.0)) }
     }
 
     #[inline(always)]
-    unsafe fn mul_sub(self, a: Self, b: Self) -> Self {
-        F32x8(_mm256_fmsub_ps(self.0, a.0, b.0))
+    fn mul_sub(self, a: Self, b: Self) -> Self {
+        unsafe { F32x8(_mm256_fmsub_ps(self.0, a.0, b.0)) }
     }
 
     #[inline(always)]
-    unsafe fn neg_mul_add(self, a: Self, b: Self) -> Self {
-        F32x8(_mm256_fnmadd_ps(self.0, a.0, b.0))
+    fn neg_mul_add(self, a: Self, b: Self) -> Self {
+        unsafe { F32x8(_mm256_fnmadd_ps(self.0, a.0, b.0)) }
     }
 
     #[inline(always)]
-    unsafe fn neg_mul_sub(self, a: Self, b: Self) -> Self {
-        F32x8(_mm256_fnmsub_ps(self.0, a.0, b.0))
+    fn neg_mul_sub(self, a: Self, b: Self) -> Self {
+        unsafe { F32x8(_mm256_fnmsub_ps(self.0, a.0, b.0)) }
     }
 
     #[inline(always)]
-    unsafe fn horizontal_add(self) -> Self::Scalar {
-        let a = _mm256_hadd_ps(self.0, self.0);
-        let b = _mm256_hadd_ps(a, a);
-        let c = _mm256_hadd_ps(b, b);
-        _mm_cvtss_f32(_mm256_castps256_ps128(c))
+    fn horizontal_add(self) -> Self::Scalar {
+        unsafe {
+            let a = _mm256_hadd_ps(self.0, self.0);
+            let b = _mm256_hadd_ps(a, a);
+            let c = _mm256_hadd_ps(b, b);
+            _mm_cvtss_f32(_mm256_castps256_ps128(c))
+        }
     }
 
     #[inline(always)]
-    unsafe fn sqrt(self) -> Self {
-        F32x8(_mm256_sqrt_ps(self.0))
+    fn sqrt(self) -> Self {
+        unsafe { F32x8(_mm256_sqrt_ps(self.0)) }
     }
 
     #[inline(always)]
-    unsafe fn rsqrt(self) -> Self {
-        F32x8(_mm256_rsqrt_ps(self.0))
+    fn rsqrt(self) -> Self {
+        unsafe { F32x8(_mm256_rsqrt_ps(self.0)) }
     }
 }
 
@@ -777,18 +799,18 @@ impl SimdFloat32 for F32x8 {
     type SimdI32 = I32x8;
 
     #[inline(always)]
-    unsafe fn bitcast_i32(self) -> Self::SimdI32 {
-        I32x8(_mm256_castps_si256(self.0))
+    fn bitcast_i32(self) -> Self::SimdI32 {
+        unsafe { I32x8(_mm256_castps_si256(self.0)) }
     }
 
     #[inline(always)]
-    unsafe fn cast_i32(self) -> Self::SimdI32 {
-        I32x8(_mm256_cvtps_epi32(self.0))
+    fn cast_i32(self) -> Self::SimdI32 {
+        unsafe { I32x8(_mm256_cvtps_epi32(self.0)) }
     }
 
     #[inline(always)]
-    unsafe fn fast_inverse(self) -> Self {
-        F32x8(_mm256_rcp_ps(self.0))
+    fn fast_inverse(self) -> Self {
+        unsafe { F32x8(_mm256_rcp_ps(self.0)) }
     }
 }
 
@@ -814,94 +836,96 @@ impl SimdBase for F64x4 {
     }
 
     #[inline(always)]
-    unsafe fn add(self, rhs: Self) -> Self {
-        F64x4(_mm256_add_pd(self.0, rhs.0))
+    fn add(self, rhs: Self) -> Self {
+        unsafe { F64x4(_mm256_add_pd(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn sub(self, rhs: Self) -> Self {
-        F64x4(_mm256_sub_pd(self.0, rhs.0))
+    fn sub(self, rhs: Self) -> Self {
+        unsafe { F64x4(_mm256_sub_pd(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn mul(self, rhs: Self) -> Self {
-        F64x4(_mm256_mul_pd(self.0, rhs.0))
+    fn mul(self, rhs: Self) -> Self {
+        unsafe { F64x4(_mm256_mul_pd(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn bit_and(self, rhs: Self) -> Self {
-        F64x4(_mm256_and_pd(self.0, rhs.0))
+    fn bit_and(self, rhs: Self) -> Self {
+        unsafe { F64x4(_mm256_and_pd(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn bit_or(self, rhs: Self) -> Self {
-        F64x4(_mm256_or_pd(self.0, rhs.0))
+    fn bit_or(self, rhs: Self) -> Self {
+        unsafe { F64x4(_mm256_or_pd(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn bit_xor(self, rhs: Self) -> Self {
-        F64x4(_mm256_xor_pd(self.0, rhs.0))
+    fn bit_xor(self, rhs: Self) -> Self {
+        unsafe { F64x4(_mm256_xor_pd(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn bit_not(self) -> Self {
-        self.bit_xor(I64x4::set1(-1).bitcast_f64())
+    fn bit_not(self) -> Self {
+        unsafe { self.bit_xor(I64x4::set1(-1).bitcast_f64()) }
     }
 
     #[inline(always)]
-    unsafe fn abs(self) -> Self {
-        let b = _mm256_set1_pd(-0.0f64);
-        F64x4(_mm256_andnot_pd(b, self.0))
+    fn abs(self) -> Self {
+        unsafe {
+            let b = _mm256_set1_pd(-0.0f64);
+            F64x4(_mm256_andnot_pd(b, self.0))
+        }
     }
 
     #[inline(always)]
-    unsafe fn and_not(self, rhs: Self) -> Self {
-        F64x4(_mm256_andnot_pd(self.0, rhs.0))
+    fn and_not(self, rhs: Self) -> Self {
+        unsafe { F64x4(_mm256_andnot_pd(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn blendv(self, a: Self, b: Self) -> Self {
-        F64x4(_mm256_blendv_pd(a.0, b.0, self.0))
+    fn blendv(self, a: Self, b: Self) -> Self {
+        unsafe { F64x4(_mm256_blendv_pd(a.0, b.0, self.0)) }
     }
 
     #[inline(always)]
-    unsafe fn cmp_eq(self, rhs: Self) -> Self {
-        F64x4(_mm256_cmp_pd(self.0, rhs.0, _CMP_EQ_OQ))
+    fn cmp_eq(self, rhs: Self) -> Self {
+        unsafe { F64x4(_mm256_cmp_pd(self.0, rhs.0, _CMP_EQ_OQ)) }
     }
 
     #[inline(always)]
-    unsafe fn cmp_neq(self, rhs: Self) -> Self {
-        F64x4(_mm256_cmp_pd(self.0, rhs.0, _CMP_NEQ_OQ))
+    fn cmp_neq(self, rhs: Self) -> Self {
+        unsafe { F64x4(_mm256_cmp_pd(self.0, rhs.0, _CMP_NEQ_OQ)) }
     }
 
     #[inline(always)]
-    unsafe fn cmp_lt(self, rhs: Self) -> Self {
-        F64x4(_mm256_cmp_pd(self.0, rhs.0, _CMP_LT_OQ))
+    fn cmp_lt(self, rhs: Self) -> Self {
+        unsafe { F64x4(_mm256_cmp_pd(self.0, rhs.0, _CMP_LT_OQ)) }
     }
 
     #[inline(always)]
-    unsafe fn cmp_lte(self, rhs: Self) -> Self {
-        F64x4(_mm256_cmp_pd(self.0, rhs.0, _CMP_LE_OQ))
+    fn cmp_lte(self, rhs: Self) -> Self {
+        unsafe { F64x4(_mm256_cmp_pd(self.0, rhs.0, _CMP_LE_OQ)) }
     }
 
     #[inline(always)]
-    unsafe fn cmp_gt(self, rhs: Self) -> Self {
-        F64x4(_mm256_cmp_pd(self.0, rhs.0, _CMP_GT_OQ))
+    fn cmp_gt(self, rhs: Self) -> Self {
+        unsafe { F64x4(_mm256_cmp_pd(self.0, rhs.0, _CMP_GT_OQ)) }
     }
 
     #[inline(always)]
-    unsafe fn cmp_gte(self, rhs: Self) -> Self {
-        F64x4(_mm256_cmp_pd(self.0, rhs.0, _CMP_GE_OQ))
+    fn cmp_gte(self, rhs: Self) -> Self {
+        unsafe { F64x4(_mm256_cmp_pd(self.0, rhs.0, _CMP_GE_OQ)) }
     }
 
     #[inline(always)]
-    unsafe fn max(self, rhs: Self) -> Self {
-        F64x4(_mm256_max_pd(self.0, rhs.0))
+    fn max(self, rhs: Self) -> Self {
+        unsafe { F64x4(_mm256_max_pd(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn min(self, rhs: Self) -> Self {
-        F64x4(_mm256_min_pd(self.0, rhs.0))
+    fn min(self, rhs: Self) -> Self {
+        unsafe { F64x4(_mm256_min_pd(self.0, rhs.0)) }
     }
 
     #[inline(always)]
@@ -937,75 +961,77 @@ impl SimdBase for F64x4 {
 
 impl SimdFloat for F64x4 {
     #[inline(always)]
-    unsafe fn div(self, rhs: Self) -> Self {
-        F64x4(_mm256_div_pd(self.0, rhs.0))
+    fn div(self, rhs: Self) -> Self {
+        unsafe { F64x4(_mm256_div_pd(self.0, rhs.0)) }
     }
 
     #[inline(always)]
-    unsafe fn ceil(self) -> Self {
-        F64x4(_mm256_ceil_pd(self.0))
+    fn ceil(self) -> Self {
+        unsafe { F64x4(_mm256_ceil_pd(self.0)) }
     }
 
     #[inline(always)]
-    unsafe fn floor(self) -> Self {
-        F64x4(_mm256_floor_pd(self.0))
+    fn floor(self) -> Self {
+        unsafe { F64x4(_mm256_floor_pd(self.0)) }
     }
 
     #[inline(always)]
-    unsafe fn round(self) -> Self {
-        F64x4(_mm256_round_pd(self.0, _MM_FROUND_TO_NEAREST_INT))
+    fn round(self) -> Self {
+        unsafe { F64x4(_mm256_round_pd(self.0, _MM_FROUND_TO_NEAREST_INT)) }
     }
 
     #[inline(always)]
-    unsafe fn fast_ceil(self) -> Self {
+    fn fast_ceil(self) -> Self {
         self.ceil()
     }
 
     #[inline(always)]
-    unsafe fn fast_floor(self) -> Self {
+    fn fast_floor(self) -> Self {
         self.floor()
     }
 
     #[inline(always)]
-    unsafe fn fast_round(self) -> Self {
+    fn fast_round(self) -> Self {
         self.round()
     }
 
     #[inline(always)]
-    unsafe fn mul_add(self, a: Self, b: Self) -> Self {
-        F64x4(_mm256_fmadd_pd(self.0, a.0, b.0))
+    fn mul_add(self, a: Self, b: Self) -> Self {
+        unsafe { F64x4(_mm256_fmadd_pd(self.0, a.0, b.0)) }
     }
 
     #[inline(always)]
-    unsafe fn mul_sub(self, a: Self, b: Self) -> Self {
-        F64x4(_mm256_fmsub_pd(self.0, a.0, b.0))
+    fn mul_sub(self, a: Self, b: Self) -> Self {
+        unsafe { F64x4(_mm256_fmsub_pd(self.0, a.0, b.0)) }
     }
 
     #[inline(always)]
-    unsafe fn neg_mul_add(self, a: Self, b: Self) -> Self {
-        F64x4(_mm256_fnmadd_pd(self.0, a.0, b.0))
+    fn neg_mul_add(self, a: Self, b: Self) -> Self {
+        unsafe { F64x4(_mm256_fnmadd_pd(self.0, a.0, b.0)) }
     }
 
     #[inline(always)]
-    unsafe fn neg_mul_sub(self, a: Self, b: Self) -> Self {
-        F64x4(_mm256_fnmsub_pd(self.0, a.0, b.0))
+    fn neg_mul_sub(self, a: Self, b: Self) -> Self {
+        unsafe { F64x4(_mm256_fnmsub_pd(self.0, a.0, b.0)) }
     }
 
     #[inline(always)]
-    unsafe fn horizontal_add(self) -> Self::Scalar {
-        let a = _mm256_hadd_pd(self.0, self.0);
-        let b = _mm256_hadd_pd(a, a);
-        _mm_cvtsd_f64(_mm256_castpd256_pd128(b))
+    fn horizontal_add(self) -> Self::Scalar {
+        unsafe {
+            let a = _mm256_hadd_pd(self.0, self.0);
+            let b = _mm256_hadd_pd(a, a);
+            _mm_cvtsd_f64(_mm256_castpd256_pd128(b))
+        }
     }
 
     #[inline(always)]
-    unsafe fn sqrt(self) -> Self {
-        F64x4(_mm256_sqrt_pd(self.0))
+    fn sqrt(self) -> Self {
+        unsafe { F64x4(_mm256_sqrt_pd(self.0)) }
     }
 
     #[inline(always)]
-    unsafe fn rsqrt(self) -> Self {
-        Self::set1(1.0) / self.sqrt()
+    fn rsqrt(self) -> Self {
+        unsafe { Self::set1(1.0) / self.sqrt() }
     }
 }
 
@@ -1013,19 +1039,21 @@ impl SimdFloat64 for F64x4 {
     type SimdI64 = I64x4;
 
     #[inline(always)]
-    unsafe fn bitcast_i64(self) -> Self::SimdI64 {
-        I64x4(_mm256_castpd_si256(self.0))
+    fn bitcast_i64(self) -> Self::SimdI64 {
+        unsafe { I64x4(_mm256_castpd_si256(self.0)) }
     }
 
     #[inline(always)]
-    unsafe fn cast_i64(self) -> Self::SimdI64 {
-        let x = _mm256_add_pd(
-            self.0,
-            _mm256_set1_pd(f64::from_bits(0x0018000000000000u64)),
-        );
-        I64x4(_mm256_sub_epi64(
-            _mm256_castpd_si256(x),
-            _mm256_castpd_si256(_mm256_set1_pd(f64::from_bits(0x0018000000000000u64))),
-        ))
+    fn cast_i64(self) -> Self::SimdI64 {
+        unsafe {
+            let x = _mm256_add_pd(
+                self.0,
+                _mm256_set1_pd(f64::from_bits(0x0018000000000000u64)),
+            );
+            I64x4(_mm256_sub_epi64(
+                _mm256_castpd_si256(x),
+                _mm256_castpd_si256(_mm256_set1_pd(f64::from_bits(0x0018000000000000u64))),
+            ))
+        }
     }
 }

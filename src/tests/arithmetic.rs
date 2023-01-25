@@ -1,5 +1,6 @@
 use quickcheck::{Arbitrary, Gen, TestResult, Testable};
 
+use crate::tests::EqPrecision;
 use crate::{avx2::*, scalar::*, sse2::*, sse41::*};
 use crate::{tests::ArbitrarySimd, Simd, SimdBase, SimdFloat};
 
@@ -28,7 +29,7 @@ fn check_function_1_arg<N: ScalarNumber, S: 'static + SimdBase<Scalar = N>>(
                 for i in 0..S::WIDTH {
                     expected[i] = (self.check)(arbitrary.0[i]);
 
-                    if !expected[i].almost_eq(result[i]) {
+                    if !expected[i].almost_eq(result[i], EqPrecision::Exact) {
                         success = false;
                     }
                 }
@@ -74,7 +75,7 @@ fn check_function_2_arg<N: ScalarNumber, S: 'static + SimdBase<Scalar = N>>(
                 for i in 0..S::WIDTH {
                     expected[i] = (self.check)(arbitrary1.0[i], arbitrary2.0[i]);
 
-                    if !expected[i].almost_eq(result[i]) {
+                    if !expected[i].almost_eq(result[i], EqPrecision::Exact) {
                         success = false;
                     }
                 }
@@ -121,7 +122,7 @@ fn check_function_3_arg<N: ScalarNumber, S: 'static + SimdBase<Scalar = N>>(
                 for i in 0..S::WIDTH {
                     expected[i] = (self.check)(arbitrary1.0[i], arbitrary2.0[i], arbitrary3.0[i]);
 
-                    if !expected[i].almost_eq(result[i]) {
+                    if !expected[i].almost_eq(result[i], EqPrecision::Exact) {
                         success = false;
                     }
                 }

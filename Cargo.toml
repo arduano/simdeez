@@ -28,7 +28,8 @@ libm = { version = "0.2.6", optional = true }
 [dev-dependencies]
 criterion = "0.3.1"
 quickcheck = "0.9.2"
-rand = "0.7.3"
+rand = "0.8.5"
+rand_chacha = "0.3.1"
 
 [[bench]]
 name = "sseby2"

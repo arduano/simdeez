@@ -31,92 +31,92 @@ impl SimdBase for I16x1 {
     }
 
     #[inline(always)]
-    unsafe fn add(self, rhs: Self) -> Self {
+    fn add(self, rhs: Self) -> Self {
         I16x1(self.0 + rhs.0)
     }
 
     #[inline(always)]
-    unsafe fn sub(self, rhs: Self) -> Self {
+    fn sub(self, rhs: Self) -> Self {
         I16x1(self.0 - rhs.0)
     }
 
     #[inline(always)]
-    unsafe fn mul(self, rhs: Self) -> Self {
+    fn mul(self, rhs: Self) -> Self {
         I16x1(self.0 * rhs.0)
     }
 
     #[inline(always)]
-    unsafe fn bit_and(self, rhs: Self) -> Self {
+    fn bit_and(self, rhs: Self) -> Self {
         I16x1(self.0 & rhs.0)
     }
 
     #[inline(always)]
-    unsafe fn bit_or(self, rhs: Self) -> Self {
+    fn bit_or(self, rhs: Self) -> Self {
         I16x1(self.0 | rhs.0)
     }
 
     #[inline(always)]
-    unsafe fn bit_xor(self, rhs: Self) -> Self {
+    fn bit_xor(self, rhs: Self) -> Self {
         I16x1(self.0 ^ rhs.0)
     }
 
     #[inline(always)]
-    unsafe fn bit_not(self) -> Self {
+    fn bit_not(self) -> Self {
         I16x1(!self.0)
     }
 
     #[inline(always)]
-    unsafe fn abs(self) -> Self {
+    fn abs(self) -> Self {
         I16x1(self.0.abs())
     }
 
     #[inline(always)]
-    unsafe fn and_not(self, rhs: Self) -> Self {
+    fn and_not(self, rhs: Self) -> Self {
         I16x1(!self.0 & rhs.0)
     }
 
     #[inline(always)]
-    unsafe fn blendv(self, a: Self, b: Self) -> Self {
+    fn blendv(self, a: Self, b: Self) -> Self {
         I16x1(if self.0 != 0 { a.0 } else { b.0 })
     }
 
     #[inline(always)]
-    unsafe fn cmp_eq(self, rhs: Self) -> Self {
+    fn cmp_eq(self, rhs: Self) -> Self {
         I16x1(if self.0 == rhs.0 { -1 } else { 0 })
     }
 
     #[inline(always)]
-    unsafe fn cmp_neq(self, rhs: Self) -> Self {
+    fn cmp_neq(self, rhs: Self) -> Self {
         I16x1(if self.0 != rhs.0 { -1 } else { 0 })
     }
 
     #[inline(always)]
-    unsafe fn cmp_lt(self, rhs: Self) -> Self {
+    fn cmp_lt(self, rhs: Self) -> Self {
         I16x1(if self.0 < rhs.0 { -1 } else { 0 })
     }
 
     #[inline(always)]
-    unsafe fn cmp_lte(self, rhs: Self) -> Self {
+    fn cmp_lte(self, rhs: Self) -> Self {
         I16x1(if self.0 <= rhs.0 { -1 } else { 0 })
     }
 
     #[inline(always)]
-    unsafe fn cmp_gt(self, rhs: Self) -> Self {
+    fn cmp_gt(self, rhs: Self) -> Self {
         I16x1(if self.0 > rhs.0 { -1 } else { 0 })
     }
 
     #[inline(always)]
-    unsafe fn cmp_gte(self, rhs: Self) -> Self {
+    fn cmp_gte(self, rhs: Self) -> Self {
         I16x1(if self.0 >= rhs.0 { -1 } else { 0 })
     }
 
     #[inline(always)]
-    unsafe fn max(self, rhs: Self) -> Self {
+    fn max(self, rhs: Self) -> Self {
         I16x1(self.0.max(rhs.0))
     }
 
     #[inline(always)]
-    unsafe fn min(self, rhs: Self) -> Self {
+    fn min(self, rhs: Self) -> Self {
         I16x1(self.0.min(rhs.0))
     }
 
@@ -153,12 +153,12 @@ impl SimdBase for I16x1 {
 
 impl SimdInt for I16x1 {
     #[inline(always)]
-    unsafe fn shl(self, rhs: i32) -> Self {
+    fn shl(self, rhs: i32) -> Self {
         I16x1(self.0 << rhs)
     }
 
     #[inline(always)]
-    unsafe fn shr(self, rhs: i32) -> Self {
+    fn shr(self, rhs: i32) -> Self {
         I16x1(self.0 >> rhs)
     }
 }
@@ -190,92 +190,92 @@ impl SimdBase for I32x1 {
     }
 
     #[inline(always)]
-    unsafe fn add(self, rhs: Self) -> Self {
+    fn add(self, rhs: Self) -> Self {
         I32x1(self.0 + rhs.0)
     }
 
     #[inline(always)]
-    unsafe fn sub(self, rhs: Self) -> Self {
+    fn sub(self, rhs: Self) -> Self {
         I32x1(self.0 - rhs.0)
     }
 
     #[inline(always)]
-    unsafe fn mul(self, rhs: Self) -> Self {
+    fn mul(self, rhs: Self) -> Self {
         I32x1(self.0 * rhs.0)
     }
 
     #[inline(always)]
-    unsafe fn bit_and(self, rhs: Self) -> Self {
+    fn bit_and(self, rhs: Self) -> Self {
         I32x1(self.0 & rhs.0)
     }
 
     #[inline(always)]
-    unsafe fn bit_or(self, rhs: Self) -> Self {
+    fn bit_or(self, rhs: Self) -> Self {
         I32x1(self.0 | rhs.0)
     }
 
     #[inline(always)]
-    unsafe fn bit_xor(self, rhs: Self) -> Self {
+    fn bit_xor(self, rhs: Self) -> Self {
         I32x1(self.0 ^ rhs.0)
     }
 
     #[inline(always)]
-    unsafe fn bit_not(self) -> Self {
+    fn bit_not(self) -> Self {
         I32x1(!self.0)
     }
 
     #[inline(always)]
-    unsafe fn abs(self) -> Self {
+    fn abs(self) -> Self {
         I32x1(self.0.abs())
     }
 
     #[inline(always)]
-    unsafe fn and_not(self, rhs: Self) -> Self {
+    fn and_not(self, rhs: Self) -> Self {
         I32x1(!self.0 & rhs.0)
     }
 
     #[inline(always)]
-    unsafe fn blendv(self, a: Self, b: Self) -> Self {
+    fn blendv(self, a: Self, b: Self) -> Self {
         I32x1(if self.0 != 0 { a.0 } else { b.0 })
     }
 
     #[inline(always)]
-    unsafe fn cmp_eq(self, rhs: Self) -> Self {
+    fn cmp_eq(self, rhs: Self) -> Self {
         I32x1(if self.0 == rhs.0 { -1 } else { 0 })
     }
 
     #[inline(always)]
-    unsafe fn cmp_neq(self, rhs: Self) -> Self {
+    fn cmp_neq(self, rhs: Self) -> Self {
         I32x1(if self.0 != rhs.0 { -1 } else { 0 })
     }
 
     #[inline(always)]
-    unsafe fn cmp_lt(self, rhs: Self) -> Self {
+    fn cmp_lt(self, rhs: Self) -> Self {
         I32x1(if self.0 < rhs.0 { -1 } else { 0 })
     }
 
     #[inline(always)]
-    unsafe fn cmp_lte(self, rhs: Self) -> Self {
+    fn cmp_lte(self, rhs: Self) -> Self {
         I32x1(if self.0 <= rhs.0 { -1 } else { 0 })
     }
 
     #[inline(always)]
-    unsafe fn cmp_gt(self, rhs: Self) -> Self {
+    fn cmp_gt(self, rhs: Self) -> Self {
         I32x1(if self.0 > rhs.0 { -1 } else { 0 })
     }
 
     #[inline(always)]
-    unsafe fn cmp_gte(self, rhs: Self) -> Self {
+    fn cmp_gte(self, rhs: Self) -> Self {
         I32x1(if self.0 >= rhs.0 { -1 } else { 0 })
     }
 
     #[inline(always)]
-    unsafe fn max(self, rhs: Self) -> Self {
+    fn max(self, rhs: Self) -> Self {
         I32x1(self.0.max(rhs.0))
     }
 
     #[inline(always)]
-    unsafe fn min(self, rhs: Self) -> Self {
+    fn min(self, rhs: Self) -> Self {
         I32x1(self.0.min(rhs.0))
     }
 
@@ -312,12 +312,12 @@ impl SimdBase for I32x1 {
 
 impl SimdInt for I32x1 {
     #[inline(always)]
-    unsafe fn shl(self, rhs: i32) -> Self {
+    fn shl(self, rhs: i32) -> Self {
         I32x1(self.0 << rhs)
     }
 
     #[inline(always)]
-    unsafe fn shr(self, rhs: i32) -> Self {
+    fn shr(self, rhs: i32) -> Self {
         I32x1(self.0 >> rhs)
     }
 }
@@ -326,12 +326,12 @@ impl SimdInt32 for I32x1 {
     type SimdF32 = F32x1;
 
     #[inline(always)]
-    unsafe fn bitcast_f32(self) -> Self::SimdF32 {
+    fn bitcast_f32(self) -> Self::SimdF32 {
         F32x1(f32::from_bits(self.0 as u32))
     }
 
     #[inline(always)]
-    unsafe fn cast_f32(self) -> Self::SimdF32 {
+    fn cast_f32(self) -> Self::SimdF32 {
         F32x1(self.0 as f32)
     }
 }
@@ -361,92 +361,92 @@ impl SimdBase for I64x1 {
     }
 
     #[inline(always)]
-    unsafe fn add(self, rhs: Self) -> Self {
+    fn add(self, rhs: Self) -> Self {
         I64x1(self.0 + rhs.0)
     }
 
     #[inline(always)]
-    unsafe fn sub(self, rhs: Self) -> Self {
+    fn sub(self, rhs: Self) -> Self {
         I64x1(self.0 - rhs.0)
     }
 
     #[inline(always)]
-    unsafe fn mul(self, rhs: Self) -> Self {
+    fn mul(self, rhs: Self) -> Self {
         I64x1(self.0 * rhs.0)
     }
 
     #[inline(always)]
-    unsafe fn bit_and(self, rhs: Self) -> Self {
+    fn bit_and(self, rhs: Self) -> Self {
         I64x1(self.0 & rhs.0)
     }
 
     #[inline(always)]
-    unsafe fn bit_or(self, rhs: Self) -> Self {
+    fn bit_or(self, rhs: Self) -> Self {
         I64x1(self.0 | rhs.0)
     }
 
     #[inline(always)]
-    unsafe fn bit_xor(self, rhs: Self) -> Self {
+    fn bit_xor(self, rhs: Self) -> Self {
         I64x1(self.0 ^ rhs.0)
     }
 
     #[inline(always)]
-    unsafe fn bit_not(self) -> Self {
+    fn bit_not(self) -> Self {
         I64x1(!self.0)
     }
 
     #[inline(always)]
-    unsafe fn abs(self) -> Self {
+    fn abs(self) -> Self {
         I64x1(self.0.abs())
     }
 
     #[inline(always)]
-    unsafe fn and_not(self, rhs: Self) -> Self {
+    fn and_not(self, rhs: Self) -> Self {
         I64x1(!self.0 & rhs.0)
     }
 
     #[inline(always)]
-    unsafe fn blendv(self, a: Self, b: Self) -> Self {
+    fn blendv(self, a: Self, b: Self) -> Self {
         I64x1(if self.0 != 0 { a.0 } else { b.0 })
     }
 
     #[inline(always)]
-    unsafe fn cmp_eq(self, rhs: Self) -> Self {
+    fn cmp_eq(self, rhs: Self) -> Self {
         I64x1(if self.0 == rhs.0 { -1 } else { 0 })
     }
 
     #[inline(always)]
-    unsafe fn cmp_neq(self, rhs: Self) -> Self {
+    fn cmp_neq(self, rhs: Self) -> Self {
         I64x1(if self.0 != rhs.0 { -1 } else { 0 })
     }
 
     #[inline(always)]
-    unsafe fn cmp_lt(self, rhs: Self) -> Self {
+    fn cmp_lt(self, rhs: Self) -> Self {
         I64x1(if self.0 < rhs.0 { -1 } else { 0 })
     }
 
     #[inline(always)]
-    unsafe fn cmp_lte(self, rhs: Self) -> Self {
+    fn cmp_lte(self, rhs: Self) -> Self {
         I64x1(if self.0 <= rhs.0 { -1 } else { 0 })
     }
 
     #[inline(always)]
-    unsafe fn cmp_gt(self, rhs: Self) -> Self {
+    fn cmp_gt(self, rhs: Self) -> Self {
         I64x1(if self.0 > rhs.0 { -1 } else { 0 })
     }
 
     #[inline(always)]
-    unsafe fn cmp_gte(self, rhs: Self) -> Self {
+    fn cmp_gte(self, rhs: Self) -> Self {
         I64x1(if self.0 >= rhs.0 { -1 } else { 0 })
     }
 
     #[inline(always)]
-    unsafe fn max(self, rhs: Self) -> Self {
+    fn max(self, rhs: Self) -> Self {
         I64x1(self.0.max(rhs.0))
     }
 
     #[inline(always)]
-    unsafe fn min(self, rhs: Self) -> Self {
+    fn min(self, rhs: Self) -> Self {
         I64x1(self.0.min(rhs.0))
     }
 
@@ -483,12 +483,12 @@ impl SimdBase for I64x1 {
 
 impl SimdInt for I64x1 {
     #[inline(always)]
-    unsafe fn shl(self, rhs: i32) -> Self {
+    fn shl(self, rhs: i32) -> Self {
         I64x1(self.0 << rhs)
     }
 
     #[inline(always)]
-    unsafe fn shr(self, rhs: i32) -> Self {
+    fn shr(self, rhs: i32) -> Self {
         I64x1(self.0 >> rhs)
     }
 }
@@ -497,12 +497,12 @@ impl SimdInt64 for I64x1 {
     type SimdF64 = F64x1;
 
     #[inline(always)]
-    unsafe fn bitcast_f64(self) -> Self::SimdF64 {
+    fn bitcast_f64(self) -> Self::SimdF64 {
         F64x1(f64::from_bits(self.0 as u64))
     }
 
     #[inline(always)]
-    unsafe fn cast_f64(self) -> Self::SimdF64 {
+    fn cast_f64(self) -> Self::SimdF64 {
         F64x1(self.0 as f64)
     }
 }
@@ -532,57 +532,57 @@ impl SimdBase for F32x1 {
     }
 
     #[inline(always)]
-    unsafe fn add(self, rhs: Self) -> Self {
+    fn add(self, rhs: Self) -> Self {
         F32x1(self.0 + rhs.0)
     }
 
     #[inline(always)]
-    unsafe fn sub(self, rhs: Self) -> Self {
+    fn sub(self, rhs: Self) -> Self {
         F32x1(self.0 - rhs.0)
     }
 
     #[inline(always)]
-    unsafe fn mul(self, rhs: Self) -> Self {
+    fn mul(self, rhs: Self) -> Self {
         F32x1(self.0 * rhs.0)
     }
 
     #[inline(always)]
-    unsafe fn bit_and(self, rhs: Self) -> Self {
+    fn bit_and(self, rhs: Self) -> Self {
         F32x1(f32::from_bits(self.0.to_bits() & rhs.0.to_bits()))
     }
 
     #[inline(always)]
-    unsafe fn bit_or(self, rhs: Self) -> Self {
+    fn bit_or(self, rhs: Self) -> Self {
         F32x1(f32::from_bits(self.0.to_bits() | rhs.0.to_bits()))
     }
 
     #[inline(always)]
-    unsafe fn bit_xor(self, rhs: Self) -> Self {
+    fn bit_xor(self, rhs: Self) -> Self {
         F32x1(f32::from_bits(self.0.to_bits() ^ rhs.0.to_bits()))
     }
 
     #[inline(always)]
-    unsafe fn bit_not(self) -> Self {
+    fn bit_not(self) -> Self {
         F32x1(f32::from_bits(!self.0.to_bits()))
     }
 
     #[inline(always)]
-    unsafe fn abs(self) -> Self {
+    fn abs(self) -> Self {
         F32x1(self.0.m_abs())
     }
 
     #[inline(always)]
-    unsafe fn and_not(self, rhs: Self) -> Self {
+    fn and_not(self, rhs: Self) -> Self {
         F32x1(f32::from_bits((!self.0.to_bits()) & rhs.0.to_bits()))
     }
 
     #[inline(always)]
-    unsafe fn blendv(self, a: Self, b: Self) -> Self {
+    fn blendv(self, a: Self, b: Self) -> Self {
         F32x1(if self.0.to_bits() != 0 { b.0 } else { a.0 })
     }
 
     #[inline(always)]
-    unsafe fn cmp_eq(self, rhs: Self) -> Self {
+    fn cmp_eq(self, rhs: Self) -> Self {
         F32x1(if self.0 == rhs.0 {
             f32::from_bits(u32::MAX)
         } else {
@@ -591,7 +591,7 @@ impl SimdBase for F32x1 {
     }
 
     #[inline(always)]
-    unsafe fn cmp_neq(self, rhs: Self) -> Self {
+    fn cmp_neq(self, rhs: Self) -> Self {
         F32x1(if self.0 != rhs.0 {
             f32::from_bits(u32::MAX)
         } else {
@@ -600,7 +600,7 @@ impl SimdBase for F32x1 {
     }
 
     #[inline(always)]
-    unsafe fn cmp_lt(self, rhs: Self) -> Self {
+    fn cmp_lt(self, rhs: Self) -> Self {
         F32x1(if self.0 < rhs.0 {
             f32::from_bits(u32::MAX)
         } else {
@@ -609,7 +609,7 @@ impl SimdBase for F32x1 {
     }
 
     #[inline(always)]
-    unsafe fn cmp_lte(self, rhs: Self) -> Self {
+    fn cmp_lte(self, rhs: Self) -> Self {
         F32x1(if self.0 <= rhs.0 {
             f32::from_bits(u32::MAX)
         } else {
@@ -618,7 +618,7 @@ impl SimdBase for F32x1 {
     }
 
     #[inline(always)]
-    unsafe fn cmp_gt(self, rhs: Self) -> Self {
+    fn cmp_gt(self, rhs: Self) -> Self {
         F32x1(if self.0 > rhs.0 {
             f32::from_bits(u32::MAX)
         } else {
@@ -627,7 +627,7 @@ impl SimdBase for F32x1 {
     }
 
     #[inline(always)]
-    unsafe fn cmp_gte(self, rhs: Self) -> Self {
+    fn cmp_gte(self, rhs: Self) -> Self {
         F32x1(if self.0 >= rhs.0 {
             f32::from_bits(u32::MAX)
         } else {
@@ -636,12 +636,12 @@ impl SimdBase for F32x1 {
     }
 
     #[inline(always)]
-    unsafe fn max(self, rhs: Self) -> Self {
+    fn max(self, rhs: Self) -> Self {
         F32x1(self.0.max(rhs.0))
     }
 
     #[inline(always)]
-    unsafe fn min(self, rhs: Self) -> Self {
+    fn min(self, rhs: Self) -> Self {
         F32x1(self.0.min(rhs.0))
     }
 
@@ -678,72 +678,72 @@ impl SimdBase for F32x1 {
 
 impl SimdFloat for F32x1 {
     #[inline(always)]
-    unsafe fn div(self, rhs: Self) -> Self {
+    fn div(self, rhs: Self) -> Self {
         F32x1(self.0 / rhs.0)
     }
 
     #[inline(always)]
-    unsafe fn ceil(self) -> Self {
+    fn ceil(self) -> Self {
         F32x1(self.0.m_ceil())
     }
 
     #[inline(always)]
-    unsafe fn floor(self) -> Self {
+    fn floor(self) -> Self {
         F32x1(self.0.m_floor())
     }
 
     #[inline(always)]
-    unsafe fn round(self) -> Self {
+    fn round(self) -> Self {
         F32x1(self.0.m_round())
     }
 
     #[inline(always)]
-    unsafe fn fast_ceil(self) -> Self {
+    fn fast_ceil(self) -> Self {
         self.ceil()
     }
 
     #[inline(always)]
-    unsafe fn fast_floor(self) -> Self {
+    fn fast_floor(self) -> Self {
         self.floor()
     }
 
     #[inline(always)]
-    unsafe fn fast_round(self) -> Self {
+    fn fast_round(self) -> Self {
         self.round()
     }
 
     #[inline(always)]
-    unsafe fn mul_add(self, a: Self, b: Self) -> Self {
+    fn mul_add(self, a: Self, b: Self) -> Self {
         F32x1(self.0 * a.0 + b.0)
     }
 
     #[inline(always)]
-    unsafe fn mul_sub(self, a: Self, b: Self) -> Self {
+    fn mul_sub(self, a: Self, b: Self) -> Self {
         F32x1(self.0 * a.0 - b.0)
     }
 
     #[inline(always)]
-    unsafe fn neg_mul_add(self, a: Self, b: Self) -> Self {
+    fn neg_mul_add(self, a: Self, b: Self) -> Self {
         -self * a + b
     }
 
     #[inline(always)]
-    unsafe fn neg_mul_sub(self, a: Self, b: Self) -> Self {
+    fn neg_mul_sub(self, a: Self, b: Self) -> Self {
         -self * a - b
     }
 
     #[inline(always)]
-    unsafe fn horizontal_add(self) -> Self::Scalar {
+    fn horizontal_add(self) -> Self::Scalar {
         self.0
     }
 
     #[inline(always)]
-    unsafe fn sqrt(self) -> Self {
+    fn sqrt(self) -> Self {
         F32x1(self.0.m_sqrt())
     }
 
     #[inline(always)]
-    unsafe fn rsqrt(self) -> Self {
+    fn rsqrt(self) -> Self {
         F32x1(1.0 / self.0.m_sqrt())
     }
 }
@@ -752,17 +752,17 @@ impl SimdFloat32 for F32x1 {
     type SimdI32 = I32x1;
 
     #[inline(always)]
-    unsafe fn bitcast_i32(self) -> Self::SimdI32 {
+    fn bitcast_i32(self) -> Self::SimdI32 {
         I32x1(self.0.to_bits() as i32)
     }
 
     #[inline(always)]
-    unsafe fn cast_i32(self) -> Self::SimdI32 {
+    fn cast_i32(self) -> Self::SimdI32 {
         I32x1(self.0 as i32)
     }
 
     #[inline(always)]
-    unsafe fn fast_inverse(self) -> Self {
+    fn fast_inverse(self) -> Self {
         F32x1(self.0.recip())
     }
 }
@@ -790,57 +790,57 @@ impl SimdBase for F64x1 {
     }
 
     #[inline(always)]
-    unsafe fn add(self, rhs: Self) -> Self {
+    fn add(self, rhs: Self) -> Self {
         F64x1(self.0 + rhs.0)
     }
 
     #[inline(always)]
-    unsafe fn sub(self, rhs: Self) -> Self {
+    fn sub(self, rhs: Self) -> Self {
         F64x1(self.0 - rhs.0)
     }
 
     #[inline(always)]
-    unsafe fn mul(self, rhs: Self) -> Self {
+    fn mul(self, rhs: Self) -> Self {
         F64x1(self.0 * rhs.0)
     }
 
     #[inline(always)]
-    unsafe fn bit_and(self, rhs: Self) -> Self {
+    fn bit_and(self, rhs: Self) -> Self {
         F64x1(f64::from_bits(self.0.to_bits() & rhs.0.to_bits()))
     }
 
     #[inline(always)]
-    unsafe fn bit_or(self, rhs: Self) -> Self {
+    fn bit_or(self, rhs: Self) -> Self {
         F64x1(f64::from_bits(self.0.to_bits() | rhs.0.to_bits()))
     }
 
     #[inline(always)]
-    unsafe fn bit_xor(self, rhs: Self) -> Self {
+    fn bit_xor(self, rhs: Self) -> Self {
         F64x1(f64::from_bits(self.0.to_bits() ^ rhs.0.to_bits()))
     }
 
     #[inline(always)]
-    unsafe fn bit_not(self) -> Self {
+    fn bit_not(self) -> Self {
         F64x1(f64::from_bits(!self.0.to_bits()))
     }
 
     #[inline(always)]
-    unsafe fn abs(self) -> Self {
+    fn abs(self) -> Self {
         F64x1(self.0.m_abs())
     }
 
     #[inline(always)]
-    unsafe fn and_not(self, rhs: Self) -> Self {
+    fn and_not(self, rhs: Self) -> Self {
         F64x1(f64::from_bits((!self.0.to_bits()) & rhs.0.to_bits()))
     }
 
     #[inline(always)]
-    unsafe fn blendv(self, a: Self, b: Self) -> Self {
+    fn blendv(self, a: Self, b: Self) -> Self {
         F64x1(if a.0 != 0.0 { self.0 } else { b.0 })
     }
 
     #[inline(always)]
-    unsafe fn cmp_eq(self, rhs: Self) -> Self {
+    fn cmp_eq(self, rhs: Self) -> Self {
         F64x1(if self.0 == rhs.0 {
             f64::from_bits(u64::MAX)
         } else {
@@ -849,7 +849,7 @@ impl SimdBase for F64x1 {
     }
 
     #[inline(always)]
-    unsafe fn cmp_neq(self, rhs: Self) -> Self {
+    fn cmp_neq(self, rhs: Self) -> Self {
         F64x1(if self.0 != rhs.0 {
             f64::from_bits(u64::MAX)
         } else {
@@ -858,7 +858,7 @@ impl SimdBase for F64x1 {
     }
 
     #[inline(always)]
-    unsafe fn cmp_lt(self, rhs: Self) -> Self {
+    fn cmp_lt(self, rhs: Self) -> Self {
         F64x1(if self.0 < rhs.0 {
             f64::from_bits(u64::MAX)
         } else {
@@ -867,7 +867,7 @@ impl SimdBase for F64x1 {
     }
 
     #[inline(always)]
-    unsafe fn cmp_lte(self, rhs: Self) -> Self {
+    fn cmp_lte(self, rhs: Self) -> Self {
         F64x1(if self.0 <= rhs.0 {
             f64::from_bits(u64::MAX)
         } else {
@@ -876,7 +876,7 @@ impl SimdBase for F64x1 {
     }
 
     #[inline(always)]
-    unsafe fn cmp_gt(self, rhs: Self) -> Self {
+    fn cmp_gt(self, rhs: Self) -> Self {
         F64x1(if self.0 > rhs.0 {
             f64::from_bits(u64::MAX)
         } else {
@@ -885,7 +885,7 @@ impl SimdBase for F64x1 {
     }
 
     #[inline(always)]
-    unsafe fn cmp_gte(self, rhs: Self) -> Self {
+    fn cmp_gte(self, rhs: Self) -> Self {
         F64x1(if self.0 >= rhs.0 {
             f64::from_bits(u64::MAX)
         } else {
@@ -894,12 +894,12 @@ impl SimdBase for F64x1 {
     }
 
     #[inline(always)]
-    unsafe fn max(self, rhs: Self) -> Self {
+    fn max(self, rhs: Self) -> Self {
         F64x1(self.0.max(rhs.0))
     }
 
     #[inline(always)]
-    unsafe fn min(self, rhs: Self) -> Self {
+    fn min(self, rhs: Self) -> Self {
         F64x1(self.0.min(rhs.0))
     }
 
@@ -936,72 +936,72 @@ impl SimdBase for F64x1 {
 
 impl SimdFloat for F64x1 {
     #[inline(always)]
-    unsafe fn div(self, rhs: Self) -> Self {
+    fn div(self, rhs: Self) -> Self {
         F64x1(self.0 / rhs.0)
     }
 
     #[inline(always)]
-    unsafe fn ceil(self) -> Self {
+    fn ceil(self) -> Self {
         F64x1(self.0.m_ceil())
     }
 
     #[inline(always)]
-    unsafe fn floor(self) -> Self {
+    fn floor(self) -> Self {
         F64x1(self.0.m_floor())
     }
 
     #[inline(always)]
-    unsafe fn round(self) -> Self {
+    fn round(self) -> Self {
         F64x1(self.0.m_round())
     }
 
     #[inline(always)]
-    unsafe fn fast_ceil(self) -> Self {
+    fn fast_ceil(self) -> Self {
         self.ceil()
     }
 
     #[inline(always)]
-    unsafe fn fast_floor(self) -> Self {
+    fn fast_floor(self) -> Self {
         self.floor()
     }
 
     #[inline(always)]
-    unsafe fn fast_round(self) -> Self {
+    fn fast_round(self) -> Self {
         self.round()
     }
 
     #[inline(always)]
-    unsafe fn mul_add(self, a: Self, b: Self) -> Self {
+    fn mul_add(self, a: Self, b: Self) -> Self {
         self * a + b
     }
 
     #[inline(always)]
-    unsafe fn mul_sub(self, a: Self, b: Self) -> Self {
+    fn mul_sub(self, a: Self, b: Self) -> Self {
         self * a - b
     }
 
     #[inline(always)]
-    unsafe fn neg_mul_add(self, a: Self, b: Self) -> Self {
+    fn neg_mul_add(self, a: Self, b: Self) -> Self {
         -self * a + b
     }
 
     #[inline(always)]
-    unsafe fn neg_mul_sub(self, a: Self, b: Self) -> Self {
+    fn neg_mul_sub(self, a: Self, b: Self) -> Self {
         -self * a - b
     }
 
     #[inline(always)]
-    unsafe fn horizontal_add(self) -> Self::Scalar {
+    fn horizontal_add(self) -> Self::Scalar {
         self.0
     }
 
     #[inline(always)]
-    unsafe fn sqrt(self) -> Self {
+    fn sqrt(self) -> Self {
         F64x1(self.0.m_sqrt())
     }
 
     #[inline(always)]
-    unsafe fn rsqrt(self) -> Self {
+    fn rsqrt(self) -> Self {
         F64x1(1.0 / self.0.m_sqrt())
     }
 }
@@ -1010,12 +1010,12 @@ impl SimdFloat64 for F64x1 {
     type SimdI64 = I64x1;
 
     #[inline(always)]
-    unsafe fn bitcast_i64(self) -> Self::SimdI64 {
+    fn bitcast_i64(self) -> Self::SimdI64 {
         I64x1(self.0.to_bits() as i64)
     }
 
     #[inline(always)]
-    unsafe fn cast_i64(self) -> Self::SimdI64 {
+    fn cast_i64(self) -> Self::SimdI64 {
         I64x1(self.0 as i64)
     }
 }
