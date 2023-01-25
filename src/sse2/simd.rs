@@ -10,10 +10,6 @@ impl Simd for Sse2 {
     type Vf64 = F64x2;
     type Vi64 = I64x2;
 
-    unsafe fn mullo_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 {
-        I16x8(_mm_mullo_epi16(a.0, b.0))
-    }
-
     unsafe fn castps_pd(a: Self::Vf32) -> Self::Vf64 {
         F64x2(_mm_castps_pd(a.0))
     }
@@ -86,22 +82,6 @@ impl Simd for Sse2 {
         result
     }
 
-    unsafe fn mullo_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        let tmp1 = _mm_mul_epu32(a.0, b.0); /* mul 2,0*/
-        let tmp2 = _mm_mul_epu32(_mm_srli_si128(a.0, 4), _mm_srli_si128(b.0, 4)); /* mul 3,1 */
-        I32x4(_mm_unpacklo_epi32(
-            _mm_shuffle_epi32(tmp1, mm_shuffle!(0, 0, 2, 0)),
-            _mm_shuffle_epi32(tmp2, mm_shuffle!(0, 0, 2, 0)),
-        )) /* shuffle results to [63..0] and pack */
-    }
-
-    unsafe fn mullo_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
-        let mut result = Self::setzero_epi64();
-        result[0] = a[0] * b[0];
-        result[1] = a[1] * b[1];
-        result
-    }
-
     unsafe fn shuffle_epi32(a: Self::Vi32, imm8: i32) -> Self::Vi32 {
         macro_rules! call {
             ($imm8:expr) => {
@@ -110,5 +90,4 @@ impl Simd for Sse2 {
         }
         constify_imm8!(imm8, call)
     }
-
 }

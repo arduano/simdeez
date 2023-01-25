@@ -10,10 +10,6 @@ impl Simd for Sse41 {
     type Vf64 = F64x2_41;
     type Vi64 = I64x2_41;
 
-    unsafe fn mullo_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 {
-        I16x8_41(_mm_mullo_epi16(a.0, b.0))
-    }
-
     unsafe fn castps_pd(a: Self::Vf32) -> Self::Vf64 {
         F64x2_41(_mm_castps_pd(a.0))
     }
@@ -83,17 +79,6 @@ impl Simd for Sse41 {
         let ptr = mem_addr as *const f64;
         result[0] = if mask[0] != 0 { *ptr } else { 0.0 };
         result[1] = if mask[1] != 0 { *ptr.offset(1) } else { 0.0 };
-        result
-    }
-
-    unsafe fn mullo_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        I32x4_41(_mm_mullo_epi32(a.0, b.0))
-    }
-
-    unsafe fn mullo_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
-        let mut result = Self::setzero_epi64();
-        result[0] = a[0] * b[0];
-        result[1] = a[1] * b[1];
         result
     }
 

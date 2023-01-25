@@ -8,10 +8,6 @@ impl Simd for Scalar {
     type Vf64 = F64x1;
     type Vi64 = I64x1;
 
-    unsafe fn mullo_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 {
-        a * b
-    }
-
     unsafe fn castps_pd(a: Self::Vf32) -> Self::Vf64 {
         F64x1(a.0 as f64)
     }
@@ -62,14 +58,6 @@ impl Simd for Scalar {
         } else {
             F64x1(0.0)
         }
-    }
-
-    unsafe fn mullo_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
-        a * b
-    }
-
-    unsafe fn mullo_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
-        a * b
     }
 
     unsafe fn shuffle_epi32(a: Self::Vi32, _imm8: i32) -> Self::Vi32 {

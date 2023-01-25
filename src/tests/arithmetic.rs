@@ -1,6 +1,6 @@
 use quickcheck::{Arbitrary, Gen, TestResult, Testable};
 
-use crate::{avx2::*, scalar::*, sse41::*, sse2::*};
+use crate::{avx2::*, scalar::*, sse2::*, sse41::*};
 use crate::{tests::ArbitrarySimd, Simd, SimdBase, SimdFloat};
 
 use super::ScalarNumber;

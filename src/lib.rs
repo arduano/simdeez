@@ -421,7 +421,26 @@ pub trait Simd: Sync + Send {
         a.abs()
     }
 
-    unsafe fn mullo_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16;
+    // Mullo is implemented for Sse2 by combining other Sse2 operations.
+
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn mullo_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
+        a * b
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn mullo_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
+        a * b
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn mullo_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 {
+        a * b
+    }
 
     #[deprecated(
         note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
@@ -1059,12 +1078,6 @@ pub trait Simd: Sync + Send {
     unsafe fn min_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
         a.min(b)
     }
-
-    /// Mullo is implemented for Sse2 by combining other Sse2 operations.
-    #[deprecated(note = "FIXME: make proper deprecation message")]
-    unsafe fn mullo_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
-    #[deprecated(note = "FIXME: make proper deprecation message")]
-    unsafe fn mullo_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
 
     #[deprecated(
         note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
