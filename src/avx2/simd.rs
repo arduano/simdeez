@@ -1,5 +1,4 @@
-#[cfg(feature = "sleef")]
-use crate::sse41::{F32x4_41, F64x2_41};
+#![allow(deprecated)]
 
 use super::*;
 

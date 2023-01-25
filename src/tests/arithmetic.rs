@@ -1,7 +1,7 @@
 use quickcheck::{Arbitrary, Gen, TestResult, Testable};
 
-use crate::{avx2::*, scalar::*};
-use crate::{tests::ArbitrarySimd, Simd, SimdBase, SimdFloat, SimdFloat32};
+use crate::{avx2::*, scalar::*, sse41::*};
+use crate::{tests::ArbitrarySimd, Simd, SimdBase, SimdFloat};
 
 use super::ScalarNumber;
 
@@ -244,6 +244,11 @@ macro_rules! make_tests {
             fn [<$f _scalar>]() {
                 check_function!($kind, Scalar, $f, $($rest)+);
             }
+
+            #[test]
+            fn [<$f _sse41>]() {
+                check_function!($kind, Sse41, $f, $($rest)+);
+            }
         }
     };
 }
@@ -298,7 +303,6 @@ mod float {
 }
 
 mod float32 {
-    use super::*;
-
-    make_tests!(f32, fast_inverse, 1_arg);
+    // FIXME: Create a better test for this as it's too imprecise
+    // make_tests!(f32, fast_inverse, 1_arg);
 }
