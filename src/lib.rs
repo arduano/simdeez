@@ -854,13 +854,13 @@ pub trait Simd: Sync + Send {
     }
     /// Sse2 and Sse41 paths will simulate a gather by breaking out and
     /// doing scalar array accesses, because gather doesn't exist until Avx2.
-    #[deprecated(note = "FIXME: make proper deprecation message")]
+    #[deprecated(note = "These functions have unpredictable behavior and will be deleted in the future. Please use a manual implementation instead.")]
     unsafe fn i32gather_epi32(arr: &[i32], index: Self::Vi32) -> Self::Vi32;
-    #[deprecated(note = "FIXME: make proper deprecation message")]
+    #[deprecated(note = "These functions have unpredictable behavior and will be deleted in the future. Please use a manual implementation instead.")]
     unsafe fn i64gather_epi64(arr: &[i64], index: Self::Vi64) -> Self::Vi64;
     /// Sse2 and Sse41 paths will simulate a gather by breaking out and
     /// doing scalar array accesses, because gather doesn't exist until Avx2.
-    #[deprecated(note = "FIXME: make proper deprecation message")]
+    #[deprecated(note = "These functions have unpredictable behavior and will be deleted in the future. Please use a manual implementation instead.")]
     unsafe fn i32gather_ps(arr: &[f32], index: Self::Vi32) -> Self::Vf32;
 
     #[deprecated(
@@ -930,22 +930,22 @@ pub trait Simd: Sync + Send {
     /// Note, SSE2 and SSE4 will load when mask[i] is nonzero, where AVX2
     /// will store only when the high bit is set. To ensure portability
     /// ensure that the high bit is set.
-    #[deprecated(note = "FIXME: make proper deprecation message")]
+    #[deprecated(note = "These functions have unpredictable behavior and will be deleted in the future. Please use a manual implementation instead.")]
     unsafe fn maskload_epi32(mem_addr: &i32, mask: Self::Vi32) -> Self::Vi32;
     /// Note, SSE2 and SSE4 will load when mask[i] is nonzero, where AVX2
     /// will store only when the high bit is set. To ensure portability
     /// ensure that the high bit is set.
-    #[deprecated(note = "FIXME: make proper deprecation message")]
+    #[deprecated(note = "These functions have unpredictable behavior and will be deleted in the future. Please use a manual implementation instead.")]
     unsafe fn maskload_epi64(mem_addr: &i64, mask: Self::Vi64) -> Self::Vi64;
     /// Note, SSE2 and SSE4 will load when mask[i] is nonzero, where AVX2
     /// will store only when the high bit is set. To ensure portability
     /// ensure that the high bit is set.
-    #[deprecated(note = "FIXME: make proper deprecation message")]
+    #[deprecated(note = "These functions have unpredictable behavior and will be deleted in the future. Please use a manual implementation instead.")]
     unsafe fn maskload_ps(mem_addr: &f32, mask: Self::Vi32) -> Self::Vf32;
     /// Note, SSE2 and SSE4 will load when mask[i] is nonzero, where AVX2
     /// will store only when the high bit is set. To ensure portability
     /// ensure that the high bit is set.
-    #[deprecated(note = "FIXME: make proper deprecation message")]
+    #[deprecated(note = "These functions have unpredictable behavior and will be deleted in the future. Please use a manual implementation instead.")]
     unsafe fn maskload_pd(mem_addr: &f64, mask: Self::Vi64) -> Self::Vf64;
 
     #[deprecated(
@@ -1243,7 +1243,7 @@ pub trait Simd: Sync + Send {
 
     /// Using the shuffle function is undefined behavior because imm8 behaves differently on different
     /// architectures.
-    #[deprecated(note = "FIXME: make proper deprecation message")]
+    #[deprecated(note = "These functions have unpredictable behavior and will be deleted in the future. Please use a manual implementation instead.")]
     unsafe fn shuffle_epi32(a: Self::Vi32, imm8: i32) -> Self::Vi32;
 
     cfg_if::cfg_if! {
