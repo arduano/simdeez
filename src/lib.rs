@@ -158,6 +158,8 @@ pub extern crate paste;
 #[cfg(test)]
 mod tests;
 
+pub mod prelude;
+
 use core::ops::*;
 
 #[macro_use]
