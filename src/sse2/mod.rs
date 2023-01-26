@@ -82,8 +82,8 @@ impl SimdBase for I16x8 {
     fn blendv(self, a: Self, b: Self) -> Self {
         unsafe {
             let mask = self.cmp_eq(Self::set1(-1));
-            let a = mask.bit_and(a);
-            let b = mask.and_not(b);
+            let a = mask.and_not(a);
+            let b = mask.bit_and(b);
             a.bit_or(b)
         }
     }
@@ -266,8 +266,8 @@ impl SimdBase for I32x4 {
     fn blendv(self, a: Self, b: Self) -> Self {
         unsafe {
             let mask = self.cmp_eq(Self::set1(-1));
-            let a = mask.bit_and(a);
-            let b = mask.and_not(b);
+            let a = mask.and_not(a);
+            let b = mask.bit_and(b);
             a.bit_or(b)
         }
     }
@@ -304,12 +304,12 @@ impl SimdBase for I32x4 {
 
     fn max(self, rhs: Self) -> Self {
         let mask = self.cmp_gt(rhs);
-        mask.blendv(self, rhs)
+        mask.blendv(rhs, self)
     }
 
     fn min(self, rhs: Self) -> Self {
         let mask = self.cmp_gt(rhs);
-        mask.blendv(rhs, self)
+        mask.blendv(self, rhs)
     }
 
     unsafe fn load_from_array(array: Self::ArrayRepresentation) -> Self {
@@ -460,8 +460,8 @@ impl SimdBase for I64x2 {
     fn blendv(self, a: Self, b: Self) -> Self {
         unsafe {
             let mask = self.cmp_eq(Self::set1(-1));
-            let a = mask.bit_and(a);
-            let b = mask.and_not(b);
+            let a = mask.and_not(a);
+            let b = mask.bit_and(b);
             a.bit_or(b)
         }
     }
@@ -517,12 +517,12 @@ impl SimdBase for I64x2 {
 
     fn max(self, rhs: Self) -> Self {
         let cmp = self.cmp_gt(rhs);
-        cmp.blendv(self, rhs)
+        cmp.blendv(rhs, self)
     }
 
     fn min(self, rhs: Self) -> Self {
         let cmp = self.cmp_gt(rhs);
-        cmp.blendv(rhs, self)
+        cmp.blendv(self, rhs)
     }
 
     unsafe fn load_from_array(array: Self::ArrayRepresentation) -> Self {
@@ -667,7 +667,7 @@ impl SimdBase for F32x4 {
 
     fn blendv(self, a: Self, b: Self) -> Self {
         self.bitcast_i32()
-            .bit_or(a.bitcast_i32().bit_and(b.bitcast_i32()))
+            .blendv(a.bitcast_i32(), b.bitcast_i32())
             .bitcast_f32()
     }
 
@@ -928,7 +928,7 @@ impl SimdBase for F64x2 {
 
     fn blendv(self, a: Self, b: Self) -> Self {
         self.bitcast_i64()
-            .bit_or(a.bitcast_i64().bit_and(b.bitcast_i64()))
+            .blendv(a.bitcast_i64(), b.bitcast_i64())
             .bitcast_f64()
     }
 

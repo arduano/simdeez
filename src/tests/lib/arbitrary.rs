@@ -1,6 +1,8 @@
 //! This module allows generating a (seeded) random list of inputs that includes special numbers as well as
 //! seeded random ones. The IMPORTANT_[ty] constants contain the important edge cases to try out.
 
+use core::iter;
+
 use rand::{
     distributions::uniform::{SampleRange, SampleUniform},
     prelude::*,
@@ -51,10 +53,10 @@ fn iter_arbitrary_f32(interval: usize) -> impl Iterator<Item = f32> {
     let mut make_random_iter = move || {
         i += 1;
         let mut rng = ChaCha8Rng::seed_from_u64((interval + i) as u64);
-        std::iter::repeat_with(move || f32::from_bits(rng.gen_range(0..u32::MAX)))
+        iter::repeat_with(move || f32::from_bits(rng.gen_range(0..u32::MAX)))
     };
 
-    std::iter::repeat_with(move || make_important_iter().chain(make_random_iter().take(rng_count)))
+    iter::repeat_with(move || make_important_iter().chain(make_random_iter().take(rng_count)))
         .flatten()
 }
 
@@ -68,10 +70,10 @@ fn iter_arbitrary_f64(interval: usize) -> impl Iterator<Item = f64> {
     let mut make_random_iter = move || {
         i += 1;
         let mut rng = ChaCha8Rng::seed_from_u64((interval + i) as u64);
-        std::iter::repeat_with(move || f64::from_bits(rng.gen_range(0..u64::MAX)))
+        iter::repeat_with(move || f64::from_bits(rng.gen_range(0..u64::MAX)))
     };
 
-    std::iter::repeat_with(move || make_important_iter().chain(make_random_iter().take(rng_count)))
+    iter::repeat_with(move || make_important_iter().chain(make_random_iter().take(rng_count)))
         .flatten()
 }
 
@@ -90,10 +92,10 @@ fn iter_arbitrary_ints<T: SampleUniform + Clone>(
         i += 1;
         let mut rng = ChaCha8Rng::seed_from_u64((interval + i) as u64);
         let range = range.clone();
-        std::iter::repeat_with(move || rng.gen_range(range.clone()))
+        iter::repeat_with(move || rng.gen_range(range.clone()))
     };
 
-    std::iter::repeat_with(move || make_important_iter().chain(make_random_iter().take(rng_count)))
+    iter::repeat_with(move || make_important_iter().chain(make_random_iter().take(rng_count)))
         .flatten()
 }
 
@@ -109,11 +111,35 @@ fn iter_arbitrary_i64(interval: usize) -> impl Iterator<Item = i64> {
     iter_arbitrary_ints(interval, &IMPORTANT_I64, std::i64::MIN..=std::i64::MAX)
 }
 
+fn iter_arbitrary_blendv_i16() -> impl Iterator<Item = i16> {
+    [-1, 0].iter().cycle().copied()
+}
+
+fn iter_arbitrary_blendv_i32() -> impl Iterator<Item = i32> {
+    [-1, 0].iter().cycle().copied()
+}
+
+fn iter_arbitrary_blendv_i64() -> impl Iterator<Item = i64> {
+    [-1, 0].iter().cycle().copied()
+}
+
+fn iter_arbitrary_blendv_f32() -> impl Iterator<Item = f32> {
+    iter::once(f32::from_bits(u32::MAX))
+        .chain(iter::once(f32::from_bits(0)))
+        .cycle()
+}
+
+fn iter_arbitrary_blendv_f64() -> impl Iterator<Item = f64> {
+    iter::once(f64::from_bits(u64::MAX))
+        .chain(iter::once(f64::from_bits(0)))
+        .cycle()
+}
+
 /// Convert an iterator of scalars into an iterator of SIMD vectors.
 fn iter_as_simd<S: SimdBase<Scalar = N>, N>(
     mut iter: impl Iterator<Item = N>,
 ) -> impl Iterator<Item = S> {
-    std::iter::repeat_with(move || unsafe {
+    iter::repeat_with(move || unsafe {
         let mut v = S::zeroes();
         for i in 0..S::WIDTH {
             v[i] = iter.next().unwrap();
@@ -127,30 +153,55 @@ fn iter_as_simd<S: SimdBase<Scalar = N>, N>(
 /// E.g. `RandSimd::f32().two_arg()` will generate an iterator of `(S,S)` values
 /// where S's scalar type is f32 and S is inferred.
 pub struct RandSimd;
-pub struct IterRandSimdForScalar<N, I: Iterator<Item = N>>(Box<dyn Fn(usize) -> I>);
+pub struct IterRandSimdForScalar<N, I: Iterator<Item = N>, I2: Iterator<Item = N>> {
+    any: Box<dyn Fn(usize) -> I>,
+    blendv: Box<dyn Fn() -> I2>,
+}
 
 impl RandSimd {
-    pub fn f32() -> IterRandSimdForScalar<f32, impl Iterator<Item = f32>> {
-        IterRandSimdForScalar(Box::new(iter_arbitrary_f32))
+    pub fn f32() -> IterRandSimdForScalar<f32, impl Iterator<Item = f32>, impl Iterator<Item = f32>>
+    {
+        IterRandSimdForScalar {
+            any: Box::new(iter_arbitrary_f32),
+            blendv: Box::new(iter_arbitrary_blendv_f32),
+        }
     }
-    pub fn f64() -> IterRandSimdForScalar<f64, impl Iterator<Item = f64>> {
-        IterRandSimdForScalar(Box::new(iter_arbitrary_f64))
+    pub fn f64() -> IterRandSimdForScalar<f64, impl Iterator<Item = f64>, impl Iterator<Item = f64>>
+    {
+        IterRandSimdForScalar {
+            any: Box::new(iter_arbitrary_f64),
+            blendv: Box::new(iter_arbitrary_blendv_f64),
+        }
     }
-    pub fn i16() -> IterRandSimdForScalar<i16, impl Iterator<Item = i16>> {
-        IterRandSimdForScalar(Box::new(iter_arbitrary_i16))
+    pub fn i16() -> IterRandSimdForScalar<i16, impl Iterator<Item = i16>, impl Iterator<Item = i16>>
+    {
+        IterRandSimdForScalar {
+            any: Box::new(iter_arbitrary_i16),
+            blendv: Box::new(iter_arbitrary_blendv_i16),
+        }
     }
-    pub fn i32() -> IterRandSimdForScalar<i32, impl Iterator<Item = i32>> {
-        IterRandSimdForScalar(Box::new(iter_arbitrary_i32))
+    pub fn i32() -> IterRandSimdForScalar<i32, impl Iterator<Item = i32>, impl Iterator<Item = i32>>
+    {
+        IterRandSimdForScalar {
+            any: Box::new(iter_arbitrary_i32),
+            blendv: Box::new(iter_arbitrary_blendv_i32),
+        }
     }
-    pub fn i64() -> IterRandSimdForScalar<i64, impl Iterator<Item = i64>> {
-        IterRandSimdForScalar(Box::new(iter_arbitrary_i64))
+    pub fn i64() -> IterRandSimdForScalar<i64, impl Iterator<Item = i64>, impl Iterator<Item = i64>>
+    {
+        IterRandSimdForScalar {
+            any: Box::new(iter_arbitrary_i64),
+            blendv: Box::new(iter_arbitrary_blendv_i64),
+        }
     }
 }
 
-impl<N: ScalarNumber, I: Iterator<Item = N>> IterRandSimdForScalar<N, I> {
+impl<N: ScalarNumber, I: Iterator<Item = N>, I2: Iterator<Item = N>>
+    IterRandSimdForScalar<N, I, I2>
+{
     /// Iterate 1000 random inputs, starting from the important numbers
     pub fn one_arg<S: SimdBase<Scalar = N>>(self) -> impl Iterator<Item = (S,)> {
-        let iter = iter_as_simd(self.0(1000));
+        let iter = iter_as_simd((self.any)(1000));
         iter.map(|v| (v,)).take(1000 * S::WIDTH)
     }
 
@@ -158,18 +209,18 @@ impl<N: ScalarNumber, I: Iterator<Item = N>> IterRandSimdForScalar<N, I> {
     /// the second arguming looping at 15 inputs, effectively putting each special number against each
     /// other one in the end.
     pub fn two_arg<S: SimdBase<Scalar = N>>(self) -> impl Iterator<Item = (S, S)> {
-        let iter1 = iter_as_simd(self.0(14));
-        let iter2 = iter_as_simd(self.0(15));
+        let iter1 = iter_as_simd((self.any)(14));
+        let iter2 = iter_as_simd((self.any)(15));
         iter1.zip(iter2).take(14 * 15 * 20 * S::WIDTH)
     }
 
     /// Same as two_arg except with periods of 14, 15 and 16.
     pub fn three_arg<S: SimdBase<Scalar = N>>(self) -> impl Iterator<Item = (S, S, S)> {
-        let mut iter1 = iter_as_simd(self.0(14));
-        let mut iter2 = iter_as_simd(self.0(15));
-        let mut iter3 = iter_as_simd(self.0(16));
+        let mut iter1 = iter_as_simd((self.any)(14));
+        let mut iter2 = iter_as_simd((self.any)(15));
+        let mut iter3 = iter_as_simd((self.any)(16));
 
-        std::iter::repeat_with(move || {
+        iter::repeat_with(move || {
             (
                 iter1.next().unwrap(),
                 iter2.next().unwrap(),
@@ -181,20 +232,36 @@ impl<N: ScalarNumber, I: Iterator<Item = N>> IterRandSimdForScalar<N, I> {
 
     /// Same as one_arg, except filtering out invalid inputs for abs functions
     pub fn one_arg_abs_filtered<S: SimdBase<Scalar = N>>(self) -> impl Iterator<Item = (S,)> {
-        let iter = iter_as_simd(self.0(1000).filter(|v| !v.is_minimum_int()));
+        let iter = iter_as_simd((self.any)(1000).filter(|v| !v.is_minimum_int()));
         iter.map(|v| (v,)).take(1000 * S::WIDTH)
     }
 
     /// Same as one_arg, except slightly shifted on floating point values
     pub fn one_arg_slightly_shifted<S: SimdBase<Scalar = N>>(self) -> impl Iterator<Item = (S,)> {
-        let iter = iter_as_simd(self.0(1000).map(|v| v.slightly_shift()));
+        let iter = iter_as_simd((self.any)(1000).map(|v| v.slightly_shift()));
         iter.map(|v| (v,)).take(1000 * S::WIDTH)
     }
 
     /// Same as two_arg, except filtering out NaN floats
     pub fn two_arg_nan_filtered<S: SimdBase<Scalar = N>>(self) -> impl Iterator<Item = (S, S)> {
-        let iter1 = iter_as_simd(self.0(15).filter(|v| !v.is_float_nan()));
-        let iter2 = iter_as_simd(self.0(16).filter(|v| !v.is_float_nan()));
+        let iter1 = iter_as_simd((self.any)(15).filter(|v| !v.is_float_nan()));
+        let iter2 = iter_as_simd((self.any)(16).filter(|v| !v.is_float_nan()));
         iter1.zip(iter2).take(14 * 15 * 20 * S::WIDTH)
+    }
+
+    /// A blendv mask that's not all 0's or all 1's is undefined behavior between different architectures.
+    pub fn iter_blendv_ags<S: SimdBase<Scalar = N>>(self) -> impl Iterator<Item = (S, S, S)> {
+        let mut mask_iter = iter_as_simd((self.blendv)());
+        let mut iter2 = iter_as_simd((self.any)(15));
+        let mut iter3 = iter_as_simd((self.any)(16));
+
+        iter::repeat_with(move || {
+            (
+                mask_iter.next().unwrap(),
+                iter2.next().unwrap(),
+                iter3.next().unwrap(),
+            )
+        })
+        .take(100 * S::WIDTH)
     }
 }

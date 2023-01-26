@@ -77,7 +77,7 @@ impl SimdBase for I16x1 {
 
     #[inline(always)]
     fn blendv(self, a: Self, b: Self) -> Self {
-        I16x1(if self.0 != 0 { a.0 } else { b.0 })
+        I16x1(if self.0 != 0 { b.0 } else { a.0 })
     }
 
     #[inline(always)]
@@ -236,7 +236,7 @@ impl SimdBase for I32x1 {
 
     #[inline(always)]
     fn blendv(self, a: Self, b: Self) -> Self {
-        I32x1(if self.0 != 0 { a.0 } else { b.0 })
+        I32x1(if self.0 != 0 { b.0 } else { a.0 })
     }
 
     #[inline(always)]
@@ -407,7 +407,7 @@ impl SimdBase for I64x1 {
 
     #[inline(always)]
     fn blendv(self, a: Self, b: Self) -> Self {
-        I64x1(if self.0 != 0 { a.0 } else { b.0 })
+        I64x1(if self.0 != 0 { b.0 } else { a.0 })
     }
 
     #[inline(always)]
@@ -836,7 +836,7 @@ impl SimdBase for F64x1 {
 
     #[inline(always)]
     fn blendv(self, a: Self, b: Self) -> Self {
-        F64x1(if a.0 != 0.0 { self.0 } else { b.0 })
+        F64x1(if self.0 != 0.0 { b.0 } else { a.0 })
     }
 
     #[inline(always)]

@@ -70,8 +70,8 @@ impl SimdBase for I16x8_41 {
     fn blendv(self, a: Self, b: Self) -> Self {
         unsafe {
             let mask = self.cmp_eq(Self::set1(-1));
-            let a = mask.bit_and(a);
-            let b = mask.and_not(b);
+            let a = mask.and_not(a);
+            let b = mask.bit_and(b);
             a.bit_or(b)
         }
     }
@@ -218,9 +218,9 @@ impl SimdBase for I32x4_41 {
     }
 
     fn blendv(self, a: Self, b: Self) -> Self {
-        self.cast_f32()
-            .blendv(a.cast_f32(), b.cast_f32())
-            .cast_i32()
+        self.bitcast_f32()
+            .blendv(a.bitcast_f32(), b.bitcast_f32())
+            .bitcast_i32()
     }
 
     fn cmp_eq(self, rhs: Self) -> Self {
@@ -380,9 +380,9 @@ impl SimdBase for I64x2_41 {
     }
 
     fn blendv(self, a: Self, b: Self) -> Self {
-        self.cast_f64()
-            .blendv(a.cast_f64(), b.cast_f64())
-            .cast_i64()
+        self.bitcast_f64()
+            .blendv(a.bitcast_f64(), b.bitcast_f64())
+            .bitcast_i64()
     }
 
     fn cmp_eq(self, rhs: Self) -> Self {

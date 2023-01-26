@@ -245,9 +245,9 @@ impl SimdBase for I32x8 {
 
     #[inline(always)]
     fn blendv(self, a: Self, b: Self) -> Self {
-        self.cast_f32()
-            .blendv(a.cast_f32(), b.cast_f32())
-            .cast_i32()
+        self.bitcast_f32()
+            .blendv(a.bitcast_f32(), b.bitcast_f32())
+            .bitcast_i32()
     }
 
     #[inline(always)]
@@ -441,9 +441,9 @@ impl SimdBase for I64x4 {
 
     #[inline(always)]
     fn blendv(self, a: Self, b: Self) -> Self {
-        self.cast_f64()
-            .blendv(a.cast_f64(), b.cast_f64())
-            .cast_i64()
+        self.bitcast_f64()
+            .blendv(a.bitcast_f64(), b.bitcast_f64())
+            .bitcast_i64()
     }
 
     #[inline(always)]
