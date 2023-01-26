@@ -873,64 +873,55 @@ pub trait Simd: Sync + Send {
         note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
     )]
     unsafe fn load_ps(a: &f32) -> Self::Vf32 {
-        // This function was originally highly unsafe, now it just defaults to set1
-        SimdBase::set1(*a)
+        SimdBase::load_from_ptr_aligned(a)
     }
     #[deprecated(
         note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
     )]
     unsafe fn load_pd(a: &f64) -> Self::Vf64 {
-        // This function was originally highly unsafe, now it just defaults to set1
-        SimdBase::set1(*a)
+        SimdBase::load_from_ptr_aligned(a)
     }
     #[deprecated(
         note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
     )]
     unsafe fn load_epi16(a: &i16) -> Self::Vi16 {
-        // This function was originally highly unsafe, now it just defaults to set1
-        SimdBase::set1(*a)
+        SimdBase::load_from_ptr_aligned(a)
     }
     #[deprecated(
         note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
     )]
     unsafe fn load_epi32(a: &i32) -> Self::Vi32 {
-        // This function was originally highly unsafe, now it just defaults to set1
-        SimdBase::set1(*a)
+        SimdBase::load_from_ptr_aligned(a)
     }
     #[deprecated(
         note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
     )]
     unsafe fn load_epi64(a: &i64) -> Self::Vi64 {
-        // This function was originally highly unsafe, now it just defaults to set1
-        SimdBase::set1(*a)
+        SimdBase::load_from_ptr_aligned(a)
     }
     #[deprecated(
         note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
     )]
     unsafe fn loadu_ps(a: &f32) -> Self::Vf32 {
-        // This function was originally highly unsafe, now it just defaults to set1
-        SimdBase::set1(*a)
+        SimdBase::load_from_ptr_unaligned(a)
     }
     #[deprecated(
         note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
     )]
     unsafe fn loadu_pd(a: &f64) -> Self::Vf64 {
-        // This function was originally highly unsafe, now it just defaults to set1
-        SimdBase::set1(*a)
+        SimdBase::load_from_ptr_unaligned(a)
     }
     #[deprecated(
         note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
     )]
     unsafe fn loadu_epi32(a: &i32) -> Self::Vi32 {
-        // This function was originally highly unsafe, now it just defaults to set1
-        SimdBase::set1(*a)
+        SimdBase::load_from_ptr_unaligned(a)
     }
     #[deprecated(
         note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
     )]
     unsafe fn loadu_epi64(a: &i64) -> Self::Vi64 {
-        // This function was originally highly unsafe, now it just defaults to set1
-        SimdBase::set1(*a)
+        SimdBase::load_from_ptr_unaligned(a)
     }
 
     /// Note, SSE2 and SSE4 will load when mask[i] is nonzero, where AVX2
@@ -966,49 +957,49 @@ pub trait Simd: Sync + Send {
         note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
     )]
     unsafe fn store_ps(mem_addr: &mut f32, a: Self::Vf32) {
-        *mem_addr = a[0];
+        a.copy_to_ptr_aligned(mem_addr)
     }
     #[deprecated(
         note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
     )]
     unsafe fn store_pd(mem_addr: &mut f64, a: Self::Vf64) {
-        *mem_addr = a[0];
+        a.copy_to_ptr_aligned(mem_addr)
     }
     #[deprecated(
         note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
     )]
     unsafe fn store_epi32(mem_addr: &mut i32, a: Self::Vi32) {
-        *mem_addr = a[0];
+        a.copy_to_ptr_aligned(mem_addr)
     }
     #[deprecated(
         note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
     )]
     unsafe fn store_epi64(mem_addr: &mut i64, a: Self::Vi64) {
-        *mem_addr = a[0];
+        a.copy_to_ptr_aligned(mem_addr)
     }
     #[deprecated(
         note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
     )]
     unsafe fn storeu_ps(mem_addr: &mut f32, a: Self::Vf32) {
-        *mem_addr = a[0];
+        a.copy_to_ptr_unaligned(mem_addr)
     }
     #[deprecated(
         note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
     )]
     unsafe fn storeu_pd(mem_addr: &mut f64, a: Self::Vf64) {
-        *mem_addr = a[0];
+        a.copy_to_ptr_unaligned(mem_addr)
     }
     #[deprecated(
         note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
     )]
     unsafe fn storeu_epi32(mem_addr: &mut i32, a: Self::Vi32) {
-        *mem_addr = a[0];
+        a.copy_to_ptr_unaligned(mem_addr)
     }
     #[deprecated(
         note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
     )]
     unsafe fn storeu_epi64(mem_addr: &mut i64, a: Self::Vi64) {
-        *mem_addr = a[0];
+        a.copy_to_ptr_unaligned(mem_addr)
     }
 
     /// Note, SSE2 and SSE4 will store when mask[i] is nonzero, where AVX2
