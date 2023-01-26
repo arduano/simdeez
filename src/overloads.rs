@@ -29,6 +29,15 @@ macro_rules! impl_simd_base_overloads {
             }
         }
 
+        impl Add<$s> for <$s as SimdBase>::Scalar {
+            type Output = $s;
+
+            #[inline(always)]
+            fn add(self, rhs: $s) -> $s {
+                unsafe { SimdBase::add($s::set1(self), rhs) }
+            }
+        }
+
         impl AddAssign<<Self as SimdBase>::Scalar> for $s {
             #[inline(always)]
             fn add_assign(&mut self, rhs: <Self as SimdBase>::Scalar) {
@@ -60,6 +69,15 @@ macro_rules! impl_simd_base_overloads {
             #[inline(always)]
             fn sub(self, rhs: <Self as SimdBase>::Scalar) -> Self {
                 unsafe { SimdBase::sub(self, Self::set1(rhs)) }
+            }
+        }
+
+        impl Sub<$s> for <$s as SimdBase>::Scalar {
+            type Output = $s;
+
+            #[inline(always)]
+            fn sub(self, rhs: $s) -> $s {
+                unsafe { SimdBase::sub($s::set1(self), rhs) }
             }
         }
 
@@ -103,6 +121,15 @@ macro_rules! impl_simd_base_overloads {
                 unsafe {
                     *self = SimdBase::mul(*self, Self::set1(rhs));
                 }
+            }
+        }
+
+        impl Mul<$s> for <$s as SimdBase>::Scalar {
+            type Output = $s;
+
+            #[inline(always)]
+            fn mul(self, rhs: $s) -> $s {
+                unsafe { SimdBase::mul($s::set1(self), rhs) }
             }
         }
 

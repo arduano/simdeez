@@ -34,6 +34,10 @@ pub trait SimdBase:
     + core::marker::Sync
     + core::marker::Send
     + Not<Output = Self>
+where
+    Self::Scalar: Sub<Self, Output = Self>,
+    Self::Scalar: Add<Self, Output = Self>,
+    Self::Scalar: Mul<Self, Output = Self>,
 {
     type Scalar: Copy + Debug + core::marker::Sync + core::marker::Send;
     const WIDTH: usize;
@@ -316,7 +320,9 @@ pub trait SimdFloat:
     + Div<Self, Output = Self>
     + DivAssign<Self>
     + Div<Self::Scalar, Output = Self>
-    + DivAssign<Self::Scalar>
+    + DivAssign<Self::Scalar> //
+// where
+//     Self::Scalar: Div<Self, Output = Self>,
 {
     /// Element-wise divide between two vectors
     fn div(self, rhs: Self) -> Self;
