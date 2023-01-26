@@ -1,3 +1,5 @@
+use crate::libm_ext::FloatExt;
+
 use super::*;
 #[cfg(target_arch = "x86")]
 use core::arch::x86::*;
@@ -876,24 +878,24 @@ impl SimdFloat for F32x4 {
     #[inline(always)]
     fn ceil(self) -> Self {
         unsafe {
-            let t1 = _mm_getcsr();
-            let t2 = t1 | (2 << 13);
-            _mm_setcsr(t2);
-            let r = self.round();
-            _mm_setcsr(t1);
-            r
+            Self::load_from_array([
+                self[0].m_ceil(),
+                self[1].m_ceil(),
+                self[2].m_ceil(),
+                self[3].m_ceil(),
+            ])
         }
     }
 
     #[inline(always)]
     fn floor(self) -> Self {
         unsafe {
-            let t1 = _mm_getcsr();
-            let t2 = t1 | (1 << 13);
-            _mm_setcsr(t2);
-            let r = self.round();
-            _mm_setcsr(t1);
-            r
+            Self::load_from_array([
+                self[0].m_floor(),
+                self[1].m_floor(),
+                self[2].m_floor(),
+                self[3].m_floor(),
+            ])
         }
     }
 
@@ -1178,26 +1180,12 @@ impl SimdFloat for F64x2 {
 
     #[inline(always)]
     fn ceil(self) -> Self {
-        unsafe {
-            let t1 = _mm_getcsr();
-            let t2 = t1 | (2 << 13);
-            _mm_setcsr(t2);
-            let r = self.round();
-            _mm_setcsr(t1);
-            r
-        }
+        unsafe { Self::load_from_array([self[0].m_ceil(), self[1].m_ceil()]) }
     }
 
     #[inline(always)]
     fn floor(self) -> Self {
-        unsafe {
-            let t1 = _mm_getcsr();
-            let t2 = t1 | (1 << 13);
-            _mm_setcsr(t2);
-            let r = self.round();
-            _mm_setcsr(t1);
-            r
-        }
+        unsafe { Self::load_from_array([self[0].m_floor(), self[1].m_floor()]) }
     }
 
     #[inline(always)]

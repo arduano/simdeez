@@ -31,7 +31,14 @@ jobs:
           command: clippy
           args: --all -- --deny "warnings"
 
+      # Ensure that everything happens safely (with runtime checks)
       - uses: actions-rs/cargo@v1
-        name: Run tests
+        name: Run tests (debug)
         with:
           command: test
+
+      # Ensure that no behavior gets optimized out
+      - uses: actions-rs/cargo@v1
+        name: Run tests (release)
+        with:
+          command: test --release
