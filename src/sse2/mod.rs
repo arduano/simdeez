@@ -609,10 +609,7 @@ impl SimdInt64 for I64x2 {
 
     #[inline(always)]
     fn cast_f64(self) -> Self::SimdF64 {
-        unsafe {
-            let x = self + Self::set1(0x0018000000000000);
-            x.bitcast_f64() - Self::set1(0x0018000000000000).bitcast_f64()
-        }
+        unsafe { Self::SimdF64::load_from_array([self[0] as f64, self[1] as f64]) }
     }
 }
 
@@ -1116,8 +1113,7 @@ impl SimdFloat64 for F64x2 {
     #[inline(always)]
     fn cast_i64(self) -> Self::SimdI64 {
         unsafe {
-            let x = self + Self::set1(f64::from_bits(0x0018000000000000));
-            x.bitcast_i64() - I64x2::set1(0x0018000000000000)
+            Self::SimdI64::load_from_array([self[0].m_round() as i64, self[1].m_round() as i64])
         }
     }
 }

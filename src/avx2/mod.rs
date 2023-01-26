@@ -1,3 +1,5 @@
+use crate::libm_ext::FloatExt;
+
 use super::*;
 use core::arch::x86_64::*;
 
@@ -560,14 +562,12 @@ impl SimdInt64 for I64x4 {
     #[inline(always)]
     fn cast_f64(self) -> Self::SimdF64 {
         unsafe {
-            let x = _mm256_add_epi64(
-                self.0,
-                _mm256_castpd_si256(_mm256_set1_pd(f64::from_bits(0x0018000000000000u64))),
-            );
-            F64x4(_mm256_sub_pd(
-                _mm256_castsi256_pd(x),
-                _mm256_set1_pd(f64::from_bits(0x0018000000000000u64)),
-            ))
+            Self::SimdF64::load_from_array([
+                self[0] as f64,
+                self[1] as f64,
+                self[2] as f64,
+                self[3] as f64,
+            ])
         }
     }
 }
@@ -1050,14 +1050,12 @@ impl SimdFloat64 for F64x4 {
     #[inline(always)]
     fn cast_i64(self) -> Self::SimdI64 {
         unsafe {
-            let x = _mm256_add_pd(
-                self.0,
-                _mm256_set1_pd(f64::from_bits(0x0018000000000000u64)),
-            );
-            I64x4(_mm256_sub_epi64(
-                _mm256_castpd_si256(x),
-                _mm256_castpd_si256(_mm256_set1_pd(f64::from_bits(0x0018000000000000u64))),
-            ))
+            Self::SimdI64::load_from_array([
+                self[0].m_round() as i64,
+                self[1].m_round() as i64,
+                self[2].m_round() as i64,
+                self[3].m_round() as i64,
+            ])
         }
     }
 }

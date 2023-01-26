@@ -46,14 +46,16 @@ pub fn check_elementwise_function<
 /// Compares a SIMD function against a corresponding scalar function
 pub fn elementwise_eq_tester<
     N: ScalarNumber,
+    RN: ScalarNumber,
     Args: Tuple + Debug + Clone + SimdTupleIterable<N>,
     ScalarArg: SimdBase<Scalar = N>,
-    R: SimdBase<Scalar = N>,
+    SimdRet: SimdBase<Scalar = RN>,
+    ScalarRet: SimdBase<Scalar = RN>,
 >(
     inputs: impl Iterator<Item = Args>,
     precision: EqPrecision,
-    simd_fn: impl Func<Args, Output = R>,
-    scalar_fn: impl Func<Args::AsTuple<ScalarArg>, Output = ScalarArg>,
+    simd_fn: impl Func<Args, Output = SimdRet>,
+    scalar_fn: impl Func<Args::AsTuple<ScalarArg>, Output = ScalarRet>,
 ) {
     check_elementwise_function(inputs, simd_fn, |result, args| {
         let scalar_result = scalar_fn.call(Args::wrap_scalars(args))[0];
@@ -195,6 +197,18 @@ macro_rules! elementwise_eq_tester_impl {
 
     (SimdFloat32, $simd_fn:ident, $arg_cnt:ident, $precision:expr) => {
         elementwise_eq_tester_impl!(@simdkind f32, SimdFloat32, $simd_fn, $arg_cnt, $precision);
+    };
+
+    (SimdInt32, $simd_fn:ident, $arg_cnt:ident, $precision:expr) => {
+        elementwise_eq_tester_impl!(@simdkind i32, SimdInt32, $simd_fn, $arg_cnt, $precision);
+    };
+
+    (SimdFloat64, $simd_fn:ident, $arg_cnt:ident, $precision:expr) => {
+        elementwise_eq_tester_impl!(@simdkind f64, SimdFloat64, $simd_fn, $arg_cnt, $precision);
+    };
+
+    (SimdInt64, $simd_fn:ident, $arg_cnt:ident, $precision:expr) => {
+        elementwise_eq_tester_impl!(@simdkind i64, SimdInt64, $simd_fn, $arg_cnt, $precision);
     };
 }
 

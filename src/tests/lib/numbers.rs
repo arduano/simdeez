@@ -31,9 +31,15 @@ pub trait ScalarNumber: Arbitrary + PartialEq + Copy + core::fmt::Display {
         false
     }
 
-    /// For floating point numbers, add a very small number on top to avoid .5 cutoffs for functions like .round
-    fn slightly_shift(self) -> Self {
-        self
+    /// For floating point numbers, rounding from .5 numbers can cause undefined behavior.
+    fn is_undefined_behavior_when_rounding(self) -> bool {
+        false
+    }
+
+    /// Some floating point numbers appear to cause undefined behavior when casting, e.g. a very large positive float
+    /// would end up as a negative integer.
+    fn is_undefined_behavior_when_casting(self) -> bool {
+        false
     }
 }
 
@@ -89,12 +95,16 @@ impl ScalarNumber for f32 {
         self.is_nan()
     }
 
-    fn slightly_shift(self) -> Self {
-        if (self % 1.0).abs() == 0.5 {
-            self + self / 100000.0
-        } else {
-            self
-        }
+    fn is_undefined_behavior_when_rounding(self) -> bool {
+        // Anything that's close to ending in .5 may cause undefined behavior
+        ((self.abs() % 1.0) - 0.5).abs() < f32::EPSILON
+    }
+
+    fn is_undefined_behavior_when_casting(self) -> bool {
+        // Anything that's outside the maximum range of an i32 may cause undefined behavior
+        // e.g. resulting in i32::MIN from a large positive float
+        let range = (i32::MIN as f32)..=(i32::MAX as f32);
+        !range.contains(&self)
     }
 }
 impl ScalarNumber for f64 {
@@ -134,12 +144,16 @@ impl ScalarNumber for f64 {
         self.is_nan()
     }
 
-    fn slightly_shift(self) -> Self {
-        if (self % 1.0).abs() == 0.5 {
-            self + self / 100000000.0
-        } else {
-            self
-        }
+    fn is_undefined_behavior_when_rounding(self) -> bool {
+        // Anything that's close to ending in .5 may cause undefined behavior
+        ((self.abs() % 1.0) - 0.5).abs() < f64::EPSILON
+    }
+
+    fn is_undefined_behavior_when_casting(self) -> bool {
+        // Anything that's outside the maximum range of an i32 may cause undefined behavior
+        // e.g. resulting in i64::MIN from a large positive float
+        let range = (i64::MIN as f64)..=(i64::MAX as f64);
+        !range.contains(&self)
     }
 }
 

@@ -8,17 +8,29 @@ pub trait SimdBase:
     + IndexMut<usize>
     + Index<usize, Output = Self::Scalar>
     + Add<Self, Output = Self>
+    + Add<Self::Scalar, Output = Self>
     + AddAssign<Self>
+    + AddAssign<Self::Scalar>
     + Sub<Self, Output = Self>
+    + Sub<Self::Scalar, Output = Self>
     + SubAssign<Self>
+    + SubAssign<Self::Scalar>
     + Mul<Self, Output = Self>
+    + Mul<Self::Scalar, Output = Self>
     + MulAssign<Self>
+    + MulAssign<Self::Scalar>
     + BitAnd<Self, Output = Self>
+    + BitAnd<Self::Scalar, Output = Self>
     + BitAndAssign<Self>
+    + BitAndAssign<Self::Scalar>
     + BitOr<Self, Output = Self>
+    + BitOr<Self::Scalar, Output = Self>
     + BitOrAssign<Self>
+    + BitOrAssign<Self::Scalar>
     + BitXor<Self, Output = Self>
+    + BitXor<Self::Scalar, Output = Self>
     + BitXorAssign<Self>
+    + BitXorAssign<Self::Scalar>
     + core::marker::Sync
     + core::marker::Send
     + Not<Output = Self>
@@ -187,7 +199,7 @@ pub trait SimdInt32: SimdInt<Scalar = i32> {
 pub trait SimdInt64: SimdInt<Scalar = i64> {
     type SimdF64: SimdFloat64;
 
-    /// Bit cast to f64
+    /// Bit cast to f64.
     /// This function is only used for compilation and does not generate any instructions, thus it has zero latency.
     fn bitcast_f64(self) -> Self::SimdF64;
 
@@ -196,7 +208,13 @@ pub trait SimdInt64: SimdInt<Scalar = i64> {
 }
 
 /// Operations shared by f32 and f64 floating point types
-pub trait SimdFloat: SimdBase + Div<Self, Output = Self> {
+pub trait SimdFloat:
+    SimdBase
+    + Div<Self, Output = Self>
+    + DivAssign<Self>
+    + Div<Self::Scalar, Output = Self>
+    + DivAssign<Self::Scalar>
+{
     /// Element-wise divide between two vectors
     fn div(self, rhs: Self) -> Self;
 
@@ -256,11 +274,12 @@ pub trait SimdFloat: SimdBase + Div<Self, Output = Self> {
 pub trait SimdFloat32: SimdFloat<Scalar = f32> {
     type SimdI32: SimdInt32;
 
-    /// Bit cast to i32
+    /// Bit cast to i32.
     /// This function is only used for compilation and does not generate any instructions, thus it has zero latency.
     fn bitcast_i32(self) -> Self::SimdI32;
 
-    /// Element-wise cast to i32
+    /// Element-wise cast to i32 (rounded, not floored). Note, this may cause undefined behavior when casting from
+    /// numbers outside the range of i32. E.g. a very large positive float may become i32::MIN.
     fn cast_i32(self) -> Self::SimdI32;
 
     /// Element-wise fast reciprocal (1.0 / x)
@@ -310,11 +329,11 @@ pub trait SimdFloat32: SimdFloat<Scalar = f32> {
 pub trait SimdFloat64: SimdFloat<Scalar = f64> {
     type SimdI64: SimdInt64;
 
-    /// Bit cast to i64
+    /// Bit cast to i64.
     /// This function is only used for compilation and does not generate any instructions, thus it has zero latency.
     fn bitcast_i64(self) -> Self::SimdI64;
 
-    /// Element-wise cast to i64
+    /// Element-wise cast to i64 (rounded, not floored).
     fn cast_i64(self) -> Self::SimdI64;
 }
 

@@ -20,6 +20,24 @@ macro_rules! impl_simd_base_overloads {
             }
         }
 
+        impl Add<<Self as SimdBase>::Scalar> for $s {
+            type Output = Self;
+
+            #[inline(always)]
+            fn add(self, rhs: <Self as SimdBase>::Scalar) -> Self {
+                unsafe { SimdBase::add(self, Self::set1(rhs)) }
+            }
+        }
+
+        impl AddAssign<<Self as SimdBase>::Scalar> for $s {
+            #[inline(always)]
+            fn add_assign(&mut self, rhs: <Self as SimdBase>::Scalar) {
+                unsafe {
+                    *self = SimdBase::add(*self, Self::set1(rhs));
+                }
+            }
+        }
+
         impl Sub<Self> for $s {
             type Output = Self;
 
@@ -33,6 +51,24 @@ macro_rules! impl_simd_base_overloads {
             #[inline(always)]
             fn sub_assign(&mut self, rhs: Self) {
                 *self = SimdBase::sub(*self, rhs);
+            }
+        }
+
+        impl Sub<<Self as SimdBase>::Scalar> for $s {
+            type Output = Self;
+
+            #[inline(always)]
+            fn sub(self, rhs: <Self as SimdBase>::Scalar) -> Self {
+                unsafe { SimdBase::sub(self, Self::set1(rhs)) }
+            }
+        }
+
+        impl SubAssign<<Self as SimdBase>::Scalar> for $s {
+            #[inline(always)]
+            fn sub_assign(&mut self, rhs: <Self as SimdBase>::Scalar) {
+                unsafe {
+                    *self = SimdBase::sub(*self, Self::set1(rhs));
+                }
             }
         }
 
@@ -52,6 +88,24 @@ macro_rules! impl_simd_base_overloads {
             }
         }
 
+        impl Mul<<Self as SimdBase>::Scalar> for $s {
+            type Output = Self;
+
+            #[inline(always)]
+            fn mul(self, rhs: <Self as SimdBase>::Scalar) -> Self {
+                unsafe { SimdBase::mul(self, Self::set1(rhs)) }
+            }
+        }
+
+        impl MulAssign<<Self as SimdBase>::Scalar> for $s {
+            #[inline(always)]
+            fn mul_assign(&mut self, rhs: <Self as SimdBase>::Scalar) {
+                unsafe {
+                    *self = SimdBase::mul(*self, Self::set1(rhs));
+                }
+            }
+        }
+
         impl BitAnd<Self> for $s {
             type Output = Self;
 
@@ -65,6 +119,24 @@ macro_rules! impl_simd_base_overloads {
             #[inline(always)]
             fn bitand_assign(&mut self, rhs: Self) {
                 *self = SimdBase::bit_and(*self, rhs);
+            }
+        }
+
+        impl BitAnd<<Self as SimdBase>::Scalar> for $s {
+            type Output = Self;
+
+            #[inline(always)]
+            fn bitand(self, rhs: <Self as SimdBase>::Scalar) -> Self {
+                unsafe { SimdBase::bit_and(self, SimdBase::set1(rhs)) }
+            }
+        }
+
+        impl BitAndAssign<<Self as SimdBase>::Scalar> for $s {
+            #[inline(always)]
+            fn bitand_assign(&mut self, rhs: <Self as SimdBase>::Scalar) {
+                unsafe {
+                    *self = SimdBase::bit_and(*self, SimdBase::set1(rhs));
+                }
             }
         }
 
@@ -84,6 +156,24 @@ macro_rules! impl_simd_base_overloads {
             }
         }
 
+        impl BitOr<<Self as SimdBase>::Scalar> for $s {
+            type Output = Self;
+
+            #[inline(always)]
+            fn bitor(self, rhs: <Self as SimdBase>::Scalar) -> Self {
+                unsafe { SimdBase::bit_or(self, SimdBase::set1(rhs)) }
+            }
+        }
+
+        impl BitOrAssign<<Self as SimdBase>::Scalar> for $s {
+            #[inline(always)]
+            fn bitor_assign(&mut self, rhs: <Self as SimdBase>::Scalar) {
+                unsafe {
+                    *self = SimdBase::bit_or(*self, SimdBase::set1(rhs));
+                }
+            }
+        }
+
         impl BitXor<Self> for $s {
             type Output = Self;
 
@@ -97,6 +187,24 @@ macro_rules! impl_simd_base_overloads {
             #[inline(always)]
             fn bitxor_assign(&mut self, rhs: Self) {
                 *self = SimdBase::bit_xor(*self, rhs);
+            }
+        }
+
+        impl BitXor<<Self as SimdBase>::Scalar> for $s {
+            type Output = Self;
+
+            #[inline(always)]
+            fn bitxor(self, rhs: <Self as SimdBase>::Scalar) -> Self {
+                unsafe { SimdBase::bit_xor(self, SimdBase::set1(rhs)) }
+            }
+        }
+
+        impl BitXorAssign<<Self as SimdBase>::Scalar> for $s {
+            #[inline(always)]
+            fn bitxor_assign(&mut self, rhs: <Self as SimdBase>::Scalar) {
+                unsafe {
+                    *self = SimdBase::bit_xor(*self, SimdBase::set1(rhs));
+                }
             }
         }
 
@@ -194,6 +302,24 @@ macro_rules! impl_simd_float_overloads {
             #[inline(always)]
             fn div_assign(&mut self, rhs: Self) {
                 *self = SimdFloat::div(*self, rhs);
+            }
+        }
+
+        impl Div<<Self as SimdBase>::Scalar> for $s {
+            type Output = Self;
+
+            #[inline(always)]
+            fn div(self, rhs: <Self as SimdBase>::Scalar) -> Self {
+                unsafe { SimdFloat::div(self, Self::set1(rhs)) }
+            }
+        }
+
+        impl DivAssign<<Self as SimdBase>::Scalar> for $s {
+            #[inline(always)]
+            fn div_assign(&mut self, rhs: <Self as SimdBase>::Scalar) {
+                unsafe {
+                    *self = SimdFloat::div(*self, Self::set1(rhs));
+                }
             }
         }
     };

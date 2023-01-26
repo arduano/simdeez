@@ -251,9 +251,10 @@ impl<N: ScalarNumber, I: Iterator<Item = N>, I2: Iterator<Item = N>>
         iter.map(|v| (v,)).take(1000 * S::WIDTH)
     }
 
-    /// Same as one_arg, except slightly shifted on floating point values
-    pub fn one_arg_slightly_shifted<S: SimdBase<Scalar = N>>(self) -> impl Iterator<Item = (S,)> {
-        let iter = iter_as_simd((self.any)(1000).map(|v| v.slightly_shift()));
+    /// Same as one_arg, except without values that can cause undefined behavior when rounding
+    pub fn one_arg_rounding_safe<S: SimdBase<Scalar = N>>(self) -> impl Iterator<Item = (S,)> {
+        let iter =
+            iter_as_simd((self.any)(1000).filter(|v| !v.is_undefined_behavior_when_rounding()));
         iter.map(|v| (v,)).take(1000 * S::WIDTH)
     }
 
@@ -280,12 +281,20 @@ impl<N: ScalarNumber, I: Iterator<Item = N>, I2: Iterator<Item = N>>
         .take(100 * S::WIDTH)
     }
 
-    /// Same as one_arg, except slightly shifted on floating point values
+    /// Same as one_arg, except with a second arg as a bitshift i32 number
     pub fn one_arg_and_bitshift_arg<S: SimdBase<Scalar = N>>(
         self,
     ) -> impl Iterator<Item = (S, i32)> {
-        let iter = iter_as_simd((self.any)(1000).map(|v| v.slightly_shift()));
+        let iter = iter_as_simd((self.any)(1000));
         let bitshift_iter = iter_arbitrary_bitshift_ints(self.scalar_size as u32 * 8);
         iter.zip(bitshift_iter).take(1000 * S::WIDTH)
+    }
+
+    /// Same as one_arg, except it adjusts the values to avoid undefined behavior
+    pub fn float_to_int_cast_values<S: SimdBase<Scalar = N>>(self) -> impl Iterator<Item = (S,)> {
+        let iter = iter_as_simd((self.any)(1000).filter(|v| {
+            !v.is_undefined_behavior_when_casting() && !v.is_undefined_behavior_when_rounding()
+        }));
+        iter.map(|v| (v,)).take(1000 * S::WIDTH)
     }
 }

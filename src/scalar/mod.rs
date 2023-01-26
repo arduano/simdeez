@@ -503,7 +503,7 @@ impl SimdInt64 for I64x1 {
 
     #[inline(always)]
     fn cast_f64(self) -> Self::SimdF64 {
-        F64x1(self.0 as f64)
+        unsafe { Self::SimdF64::load_from_array([self[0] as f64]) }
     }
 }
 
@@ -758,7 +758,7 @@ impl SimdFloat32 for F32x1 {
 
     #[inline(always)]
     fn cast_i32(self) -> Self::SimdI32 {
-        I32x1(self.0 as i32)
+        I32x1(self.0.m_round() as i32)
     }
 
     #[inline(always)]
@@ -1016,6 +1016,6 @@ impl SimdFloat64 for F64x1 {
 
     #[inline(always)]
     fn cast_i64(self) -> Self::SimdI64 {
-        I64x1(self.0 as i64)
+        unsafe { Self::SimdI64::load_from_array([self[0].m_round() as i64]) }
     }
 }

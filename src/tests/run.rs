@@ -46,7 +46,7 @@ elementwise_eq_tester_impl!(SimdFloat, floor, one_arg, EqPrecision::almost(6));
 elementwise_eq_tester_impl!(
     SimdFloat,
     round,
-    one_arg_slightly_shifted,
+    one_arg_rounding_safe,
     EqPrecision::almost(6)
 );
 
@@ -62,3 +62,18 @@ bitshift_eq_tester_impl!(dyn shl);
 bitshift_eq_tester_impl!(dyn shr);
 bitshift_eq_tester_impl!(const shl_const);
 bitshift_eq_tester_impl!(const shr_const);
+
+elementwise_eq_tester_impl!(
+    SimdFloat32,
+    cast_i32,
+    float_to_int_cast_values,
+    EqPrecision::exact()
+);
+elementwise_eq_tester_impl!(SimdInt32, cast_f32, one_arg, EqPrecision::exact());
+elementwise_eq_tester_impl!(
+    SimdFloat64,
+    cast_i64,
+    one_arg_rounding_safe,
+    EqPrecision::exact()
+);
+elementwise_eq_tester_impl!(SimdInt64, cast_f64, one_arg, EqPrecision::exact());
