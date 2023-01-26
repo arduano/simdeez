@@ -397,12 +397,12 @@ impl SimdBase for I64x4 {
     #[inline(always)]
     fn mul(self, rhs: Self) -> Self {
         unsafe {
-            let mut new = Self::zeroes();
-            new[0] = self[0].wrapping_mul(rhs[0]);
-            new[1] = self[1].wrapping_mul(rhs[1]);
-            new[2] = self[2].wrapping_mul(rhs[2]);
-            new[3] = self[3].wrapping_mul(rhs[3]);
-            new
+            Self::load_from_array([
+                self[0].wrapping_mul(rhs[0]),
+                self[1].wrapping_mul(rhs[1]),
+                self[2].wrapping_mul(rhs[2]),
+                self[3].wrapping_mul(rhs[3]),
+            ])
         }
     }
 

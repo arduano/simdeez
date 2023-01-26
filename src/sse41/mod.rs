@@ -412,10 +412,7 @@ impl SimdBase for I64x2_41 {
     #[inline(always)]
     fn mul(self, rhs: Self) -> Self {
         unsafe {
-            let mut new = Self::zeroes();
-            new[0] = self[0].wrapping_mul(rhs[0]);
-            new[1] = self[1].wrapping_mul(rhs[1]);
-            new
+            Self::load_from_array([self[0].wrapping_mul(rhs[0]), self[1].wrapping_mul(rhs[1])])
         }
     }
 
@@ -472,40 +469,40 @@ impl SimdBase for I64x2_41 {
     #[inline(always)]
     fn cmp_lt(self, rhs: Self) -> Self {
         unsafe {
-            let mut new = Self::zeroes();
-            new[0] = if self[0] < rhs[0] { -1 } else { 0 };
-            new[1] = if self[1] < rhs[1] { -1 } else { 0 };
-            new
+            Self::load_from_array([
+                if self[0] < rhs[0] { -1 } else { 0 },
+                if self[1] < rhs[1] { -1 } else { 0 },
+            ])
         }
     }
 
     #[inline(always)]
     fn cmp_lte(self, rhs: Self) -> Self {
         unsafe {
-            let mut new = Self::zeroes();
-            new[0] = if self[0] <= rhs[0] { -1 } else { 0 };
-            new[1] = if self[1] <= rhs[1] { -1 } else { 0 };
-            new
+            Self::load_from_array([
+                if self[0] <= rhs[0] { -1 } else { 0 },
+                if self[1] <= rhs[1] { -1 } else { 0 },
+            ])
         }
     }
 
     #[inline(always)]
     fn cmp_gt(self, rhs: Self) -> Self {
         unsafe {
-            let mut new = Self::zeroes();
-            new[0] = if self[0] > rhs[0] { -1 } else { 0 };
-            new[1] = if self[1] > rhs[1] { -1 } else { 0 };
-            new
+            Self::load_from_array([
+                if self[0] > rhs[0] { -1 } else { 0 },
+                if self[1] > rhs[1] { -1 } else { 0 },
+            ])
         }
     }
 
     #[inline(always)]
     fn cmp_gte(self, rhs: Self) -> Self {
         unsafe {
-            let mut new = Self::zeroes();
-            new[0] = if self[0] >= rhs[0] { -1 } else { 0 };
-            new[1] = if self[1] >= rhs[1] { -1 } else { 0 };
-            new
+            Self::load_from_array([
+                if self[0] >= rhs[0] { -1 } else { 0 },
+                if self[1] >= rhs[1] { -1 } else { 0 },
+            ])
         }
     }
 
