@@ -93,7 +93,7 @@ macro_rules! with_feature_flag {
 }
 
 #[macro_export]
-macro_rules! generate_elementwise_eq_tester_impl {
+macro_rules! elementwise_eq_tester_impl {
     (@full $simd:ident, $simd_ty:ident, $simd_base:ident, $simd_fn:ident, $arg_cnt:ident, $precision:expr) => {
         with_feature_flag!($simd,
             paste::item! {
@@ -110,32 +110,32 @@ macro_rules! generate_elementwise_eq_tester_impl {
     };
 
     (@simdkind $simd_ty:ident, $simd_base:ident, $simd_fn:ident, $arg_cnt:ident, $precision:expr) => {
-        generate_elementwise_eq_tester_impl!(@full Scalar, $simd_ty, $simd_base, $simd_fn, $arg_cnt, $precision);
-        generate_elementwise_eq_tester_impl!(@full Avx2, $simd_ty, $simd_base, $simd_fn, $arg_cnt, $precision);
-        generate_elementwise_eq_tester_impl!(@full Sse2, $simd_ty, $simd_base, $simd_fn, $arg_cnt, $precision);
-        generate_elementwise_eq_tester_impl!(@full Sse41, $simd_ty, $simd_base, $simd_fn, $arg_cnt, $precision);
+        elementwise_eq_tester_impl!(@full Scalar, $simd_ty, $simd_base, $simd_fn, $arg_cnt, $precision);
+        elementwise_eq_tester_impl!(@full Avx2, $simd_ty, $simd_base, $simd_fn, $arg_cnt, $precision);
+        elementwise_eq_tester_impl!(@full Sse2, $simd_ty, $simd_base, $simd_fn, $arg_cnt, $precision);
+        elementwise_eq_tester_impl!(@full Sse41, $simd_ty, $simd_base, $simd_fn, $arg_cnt, $precision);
     };
 
     (SimdBase, $simd_fn:ident, $arg_cnt:ident, $precision:expr) => {
-        generate_elementwise_eq_tester_impl!(@simdkind i16, SimdBase, $simd_fn, $arg_cnt, $precision);
-        generate_elementwise_eq_tester_impl!(@simdkind i32, SimdBase, $simd_fn, $arg_cnt, $precision);
-        generate_elementwise_eq_tester_impl!(@simdkind i64, SimdBase, $simd_fn, $arg_cnt, $precision);
-        generate_elementwise_eq_tester_impl!(@simdkind f32, SimdBase, $simd_fn, $arg_cnt, $precision);
-        generate_elementwise_eq_tester_impl!(@simdkind f64, SimdBase, $simd_fn, $arg_cnt, $precision);
+        elementwise_eq_tester_impl!(@simdkind i16, SimdBase, $simd_fn, $arg_cnt, $precision);
+        elementwise_eq_tester_impl!(@simdkind i32, SimdBase, $simd_fn, $arg_cnt, $precision);
+        elementwise_eq_tester_impl!(@simdkind i64, SimdBase, $simd_fn, $arg_cnt, $precision);
+        elementwise_eq_tester_impl!(@simdkind f32, SimdBase, $simd_fn, $arg_cnt, $precision);
+        elementwise_eq_tester_impl!(@simdkind f64, SimdBase, $simd_fn, $arg_cnt, $precision);
     };
 
     (SimdInt, $simd_fn:ident, $arg_cnt:ident, $precision:expr) => {
-        generate_elementwise_eq_tester_impl!(@simdkind i16, SimdInt, $simd_fn, $arg_cnt, $precision);
-        generate_elementwise_eq_tester_impl!(@simdkind i32, SimdInt, $simd_fn, $arg_cnt, $precision);
-        generate_elementwise_eq_tester_impl!(@simdkind i64, SimdInt, $simd_fn, $arg_cnt, $precision);
+        elementwise_eq_tester_impl!(@simdkind i16, SimdInt, $simd_fn, $arg_cnt, $precision);
+        elementwise_eq_tester_impl!(@simdkind i32, SimdInt, $simd_fn, $arg_cnt, $precision);
+        elementwise_eq_tester_impl!(@simdkind i64, SimdInt, $simd_fn, $arg_cnt, $precision);
     };
 
     (SimdFloat, $simd_fn:ident, $arg_cnt:ident, $precision:expr) => {
-        generate_elementwise_eq_tester_impl!(@simdkind f32, SimdFloat, $simd_fn, $arg_cnt, $precision);
-        generate_elementwise_eq_tester_impl!(@simdkind f64, SimdFloat, $simd_fn, $arg_cnt, $precision);
+        elementwise_eq_tester_impl!(@simdkind f32, SimdFloat, $simd_fn, $arg_cnt, $precision);
+        elementwise_eq_tester_impl!(@simdkind f64, SimdFloat, $simd_fn, $arg_cnt, $precision);
     };
 
     (SimdFloat32, $simd_fn:ident, $arg_cnt:ident, $precision:expr) => {
-        generate_elementwise_eq_tester_impl!(@simdkind f32, SimdFloat32, $simd_fn, $arg_cnt, $precision);
+        elementwise_eq_tester_impl!(@simdkind f32, SimdFloat32, $simd_fn, $arg_cnt, $precision);
     };
 }
