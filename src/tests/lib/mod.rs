@@ -11,3 +11,6 @@ pub use tester::*;
 
 mod numbers;
 pub use numbers::*;
+
+mod constify;
+pub use constify::*;

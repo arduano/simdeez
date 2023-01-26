@@ -135,6 +135,15 @@ fn iter_arbitrary_blendv_f64() -> impl Iterator<Item = f64> {
         .cycle()
 }
 
+fn iter_arbitrary_bitshift_ints(max: u32) -> impl Iterator<Item = i32> {
+    let mut i = 0;
+    iter::repeat_with(move || {
+        i += 1;
+        i %= max;
+        i as i32
+    })
+}
+
 /// Convert an iterator of scalars into an iterator of SIMD vectors.
 fn iter_as_simd<S: SimdBase<Scalar = N>, N>(
     mut iter: impl Iterator<Item = N>,
@@ -156,6 +165,7 @@ pub struct RandSimd;
 pub struct IterRandSimdForScalar<N, I: Iterator<Item = N>, I2: Iterator<Item = N>> {
     any: Box<dyn Fn(usize) -> I>,
     blendv: Box<dyn Fn() -> I2>,
+    scalar_size: usize,
 }
 
 impl RandSimd {
@@ -164,6 +174,7 @@ impl RandSimd {
         IterRandSimdForScalar {
             any: Box::new(iter_arbitrary_f32),
             blendv: Box::new(iter_arbitrary_blendv_f32),
+            scalar_size: 4,
         }
     }
     pub fn f64() -> IterRandSimdForScalar<f64, impl Iterator<Item = f64>, impl Iterator<Item = f64>>
@@ -171,6 +182,7 @@ impl RandSimd {
         IterRandSimdForScalar {
             any: Box::new(iter_arbitrary_f64),
             blendv: Box::new(iter_arbitrary_blendv_f64),
+            scalar_size: 8,
         }
     }
     pub fn i16() -> IterRandSimdForScalar<i16, impl Iterator<Item = i16>, impl Iterator<Item = i16>>
@@ -178,6 +190,7 @@ impl RandSimd {
         IterRandSimdForScalar {
             any: Box::new(iter_arbitrary_i16),
             blendv: Box::new(iter_arbitrary_blendv_i16),
+            scalar_size: 2,
         }
     }
     pub fn i32() -> IterRandSimdForScalar<i32, impl Iterator<Item = i32>, impl Iterator<Item = i32>>
@@ -185,6 +198,7 @@ impl RandSimd {
         IterRandSimdForScalar {
             any: Box::new(iter_arbitrary_i32),
             blendv: Box::new(iter_arbitrary_blendv_i32),
+            scalar_size: 4,
         }
     }
     pub fn i64() -> IterRandSimdForScalar<i64, impl Iterator<Item = i64>, impl Iterator<Item = i64>>
@@ -192,6 +206,7 @@ impl RandSimd {
         IterRandSimdForScalar {
             any: Box::new(iter_arbitrary_i64),
             blendv: Box::new(iter_arbitrary_blendv_i64),
+            scalar_size: 8,
         }
     }
 }
@@ -263,5 +278,14 @@ impl<N: ScalarNumber, I: Iterator<Item = N>, I2: Iterator<Item = N>>
             )
         })
         .take(100 * S::WIDTH)
+    }
+
+    /// Same as one_arg, except slightly shifted on floating point values
+    pub fn one_arg_and_bitshift_arg<S: SimdBase<Scalar = N>>(
+        self,
+    ) -> impl Iterator<Item = (S, i32)> {
+        let iter = iter_as_simd((self.any)(1000).map(|v| v.slightly_shift()));
+        let bitshift_iter = iter_arbitrary_bitshift_ints(self.scalar_size as u32 * 8);
+        iter.zip(bitshift_iter).take(1000 * S::WIDTH)
     }
 }

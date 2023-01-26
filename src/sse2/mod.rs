@@ -10,7 +10,7 @@ pub use self::overloads::*;
 pub use self::simd::*;
 
 #[derive(Copy, Clone)]
-pub struct I16x8(pub __m128i);
+pub struct I16x8(__m128i);
 impl_simd_base_overloads!(I16x8);
 impl_simd_int_overloads!(I16x8);
 
@@ -217,7 +217,7 @@ impl SimdInt for I16x8 {
 impl SimdInt16 for I16x8 {}
 
 #[derive(Copy, Clone)]
-pub struct I32x4(pub __m128i);
+pub struct I32x4(__m128i);
 impl_simd_base_overloads!(I32x4);
 impl_simd_int_overloads!(I32x4);
 
@@ -445,7 +445,7 @@ impl SimdInt32 for I32x4 {
 }
 
 #[derive(Copy, Clone)]
-pub struct I64x2(pub __m128i);
+pub struct I64x2(__m128i);
 impl_simd_base_overloads!(I64x2);
 impl_simd_int_overloads!(I64x2);
 
@@ -691,7 +691,7 @@ impl SimdInt64 for I64x2 {
 }
 
 #[derive(Copy, Clone)]
-pub struct F32x4(pub __m128);
+pub struct F32x4(__m128);
 impl_simd_base_overloads!(F32x4);
 impl_simd_float_overloads!(F32x4);
 
@@ -995,7 +995,7 @@ impl SimdFloat32 for F32x4 {
 }
 
 #[derive(Copy, Clone)]
-pub struct F64x2(pub __m128d);
+pub struct F64x2(__m128d);
 impl_simd_base_overloads!(F64x2);
 impl_simd_float_overloads!(F64x2);
 

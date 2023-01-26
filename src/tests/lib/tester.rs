@@ -43,6 +43,7 @@ pub fn check_elementwise_function<
     });
 }
 
+/// Compares a SIMD function against a corresponding scalar function
 pub fn elementwise_eq_tester<
     N: ScalarNumber,
     Args: Tuple + Debug + Clone + SimdTupleIterable<N>,
@@ -64,12 +65,69 @@ pub fn elementwise_eq_tester<
     });
 }
 
+/// Compares a SIMD function against a corresponding scalar function
+pub fn bitshift_eq_tester<
+    N: ScalarNumber + Eq,
+    SimdArg: SimdBase<Scalar = N>,
+    ScalarArg: SimdBase<Scalar = N>,
+>(
+    inputs: impl Iterator<Item = (SimdArg, i32)>,
+    simd_fn: impl Func<(SimdArg, i32), Output = SimdArg>,
+    scalar_fn: impl Func<(ScalarArg, i32), Output = ScalarArg>,
+) {
+    check_function(inputs, simd_fn, |result, args| unsafe {
+        for i in 0..SimdArg::WIDTH {
+            let scalar_result = scalar_fn.call((ScalarArg::set1(args.0[i]), args.1))[0];
+            let equal = scalar_result == result[i];
+            if !equal {
+                return Err(format!(
+                    "Failed for element {}: Expected {}, got {}",
+                    i, scalar_result, result[i]
+                ));
+            }
+        }
+        Ok(())
+    });
+}
+
 #[macro_export]
 macro_rules! elementwise_eq_tester {
     (< $simd_kind:ident :: $simd_ty:ident as $base_kind:ident >  :: $fn_name:ident, $inputs:expr, $precision:expr) => {{
         let f = <<$simd_kind as Simd>::$simd_ty as $base_kind>::$fn_name;
         let sf = <<Scalar as Simd>::$simd_ty as $base_kind>::$fn_name;
         elementwise_eq_tester($inputs, $precision, f, sf);
+    }};
+}
+
+#[macro_export]
+macro_rules! bitshift_eq_tester {
+    ($simd_kind:ident :: $simd_ty:ident :: $fn_name:ident, $inputs:expr) => {{
+        let f = <<$simd_kind as Simd>::$simd_ty as SimdInt>::$fn_name;
+        let sf = <<Scalar as Simd>::$simd_ty as SimdInt>::$fn_name;
+        bitshift_eq_tester($inputs, f, sf);
+    }};
+}
+
+#[macro_export]
+macro_rules! const_bitshift_eq_tester {
+    ($simd_kind:ident :: $simd_ty:ident :: $fn_name:ident, $inputs:expr) => {{
+        let f = |val, s| {
+            macro_rules! expand {
+                ($imm8:literal) => {
+                    <<$simd_kind as Simd>::$simd_ty as SimdInt>::$fn_name::<$imm8>(val)
+                };
+            }
+            test_constify_imm8!(s, expand)
+        };
+        let sf = |val, s| {
+            macro_rules! expand {
+                ($imm8:literal) => {
+                    <<Scalar as Simd>::$simd_ty as SimdInt>::$fn_name::<$imm8>(val)
+                };
+            }
+            test_constify_imm8!(s, expand)
+        };
+        bitshift_eq_tester($inputs, f, sf);
     }};
 }
 
@@ -137,5 +195,49 @@ macro_rules! elementwise_eq_tester_impl {
 
     (SimdFloat32, $simd_fn:ident, $arg_cnt:ident, $precision:expr) => {
         elementwise_eq_tester_impl!(@simdkind f32, SimdFloat32, $simd_fn, $arg_cnt, $precision);
+    };
+}
+
+#[macro_export]
+macro_rules! bitshift_eq_tester_impl {
+    (@full dyn, $simd:ident, $simd_ty:ident, $simd_fn:ident) => {
+        with_feature_flag!($simd,
+            paste::item! {
+                #[test]
+                fn [<$simd_fn _ $simd:lower _ $simd_ty>]() {
+                    bitshift_eq_tester!(
+                        $simd:: [<V$simd_ty>]::$simd_fn,
+                        RandSimd::$simd_ty().one_arg_and_bitshift_arg()
+                    );
+                }
+            }
+        );
+    };
+
+    (@full const, $simd:ident, $simd_ty:ident, $simd_fn:ident) => {
+        with_feature_flag!($simd,
+            paste::item! {
+                #[test]
+                fn [<$simd_fn _ $simd:lower _ $simd_ty>]() {
+                    const_bitshift_eq_tester!(
+                        $simd:: [<V$simd_ty>]::$simd_fn,
+                        RandSimd::$simd_ty().one_arg_and_bitshift_arg()
+                    );
+                }
+            }
+        );
+    };
+
+    (@simdkind $is_const:ident, $simd_ty:ident, $simd_fn:ident) => {
+        bitshift_eq_tester_impl!(@full $is_const, Scalar, $simd_ty, $simd_fn);
+        bitshift_eq_tester_impl!(@full $is_const, Avx2, $simd_ty, $simd_fn);
+        bitshift_eq_tester_impl!(@full $is_const, Sse2, $simd_ty, $simd_fn);
+        bitshift_eq_tester_impl!(@full $is_const, Sse41, $simd_ty, $simd_fn);
+    };
+
+    ($is_const:ident $simd_fn:ident) => {
+        bitshift_eq_tester_impl!(@simdkind $is_const, i16, $simd_fn);
+        bitshift_eq_tester_impl!(@simdkind $is_const, i32, $simd_fn);
+        bitshift_eq_tester_impl!(@simdkind $is_const, i64, $simd_fn);
     };
 }

@@ -10,7 +10,7 @@ use crate::libm_ext::FloatExt;
 // We have to do this to allow for overloading of
 // __m128i etc
 #[derive(Copy, Clone)]
-pub struct I16x1(pub i16);
+pub struct I16x1(i16);
 impl_simd_base_overloads!(I16x1);
 impl_simd_int_overloads!(I16x1);
 
@@ -154,12 +154,12 @@ impl SimdBase for I16x1 {
 impl SimdInt for I16x1 {
     #[inline(always)]
     fn shl(self, rhs: i32) -> Self {
-        I16x1(self.0 << rhs)
+        I16x1(((self.0 as u16) << rhs) as i16)
     }
 
     #[inline(always)]
     fn shr(self, rhs: i32) -> Self {
-        I16x1(self.0 >> rhs)
+        I16x1(((self.0 as u16) >> rhs) as i16)
     }
 }
 
@@ -169,7 +169,7 @@ impl SimdInt16 for I16x1 {}
 // We have to do this to allow for overloading of
 // __m128i etc
 #[derive(Copy, Clone)]
-pub struct I32x1(pub i32);
+pub struct I32x1(i32);
 impl_simd_base_overloads!(I32x1);
 impl_simd_int_overloads!(I32x1);
 
@@ -313,12 +313,12 @@ impl SimdBase for I32x1 {
 impl SimdInt for I32x1 {
     #[inline(always)]
     fn shl(self, rhs: i32) -> Self {
-        I32x1(self.0 << rhs)
+        I32x1(((self.0 as u32) << rhs) as i32)
     }
 
     #[inline(always)]
     fn shr(self, rhs: i32) -> Self {
-        I32x1(self.0 >> rhs)
+        I32x1(((self.0 as u32) >> rhs) as i32)
     }
 }
 
@@ -340,7 +340,7 @@ impl SimdInt32 for I32x1 {
 // We have to do this to allow for overloading of
 // __m128i etc
 #[derive(Copy, Clone)]
-pub struct I64x1(pub i64);
+pub struct I64x1(i64);
 impl_simd_base_overloads!(I64x1);
 impl_simd_int_overloads!(I64x1);
 
@@ -484,12 +484,12 @@ impl SimdBase for I64x1 {
 impl SimdInt for I64x1 {
     #[inline(always)]
     fn shl(self, rhs: i32) -> Self {
-        I64x1(self.0 << rhs)
+        I64x1(((self.0 as u64) << rhs) as i64)
     }
 
     #[inline(always)]
     fn shr(self, rhs: i32) -> Self {
-        I64x1(self.0 >> rhs)
+        I64x1(((self.0 as u64) >> rhs) as i64)
     }
 }
 
@@ -511,7 +511,7 @@ impl SimdInt64 for I64x1 {
 // We have to do this to allow for overloading of
 // __m128 etc
 #[derive(Copy, Clone)]
-pub struct F32x1(pub f32);
+pub struct F32x1(f32);
 impl_simd_base_overloads!(F32x1);
 impl_simd_float_overloads!(F32x1);
 
@@ -769,7 +769,7 @@ impl SimdFloat32 for F32x1 {
 
 // Newtypes for f64 vectors
 #[derive(Copy, Clone)]
-pub struct F64x1(pub f64);
+pub struct F64x1(f64);
 impl_simd_base_overloads!(F64x1);
 impl_simd_float_overloads!(F64x1);
 

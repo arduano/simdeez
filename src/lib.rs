@@ -1364,10 +1364,6 @@ macro_rules! simd_compiletime_generate {
             $vis fn [<$fn_name _compiletime>]($($arg:$typ,)*) $(-> $rt)? {
                unsafe { $fn_name::<Scalar>($($arg,)*) }
             }
-
-
        }
-
     };
-
 }

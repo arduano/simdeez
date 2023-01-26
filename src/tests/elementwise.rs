@@ -1,4 +1,4 @@
-use crate::elementwise_eq_tester;
+use crate::{test_constify_imm8, elementwise_eq_tester};
 
 use super::*;
 
@@ -22,6 +22,8 @@ elementwise_eq_tester_impl!(SimdBase, cmp_lt, two_arg, EqPrecision::exact());
 elementwise_eq_tester_impl!(SimdBase, cmp_lte, two_arg, EqPrecision::exact());
 elementwise_eq_tester_impl!(SimdBase, cmp_gt, two_arg, EqPrecision::exact());
 elementwise_eq_tester_impl!(SimdBase, cmp_gte, two_arg, EqPrecision::exact());
+
+elementwise_eq_tester_impl!(SimdBase, blendv, iter_blendv_ags, EqPrecision::exact());
 
 // We filter out NaN numbers for neq because under some hardware implementations (including Avx2)
 // it appears that `NaN != [number]` is false. Technically that's invalid according to the floatin point
@@ -56,4 +58,7 @@ elementwise_eq_tester_impl!(SimdFloat, neg_mul_sub, three_arg, EqPrecision::almo
 elementwise_eq_tester_impl!(SimdFloat, sqrt, one_arg, EqPrecision::almost(7));
 elementwise_eq_tester_impl!(SimdFloat, rsqrt, one_arg, EqPrecision::almost(3)); // Has very low precision
 
-elementwise_eq_tester_impl!(SimdBase, blendv, iter_blendv_ags, EqPrecision::exact());
+bitshift_eq_tester_impl!(dyn shl);
+bitshift_eq_tester_impl!(dyn shr);
+bitshift_eq_tester_impl!(const shl_const);
+bitshift_eq_tester_impl!(const shr_const);
