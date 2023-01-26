@@ -1,4 +1,4 @@
-use crate::{test_constify_imm8, elementwise_eq_tester};
+use crate::{elementwise_eq_tester, test_constify_imm8};
 
 use super::*;
 
