@@ -74,18 +74,39 @@ macro_rules! elementwise_eq_tester {
 }
 
 #[macro_export]
+macro_rules! with_feature_flag {
+    (Avx2, $($r:tt)+) => {
+        #[cfg(target_feature = "avx2")]
+        $($r)+
+    };
+    (Sse2, $($r:tt)+) => {
+        #[cfg(target_feature = "sse2")]
+        $($r)+
+    };
+    (Sse41, $($r:tt)+) => {
+        #[cfg(target_feature = "sse4.1")]
+        $($r)+
+    };
+    (Scalar, $($r:tt)+) => {
+        $($r)+
+    };
+}
+
+#[macro_export]
 macro_rules! generate_elementwise_eq_tester_impl {
     (@full $simd:ident, $simd_ty:ident, $simd_base:ident, $simd_fn:ident, $arg_cnt:ident, $precision:expr) => {
-        paste::item! {
-            #[test]
-            fn [<$simd_fn _ $simd:lower _ $simd_ty>]() {
-                elementwise_eq_tester!(
-                    <$simd:: [<V$simd_ty>] as $simd_base>::$simd_fn,
-                    RandSimd::$simd_ty().$arg_cnt(),
-                    $precision
-                );
+        with_feature_flag!($simd,
+            paste::item! {
+                #[test]
+                fn [<$simd_fn _ $simd:lower _ $simd_ty>]() {
+                    elementwise_eq_tester!(
+                        <$simd:: [<V$simd_ty>] as $simd_base>::$simd_fn,
+                        RandSimd::$simd_ty().$arg_cnt(),
+                        $precision
+                    );
+                }
             }
-        }
+        );
     };
 
     (@simdkind $simd_ty:ident, $simd_base:ident, $simd_fn:ident, $arg_cnt:ident, $precision:expr) => {
