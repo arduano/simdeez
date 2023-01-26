@@ -1,4 +1,4 @@
-use core::fmt::Debug;
+use core::{fmt::Debug, ops::Add};
 
 use crate::SimdBase;
 
@@ -92,6 +92,31 @@ pub fn bitshift_eq_tester<
     });
 }
 
+/// Compares a SIMD function against a corresponding scalar function
+pub fn horizontal_add_tester<
+    N: ScalarNumber + Add<Output = N> + Default,
+    SimdArg: SimdBase<Scalar = N>,
+>(
+    inputs: impl Iterator<Item = (SimdArg,)>,
+    simd_fn: impl Func<(SimdArg,), Output = SimdArg::Scalar>,
+) {
+    check_function(inputs, simd_fn, |result, args| {
+        let mut sum: N = Default::default();
+        for scalar in args.0.iter() {
+            sum = sum + scalar;
+        }
+
+        let equal = sum.almost_eq(result, EqPrecision::almost(5));
+        if !equal {
+            return Err(format!(
+                "Failed: Expected sum to be {}, got {}",
+                sum, result
+            ));
+        }
+        Ok(())
+    });
+}
+
 #[macro_export]
 macro_rules! elementwise_eq_tester {
     (< $simd_kind:ident :: $simd_ty:ident as $base_kind:ident >  :: $fn_name:ident, $inputs:expr, $precision:expr) => {{
@@ -130,6 +155,14 @@ macro_rules! const_bitshift_eq_tester {
             test_constify_imm8!(s, expand)
         };
         bitshift_eq_tester($inputs, f, sf);
+    }};
+}
+
+#[macro_export]
+macro_rules! horizontal_add_tester {
+    ($simd_kind:ident :: $simd_ty:ident, $inputs:expr) => {{
+        let f = <<$simd_kind as Simd>::$simd_ty as SimdFloat>::horizontal_add;
+        horizontal_add_tester($inputs, f);
     }};
 }
 
@@ -253,5 +286,34 @@ macro_rules! bitshift_eq_tester_impl {
         bitshift_eq_tester_impl!(@simdkind $is_const, i16, $simd_fn);
         bitshift_eq_tester_impl!(@simdkind $is_const, i32, $simd_fn);
         bitshift_eq_tester_impl!(@simdkind $is_const, i64, $simd_fn);
+    };
+}
+
+#[macro_export]
+macro_rules! horizontal_add_tester_impl {
+    (@full $simd:ident, $simd_ty:ident) => {
+        with_feature_flag!($simd,
+            paste::item! {
+                #[test]
+                fn [<horizontal_add_ $simd:lower _ $simd_ty>]() {
+                    horizontal_add_tester!(
+                        $simd:: [<V$simd_ty>],
+                        RandSimd::$simd_ty().one_arg()
+                    );
+                }
+            }
+        );
+    };
+
+    (@simdkind $simd_ty:ident) => {
+        horizontal_add_tester_impl!(@full Scalar, $simd_ty);
+        horizontal_add_tester_impl!(@full Avx2, $simd_ty);
+        horizontal_add_tester_impl!(@full Sse2, $simd_ty);
+        horizontal_add_tester_impl!(@full Sse41, $simd_ty);
+    };
+
+    () => {
+        horizontal_add_tester_impl!(@simdkind f32);
+        horizontal_add_tester_impl!(@simdkind f64);
     };
 }

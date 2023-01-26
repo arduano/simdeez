@@ -783,8 +783,8 @@ impl SimdFloat for F32x8 {
         unsafe {
             let a = _mm256_hadd_ps(self.0, self.0);
             let b = _mm256_hadd_ps(a, a);
-            let c = _mm256_hadd_ps(b, b);
-            _mm_cvtss_f32(_mm256_castps256_ps128(c))
+            let transmuted: Self::ArrayRepresentation = core::mem::transmute(b);
+            transmuted[0] + transmuted[4]
         }
     }
 
@@ -1023,8 +1023,8 @@ impl SimdFloat for F64x4 {
     fn horizontal_add(self) -> Self::Scalar {
         unsafe {
             let a = _mm256_hadd_pd(self.0, self.0);
-            let b = _mm256_hadd_pd(a, a);
-            _mm_cvtsd_f64(_mm256_castpd256_pd128(b))
+            let transmuted: Self::ArrayRepresentation = core::mem::transmute(a);
+            transmuted[0] + transmuted[2]
         }
     }
 
