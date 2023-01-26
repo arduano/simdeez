@@ -132,8 +132,38 @@ pub trait SimdBase:
         self.transmute_into_array_ref().clone()
     }
 
-    unsafe fn load_from_ptr(ptr: *const Self::Scalar) -> Self;
-    unsafe fn copy_to_ptr(self, ptr: *mut Self::Scalar);
+    /// Load a vector from an unaligned raw pointer.
+    unsafe fn load_from_ptr_unaligned(ptr: *const Self::Scalar) -> Self;
+    /// Store a vector to an unaligned raw pointer.
+    unsafe fn copy_to_ptr_unaligned(self, ptr: *mut Self::Scalar);
+
+    /// Load a vector from a 32 bit aligned raw pointer.
+    unsafe fn load_from_ptr_aligned(ptr: *const Self::Scalar) -> Self;
+    /// Store a vector to a 32 bit aligned raw pointer.
+    unsafe fn copy_to_ptr_aligned(self, ptr: *mut Self::Scalar);
+
+    /// Load a vector from a 32 bit raw pointer. Assumes the pointer is aligned if the size of Self::Scalar is a multiple of 32 bits.
+    ///
+    /// NOTE: This doesn't guarantee that the pointer is definitely aligned, but it's a safe assumption in most cases.
+    #[inline(always)]
+    unsafe fn load_from_ptr_autoalign(ptr: *const Self::Scalar) -> Self {
+        if core::mem::size_of::<Self::Scalar>() % 4 == 0 {
+            Self::load_from_ptr_aligned(ptr)
+        } else {
+            Self::load_from_ptr_unaligned(ptr)
+        }
+    }
+    /// Store a vector to a 32 bit raw pointer. Assumes the pointer is aligned if the size of Self::Scalar is a multiple of 32 bits.
+    ///
+    /// NOTE: This doesn't guarantee that the pointer is definitely aligned, but it's a safe assumption in most cases.
+    #[inline(always)]
+    unsafe fn copy_to_ptr_autoalign(self, ptr: *mut Self::Scalar) {
+        if core::mem::size_of::<Self::Scalar>() % 4 == 0 {
+            self.copy_to_ptr_aligned(ptr)
+        } else {
+            self.copy_to_ptr_unaligned(ptr)
+        }
+    }
 
     unsafe fn underlying_value(self) -> Self::UnderlyingType;
     unsafe fn underlying_value_mut(&mut self) -> &mut Self::UnderlyingType;
@@ -148,10 +178,74 @@ pub trait SimdBase:
     }
 
     #[inline(always)]
-    fn iter_mut(&self) -> SimdArrayIterator<'_, Self> {
-        SimdArrayIterator {
+    fn iter_mut(&mut self) -> SimdArrayMutIterator<'_, Self> {
+        SimdArrayMutIterator {
             simd: self,
             index: 0,
+        }
+    }
+
+    /// Gets the value at the specified index, without a bounds check.
+    #[inline(always)]
+    unsafe fn get_unchecked(&self, index: usize) -> Self::Scalar {
+        unsafe {
+            let underlying_ptr = &self.underlying_value() as *const Self::UnderlyingType;
+            let ptr_scalar = underlying_ptr as *mut Self::Scalar;
+            let ptr = ptr_scalar.add(index);
+            *ptr
+        }
+    }
+
+    /// Gets the value at the specified index, without a bounds check.
+    #[inline(always)]
+    unsafe fn get_unchecked_mut<'a>(&mut self, index: usize) -> &'a mut Self::Scalar {
+        unsafe {
+            let underlying_ptr = self.underlying_value_mut() as *mut Self::UnderlyingType;
+            let ptr_scalar = underlying_ptr as *mut Self::Scalar;
+            let ptr = ptr_scalar.add(index);
+            &mut *ptr
+        }
+    }
+
+    /// Tries to load from a slice. If the slice is too short, it returns the length of the slice.
+    unsafe fn load_from_slice_exact(slice: &[Self::Scalar]) -> Result<Self, usize> {
+        if slice.len() < Self::WIDTH {
+            Err(slice.len())
+        } else {
+            Ok(Self::load_from_ptr_autoalign(slice.as_ptr()))
+        }
+    }
+
+    /// Tries to load from a slice. If the slice is too short, it uses zeroes for the remaining values.
+    unsafe fn load_from_slice(slice: &[Self::Scalar]) -> Self {
+        if slice.len() < Self::WIDTH {
+            let mut val = Self::zeroes();
+            for (i, s) in slice.iter().copied().enumerate() {
+                let ptr = val.get_unchecked_mut(i);
+                *ptr = s;
+            }
+            val
+        } else {
+            Self::load_from_ptr_autoalign(slice.as_ptr())
+        }
+    }
+
+    unsafe fn copy_to_slice_exact(self, slice: &mut [Self::Scalar]) -> Result<(), usize> {
+        if slice.len() < Self::WIDTH {
+            Err(slice.len())
+        } else {
+            self.copy_to_ptr_autoalign(slice.as_mut_ptr());
+            Ok(())
+        }
+    }
+
+    unsafe fn copy_to_slice(self, slice: &mut [Self::Scalar]) {
+        if slice.len() < Self::WIDTH {
+            for (i, s) in slice.iter_mut().enumerate() {
+                *s = self.get_unchecked(i);
+            }
+        } else {
+            self.copy_to_ptr_autoalign(slice.as_mut_ptr());
         }
     }
 }
@@ -360,21 +454,16 @@ impl<'a, S: SimdBase> Iterator for SimdArrayIterator<'a, S> {
             return None;
         }
 
-        let value = unsafe {
-            let underlying_ptr = &self.simd.underlying_value() as *const S::UnderlyingType;
-            let ptr_scalar = underlying_ptr as *const S::Scalar;
-            let ptr = ptr_scalar.add(self.index);
-            *ptr
-        };
-
-        self.index += 1;
-
-        Some(value)
+        unsafe {
+            let value = self.simd.get_unchecked(self.index);
+            self.index += 1;
+            Some(value)
+        }
     }
 }
 
 pub struct SimdArrayMutIterator<'a, S: SimdBase> {
-    simd: &'a S,
+    simd: &'a mut S,
     index: usize,
 }
 
@@ -387,15 +476,10 @@ impl<'a, S: SimdBase> Iterator for SimdArrayMutIterator<'a, S> {
             return None;
         }
 
-        let value = unsafe {
-            let underlying_ptr = &self.simd.underlying_value() as *const S::UnderlyingType;
-            let ptr_scalar = underlying_ptr as *mut S::Scalar;
-            let ptr = ptr_scalar.add(self.index);
-            &mut *ptr
-        };
-
-        self.index += 1;
-
-        Some(value)
+        unsafe {
+            let value = self.simd.get_unchecked_mut(self.index);
+            self.index += 1;
+            Some(value)
+        }
     }
 }

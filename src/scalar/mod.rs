@@ -126,12 +126,22 @@ impl SimdBase for I16x1 {
     }
 
     #[inline(always)]
-    unsafe fn load_from_ptr(ptr: *const Self::Scalar) -> Self {
+    unsafe fn load_from_ptr_unaligned(ptr: *const Self::Scalar) -> Self {
         I16x1(*ptr)
     }
 
     #[inline(always)]
-    unsafe fn copy_to_ptr(self, ptr: *mut Self::Scalar) {
+    unsafe fn copy_to_ptr_unaligned(self, ptr: *mut Self::Scalar) {
+        *ptr = self.0;
+    }
+
+    #[inline(always)]
+    unsafe fn load_from_ptr_aligned(ptr: *const Self::Scalar) -> Self {
+        I16x1(*ptr)
+    }
+
+    #[inline(always)]
+    unsafe fn copy_to_ptr_aligned(self, ptr: *mut Self::Scalar) {
         *ptr = self.0;
     }
 
@@ -285,12 +295,22 @@ impl SimdBase for I32x1 {
     }
 
     #[inline(always)]
-    unsafe fn load_from_ptr(ptr: *const Self::Scalar) -> Self {
+    unsafe fn load_from_ptr_unaligned(ptr: *const Self::Scalar) -> Self {
         I32x1(*ptr)
     }
 
     #[inline(always)]
-    unsafe fn copy_to_ptr(self, ptr: *mut Self::Scalar) {
+    unsafe fn copy_to_ptr_unaligned(self, ptr: *mut Self::Scalar) {
+        *ptr = self.0;
+    }
+
+    #[inline(always)]
+    unsafe fn load_from_ptr_aligned(ptr: *const Self::Scalar) -> Self {
+        I32x1(*ptr)
+    }
+
+    #[inline(always)]
+    unsafe fn copy_to_ptr_aligned(self, ptr: *mut Self::Scalar) {
         *ptr = self.0;
     }
 
@@ -456,12 +476,22 @@ impl SimdBase for I64x1 {
     }
 
     #[inline(always)]
-    unsafe fn load_from_ptr(ptr: *const Self::Scalar) -> Self {
+    unsafe fn load_from_ptr_unaligned(ptr: *const Self::Scalar) -> Self {
         I64x1(*ptr)
     }
 
     #[inline(always)]
-    unsafe fn copy_to_ptr(self, ptr: *mut Self::Scalar) {
+    unsafe fn copy_to_ptr_unaligned(self, ptr: *mut Self::Scalar) {
+        *ptr = self.0;
+    }
+
+    #[inline(always)]
+    unsafe fn load_from_ptr_aligned(ptr: *const Self::Scalar) -> Self {
+        I64x1(*ptr)
+    }
+
+    #[inline(always)]
+    unsafe fn copy_to_ptr_aligned(self, ptr: *mut Self::Scalar) {
         *ptr = self.0;
     }
 
@@ -651,12 +681,22 @@ impl SimdBase for F32x1 {
     }
 
     #[inline(always)]
-    unsafe fn load_from_ptr(ptr: *const Self::Scalar) -> Self {
+    unsafe fn load_from_ptr_unaligned(ptr: *const Self::Scalar) -> Self {
         F32x1(*ptr)
     }
 
     #[inline(always)]
-    unsafe fn copy_to_ptr(self, ptr: *mut Self::Scalar) {
+    unsafe fn copy_to_ptr_unaligned(self, ptr: *mut Self::Scalar) {
+        *ptr = self.0;
+    }
+
+    #[inline(always)]
+    unsafe fn load_from_ptr_aligned(ptr: *const Self::Scalar) -> Self {
+        F32x1(*ptr)
+    }
+
+    #[inline(always)]
+    unsafe fn copy_to_ptr_aligned(self, ptr: *mut Self::Scalar) {
         *ptr = self.0;
     }
 
@@ -909,12 +949,22 @@ impl SimdBase for F64x1 {
     }
 
     #[inline(always)]
-    unsafe fn load_from_ptr(ptr: *const Self::Scalar) -> Self {
+    unsafe fn load_from_ptr_unaligned(ptr: *const Self::Scalar) -> Self {
         F64x1(*ptr)
     }
 
     #[inline(always)]
-    unsafe fn copy_to_ptr(self, ptr: *mut Self::Scalar) {
+    unsafe fn copy_to_ptr_unaligned(self, ptr: *mut Self::Scalar) {
+        *ptr = self.0;
+    }
+
+    #[inline(always)]
+    unsafe fn load_from_ptr_aligned(ptr: *const Self::Scalar) -> Self {
+        F64x1(*ptr)
+    }
+
+    #[inline(always)]
+    unsafe fn copy_to_ptr_aligned(self, ptr: *mut Self::Scalar) {
         *ptr = self.0;
     }
 

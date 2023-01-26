@@ -124,13 +124,23 @@ impl SimdBase for I16x16 {
     }
 
     #[inline(always)]
-    unsafe fn load_from_ptr(ptr: *const Self::Scalar) -> Self {
+    unsafe fn load_from_ptr_unaligned(ptr: *const Self::Scalar) -> Self {
         I16x16(_mm256_loadu_si256(ptr as *const _))
     }
 
     #[inline(always)]
-    unsafe fn copy_to_ptr(self, ptr: *mut Self::Scalar) {
+    unsafe fn copy_to_ptr_unaligned(self, ptr: *mut Self::Scalar) {
         _mm256_storeu_si256(ptr as *mut _, self.0);
+    }
+
+    #[inline(always)]
+    unsafe fn load_from_ptr_aligned(ptr: *const Self::Scalar) -> Self {
+        I16x16(_mm256_load_si256(ptr as *const _))
+    }
+
+    #[inline(always)]
+    unsafe fn copy_to_ptr_aligned(self, ptr: *mut Self::Scalar) {
+        _mm256_store_si256(ptr as *mut _, self.0);
     }
 
     #[inline(always)]
@@ -298,13 +308,23 @@ impl SimdBase for I32x8 {
     }
 
     #[inline(always)]
-    unsafe fn load_from_ptr(ptr: *const Self::Scalar) -> Self {
+    unsafe fn load_from_ptr_unaligned(ptr: *const Self::Scalar) -> Self {
         I32x8(_mm256_loadu_si256(ptr as *const _))
     }
 
     #[inline(always)]
-    unsafe fn copy_to_ptr(self, ptr: *mut Self::Scalar) {
+    unsafe fn copy_to_ptr_unaligned(self, ptr: *mut Self::Scalar) {
         _mm256_storeu_si256(ptr as *mut _, self.0);
+    }
+
+    #[inline(always)]
+    unsafe fn load_from_ptr_aligned(ptr: *const Self::Scalar) -> Self {
+        I32x8(_mm256_load_si256(ptr as *const _))
+    }
+
+    #[inline(always)]
+    unsafe fn copy_to_ptr_aligned(self, ptr: *mut Self::Scalar) {
+        _mm256_store_si256(ptr as *mut _, self.0);
     }
 
     #[inline(always)]
@@ -498,13 +518,23 @@ impl SimdBase for I64x4 {
     }
 
     #[inline(always)]
-    unsafe fn load_from_ptr(ptr: *const Self::Scalar) -> Self {
+    unsafe fn load_from_ptr_unaligned(ptr: *const Self::Scalar) -> Self {
         I64x4(_mm256_loadu_si256(ptr as *const _))
     }
 
     #[inline(always)]
-    unsafe fn copy_to_ptr(self, ptr: *mut Self::Scalar) {
+    unsafe fn copy_to_ptr_unaligned(self, ptr: *mut Self::Scalar) {
         _mm256_storeu_si256(ptr as *mut _, self.0);
+    }
+
+    #[inline(always)]
+    unsafe fn load_from_ptr_aligned(ptr: *const Self::Scalar) -> Self {
+        I64x4(_mm256_load_si256(ptr as *const _))
+    }
+
+    #[inline(always)]
+    unsafe fn copy_to_ptr_aligned(self, ptr: *mut Self::Scalar) {
+        _mm256_store_si256(ptr as *mut _, self.0);
     }
 
     #[inline(always)]
@@ -692,13 +722,23 @@ impl SimdBase for F32x8 {
     }
 
     #[inline(always)]
-    unsafe fn load_from_ptr(ptr: *const Self::Scalar) -> Self {
+    unsafe fn load_from_ptr_unaligned(ptr: *const Self::Scalar) -> Self {
         F32x8(_mm256_loadu_ps(ptr))
     }
 
     #[inline(always)]
-    unsafe fn copy_to_ptr(self, ptr: *mut Self::Scalar) {
+    unsafe fn copy_to_ptr_unaligned(self, ptr: *mut Self::Scalar) {
         _mm256_storeu_ps(ptr, self.0);
+    }
+
+    #[inline(always)]
+    unsafe fn load_from_ptr_aligned(ptr: *const Self::Scalar) -> Self {
+        F32x8(_mm256_load_ps(ptr))
+    }
+
+    #[inline(always)]
+    unsafe fn copy_to_ptr_aligned(self, ptr: *mut Self::Scalar) {
+        _mm256_store_ps(ptr, self.0);
     }
 
     #[inline(always)]
@@ -938,13 +978,23 @@ impl SimdBase for F64x4 {
     }
 
     #[inline(always)]
-    unsafe fn load_from_ptr(ptr: *const Self::Scalar) -> Self {
+    unsafe fn load_from_ptr_unaligned(ptr: *const Self::Scalar) -> Self {
         F64x4(_mm256_loadu_pd(ptr as *const f64))
     }
 
     #[inline(always)]
-    unsafe fn copy_to_ptr(self, ptr: *mut Self::Scalar) {
+    unsafe fn copy_to_ptr_unaligned(self, ptr: *mut Self::Scalar) {
         _mm256_storeu_pd(ptr as *mut f64, self.0);
+    }
+
+    #[inline(always)]
+    unsafe fn load_from_ptr_aligned(ptr: *const Self::Scalar) -> Self {
+        F64x4(_mm256_load_pd(ptr as *const f64))
+    }
+
+    #[inline(always)]
+    unsafe fn copy_to_ptr_aligned(self, ptr: *mut Self::Scalar) {
+        _mm256_store_pd(ptr as *mut f64, self.0);
     }
 
     #[inline(always)]
