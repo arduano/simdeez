@@ -41,4 +41,5 @@ jobs:
       - uses: actions-rs/cargo@v1
         name: Run tests (release)
         with:
-          command: test --release
+          command: test
+          args: --release
