@@ -396,7 +396,14 @@ impl SimdBase for I64x4 {
 
     #[inline(always)]
     fn mul(self, rhs: Self) -> Self {
-        unsafe { I64x4(_mm256_mul_epi32(self.0, rhs.0)) }
+        unsafe {
+            let mut new = Self::zeroes();
+            new[0] = self[0].wrapping_mul(rhs[0]);
+            new[1] = self[1].wrapping_mul(rhs[1]);
+            new[2] = self[2].wrapping_mul(rhs[2]);
+            new[3] = self[3].wrapping_mul(rhs[3]);
+            new
+        }
     }
 
     #[inline(always)]
@@ -422,11 +429,8 @@ impl SimdBase for I64x4 {
     #[inline(always)]
     fn abs(self) -> Self {
         unsafe {
-            // Manually implemented `v < 0 ? -v : v`
-            let zero = I64x4::set1(0); // zero
-            let mask = self.cmp_lt(zero); // mask = v < 0
-            let neg = zero - self; // neg = -v
-            mask.blendv(self, neg) // mask ? neg : v
+            let mask = self.cmp_lt(Self::zeroes());
+            self.bit_xor(mask) - mask
         }
     }
 

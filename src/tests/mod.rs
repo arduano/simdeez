@@ -1,11 +1,4 @@
-use quickcheck::Arbitrary;
+mod lib;
+use lib::*;
 
-use crate::SimdBase;
-
-mod arbitrary;
-mod arithmetic;
-mod fn_tuple;
-mod tester;
-
-mod numbers;
-use numbers::*;
+mod elementwise;

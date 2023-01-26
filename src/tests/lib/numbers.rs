@@ -10,7 +10,7 @@ pub enum EqPrecision {
 
 impl EqPrecision {
     pub fn exact() -> EqPrecision {
-        Self::exact()
+        Self::Exact
     }
 
     pub fn almost(figs: usize) -> EqPrecision {
@@ -19,22 +19,37 @@ impl EqPrecision {
 }
 
 pub trait ScalarNumber: Arbitrary + PartialEq + Copy + core::fmt::Display {
-    fn almost_eq(self, other: Self, precision: EqPrecision) -> bool;
+    fn almost_eq(self, other: Self, _precision: EqPrecision) -> bool {
+        self == other
+    }
+
+    fn is_minimum_int(&self) -> bool {
+        false
+    }
+
+    fn is_float_nan(&self) -> bool {
+        false
+    }
+
+    /// For floating point numbers, add a very small number on top to avoid .5 cutoffs for functions like .round
+    fn slightly_shift(self) -> Self {
+        self
+    }
 }
 
 impl ScalarNumber for i16 {
-    fn almost_eq(self, other: Self, precision: EqPrecision) -> bool {
-        self == other
+    fn is_minimum_int(&self) -> bool {
+        *self == i16::MIN
     }
 }
 impl ScalarNumber for i32 {
-    fn almost_eq(self, other: Self, precision: EqPrecision) -> bool {
-        self == other
+    fn is_minimum_int(&self) -> bool {
+        *self == i32::MIN
     }
 }
 impl ScalarNumber for i64 {
-    fn almost_eq(self, other: Self, precision: EqPrecision) -> bool {
-        self == other
+    fn is_minimum_int(&self) -> bool {
+        *self == i64::MIN
     }
 }
 impl ScalarNumber for f32 {
@@ -51,11 +66,34 @@ impl ScalarNumber for f32 {
             return true;
         }
 
+        if self == 0.0 && other == 0.0 {
+            return true;
+        }
+
+        if self.is_sign_negative() != other.is_sign_negative() {
+            return false;
+        }
+
         match precision {
             EqPrecision::Exact => self == other,
             EqPrecision::Almost { figs } => {
-                1.0 / (self.log10() - other.log10()).abs() < figs as f32
+                let bigger = self.max(other);
+                let norm_diff = (self / bigger) - (other / bigger);
+                let epsilon = 10.0f32.powi(-(figs as i32));
+                norm_diff < epsilon
             }
+        }
+    }
+
+    fn is_float_nan(&self) -> bool {
+        self.is_nan()
+    }
+
+    fn slightly_shift(self) -> Self {
+        if (self % 1.0).abs() == 0.5 {
+            self + self / 100000.0
+        } else {
+            self
         }
     }
 }
@@ -73,11 +111,34 @@ impl ScalarNumber for f64 {
             return true;
         }
 
+        if self == 0.0 && other == 0.0 {
+            return true;
+        }
+
+        if self.is_sign_negative() != other.is_sign_negative() {
+            return false;
+        }
+
         match precision {
             EqPrecision::Exact => self == other,
             EqPrecision::Almost { figs } => {
-                1.0 / (self.log10() - other.log10()).abs() < figs as f64
+                let bigger = self.max(other);
+                let norm_diff = (self / bigger) - (other / bigger);
+                let epsilon = 10.0f64.powi(-(figs as i32));
+                norm_diff < epsilon
             }
+        }
+    }
+
+    fn is_float_nan(&self) -> bool {
+        self.is_nan()
+    }
+
+    fn slightly_shift(self) -> Self {
+        if (self % 1.0).abs() == 0.5 {
+            self + self / 100000000.0
+        } else {
+            self
         }
     }
 }

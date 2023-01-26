@@ -220,10 +220,10 @@ impl SimdBase for I32x4 {
     fn mul(self, rhs: Self) -> Self {
         unsafe {
             let mut new = Self::zeroes();
-            new[0] = self[0] * rhs[0];
-            new[1] = self[1] * rhs[1];
-            new[2] = self[2] * rhs[2];
-            new[3] = self[3] * rhs[3];
+            new[0] = self[0].wrapping_mul(rhs[0]);
+            new[1] = self[1].wrapping_mul(rhs[1]);
+            new[2] = self[2].wrapping_mul(rhs[2]);
+            new[3] = self[3].wrapping_mul(rhs[3]);
             new
         }
     }
@@ -416,8 +416,8 @@ impl SimdBase for I64x2 {
     fn mul(self, rhs: Self) -> Self {
         unsafe {
             let mut new = Self::zeroes();
-            new[0] = self[0] * rhs[0];
-            new[1] = self[1] * rhs[1];
+            new[0] = self[0].wrapping_mul(rhs[0]);
+            new[1] = self[1].wrapping_mul(rhs[1]);
             new
         }
     }

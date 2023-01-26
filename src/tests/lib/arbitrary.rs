@@ -1,19 +1,22 @@
+//! This module allows generating a (seeded) random list of inputs that includes special numbers as well as
+//! seeded random ones. The IMPORTANT_[ty] constants contain the important edge cases to try out.
+
 use rand::{
     distributions::uniform::{SampleRange, SampleUniform},
     prelude::*,
 };
 use rand_chacha::{rand_core::SeedableRng, ChaCha8Rng};
 
-use crate::{scalar::Scalar, Simd, SimdBase};
+use crate::SimdBase;
 
-const IMPORTANT_F32: [f32; 12] = [
+use super::ScalarNumber;
+
+const IMPORTANT_F32: [f32; 10] = [
     0.0,
     1.0,
     -1.0,
     0.5,
     -0.5,
-    0.25,
-    -0.25,
     1.5,
     -1.5,
     std::f32::MAX,
@@ -21,14 +24,12 @@ const IMPORTANT_F32: [f32; 12] = [
     f32::NAN,
 ];
 
-const IMPORTANT_F64: [f64; 12] = [
+const IMPORTANT_F64: [f64; 10] = [
     0.0,
     1.0,
     -1.0,
     0.5,
     -0.5,
-    0.25,
-    -0.25,
     1.5,
     -1.5,
     std::f64::MAX,
@@ -123,7 +124,7 @@ fn iter_as_simd<S: SimdBase<Scalar = N>, N>(
 
 /// Generate a random iterator of scalars of tuples for that type.
 ///
-/// E.g. `IterRandSimd::f32().two_arg()` will generate an iterator of `(S,S)` values
+/// E.g. `RandSimd::f32().two_arg()` will generate an iterator of `(S,S)` values
 /// where S's scalar type is f32 and S is inferred.
 pub struct RandSimd;
 pub struct IterRandSimdForScalar<N, I: Iterator<Item = N>>(Box<dyn Fn(usize) -> I>);
@@ -146,22 +147,27 @@ impl RandSimd {
     }
 }
 
-impl<N, I: Iterator<Item = N>> IterRandSimdForScalar<N, I> {
+impl<N: ScalarNumber, I: Iterator<Item = N>> IterRandSimdForScalar<N, I> {
+    /// Iterate 1000 random inputs, starting from the important numbers
     pub fn one_arg<S: SimdBase<Scalar = N>>(self) -> impl Iterator<Item = (S,)> {
         let iter = iter_as_simd(self.0(1000));
         iter.map(|v| (v,)).take(1000 * S::WIDTH)
     }
 
+    /// Iterate `14 * 15 * 20 * S::WIDTH` random inputs, with the first argument looping at 14 and
+    /// the second arguming looping at 15 inputs, effectively putting each special number against each
+    /// other one in the end.
     pub fn two_arg<S: SimdBase<Scalar = N>>(self) -> impl Iterator<Item = (S, S)> {
-        let iter1 = iter_as_simd(self.0(20));
-        let iter2 = iter_as_simd(self.0(21));
-        iter1.zip(iter2).take(20 * 21 * 20 * S::WIDTH)
+        let iter1 = iter_as_simd(self.0(14));
+        let iter2 = iter_as_simd(self.0(15));
+        iter1.zip(iter2).take(14 * 15 * 20 * S::WIDTH)
     }
 
+    /// Same as two_arg except with periods of 14, 15 and 16.
     pub fn three_arg<S: SimdBase<Scalar = N>>(self) -> impl Iterator<Item = (S, S, S)> {
-        let mut iter1 = iter_as_simd(self.0(20));
-        let mut iter2 = iter_as_simd(self.0(21));
-        let mut iter3 = iter_as_simd(self.0(22));
+        let mut iter1 = iter_as_simd(self.0(14));
+        let mut iter2 = iter_as_simd(self.0(15));
+        let mut iter3 = iter_as_simd(self.0(16));
 
         std::iter::repeat_with(move || {
             (
@@ -170,6 +176,25 @@ impl<N, I: Iterator<Item = N>> IterRandSimdForScalar<N, I> {
                 iter3.next().unwrap(),
             )
         })
-        .take(20 * 21 * 22 * 20 * S::WIDTH)
+        .take(1680 * S::WIDTH)
+    }
+
+    /// Same as one_arg, except filtering out invalid inputs for abs functions
+    pub fn one_arg_abs_filtered<S: SimdBase<Scalar = N>>(self) -> impl Iterator<Item = (S,)> {
+        let iter = iter_as_simd(self.0(1000).filter(|v| !v.is_minimum_int()));
+        iter.map(|v| (v,)).take(1000 * S::WIDTH)
+    }
+
+    /// Same as one_arg, except slightly shifted on floating point values
+    pub fn one_arg_slightly_shifted<S: SimdBase<Scalar = N>>(self) -> impl Iterator<Item = (S,)> {
+        let iter = iter_as_simd(self.0(1000).map(|v| v.slightly_shift()));
+        iter.map(|v| (v,)).take(1000 * S::WIDTH)
+    }
+
+    /// Same as two_arg, except filtering out NaN floats
+    pub fn two_arg_nan_filtered<S: SimdBase<Scalar = N>>(self) -> impl Iterator<Item = (S, S)> {
+        let iter1 = iter_as_simd(self.0(15).filter(|v| !v.is_float_nan()));
+        let iter2 = iter_as_simd(self.0(16).filter(|v| !v.is_float_nan()));
+        iter1.zip(iter2).take(14 * 15 * 20 * S::WIDTH)
     }
 }

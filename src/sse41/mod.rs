@@ -346,8 +346,8 @@ impl SimdBase for I64x2_41 {
     fn mul(self, rhs: Self) -> Self {
         unsafe {
             let mut new = Self::zeroes();
-            new[0] = self[0] * rhs[0];
-            new[1] = self[1] * rhs[1];
+            new[0] = self[0].wrapping_mul(rhs[0]);
+            new[1] = self[1].wrapping_mul(rhs[1]);
             new
         }
     }
@@ -435,8 +435,8 @@ impl SimdBase for I64x2_41 {
     }
 
     fn min(self, rhs: Self) -> Self {
-        let cmp = self.cmp_gt(rhs);
-        cmp.blendv(self, rhs)
+        let cmp = self.cmp_lt(rhs);
+        cmp.blendv(rhs, self)
     }
 
     unsafe fn load_from_array(array: Self::ArrayRepresentation) -> Self {

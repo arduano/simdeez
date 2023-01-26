@@ -32,17 +32,17 @@ impl SimdBase for I16x1 {
 
     #[inline(always)]
     fn add(self, rhs: Self) -> Self {
-        I16x1(self.0 + rhs.0)
+        I16x1(self.0.wrapping_add(rhs.0))
     }
 
     #[inline(always)]
     fn sub(self, rhs: Self) -> Self {
-        I16x1(self.0 - rhs.0)
+        I16x1(self.0.wrapping_sub(rhs.0))
     }
 
     #[inline(always)]
     fn mul(self, rhs: Self) -> Self {
-        I16x1(self.0 * rhs.0)
+        I16x1(self.0.wrapping_mul(rhs.0))
     }
 
     #[inline(always)]
@@ -191,17 +191,17 @@ impl SimdBase for I32x1 {
 
     #[inline(always)]
     fn add(self, rhs: Self) -> Self {
-        I32x1(self.0 + rhs.0)
+        I32x1(self.0.wrapping_add(rhs.0))
     }
 
     #[inline(always)]
     fn sub(self, rhs: Self) -> Self {
-        I32x1(self.0 - rhs.0)
+        I32x1(self.0.wrapping_sub(rhs.0))
     }
 
     #[inline(always)]
     fn mul(self, rhs: Self) -> Self {
-        I32x1(self.0 * rhs.0)
+        I32x1(self.0.wrapping_mul(rhs.0))
     }
 
     #[inline(always)]
@@ -362,17 +362,17 @@ impl SimdBase for I64x1 {
 
     #[inline(always)]
     fn add(self, rhs: Self) -> Self {
-        I64x1(self.0 + rhs.0)
+        I64x1(self.0.wrapping_add(rhs.0))
     }
 
     #[inline(always)]
     fn sub(self, rhs: Self) -> Self {
-        I64x1(self.0 - rhs.0)
+        I64x1(self.0.wrapping_sub(rhs.0))
     }
 
     #[inline(always)]
     fn mul(self, rhs: Self) -> Self {
-        I64x1(self.0 * rhs.0)
+        I64x1(self.0.wrapping_mul(rhs.0))
     }
 
     #[inline(always)]

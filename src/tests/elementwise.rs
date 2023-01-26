@@ -1,0 +1,46 @@
+use crate::{elementwise_eq_tester};
+
+use super::*;
+use crate::{avx2::*, scalar::*, sse2::*, sse41::*, *};
+
+generate_elementwise_eq_tester_impl!(SimdBase, add, two_arg, EqPrecision::exact());
+generate_elementwise_eq_tester_impl!(SimdBase, sub, two_arg, EqPrecision::exact());
+generate_elementwise_eq_tester_impl!(SimdBase, mul, two_arg, EqPrecision::exact());
+
+generate_elementwise_eq_tester_impl!(SimdBase, bit_and, two_arg, EqPrecision::exact());
+generate_elementwise_eq_tester_impl!(SimdBase, bit_or, two_arg, EqPrecision::exact());
+generate_elementwise_eq_tester_impl!(SimdBase, bit_xor, two_arg, EqPrecision::exact());
+generate_elementwise_eq_tester_impl!(SimdBase, bit_not, one_arg, EqPrecision::exact());
+generate_elementwise_eq_tester_impl!(SimdBase, and_not, two_arg, EqPrecision::exact());
+
+// Abs breaks on minimum integer values as they dont have a corrisponding maximum, causing undefined behavior.
+generate_elementwise_eq_tester_impl!(SimdBase, abs, one_arg_abs_filtered, EqPrecision::exact());
+
+generate_elementwise_eq_tester_impl!(SimdBase, cmp_eq, two_arg, EqPrecision::exact());
+generate_elementwise_eq_tester_impl!(SimdBase, cmp_lt, two_arg, EqPrecision::exact());
+generate_elementwise_eq_tester_impl!(SimdBase, cmp_lte, two_arg, EqPrecision::exact());
+generate_elementwise_eq_tester_impl!(SimdBase, cmp_gt, two_arg, EqPrecision::exact());
+generate_elementwise_eq_tester_impl!(SimdBase, cmp_gte, two_arg, EqPrecision::exact());
+
+// We filter out NaN numbers for neq because under some hardware implementations (including Avx2)
+// it appears that `NaN != [number]` is false. Technically that's invalid according to the floatin point
+// spec, but it seems like a hardware thing that we cant avoid.
+generate_elementwise_eq_tester_impl!(SimdBase, cmp_neq, two_arg_nan_filtered, EqPrecision::exact());
+
+generate_elementwise_eq_tester_impl!(SimdBase, max, two_arg_nan_filtered, EqPrecision::exact());
+generate_elementwise_eq_tester_impl!(SimdBase, min, two_arg_nan_filtered, EqPrecision::exact());
+
+// We use "almost" precision for these functions because at higher numbers there's always small errors.
+// However if there's an error in smaller numbers, it would be caught pretty easily by this precision.
+generate_elementwise_eq_tester_impl!(SimdFloat, div, two_arg, EqPrecision::almost(6));
+generate_elementwise_eq_tester_impl!(SimdFloat, ceil, one_arg, EqPrecision::almost(6));
+generate_elementwise_eq_tester_impl!(SimdFloat, floor, one_arg, EqPrecision::almost(6));
+generate_elementwise_eq_tester_impl!(SimdFloat, round, one_arg_slightly_shifted, EqPrecision::almost(6));
+
+generate_elementwise_eq_tester_impl!(SimdFloat, mul_add, three_arg, EqPrecision::almost(5));
+generate_elementwise_eq_tester_impl!(SimdFloat, mul_sub, three_arg, EqPrecision::almost(5));
+generate_elementwise_eq_tester_impl!(SimdFloat, neg_mul_add, three_arg, EqPrecision::almost(5));
+generate_elementwise_eq_tester_impl!(SimdFloat, neg_mul_sub, three_arg, EqPrecision::almost(5));
+
+generate_elementwise_eq_tester_impl!(SimdFloat, sqrt, one_arg, EqPrecision::almost(7));
+generate_elementwise_eq_tester_impl!(SimdFloat, rsqrt, one_arg, EqPrecision::almost(3)); // Has very low precision
