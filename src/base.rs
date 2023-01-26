@@ -139,7 +139,16 @@ pub trait SimdBase:
     unsafe fn underlying_value_mut(&mut self) -> &mut Self::UnderlyingType;
     unsafe fn from_underlying_value(value: Self::UnderlyingType) -> Self;
 
+    #[inline(always)]
     fn iter(&self) -> SimdArrayIterator<'_, Self> {
+        SimdArrayIterator {
+            simd: self,
+            index: 0,
+        }
+    }
+
+    #[inline(always)]
+    fn iter_mut(&self) -> SimdArrayIterator<'_, Self> {
         SimdArrayIterator {
             simd: self,
             index: 0,
@@ -345,6 +354,7 @@ pub struct SimdArrayIterator<'a, S: SimdBase> {
 impl<'a, S: SimdBase> Iterator for SimdArrayIterator<'a, S> {
     type Item = S::Scalar;
 
+    #[inline(always)]
     fn next(&mut self) -> Option<Self::Item> {
         if self.index >= S::WIDTH {
             return None;
@@ -355,6 +365,33 @@ impl<'a, S: SimdBase> Iterator for SimdArrayIterator<'a, S> {
             let ptr_scalar = underlying_ptr as *const S::Scalar;
             let ptr = ptr_scalar.add(self.index);
             *ptr
+        };
+
+        self.index += 1;
+
+        Some(value)
+    }
+}
+
+pub struct SimdArrayMutIterator<'a, S: SimdBase> {
+    simd: &'a S,
+    index: usize,
+}
+
+impl<'a, S: SimdBase> Iterator for SimdArrayMutIterator<'a, S> {
+    type Item = &'a mut S::Scalar;
+
+    #[inline(always)]
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.index >= S::WIDTH {
+            return None;
+        }
+
+        let value = unsafe {
+            let underlying_ptr = &self.simd.underlying_value() as *const S::UnderlyingType;
+            let ptr_scalar = underlying_ptr as *mut S::Scalar;
+            let ptr = ptr_scalar.add(self.index);
+            &mut *ptr
         };
 
         self.index += 1;
