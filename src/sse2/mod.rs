@@ -24,26 +24,22 @@ impl SimdBase for I16x8 {
 
     #[inline(always)]
     unsafe fn zeroes() -> Self {
-        I16x8(/*_*/ _mm_setzero_si128())
+        I16x8(_mm_setzero_si128())
     }
 
     #[inline(always)]
     unsafe fn set1(x: Self::Scalar) -> Self {
-        I16x8(/*_*/ _mm_set1_epi16(x))
+        I16x8(_mm_set1_epi16(x))
     }
 
     #[inline(always)]
     fn add(self, rhs: Self) -> Self {
-        unsafe {
-            I16x8(/*_*/ _mm_add_epi16(self.0, rhs.0))
-        }
+        unsafe { I16x8(_mm_add_epi16(self.0, rhs.0)) }
     }
 
     #[inline(always)]
     fn sub(self, rhs: Self) -> Self {
-        unsafe {
-            I16x8(/*_*/ _mm_sub_epi16(self.0, rhs.0))
-        }
+        unsafe { I16x8(_mm_sub_epi16(self.0, rhs.0)) }
     }
 
     #[inline(always)]
@@ -53,23 +49,17 @@ impl SimdBase for I16x8 {
 
     #[inline(always)]
     fn bit_and(self, rhs: Self) -> Self {
-        unsafe {
-            I16x8(/*_*/ _mm_and_si128(self.0, rhs.0))
-        }
+        unsafe { I16x8(_mm_and_si128(self.0, rhs.0)) }
     }
 
     #[inline(always)]
     fn bit_or(self, rhs: Self) -> Self {
-        unsafe {
-            I16x8(/*_*/ _mm_or_si128(self.0, rhs.0))
-        }
+        unsafe { I16x8(_mm_or_si128(self.0, rhs.0)) }
     }
 
     #[inline(always)]
     fn bit_xor(self, rhs: Self) -> Self {
-        unsafe {
-            I16x8(/*_*/ /*_*/ _mm_xor_si128(self.0, rhs.0))
-        }
+        unsafe { I16x8(_mm_xor_si128(self.0, rhs.0)) }
     }
 
     #[inline(always)]
@@ -87,9 +77,7 @@ impl SimdBase for I16x8 {
 
     #[inline(always)]
     fn and_not(self, rhs: Self) -> Self {
-        unsafe {
-            I16x8(/*_*/ _mm_andnot_si128(self.0, rhs.0))
-        }
+        unsafe { I16x8(_mm_andnot_si128(self.0, rhs.0)) }
     }
 
     #[inline(always)]
@@ -104,9 +92,7 @@ impl SimdBase for I16x8 {
 
     #[inline(always)]
     fn cmp_eq(self, rhs: Self) -> Self {
-        unsafe {
-            I16x8(/*_*/ _mm_cmpeq_epi16(self.0, rhs.0))
-        }
+        unsafe { I16x8(_mm_cmpeq_epi16(self.0, rhs.0)) }
     }
 
     #[inline(always)]
@@ -116,9 +102,7 @@ impl SimdBase for I16x8 {
 
     #[inline(always)]
     fn cmp_lt(self, rhs: Self) -> Self {
-        unsafe {
-            I16x8(/*_*/ _mm_cmplt_epi16(self.0, rhs.0))
-        }
+        unsafe { I16x8(_mm_cmplt_epi16(self.0, rhs.0)) }
     }
 
     #[inline(always)]
@@ -128,9 +112,7 @@ impl SimdBase for I16x8 {
 
     #[inline(always)]
     fn cmp_gt(self, rhs: Self) -> Self {
-        unsafe {
-            I16x8(/*_*/ _mm_cmpgt_epi16(self.0, rhs.0))
-        }
+        unsafe { I16x8(_mm_cmpgt_epi16(self.0, rhs.0)) }
     }
 
     #[inline(always)]
@@ -140,31 +122,26 @@ impl SimdBase for I16x8 {
 
     #[inline(always)]
     fn max(self, rhs: Self) -> Self {
-        unsafe {
-            I16x8(/*_*/ _mm_max_epi16(self.0, rhs.0))
-        }
+        unsafe { I16x8(_mm_max_epi16(self.0, rhs.0)) }
     }
 
     #[inline(always)]
     fn min(self, rhs: Self) -> Self {
-        unsafe {
-            I16x8(/*_*/ _mm_min_epi16(self.0, rhs.0))
-        }
+        unsafe { I16x8(_mm_min_epi16(self.0, rhs.0)) }
     }
 
     #[inline(always)]
     unsafe fn load_from_array(array: Self::ArrayRepresentation) -> Self {
-        I16x8(/*_*/ _mm_loadu_si128(array.as_ptr() as *const __m128i))
+        I16x8(_mm_loadu_si128(array.as_ptr() as *const __m128i))
     }
 
     #[inline(always)]
     unsafe fn load_from_ptr(ptr: *const Self::Scalar) -> Self {
-        I16x8(/*_*/ _mm_loadu_si128(ptr as *const __m128i))
+        I16x8(_mm_loadu_si128(ptr as *const __m128i))
     }
 
     #[inline(always)]
     unsafe fn copy_to_ptr(self, ptr: *mut Self::Scalar) {
-        /*_*/
         _mm_storeu_si128(ptr as *mut __m128i, self.0);
     }
 
@@ -188,31 +165,27 @@ impl SimdInt for I16x8 {
     #[inline(always)]
     fn shl(self, rhs: i32) -> Self {
         unsafe {
-            let rhs = /*_*/_mm_cvtsi32_si128(rhs);
-            I16x8(/*_*/ _mm_sll_epi16(self.0, rhs))
+            let rhs = _mm_cvtsi32_si128(rhs);
+            I16x8(_mm_sll_epi16(self.0, rhs))
         }
     }
 
     #[inline(always)]
     fn shr(self, rhs: i32) -> Self {
         unsafe {
-            let rhs = /*_*/_mm_cvtsi32_si128(rhs);
-            I16x8(/*_*/ _mm_srl_epi16(self.0, rhs))
+            let rhs = _mm_cvtsi32_si128(rhs);
+            I16x8(_mm_srl_epi16(self.0, rhs))
         }
     }
 
     #[inline(always)]
     fn shl_const<const BY: i32>(self) -> Self {
-        unsafe {
-            I16x8(/*_*/ _mm_slli_epi16(self.0, BY))
-        }
+        unsafe { I16x8(_mm_slli_epi16(self.0, BY)) }
     }
 
     #[inline(always)]
     fn shr_const<const BY: i32>(self) -> Self {
-        unsafe {
-            I16x8(/*_*/ _mm_srli_epi16(self.0, BY))
-        }
+        unsafe { I16x8(_mm_srli_epi16(self.0, BY)) }
     }
 }
 
@@ -231,26 +204,22 @@ impl SimdBase for I32x4 {
 
     #[inline(always)]
     unsafe fn zeroes() -> Self {
-        I32x4(/*_*/ _mm_setzero_si128())
+        I32x4(_mm_setzero_si128())
     }
 
     #[inline(always)]
     unsafe fn set1(x: Self::Scalar) -> Self {
-        I32x4(/*_*/ _mm_set1_epi32(x))
+        I32x4(_mm_set1_epi32(x))
     }
 
     #[inline(always)]
     fn add(self, rhs: Self) -> Self {
-        unsafe {
-            I32x4(/*_*/ _mm_add_epi32(self.0, rhs.0))
-        }
+        unsafe { I32x4(_mm_add_epi32(self.0, rhs.0)) }
     }
 
     #[inline(always)]
     fn sub(self, rhs: Self) -> Self {
-        unsafe {
-            I32x4(/*_*/ _mm_sub_epi32(self.0, rhs.0))
-        }
+        unsafe { I32x4(_mm_sub_epi32(self.0, rhs.0)) }
     }
 
     #[inline(always)]
@@ -267,23 +236,17 @@ impl SimdBase for I32x4 {
 
     #[inline(always)]
     fn bit_and(self, rhs: Self) -> Self {
-        unsafe {
-            I32x4(/*_*/ _mm_and_si128(self.0, rhs.0))
-        }
+        unsafe { I32x4(_mm_and_si128(self.0, rhs.0)) }
     }
 
     #[inline(always)]
     fn bit_or(self, rhs: Self) -> Self {
-        unsafe {
-            I32x4(/*_*/ _mm_or_si128(self.0, rhs.0))
-        }
+        unsafe { I32x4(_mm_or_si128(self.0, rhs.0)) }
     }
 
     #[inline(always)]
     fn bit_xor(self, rhs: Self) -> Self {
-        unsafe {
-            I32x4(/*_*/ _mm_xor_si128(self.0, rhs.0))
-        }
+        unsafe { I32x4(_mm_xor_si128(self.0, rhs.0)) }
     }
 
     #[inline(always)]
@@ -301,9 +264,7 @@ impl SimdBase for I32x4 {
 
     #[inline(always)]
     fn and_not(self, rhs: Self) -> Self {
-        unsafe {
-            I32x4(/*_*/ _mm_andnot_si128(self.0, rhs.0))
-        }
+        unsafe { I32x4(_mm_andnot_si128(self.0, rhs.0)) }
     }
 
     #[inline(always)]
@@ -318,9 +279,7 @@ impl SimdBase for I32x4 {
 
     #[inline(always)]
     fn cmp_eq(self, rhs: Self) -> Self {
-        unsafe {
-            I32x4(/*_*/ _mm_cmpeq_epi32(self.0, rhs.0))
-        }
+        unsafe { I32x4(_mm_cmpeq_epi32(self.0, rhs.0)) }
     }
 
     #[inline(always)]
@@ -330,9 +289,7 @@ impl SimdBase for I32x4 {
 
     #[inline(always)]
     fn cmp_lt(self, rhs: Self) -> Self {
-        unsafe {
-            I32x4(/*_*/ _mm_cmplt_epi32(self.0, rhs.0))
-        }
+        unsafe { I32x4(_mm_cmplt_epi32(self.0, rhs.0)) }
     }
 
     #[inline(always)]
@@ -342,9 +299,7 @@ impl SimdBase for I32x4 {
 
     #[inline(always)]
     fn cmp_gt(self, rhs: Self) -> Self {
-        unsafe {
-            I32x4(/*_*/ _mm_cmpgt_epi32(self.0, rhs.0))
-        }
+        unsafe { I32x4(_mm_cmpgt_epi32(self.0, rhs.0)) }
     }
 
     #[inline(always)]
@@ -366,17 +321,16 @@ impl SimdBase for I32x4 {
 
     #[inline(always)]
     unsafe fn load_from_array(array: Self::ArrayRepresentation) -> Self {
-        I32x4(/*_*/ _mm_loadu_si128(array.as_ptr() as *const __m128i))
+        I32x4(_mm_loadu_si128(array.as_ptr() as *const __m128i))
     }
 
     #[inline(always)]
     unsafe fn load_from_ptr(ptr: *const Self::Scalar) -> Self {
-        I32x4(/*_*/ _mm_loadu_si128(ptr as *const __m128i))
+        I32x4(_mm_loadu_si128(ptr as *const __m128i))
     }
 
     #[inline(always)]
     unsafe fn copy_to_ptr(self, ptr: *mut Self::Scalar) {
-        /*_*/
         _mm_storeu_si128(ptr as *mut __m128i, self.0);
     }
 
@@ -400,31 +354,27 @@ impl SimdInt for I32x4 {
     #[inline(always)]
     fn shl(self, rhs: i32) -> Self {
         unsafe {
-            let rhs = /*_*/_mm_cvtsi32_si128(rhs);
-            I32x4(/*_*/ _mm_sll_epi32(self.0, rhs))
+            let rhs = _mm_cvtsi32_si128(rhs);
+            I32x4(_mm_sll_epi32(self.0, rhs))
         }
     }
 
     #[inline(always)]
     fn shr(self, rhs: i32) -> Self {
         unsafe {
-            let rhs = /*_*/_mm_cvtsi32_si128(rhs);
-            I32x4(/*_*/ _mm_srl_epi32(self.0, rhs))
+            let rhs = _mm_cvtsi32_si128(rhs);
+            I32x4(_mm_srl_epi32(self.0, rhs))
         }
     }
 
     #[inline(always)]
     fn shl_const<const BY: i32>(self) -> Self {
-        unsafe {
-            I32x4(/*_*/ _mm_slli_epi32(self.0, BY))
-        }
+        unsafe { I32x4(_mm_slli_epi32(self.0, BY)) }
     }
 
     #[inline(always)]
     fn shr_const<const BY: i32>(self) -> Self {
-        unsafe {
-            I32x4(/*_*/ _mm_srli_epi32(self.0, BY))
-        }
+        unsafe { I32x4(_mm_srli_epi32(self.0, BY)) }
     }
 }
 
@@ -433,16 +383,12 @@ impl SimdInt32 for I32x4 {
 
     #[inline(always)]
     fn bitcast_f32(self) -> Self::SimdF32 {
-        unsafe {
-            F32x4(/*_*/ _mm_castsi128_ps(self.0))
-        }
+        unsafe { F32x4(_mm_castsi128_ps(self.0)) }
     }
 
     #[inline(always)]
     fn cast_f32(self) -> Self::SimdF32 {
-        unsafe {
-            F32x4(/*_*/ _mm_cvtepi32_ps(self.0))
-        }
+        unsafe { F32x4(_mm_cvtepi32_ps(self.0)) }
     }
 }
 
@@ -459,26 +405,22 @@ impl SimdBase for I64x2 {
 
     #[inline(always)]
     unsafe fn zeroes() -> Self {
-        I64x2(/*_*/ _mm_setzero_si128())
+        I64x2(_mm_setzero_si128())
     }
 
     #[inline(always)]
     unsafe fn set1(x: Self::Scalar) -> Self {
-        I64x2(/*_*/ _mm_set1_epi64x(x))
+        I64x2(_mm_set1_epi64x(x))
     }
 
     #[inline(always)]
     fn add(self, rhs: Self) -> Self {
-        unsafe {
-            I64x2(/*_*/ _mm_add_epi64(self.0, rhs.0))
-        }
+        unsafe { I64x2(_mm_add_epi64(self.0, rhs.0)) }
     }
 
     #[inline(always)]
     fn sub(self, rhs: Self) -> Self {
-        unsafe {
-            I64x2(/*_*/ _mm_sub_epi64(self.0, rhs.0))
-        }
+        unsafe { I64x2(_mm_sub_epi64(self.0, rhs.0)) }
     }
 
     #[inline(always)]
@@ -490,23 +432,17 @@ impl SimdBase for I64x2 {
 
     #[inline(always)]
     fn bit_and(self, rhs: Self) -> Self {
-        unsafe {
-            I64x2(/*_*/ _mm_and_si128(self.0, rhs.0))
-        }
+        unsafe { I64x2(_mm_and_si128(self.0, rhs.0)) }
     }
 
     #[inline(always)]
     fn bit_or(self, rhs: Self) -> Self {
-        unsafe {
-            I64x2(/*_*/ _mm_or_si128(self.0, rhs.0))
-        }
+        unsafe { I64x2(_mm_or_si128(self.0, rhs.0)) }
     }
 
     #[inline(always)]
     fn bit_xor(self, rhs: Self) -> Self {
-        unsafe {
-            I64x2(/*_*/ _mm_xor_si128(self.0, rhs.0))
-        }
+        unsafe { I64x2(_mm_xor_si128(self.0, rhs.0)) }
     }
 
     #[inline(always)]
@@ -524,9 +460,7 @@ impl SimdBase for I64x2 {
 
     #[inline(always)]
     fn and_not(self, rhs: Self) -> Self {
-        unsafe {
-            I64x2(/*_*/ _mm_andnot_si128(self.0, rhs.0))
-        }
+        unsafe { I64x2(_mm_andnot_si128(self.0, rhs.0)) }
     }
 
     #[inline(always)]
@@ -542,9 +476,9 @@ impl SimdBase for I64x2 {
     #[inline(always)]
     fn cmp_eq(self, rhs: Self) -> Self {
         unsafe {
-            let com32 = /*_*/ _mm_cmpeq_epi32(self.0, rhs.0); // 32 bit compares
-            let com32s = /*_*/ _mm_shuffle_epi32(com32, 0xB1); // swap low and high dwords
-            let test = /*_*/ _mm_and_si128(com32, com32s); // low & high
+            let com32 = _mm_cmpeq_epi32(self.0, rhs.0); // 32 bit compares
+            let com32s = _mm_shuffle_epi32(com32, 0xB1); // swap low and high dwords
+            let test = _mm_and_si128(com32, com32s); // low & high
             I64x2(test)
         }
     }
@@ -608,17 +542,16 @@ impl SimdBase for I64x2 {
 
     #[inline(always)]
     unsafe fn load_from_array(array: Self::ArrayRepresentation) -> Self {
-        I64x2(/*_*/ _mm_loadu_si128(array.as_ptr() as *const _))
+        I64x2(_mm_loadu_si128(array.as_ptr() as *const _))
     }
 
     #[inline(always)]
     unsafe fn load_from_ptr(ptr: *const Self::Scalar) -> Self {
-        I64x2(/*_*/ _mm_loadu_si128(ptr as *const _))
+        I64x2(_mm_loadu_si128(ptr as *const _))
     }
 
     #[inline(always)]
     unsafe fn copy_to_ptr(self, ptr: *mut Self::Scalar) {
-        /*_*/
         _mm_storeu_si128(ptr as *mut _, self.0);
     }
 
@@ -642,31 +575,27 @@ impl SimdInt for I64x2 {
     #[inline(always)]
     fn shl(self, rhs: i32) -> Self {
         unsafe {
-            let rhs = /*_*/_mm_cvtsi32_si128(rhs);
-            I64x2(/*_*/ _mm_sll_epi64(self.0, rhs))
+            let rhs = _mm_cvtsi32_si128(rhs);
+            I64x2(_mm_sll_epi64(self.0, rhs))
         }
     }
 
     #[inline(always)]
     fn shr(self, rhs: i32) -> Self {
         unsafe {
-            let rhs = /*_*/_mm_cvtsi32_si128(rhs);
-            I64x2(/*_*/ _mm_srl_epi64(self.0, rhs))
+            let rhs = _mm_cvtsi32_si128(rhs);
+            I64x2(_mm_srl_epi64(self.0, rhs))
         }
     }
 
     #[inline(always)]
     fn shl_const<const BY: i32>(self) -> Self {
-        unsafe {
-            I64x2(/*_*/ _mm_slli_epi64(self.0, BY))
-        }
+        unsafe { I64x2(_mm_slli_epi64(self.0, BY)) }
     }
 
     #[inline(always)]
     fn shr_const<const BY: i32>(self) -> Self {
-        unsafe {
-            I64x2(/*_*/ _mm_srli_epi64(self.0, BY))
-        }
+        unsafe { I64x2(_mm_srli_epi64(self.0, BY)) }
     }
 }
 
@@ -675,9 +604,7 @@ impl SimdInt64 for I64x2 {
 
     #[inline(always)]
     fn bitcast_f64(self) -> Self::SimdF64 {
-        unsafe {
-            F64x2(/*_*/ _mm_castsi128_pd(self.0))
-        }
+        unsafe { F64x2(_mm_castsi128_pd(self.0)) }
     }
 
     #[inline(always)]
@@ -702,54 +629,42 @@ impl SimdBase for F32x4 {
 
     #[inline(always)]
     unsafe fn zeroes() -> Self {
-        F32x4(/*_*/ _mm_setzero_ps())
+        F32x4(_mm_setzero_ps())
     }
 
     #[inline(always)]
     unsafe fn set1(x: Self::Scalar) -> Self {
-        F32x4(/*_*/ _mm_set1_ps(x))
+        F32x4(_mm_set1_ps(x))
     }
 
     #[inline(always)]
     fn add(self, rhs: Self) -> Self {
-        unsafe {
-            F32x4(/*_*/ _mm_add_ps(self.0, rhs.0))
-        }
+        unsafe { F32x4(_mm_add_ps(self.0, rhs.0)) }
     }
 
     #[inline(always)]
     fn sub(self, rhs: Self) -> Self {
-        unsafe {
-            F32x4(/*_*/ _mm_sub_ps(self.0, rhs.0))
-        }
+        unsafe { F32x4(_mm_sub_ps(self.0, rhs.0)) }
     }
 
     #[inline(always)]
     fn mul(self, rhs: Self) -> Self {
-        unsafe {
-            F32x4(/*_*/ _mm_mul_ps(self.0, rhs.0))
-        }
+        unsafe { F32x4(_mm_mul_ps(self.0, rhs.0)) }
     }
 
     #[inline(always)]
     fn bit_and(self, rhs: Self) -> Self {
-        unsafe {
-            F32x4(/*_*/ _mm_and_ps(self.0, rhs.0))
-        }
+        unsafe { F32x4(_mm_and_ps(self.0, rhs.0)) }
     }
 
     #[inline(always)]
     fn bit_or(self, rhs: Self) -> Self {
-        unsafe {
-            F32x4(/*_*/ _mm_or_ps(self.0, rhs.0))
-        }
+        unsafe { F32x4(_mm_or_ps(self.0, rhs.0)) }
     }
 
     #[inline(always)]
     fn bit_xor(self, rhs: Self) -> Self {
-        unsafe {
-            F32x4(/*_*/ _mm_xor_ps(self.0, rhs.0))
-        }
+        unsafe { F32x4(_mm_xor_ps(self.0, rhs.0)) }
     }
 
     #[inline(always)]
@@ -764,9 +679,7 @@ impl SimdBase for F32x4 {
 
     #[inline(always)]
     fn and_not(self, rhs: Self) -> Self {
-        unsafe {
-            F32x4(/*_*/ _mm_andnot_ps(self.0, rhs.0))
-        }
+        unsafe { F32x4(_mm_andnot_ps(self.0, rhs.0)) }
     }
 
     #[inline(always)]
@@ -778,73 +691,56 @@ impl SimdBase for F32x4 {
 
     #[inline(always)]
     fn cmp_eq(self, rhs: Self) -> Self {
-        unsafe {
-            F32x4(/*_*/ _mm_cmpeq_ps(self.0, rhs.0))
-        }
+        unsafe { F32x4(_mm_cmpeq_ps(self.0, rhs.0)) }
     }
 
     #[inline(always)]
     fn cmp_neq(self, rhs: Self) -> Self {
-        unsafe {
-            F32x4(/*_*/ _mm_cmpneq_ps(self.0, rhs.0))
-        }
+        unsafe { F32x4(_mm_cmpneq_ps(self.0, rhs.0)) }
     }
 
     #[inline(always)]
     fn cmp_lt(self, rhs: Self) -> Self {
-        unsafe {
-            F32x4(/*_*/ _mm_cmplt_ps(self.0, rhs.0))
-        }
+        unsafe { F32x4(_mm_cmplt_ps(self.0, rhs.0)) }
     }
 
     #[inline(always)]
     fn cmp_lte(self, rhs: Self) -> Self {
-        unsafe {
-            F32x4(/*_*/ _mm_cmple_ps(self.0, rhs.0))
-        }
+        unsafe { F32x4(_mm_cmple_ps(self.0, rhs.0)) }
     }
 
     #[inline(always)]
     fn cmp_gt(self, rhs: Self) -> Self {
-        unsafe {
-            F32x4(/*_*/ _mm_cmpgt_ps(self.0, rhs.0))
-        }
+        unsafe { F32x4(_mm_cmpgt_ps(self.0, rhs.0)) }
     }
 
     #[inline(always)]
     fn cmp_gte(self, rhs: Self) -> Self {
-        unsafe {
-            F32x4(/*_*/ _mm_cmpge_ps(self.0, rhs.0))
-        }
+        unsafe { F32x4(_mm_cmpge_ps(self.0, rhs.0)) }
     }
 
     #[inline(always)]
     fn max(self, rhs: Self) -> Self {
-        unsafe {
-            F32x4(/*_*/ _mm_max_ps(self.0, rhs.0))
-        }
+        unsafe { F32x4(_mm_max_ps(self.0, rhs.0)) }
     }
 
     #[inline(always)]
     fn min(self, rhs: Self) -> Self {
-        unsafe {
-            F32x4(/*_*/ _mm_min_ps(self.0, rhs.0))
-        }
+        unsafe { F32x4(_mm_min_ps(self.0, rhs.0)) }
     }
 
     #[inline(always)]
     unsafe fn load_from_array(array: Self::ArrayRepresentation) -> Self {
-        F32x4(/*_*/ _mm_loadu_ps(array.as_ptr()))
+        F32x4(_mm_loadu_ps(array.as_ptr()))
     }
 
     #[inline(always)]
     unsafe fn load_from_ptr(ptr: *const Self::Scalar) -> Self {
-        F32x4(/*_*/ _mm_loadu_ps(ptr as *const f32))
+        F32x4(_mm_loadu_ps(ptr as *const f32))
     }
 
     #[inline(always)]
     unsafe fn copy_to_ptr(self, ptr: *mut Self::Scalar) {
-        /*_*/
         _mm_storeu_ps(ptr as *mut f32, self.0);
     }
 
@@ -867,9 +763,7 @@ impl SimdBase for F32x4 {
 impl SimdFloat for F32x4 {
     #[inline(always)]
     fn div(self, rhs: Self) -> Self {
-        unsafe {
-            F32x4(/*_*/ _mm_div_ps(self.0, rhs.0))
-        }
+        unsafe { F32x4(_mm_div_ps(self.0, rhs.0)) }
     }
 
     #[inline(always)]
@@ -955,16 +849,12 @@ impl SimdFloat for F32x4 {
 
     #[inline(always)]
     fn sqrt(self) -> Self {
-        unsafe {
-            F32x4(/*_*/ _mm_sqrt_ps(self.0))
-        }
+        unsafe { F32x4(_mm_sqrt_ps(self.0)) }
     }
 
     #[inline(always)]
     fn rsqrt(self) -> Self {
-        unsafe {
-            F32x4(/*_*/ _mm_rsqrt_ps(self.0))
-        }
+        unsafe { F32x4(_mm_rsqrt_ps(self.0)) }
     }
 }
 
@@ -973,23 +863,17 @@ impl SimdFloat32 for F32x4 {
 
     #[inline(always)]
     fn bitcast_i32(self) -> Self::SimdI32 {
-        unsafe {
-            I32x4(/*_*/ _mm_castps_si128(self.0))
-        }
+        unsafe { I32x4(_mm_castps_si128(self.0)) }
     }
 
     #[inline(always)]
     fn cast_i32(self) -> Self::SimdI32 {
-        unsafe {
-            I32x4(/*_*/ _mm_cvtps_epi32(self.0))
-        }
+        unsafe { I32x4(_mm_cvtps_epi32(self.0)) }
     }
 
     #[inline(always)]
     fn fast_inverse(self) -> Self {
-        unsafe {
-            F32x4(/*_*/ _mm_rcp_ps(self.0))
-        }
+        unsafe { F32x4(_mm_rcp_ps(self.0)) }
     }
 }
 
@@ -1006,54 +890,42 @@ impl SimdBase for F64x2 {
 
     #[inline(always)]
     unsafe fn zeroes() -> Self {
-        F64x2(/*_*/ _mm_setzero_pd())
+        F64x2(_mm_setzero_pd())
     }
 
     #[inline(always)]
     unsafe fn set1(x: Self::Scalar) -> Self {
-        F64x2(/*_*/ _mm_set1_pd(x))
+        F64x2(_mm_set1_pd(x))
     }
 
     #[inline(always)]
     fn add(self, rhs: Self) -> Self {
-        unsafe {
-            F64x2(/*_*/ _mm_add_pd(self.0, rhs.0))
-        }
+        unsafe { F64x2(_mm_add_pd(self.0, rhs.0)) }
     }
 
     #[inline(always)]
     fn sub(self, rhs: Self) -> Self {
-        unsafe {
-            F64x2(/*_*/ _mm_sub_pd(self.0, rhs.0))
-        }
+        unsafe { F64x2(_mm_sub_pd(self.0, rhs.0)) }
     }
 
     #[inline(always)]
     fn mul(self, rhs: Self) -> Self {
-        unsafe {
-            F64x2(/*_*/ _mm_mul_pd(self.0, rhs.0))
-        }
+        unsafe { F64x2(_mm_mul_pd(self.0, rhs.0)) }
     }
 
     #[inline(always)]
     fn bit_and(self, rhs: Self) -> Self {
-        unsafe {
-            F64x2(/*_*/ _mm_and_pd(self.0, rhs.0))
-        }
+        unsafe { F64x2(_mm_and_pd(self.0, rhs.0)) }
     }
 
     #[inline(always)]
     fn bit_or(self, rhs: Self) -> Self {
-        unsafe {
-            F64x2(/*_*/ _mm_or_pd(self.0, rhs.0))
-        }
+        unsafe { F64x2(_mm_or_pd(self.0, rhs.0)) }
     }
 
     #[inline(always)]
     fn bit_xor(self, rhs: Self) -> Self {
-        unsafe {
-            F64x2(/*_*/ _mm_xor_pd(self.0, rhs.0))
-        }
+        unsafe { F64x2(_mm_xor_pd(self.0, rhs.0)) }
     }
 
     #[inline(always)]
@@ -1068,9 +940,7 @@ impl SimdBase for F64x2 {
 
     #[inline(always)]
     fn and_not(self, rhs: Self) -> Self {
-        unsafe {
-            F64x2(/*_*/ _mm_andnot_pd(self.0, rhs.0))
-        }
+        unsafe { F64x2(_mm_andnot_pd(self.0, rhs.0)) }
     }
 
     #[inline(always)]
@@ -1082,68 +952,52 @@ impl SimdBase for F64x2 {
 
     #[inline(always)]
     fn cmp_eq(self, rhs: Self) -> Self {
-        unsafe {
-            F64x2(/*_*/ _mm_cmpeq_pd(self.0, rhs.0))
-        }
+        unsafe { F64x2(_mm_cmpeq_pd(self.0, rhs.0)) }
     }
 
     #[inline(always)]
     fn cmp_neq(self, rhs: Self) -> Self {
-        unsafe {
-            F64x2(/*_*/ _mm_cmpneq_pd(self.0, rhs.0))
-        }
+        unsafe { F64x2(_mm_cmpneq_pd(self.0, rhs.0)) }
     }
 
     #[inline(always)]
     fn cmp_lt(self, rhs: Self) -> Self {
-        unsafe {
-            F64x2(/*_*/ _mm_cmplt_pd(self.0, rhs.0))
-        }
+        unsafe { F64x2(_mm_cmplt_pd(self.0, rhs.0)) }
     }
 
     #[inline(always)]
     fn cmp_lte(self, rhs: Self) -> Self {
-        unsafe {
-            F64x2(/*_*/ _mm_cmple_pd(self.0, rhs.0))
-        }
+        unsafe { F64x2(_mm_cmple_pd(self.0, rhs.0)) }
     }
 
     #[inline(always)]
     fn cmp_gt(self, rhs: Self) -> Self {
-        unsafe {
-            F64x2(/*_*/ _mm_cmpgt_pd(self.0, rhs.0))
-        }
+        unsafe { F64x2(_mm_cmpgt_pd(self.0, rhs.0)) }
     }
 
     #[inline(always)]
     fn cmp_gte(self, rhs: Self) -> Self {
-        unsafe {
-            F64x2(/*_*/ _mm_cmpge_pd(self.0, rhs.0))
-        }
+        unsafe { F64x2(_mm_cmpge_pd(self.0, rhs.0)) }
     }
 
     #[inline(always)]
     fn max(self, rhs: Self) -> Self {
-        unsafe {
-            F64x2(/*_*/ _mm_max_pd(self.0, rhs.0))
-        }
+        unsafe { F64x2(_mm_max_pd(self.0, rhs.0)) }
     }
 
     #[inline(always)]
     fn min(self, rhs: Self) -> Self {
-        unsafe {
-            F64x2(/*_*/ _mm_min_pd(self.0, rhs.0))
-        }
+        unsafe { F64x2(_mm_min_pd(self.0, rhs.0)) }
     }
 
     #[inline(always)]
     unsafe fn load_from_array(array: Self::ArrayRepresentation) -> Self {
-        F64x2(/*_*/ _mm_loadu_pd(array.as_ptr()))
+        F64x2(_mm_loadu_pd(array.as_ptr()))
     }
 
     #[inline(always)]
     unsafe fn load_from_ptr(ptr: *const Self::Scalar) -> Self {
-        F64x2(/*_*/ _mm_loadu_pd(ptr))
+        F64x2(_mm_loadu_pd(ptr))
     }
 
     #[inline(always)]
@@ -1170,9 +1024,7 @@ impl SimdBase for F64x2 {
 impl SimdFloat for F64x2 {
     #[inline(always)]
     fn div(self, rhs: Self) -> Self {
-        unsafe {
-            F64x2(/*_*/ _mm_div_pd(self.0, rhs.0))
-        }
+        unsafe { F64x2(_mm_div_pd(self.0, rhs.0)) }
     }
 
     #[inline(always)]
@@ -1244,9 +1096,7 @@ impl SimdFloat for F64x2 {
 
     #[inline(always)]
     fn sqrt(self) -> Self {
-        unsafe {
-            F64x2(/*_*/ _mm_sqrt_pd(self.0))
-        }
+        unsafe { F64x2(_mm_sqrt_pd(self.0)) }
     }
 
     #[inline(always)]
@@ -1260,9 +1110,7 @@ impl SimdFloat64 for F64x2 {
 
     #[inline(always)]
     fn bitcast_i64(self) -> Self::SimdI64 {
-        unsafe {
-            I64x2(/*_*/ _mm_castpd_si128(self.0))
-        }
+        unsafe { I64x2(_mm_castpd_si128(self.0)) }
     }
 
     #[inline(always)]
