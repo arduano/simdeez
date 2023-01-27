@@ -9,7 +9,7 @@ use rand::{
 };
 use rand_chacha::{rand_core::SeedableRng, ChaCha8Rng};
 
-use crate::SimdBase;
+use crate::{SimdBase, InternalSimdBaseIo};
 
 use super::ScalarNumber;
 
@@ -149,7 +149,7 @@ fn iter_as_simd<S: SimdBase<Scalar = N>, N>(
     mut iter: impl Iterator<Item = N>,
 ) -> impl Iterator<Item = S> {
     iter::repeat_with(move || unsafe {
-        let mut v = S::zeroes();
+        let mut v = <S as InternalSimdBaseIo>::zeroes();
         for i in 0..S::WIDTH {
             v[i] = iter.next().unwrap();
         }

@@ -1,6 +1,6 @@
 use core::{fmt::Debug, ops::Add};
 
-use crate::SimdBase;
+use crate::{SimdBase, InternalSimdBaseIo};
 
 use super::{
     fn_tuple::{Func, Tuple},
@@ -79,7 +79,7 @@ pub fn bitshift_eq_tester<
 ) {
     check_function(inputs, simd_fn, |result, args| unsafe {
         for i in 0..SimdArg::WIDTH {
-            let scalar_result = scalar_fn.call((ScalarArg::set1(args.0[i]), args.1))[0];
+            let scalar_result = scalar_fn.call((<ScalarArg as InternalSimdBaseIo>::set1(args.0[i]), args.1))[0];
             let equal = scalar_result == result[i];
             if !equal {
                 return Err(format!(
@@ -209,12 +209,12 @@ macro_rules! elementwise_eq_tester_impl {
         elementwise_eq_tester_impl!(@full Sse41, $simd_ty, $simd_base, $simd_fn, $arg_cnt, $precision);
     };
 
-    (SimdBase, $simd_fn:ident, $arg_cnt:ident, $precision:expr) => {
-        elementwise_eq_tester_impl!(@simdkind i16, SimdBase, $simd_fn, $arg_cnt, $precision);
-        elementwise_eq_tester_impl!(@simdkind i32, SimdBase, $simd_fn, $arg_cnt, $precision);
-        elementwise_eq_tester_impl!(@simdkind i64, SimdBase, $simd_fn, $arg_cnt, $precision);
-        elementwise_eq_tester_impl!(@simdkind f32, SimdBase, $simd_fn, $arg_cnt, $precision);
-        elementwise_eq_tester_impl!(@simdkind f64, SimdBase, $simd_fn, $arg_cnt, $precision);
+    (SimdBaseOps, $simd_fn:ident, $arg_cnt:ident, $precision:expr) => {
+        elementwise_eq_tester_impl!(@simdkind i16, SimdBaseOps, $simd_fn, $arg_cnt, $precision);
+        elementwise_eq_tester_impl!(@simdkind i32, SimdBaseOps, $simd_fn, $arg_cnt, $precision);
+        elementwise_eq_tester_impl!(@simdkind i64, SimdBaseOps, $simd_fn, $arg_cnt, $precision);
+        elementwise_eq_tester_impl!(@simdkind f32, SimdBaseOps, $simd_fn, $arg_cnt, $precision);
+        elementwise_eq_tester_impl!(@simdkind f64, SimdBaseOps, $simd_fn, $arg_cnt, $precision);
     };
 
     (SimdInt, $simd_fn:ident, $arg_cnt:ident, $precision:expr) => {

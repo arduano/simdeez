@@ -1,23 +1,23 @@
-use crate::libm_ext::FloatExt;
+#[cfg(target_arch = "x86")]
+use core::arch::x86::*;
 
-use super::*;
+#[cfg(target_arch = "x86_64")]
 use core::arch::x86_64::*;
 
+use core::ops::*;
+
+use crate::{
+    libm_ext::FloatExt, InternalSimdBaseIo, SimdBaseOps, SimdConsts, SimdFloat, SimdFloat32,
+    SimdFloat64, SimdInt, SimdInt16, SimdInt32, SimdInt64,
+};
+
 mod simd;
-pub use self::overloads::*;
 pub use self::simd::*;
 
-#[derive(Copy, Clone)]
-pub struct I16x16(__m256i);
-impl_simd_base_overloads!(I16x16);
+define_simd_type!(i16, 16, __m256i);
 impl_simd_int_overloads!(I16x16);
 
-impl SimdBase for I16x16 {
-    const WIDTH: usize = 16;
-    type Scalar = i16;
-    type ArrayRepresentation = [i16; 16];
-    type UnderlyingType = __m256i;
-
+impl InternalSimdBaseIo for I16x16 {
     #[inline(always)]
     unsafe fn zeroes() -> Self {
         I16x16(_mm256_setzero_si256())
@@ -28,6 +28,48 @@ impl SimdBase for I16x16 {
         I16x16(_mm256_set1_epi16(x))
     }
 
+    #[inline(always)]
+    unsafe fn load_from_array(array: Self::ArrayRepresentation) -> Self {
+        I16x16(_mm256_loadu_si256(array.as_ptr() as *const _))
+    }
+
+    #[inline(always)]
+    unsafe fn load_from_ptr_unaligned(ptr: *const Self::Scalar) -> Self {
+        I16x16(_mm256_loadu_si256(ptr as *const _))
+    }
+
+    #[inline(always)]
+    unsafe fn copy_to_ptr_unaligned(self, ptr: *mut Self::Scalar) {
+        _mm256_storeu_si256(ptr as *mut _, self.0);
+    }
+
+    #[inline(always)]
+    unsafe fn load_from_ptr_aligned(ptr: *const Self::Scalar) -> Self {
+        I16x16(_mm256_load_si256(ptr as *const _))
+    }
+
+    #[inline(always)]
+    unsafe fn copy_to_ptr_aligned(self, ptr: *mut Self::Scalar) {
+        _mm256_store_si256(ptr as *mut _, self.0);
+    }
+
+    #[inline(always)]
+    unsafe fn underlying_value(self) -> Self::UnderlyingType {
+        self.0
+    }
+
+    #[inline(always)]
+    unsafe fn underlying_value_mut(&mut self) -> &mut Self::UnderlyingType {
+        &mut self.0
+    }
+
+    #[inline(always)]
+    unsafe fn from_underlying_value(value: Self::UnderlyingType) -> Self {
+        I16x16(value)
+    }
+}
+
+impl SimdBaseOps for I16x16 {
     #[inline(always)]
     fn add(self, rhs: Self) -> Self {
         unsafe { I16x16(_mm256_add_epi16(self.0, rhs.0)) }
@@ -117,46 +159,6 @@ impl SimdBase for I16x16 {
     fn min(self, rhs: Self) -> Self {
         unsafe { I16x16(_mm256_min_epi16(self.0, rhs.0)) }
     }
-
-    #[inline(always)]
-    unsafe fn load_from_array(array: Self::ArrayRepresentation) -> Self {
-        I16x16(_mm256_loadu_si256(array.as_ptr() as *const _))
-    }
-
-    #[inline(always)]
-    unsafe fn load_from_ptr_unaligned(ptr: *const Self::Scalar) -> Self {
-        I16x16(_mm256_loadu_si256(ptr as *const _))
-    }
-
-    #[inline(always)]
-    unsafe fn copy_to_ptr_unaligned(self, ptr: *mut Self::Scalar) {
-        _mm256_storeu_si256(ptr as *mut _, self.0);
-    }
-
-    #[inline(always)]
-    unsafe fn load_from_ptr_aligned(ptr: *const Self::Scalar) -> Self {
-        I16x16(_mm256_load_si256(ptr as *const _))
-    }
-
-    #[inline(always)]
-    unsafe fn copy_to_ptr_aligned(self, ptr: *mut Self::Scalar) {
-        _mm256_store_si256(ptr as *mut _, self.0);
-    }
-
-    #[inline(always)]
-    unsafe fn underlying_value(self) -> Self::UnderlyingType {
-        self.0
-    }
-
-    #[inline(always)]
-    unsafe fn underlying_value_mut(&mut self) -> &mut Self::UnderlyingType {
-        &mut self.0
-    }
-
-    #[inline(always)]
-    unsafe fn from_underlying_value(value: Self::UnderlyingType) -> Self {
-        I16x16(value)
-    }
 }
 
 impl SimdInt for I16x16 {
@@ -189,17 +191,10 @@ impl SimdInt for I16x16 {
 
 impl SimdInt16 for I16x16 {}
 
-#[derive(Copy, Clone)]
-pub struct I32x8(__m256i);
-impl_simd_base_overloads!(I32x8);
+define_simd_type!(i32, 8, __m256i);
 impl_simd_int_overloads!(I32x8);
 
-impl SimdBase for I32x8 {
-    const WIDTH: usize = 8;
-    type Scalar = i32;
-    type ArrayRepresentation = [i32; 8];
-    type UnderlyingType = __m256i;
-
+impl InternalSimdBaseIo for I32x8 {
     #[inline(always)]
     unsafe fn zeroes() -> Self {
         I32x8(_mm256_setzero_si256())
@@ -210,6 +205,48 @@ impl SimdBase for I32x8 {
         I32x8(_mm256_set1_epi32(x))
     }
 
+    #[inline(always)]
+    unsafe fn load_from_array(array: Self::ArrayRepresentation) -> Self {
+        I32x8(_mm256_loadu_si256(array.as_ptr() as *const _))
+    }
+
+    #[inline(always)]
+    unsafe fn load_from_ptr_unaligned(ptr: *const Self::Scalar) -> Self {
+        I32x8(_mm256_loadu_si256(ptr as *const _))
+    }
+
+    #[inline(always)]
+    unsafe fn copy_to_ptr_unaligned(self, ptr: *mut Self::Scalar) {
+        _mm256_storeu_si256(ptr as *mut _, self.0);
+    }
+
+    #[inline(always)]
+    unsafe fn load_from_ptr_aligned(ptr: *const Self::Scalar) -> Self {
+        I32x8(_mm256_load_si256(ptr as *const _))
+    }
+
+    #[inline(always)]
+    unsafe fn copy_to_ptr_aligned(self, ptr: *mut Self::Scalar) {
+        _mm256_store_si256(ptr as *mut _, self.0);
+    }
+
+    #[inline(always)]
+    unsafe fn underlying_value(self) -> Self::UnderlyingType {
+        self.0
+    }
+
+    #[inline(always)]
+    unsafe fn underlying_value_mut(&mut self) -> &mut Self::UnderlyingType {
+        &mut self.0
+    }
+
+    #[inline(always)]
+    unsafe fn from_underlying_value(value: Self::UnderlyingType) -> Self {
+        I32x8(value)
+    }
+}
+
+impl SimdBaseOps for I32x8 {
     #[inline(always)]
     fn add(self, rhs: Self) -> Self {
         unsafe { I32x8(_mm256_add_epi32(self.0, rhs.0)) }
@@ -301,46 +338,6 @@ impl SimdBase for I32x8 {
     fn min(self, rhs: Self) -> Self {
         unsafe { I32x8(_mm256_min_epi32(self.0, rhs.0)) }
     }
-
-    #[inline(always)]
-    unsafe fn load_from_array(array: Self::ArrayRepresentation) -> Self {
-        I32x8(_mm256_loadu_si256(array.as_ptr() as *const _))
-    }
-
-    #[inline(always)]
-    unsafe fn load_from_ptr_unaligned(ptr: *const Self::Scalar) -> Self {
-        I32x8(_mm256_loadu_si256(ptr as *const _))
-    }
-
-    #[inline(always)]
-    unsafe fn copy_to_ptr_unaligned(self, ptr: *mut Self::Scalar) {
-        _mm256_storeu_si256(ptr as *mut _, self.0);
-    }
-
-    #[inline(always)]
-    unsafe fn load_from_ptr_aligned(ptr: *const Self::Scalar) -> Self {
-        I32x8(_mm256_load_si256(ptr as *const _))
-    }
-
-    #[inline(always)]
-    unsafe fn copy_to_ptr_aligned(self, ptr: *mut Self::Scalar) {
-        _mm256_store_si256(ptr as *mut _, self.0);
-    }
-
-    #[inline(always)]
-    unsafe fn underlying_value(self) -> Self::UnderlyingType {
-        self.0
-    }
-
-    #[inline(always)]
-    unsafe fn underlying_value_mut(&mut self) -> &mut Self::UnderlyingType {
-        &mut self.0
-    }
-
-    #[inline(always)]
-    unsafe fn from_underlying_value(value: Self::UnderlyingType) -> Self {
-        I32x8(value)
-    }
 }
 
 impl SimdInt for I32x8 {
@@ -385,17 +382,10 @@ impl SimdInt32 for I32x8 {
     }
 }
 
-#[derive(Copy, Clone)]
-pub struct I64x4(__m256i);
-impl_simd_base_overloads!(I64x4);
+define_simd_type!(i64, 4, __m256i);
 impl_simd_int_overloads!(I64x4);
 
-impl SimdBase for I64x4 {
-    const WIDTH: usize = 4;
-    type Scalar = i64;
-    type ArrayRepresentation = [i64; 4];
-    type UnderlyingType = __m256i;
-
+impl InternalSimdBaseIo for I64x4 {
     #[inline(always)]
     unsafe fn zeroes() -> Self {
         I64x4(_mm256_setzero_si256())
@@ -406,6 +396,48 @@ impl SimdBase for I64x4 {
         I64x4(_mm256_set1_epi64x(x))
     }
 
+    #[inline(always)]
+    unsafe fn load_from_array(array: Self::ArrayRepresentation) -> Self {
+        I64x4(_mm256_loadu_si256(array.as_ptr() as *const _))
+    }
+
+    #[inline(always)]
+    unsafe fn load_from_ptr_unaligned(ptr: *const Self::Scalar) -> Self {
+        I64x4(_mm256_loadu_si256(ptr as *const _))
+    }
+
+    #[inline(always)]
+    unsafe fn copy_to_ptr_unaligned(self, ptr: *mut Self::Scalar) {
+        _mm256_storeu_si256(ptr as *mut _, self.0);
+    }
+
+    #[inline(always)]
+    unsafe fn load_from_ptr_aligned(ptr: *const Self::Scalar) -> Self {
+        I64x4(_mm256_load_si256(ptr as *const _))
+    }
+
+    #[inline(always)]
+    unsafe fn copy_to_ptr_aligned(self, ptr: *mut Self::Scalar) {
+        _mm256_store_si256(ptr as *mut _, self.0);
+    }
+
+    #[inline(always)]
+    unsafe fn underlying_value(self) -> Self::UnderlyingType {
+        self.0
+    }
+
+    #[inline(always)]
+    unsafe fn underlying_value_mut(&mut self) -> &mut Self::UnderlyingType {
+        &mut self.0
+    }
+
+    #[inline(always)]
+    unsafe fn from_underlying_value(value: Self::UnderlyingType) -> Self {
+        I64x4(value)
+    }
+}
+
+impl SimdBaseOps for I64x4 {
     #[inline(always)]
     fn add(self, rhs: Self) -> Self {
         unsafe { I64x4(_mm256_add_epi64(self.0, rhs.0)) }
@@ -511,46 +543,6 @@ impl SimdBase for I64x4 {
         let mask = self.cmp_lt(rhs); // mask = v < w
         mask.blendv(rhs, self) // mask ? w : v
     }
-
-    #[inline(always)]
-    unsafe fn load_from_array(array: Self::ArrayRepresentation) -> Self {
-        I64x4(_mm256_loadu_si256(array.as_ptr() as *const _))
-    }
-
-    #[inline(always)]
-    unsafe fn load_from_ptr_unaligned(ptr: *const Self::Scalar) -> Self {
-        I64x4(_mm256_loadu_si256(ptr as *const _))
-    }
-
-    #[inline(always)]
-    unsafe fn copy_to_ptr_unaligned(self, ptr: *mut Self::Scalar) {
-        _mm256_storeu_si256(ptr as *mut _, self.0);
-    }
-
-    #[inline(always)]
-    unsafe fn load_from_ptr_aligned(ptr: *const Self::Scalar) -> Self {
-        I64x4(_mm256_load_si256(ptr as *const _))
-    }
-
-    #[inline(always)]
-    unsafe fn copy_to_ptr_aligned(self, ptr: *mut Self::Scalar) {
-        _mm256_store_si256(ptr as *mut _, self.0);
-    }
-
-    #[inline(always)]
-    unsafe fn underlying_value(self) -> Self::UnderlyingType {
-        self.0
-    }
-
-    #[inline(always)]
-    unsafe fn underlying_value_mut(&mut self) -> &mut Self::UnderlyingType {
-        &mut self.0
-    }
-
-    #[inline(always)]
-    unsafe fn from_underlying_value(value: Self::UnderlyingType) -> Self {
-        I64x4(value)
-    }
 }
 
 impl SimdInt for I64x4 {
@@ -602,17 +594,10 @@ impl SimdInt64 for I64x4 {
     }
 }
 
-#[derive(Copy, Clone)]
-pub struct F32x8(__m256);
-impl_simd_base_overloads!(F32x8);
+define_simd_type!(f32, 8, __m256);
 impl_simd_float_overloads!(F32x8);
 
-impl SimdBase for F32x8 {
-    const WIDTH: usize = 8;
-    type Scalar = f32;
-    type ArrayRepresentation = [f32; 8];
-    type UnderlyingType = __m256;
-
+impl InternalSimdBaseIo for F32x8 {
     #[inline(always)]
     unsafe fn zeroes() -> Self {
         F32x8(_mm256_setzero_ps())
@@ -623,6 +608,48 @@ impl SimdBase for F32x8 {
         F32x8(_mm256_set1_ps(x))
     }
 
+    #[inline(always)]
+    unsafe fn load_from_array(array: Self::ArrayRepresentation) -> Self {
+        F32x8(_mm256_loadu_ps(array.as_ptr()))
+    }
+
+    #[inline(always)]
+    unsafe fn load_from_ptr_unaligned(ptr: *const Self::Scalar) -> Self {
+        F32x8(_mm256_loadu_ps(ptr))
+    }
+
+    #[inline(always)]
+    unsafe fn copy_to_ptr_unaligned(self, ptr: *mut Self::Scalar) {
+        _mm256_storeu_ps(ptr, self.0);
+    }
+
+    #[inline(always)]
+    unsafe fn load_from_ptr_aligned(ptr: *const Self::Scalar) -> Self {
+        F32x8(_mm256_load_ps(ptr))
+    }
+
+    #[inline(always)]
+    unsafe fn copy_to_ptr_aligned(self, ptr: *mut Self::Scalar) {
+        _mm256_store_ps(ptr, self.0);
+    }
+
+    #[inline(always)]
+    unsafe fn underlying_value(self) -> Self::UnderlyingType {
+        self.0
+    }
+
+    #[inline(always)]
+    unsafe fn underlying_value_mut(&mut self) -> &mut Self::UnderlyingType {
+        &mut self.0
+    }
+
+    #[inline(always)]
+    unsafe fn from_underlying_value(value: Self::UnderlyingType) -> Self {
+        F32x8(value)
+    }
+}
+
+impl SimdBaseOps for F32x8 {
     #[inline(always)]
     fn add(self, rhs: Self) -> Self {
         unsafe { F32x8(_mm256_add_ps(self.0, rhs.0)) }
@@ -714,46 +741,6 @@ impl SimdBase for F32x8 {
     #[inline(always)]
     fn min(self, rhs: Self) -> Self {
         unsafe { F32x8(_mm256_min_ps(self.0, rhs.0)) }
-    }
-
-    #[inline(always)]
-    unsafe fn load_from_array(array: Self::ArrayRepresentation) -> Self {
-        F32x8(_mm256_loadu_ps(array.as_ptr()))
-    }
-
-    #[inline(always)]
-    unsafe fn load_from_ptr_unaligned(ptr: *const Self::Scalar) -> Self {
-        F32x8(_mm256_loadu_ps(ptr))
-    }
-
-    #[inline(always)]
-    unsafe fn copy_to_ptr_unaligned(self, ptr: *mut Self::Scalar) {
-        _mm256_storeu_ps(ptr, self.0);
-    }
-
-    #[inline(always)]
-    unsafe fn load_from_ptr_aligned(ptr: *const Self::Scalar) -> Self {
-        F32x8(_mm256_load_ps(ptr))
-    }
-
-    #[inline(always)]
-    unsafe fn copy_to_ptr_aligned(self, ptr: *mut Self::Scalar) {
-        _mm256_store_ps(ptr, self.0);
-    }
-
-    #[inline(always)]
-    unsafe fn underlying_value(self) -> Self::UnderlyingType {
-        self.0
-    }
-
-    #[inline(always)]
-    unsafe fn underlying_value_mut(&mut self) -> &mut Self::UnderlyingType {
-        &mut self.0
-    }
-
-    #[inline(always)]
-    unsafe fn from_underlying_value(value: Self::UnderlyingType) -> Self {
-        F32x8(value)
     }
 }
 
@@ -858,17 +845,10 @@ impl SimdFloat32 for F32x8 {
     }
 }
 
-#[derive(Copy, Clone)]
-pub struct F64x4(__m256d);
-impl_simd_base_overloads!(F64x4);
+define_simd_type!(f64, 4, __m256d);
 impl_simd_float_overloads!(F64x4);
 
-impl SimdBase for F64x4 {
-    const WIDTH: usize = 4;
-    type Scalar = f64;
-    type ArrayRepresentation = [f64; 4];
-    type UnderlyingType = __m256d;
-
+impl InternalSimdBaseIo for F64x4 {
     #[inline(always)]
     unsafe fn zeroes() -> Self {
         F64x4(_mm256_setzero_pd())
@@ -879,6 +859,48 @@ impl SimdBase for F64x4 {
         F64x4(_mm256_set1_pd(x))
     }
 
+    #[inline(always)]
+    unsafe fn load_from_array(array: Self::ArrayRepresentation) -> Self {
+        F64x4(_mm256_loadu_pd(array.as_ptr() as *const f64))
+    }
+
+    #[inline(always)]
+    unsafe fn load_from_ptr_unaligned(ptr: *const Self::Scalar) -> Self {
+        F64x4(_mm256_loadu_pd(ptr as *const f64))
+    }
+
+    #[inline(always)]
+    unsafe fn copy_to_ptr_unaligned(self, ptr: *mut Self::Scalar) {
+        _mm256_storeu_pd(ptr as *mut f64, self.0);
+    }
+
+    #[inline(always)]
+    unsafe fn load_from_ptr_aligned(ptr: *const Self::Scalar) -> Self {
+        F64x4(_mm256_load_pd(ptr as *const f64))
+    }
+
+    #[inline(always)]
+    unsafe fn copy_to_ptr_aligned(self, ptr: *mut Self::Scalar) {
+        _mm256_store_pd(ptr as *mut f64, self.0);
+    }
+
+    #[inline(always)]
+    unsafe fn underlying_value(self) -> Self::UnderlyingType {
+        self.0
+    }
+
+    #[inline(always)]
+    unsafe fn underlying_value_mut(&mut self) -> &mut Self::UnderlyingType {
+        &mut self.0
+    }
+
+    #[inline(always)]
+    unsafe fn from_underlying_value(value: Self::UnderlyingType) -> Self {
+        F64x4(value)
+    }
+}
+
+impl SimdBaseOps for F64x4 {
     #[inline(always)]
     fn add(self, rhs: Self) -> Self {
         unsafe { F64x4(_mm256_add_pd(self.0, rhs.0)) }
@@ -970,46 +992,6 @@ impl SimdBase for F64x4 {
     #[inline(always)]
     fn min(self, rhs: Self) -> Self {
         unsafe { F64x4(_mm256_min_pd(self.0, rhs.0)) }
-    }
-
-    #[inline(always)]
-    unsafe fn load_from_array(array: Self::ArrayRepresentation) -> Self {
-        F64x4(_mm256_loadu_pd(array.as_ptr() as *const f64))
-    }
-
-    #[inline(always)]
-    unsafe fn load_from_ptr_unaligned(ptr: *const Self::Scalar) -> Self {
-        F64x4(_mm256_loadu_pd(ptr as *const f64))
-    }
-
-    #[inline(always)]
-    unsafe fn copy_to_ptr_unaligned(self, ptr: *mut Self::Scalar) {
-        _mm256_storeu_pd(ptr as *mut f64, self.0);
-    }
-
-    #[inline(always)]
-    unsafe fn load_from_ptr_aligned(ptr: *const Self::Scalar) -> Self {
-        F64x4(_mm256_load_pd(ptr as *const f64))
-    }
-
-    #[inline(always)]
-    unsafe fn copy_to_ptr_aligned(self, ptr: *mut Self::Scalar) {
-        _mm256_store_pd(ptr as *mut f64, self.0);
-    }
-
-    #[inline(always)]
-    unsafe fn underlying_value(self) -> Self::UnderlyingType {
-        self.0
-    }
-
-    #[inline(always)]
-    unsafe fn underlying_value_mut(&mut self) -> &mut Self::UnderlyingType {
-        &mut self.0
-    }
-
-    #[inline(always)]
-    unsafe fn from_underlying_value(value: Self::UnderlyingType) -> Self {
-        F64x4(value)
     }
 }
 

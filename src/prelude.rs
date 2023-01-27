@@ -1,1 +1,3 @@
-pub use super::{base::*, simd_invoke, Simd};
+pub use super::{
+    base::*, run_simd_runtime_decide, simd_invoke, simd_runtime_generate_v2, Simd, SimdRunner,
+};

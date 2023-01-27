@@ -1,4 +1,5 @@
 use super::*;
+use crate::Simd;
 
 pub struct Scalar;
 impl Simd for Scalar {

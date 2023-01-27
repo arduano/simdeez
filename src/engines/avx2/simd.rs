@@ -1,5 +1,6 @@
 #![allow(deprecated)]
 
+use crate::Simd;
 use super::*;
 
 pub struct Avx2;
