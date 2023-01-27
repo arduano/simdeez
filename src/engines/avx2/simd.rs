@@ -1,7 +1,7 @@
 #![allow(deprecated)]
 
-use crate::Simd;
 use super::*;
+use crate::Simd;
 
 pub struct Avx2;
 impl Simd for Avx2 {

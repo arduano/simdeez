@@ -9,7 +9,7 @@ use rand::{
 };
 use rand_chacha::{rand_core::SeedableRng, ChaCha8Rng};
 
-use crate::{SimdBase, InternalSimdBaseIo};
+use crate::{InternalSimdBaseIo, SimdBase};
 
 use super::ScalarNumber;
 
