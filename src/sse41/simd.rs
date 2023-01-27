@@ -21,7 +21,6 @@ impl Simd for Sse41 {
         unsafe { inner(f) }
     }
 
-
     #[inline(always)]
     unsafe fn castps_pd(a: Self::Vf32) -> Self::Vf64 {
         F64x2_41(_mm_castps_pd(a.0))
