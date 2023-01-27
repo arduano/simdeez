@@ -1,1 +1,1 @@
-pub use super::{base::*, Simd};
+pub use super::{base::*, simd_invoke, Simd};

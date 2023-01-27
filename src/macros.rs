@@ -369,3 +369,13 @@ macro_rules! assert_approx_eq {
         );
     }};
 }
+
+#[macro_export]
+macro_rules! simd_invoke {
+    ($g:ident, $($r:tt)+) => {
+        $g::invoke(
+            #[inline(always)]
+            || $($r)+
+        )
+    }
+}
