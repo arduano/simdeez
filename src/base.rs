@@ -146,29 +146,6 @@ where
     /// Store a vector to a 32 bit aligned raw pointer.
     unsafe fn copy_to_ptr_aligned(self, ptr: *mut Self::Scalar);
 
-    /// Load a vector from a 32 bit raw pointer. Assumes the pointer is aligned if the size of Self::Scalar is a multiple of 32 bits.
-    ///
-    /// NOTE: This doesn't guarantee that the pointer is definitely aligned, but it's a safe assumption in most cases.
-    #[inline(always)]
-    unsafe fn load_from_ptr_autoalign(ptr: *const Self::Scalar) -> Self {
-        if core::mem::size_of::<Self::Scalar>() % 4 == 0 {
-            Self::load_from_ptr_aligned(ptr)
-        } else {
-            Self::load_from_ptr_unaligned(ptr)
-        }
-    }
-    /// Store a vector to a 32 bit raw pointer. Assumes the pointer is aligned if the size of Self::Scalar is a multiple of 32 bits.
-    ///
-    /// NOTE: This doesn't guarantee that the pointer is definitely aligned, but it's a safe assumption in most cases.
-    #[inline(always)]
-    unsafe fn copy_to_ptr_autoalign(self, ptr: *mut Self::Scalar) {
-        if core::mem::size_of::<Self::Scalar>() % 4 == 0 {
-            self.copy_to_ptr_aligned(ptr)
-        } else {
-            self.copy_to_ptr_unaligned(ptr)
-        }
-    }
-
     unsafe fn underlying_value(self) -> Self::UnderlyingType;
     unsafe fn underlying_value_mut(&mut self) -> &mut Self::UnderlyingType;
     unsafe fn from_underlying_value(value: Self::UnderlyingType) -> Self;
@@ -216,7 +193,7 @@ where
         if slice.len() < Self::WIDTH {
             Err(slice.len())
         } else {
-            Ok(Self::load_from_ptr_autoalign(slice.as_ptr()))
+            Ok(Self::load_from_ptr_unaligned(slice.as_ptr()))
         }
     }
 
@@ -230,7 +207,7 @@ where
             }
             val
         } else {
-            Self::load_from_ptr_autoalign(slice.as_ptr())
+            Self::load_from_ptr_unaligned(slice.as_ptr())
         }
     }
 
@@ -238,7 +215,7 @@ where
         if slice.len() < Self::WIDTH {
             Err(slice.len())
         } else {
-            self.copy_to_ptr_autoalign(slice.as_mut_ptr());
+            self.copy_to_ptr_unaligned(slice.as_mut_ptr());
             Ok(())
         }
     }
@@ -249,7 +226,7 @@ where
                 *s = self.get_unchecked(i);
             }
         } else {
-            self.copy_to_ptr_autoalign(slice.as_mut_ptr());
+            self.copy_to_ptr_unaligned(slice.as_mut_ptr());
         }
     }
 }

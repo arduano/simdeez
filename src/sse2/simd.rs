@@ -10,6 +10,17 @@ impl Simd for Sse2 {
     type Vf64 = F64x2;
     type Vi64 = I64x2;
 
+    #[inline]
+    fn invoke<R>(f: impl FnOnce() -> R) -> R {
+        #[inline]
+        #[target_feature(enable = "sse2")]
+        unsafe fn inner<R>(f: impl FnOnce() -> R) -> R {
+            f()
+        }
+
+        unsafe { inner(f) }
+    }
+
     #[inline(always)]
     unsafe fn castps_pd(a: Self::Vf32) -> Self::Vf64 {
         F64x2(_mm_castps_pd(a.0))

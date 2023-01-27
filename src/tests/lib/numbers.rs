@@ -1,5 +1,3 @@
-use quickcheck::Arbitrary;
-
 use crate::SimdBase;
 
 #[derive(Clone, Copy, Debug)]
@@ -18,7 +16,7 @@ impl EqPrecision {
     }
 }
 
-pub trait ScalarNumber: Arbitrary + PartialEq + Copy + core::fmt::Display {
+pub trait ScalarNumber: PartialEq + Copy + core::fmt::Display {
     fn almost_eq(self, other: Self, _precision: EqPrecision) -> bool {
         self == other
     }
@@ -154,21 +152,6 @@ impl ScalarNumber for f64 {
         // e.g. resulting in i64::MIN from a large positive float
         let range = (i64::MIN as f64)..=(i64::MAX as f64);
         !range.contains(&self)
-    }
-}
-
-#[derive(Clone, Copy, Debug)]
-pub struct ArbitrarySimd<Scalar, S: SimdBase<Scalar = Scalar>>(pub S);
-
-impl<S: 'static + SimdBase<Scalar = N>, N: ScalarNumber> Arbitrary for ArbitrarySimd<N, S> {
-    fn arbitrary<G: quickcheck::Gen>(g: &mut G) -> Self {
-        unsafe {
-            let mut data = S::zeroes();
-            for i in 0..S::WIDTH {
-                data[i] = Arbitrary::arbitrary(g);
-            }
-            ArbitrarySimd(data)
-        }
     }
 }
 
