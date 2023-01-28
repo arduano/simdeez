@@ -21,6 +21,7 @@ pub trait SimdInt:
     ///
     /// For 64 bits, this operations is missing in most implementations
     /// and is emulated here under SSE2, SSE4.1, and AVX2.
+    #[inline(always)]
     fn shl_const<const BY: i32>(self) -> Self {
         SimdInt::shl(self, BY)
     }
@@ -29,17 +30,90 @@ pub trait SimdInt:
     ///
     /// For 64 bits, this operations is missing in most implementations
     /// and is emulated here under SSE2, SSE4.1, and AVX2.
+    #[inline(always)]
     fn shr_const<const BY: i32>(self) -> Self {
         SimdInt::shr(self, BY)
+    }
+
+    /// Add every number in the vector together in unsigned arithmetic. When expanding the size of each number,
+    /// it treats the numbers as unsigned, meaning the sign bit doesn't get moved around.
+    fn horizontal_unsigned_add(self) -> Self::HorizontalAddScalar;
+}
+
+/// Operations shared by 8 bit int types
+pub trait SimdInt8: SimdInt<Scalar = i8, HorizontalAddScalar = i64> {
+    type SimdI16: SimdInt16;
+
+    /// Splits the vector into two halves, then extends them both to be i16. This is useful for horizontal adding.
+    fn extend_to_i16(self) -> (Self::SimdI16, Self::SimdI16);
+
+    /// Splits the vector into two halves, then extends them both to be i16. This is useful for horizontal adding.
+    /// The numbers are treated as unsigned, so the sign bit isn't moved. This is more efficient on some instruction sets.
+    fn unsigned_extend_to_i16(self) -> (Self::SimdI16, Self::SimdI16);
+
+    /// Adds (arbitrary) pairs of values in the vector, returning a i16 version of the vector.
+    /// The way the pairs are chosen is implementation-defined.
+    #[inline(always)]
+    fn partial_horizontal_add(self) -> Self::SimdI16 {
+        let (a, b) = self.extend_to_i16();
+        a + b
+    }
+
+    /// Adds (arbitrary) pairs of values in the vector, returning a i16 version of the vector.
+    /// When extending the numbers, they're treated as unsigned wich performs more efficiently on some instruction sets.
+    /// The way the pairs are chosen is implementation-defined.
+    #[inline(always)]
+    fn partial_horizontal_unsigned_add(self) -> Self::SimdI16 {
+        let (a, b) = self.unsigned_extend_to_i16();
+        a + b
+    }
+
+    /// Gets the "mask" of a vector, where each bit in the u32 represents whether the value at that location
+    /// is truthy. A value is truthy either if the highest bit is one, or if any bit is one, depending
+    /// on the instruction set being used. Please always make sure at least the highest bit is set to 1.
+    fn get_mask(self) -> u32;
+
+    /// Checks if any element in the vector is truthy. A value is truthy either if the highest bit is one, or if any bit is one,
+    /// depending on the instruction set being used. Please always make sure at least the highest bit is set to 1.
+    #[inline(always)]
+    fn is_any_truthy(self) -> bool {
+        self.get_mask() != 0
     }
 }
 
 /// Operations shared by 16 bit int types
-pub trait SimdInt16: SimdInt<Scalar = i16> {}
+pub trait SimdInt16: SimdInt<Scalar = i16, HorizontalAddScalar = i64> {
+    type SimdI32: SimdInt32;
+
+    /// Splits the vector into two halves, then extends them both to be i32. This is useful for horizontal adding.
+    fn extend_to_i32(self) -> (Self::SimdI32, Self::SimdI32);
+
+    /// Splits the vector into two halves, then extends them both to be i32. This is useful for horizontal adding.
+    /// The numbers are treated as unsigned, so the sign bit isn't moved. This is more efficient on some instruction sets.
+    fn unsigned_extend_to_i32(self) -> (Self::SimdI32, Self::SimdI32);
+
+    /// Adds (arbitrary) pairs of values in the vector, returning a i32 version of the vector.
+    /// The way the pairs are chosen is implementation-defined.
+    #[inline(always)]
+    fn partial_horizontal_add(self) -> Self::SimdI32 {
+        let (a, b) = self.extend_to_i32();
+        a + b
+    }
+
+    /// Adds (arbitrary) pairs of values in the vector, returning a i32 version of the vector.
+    /// When extending the numbers, they're treated as unsigned wich performs more efficiently on some instruction sets.
+    /// The way the pairs are chosen is implementation-defined.
+    #[inline(always)]
+    fn partial_horizontal_unsigned_add(self) -> Self::SimdI32 {
+        let (a, b) = self.unsigned_extend_to_i32();
+        a + b
+    }
+}
 
 /// Operations shared by 32 bit int types
-pub trait SimdInt32: SimdInt<Scalar = i32> {
+pub trait SimdInt32: SimdInt<Scalar = i32, HorizontalAddScalar = i64> {
     type SimdF32: SimdFloat32;
+    type SimdI64: SimdInt64;
 
     /// Bit cast to f32.
     /// This function is only used for compilation and does not generate any instructions, thus it has zero latency.
@@ -47,10 +121,34 @@ pub trait SimdInt32: SimdInt<Scalar = i32> {
 
     /// Element-wise cast to f32
     fn cast_f32(self) -> Self::SimdF32;
+
+    /// Splits the vector into two halves, then extends them both to be i64. This is useful for horizontal adding.
+    fn extend_to_i64(self) -> (Self::SimdI64, Self::SimdI64);
+
+    /// Splits the vector into two halves, then extends them both to be i32. This is useful for horizontal adding.
+    /// The numbers are treated as unsigned, so the sign bit isn't moved. This is more efficient on some instruction sets.
+    fn unsigned_extend_to_i64(self) -> (Self::SimdI64, Self::SimdI64);
+
+    /// Adds (arbitrary) pairs of values in the vector, returning a i64 version of the vector.
+    /// The way the pairs are chosen is implementation-defined.
+    #[inline(always)]
+    fn partial_horizontal_add(self) -> Self::SimdI64 {
+        let (a, b) = self.extend_to_i64();
+        a + b
+    }
+
+    /// Adds (arbitrary) pairs of values in the vector, returning a i64 version of the vector.
+    /// When extending the numbers, they're treated as unsigned wich performs more efficiently on some instruction sets.
+    /// The way the pairs are chosen is implementation-defined.
+    #[inline(always)]
+    fn partial_horizontal_unsigned_add(self) -> Self::SimdI64 {
+        let (a, b) = self.unsigned_extend_to_i64();
+        a + b
+    }
 }
 
 /// Operations shared by 64 bt int types
-pub trait SimdInt64: SimdInt<Scalar = i64> {
+pub trait SimdInt64: SimdInt<Scalar = i64, HorizontalAddScalar = i64> {
     type SimdF64: SimdFloat64;
 
     /// Bit cast to f64.
@@ -59,6 +157,8 @@ pub trait SimdInt64: SimdInt<Scalar = i64> {
 
     /// Element-wise cast to f64
     fn cast_f64(self) -> Self::SimdF64;
+
+    fn partial_horizontal_add(self) -> i64;
 }
 
 /// Operations shared by f32 and f64 floating point types
@@ -114,9 +214,6 @@ pub trait SimdFloat:
     /// Element-wise negative multiply subtract. This performs `-(Self * A) - B`
     fn neg_mul_sub(self, a: Self, b: Self) -> Self;
 
-    /// Adds all of the elements in the vector together and returns the scalar result
-    fn horizontal_add(self) -> Self::Scalar;
-
     /// Element-wise square root
     fn sqrt(self) -> Self;
 
@@ -125,7 +222,7 @@ pub trait SimdFloat:
 }
 
 /// Operations shared by 32 bit float types
-pub trait SimdFloat32: SimdFloat<Scalar = f32> {
+pub trait SimdFloat32: SimdFloat<Scalar = f32, HorizontalAddScalar = f32> {
     type SimdI32: SimdInt32;
 
     /// Bit cast to i32.
@@ -180,7 +277,7 @@ pub trait SimdFloat32: SimdFloat<Scalar = f32> {
 }
 
 /// Operations shared by 64 bit float types
-pub trait SimdFloat64: SimdFloat<Scalar = f64> {
+pub trait SimdFloat64: SimdFloat<Scalar = f64, HorizontalAddScalar = f64> {
     type SimdI64: SimdInt64;
 
     /// Bit cast to i64.

@@ -180,6 +180,11 @@ mod engines;
 
 /// The abstract SIMD trait which is implemented by Avx2, Sse41, etc
 pub trait Simd: 'static + Sync + Send {
+    /// Vector of i8s.  Corresponds to __m128i when used
+    /// with the Sse impl, __m256i when used with Avx2, or a single i8
+    /// when used with Scalar.
+    type Vi8: SimdInt8<Scalar = i8> + InternalSimdBaseIo;
+
     /// Vector of i16s.  Corresponds to __m128i when used
     /// with the Sse impl, __m256i when used with Avx2, or a single i16
     /// when used with Scalar.

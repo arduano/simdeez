@@ -39,6 +39,7 @@ const IMPORTANT_F64: [f64; 10] = [
     f64::NAN,
 ];
 
+const IMPORTANT_I8: [i8; 7] = [0, 1, -1, 2, -2, std::i8::MAX, std::i8::MIN];
 const IMPORTANT_I16: [i16; 7] = [0, 1, -1, 2, -2, std::i16::MAX, std::i16::MIN];
 const IMPORTANT_I32: [i32; 7] = [0, 1, -1, 2, -2, std::i32::MAX, std::i32::MIN];
 const IMPORTANT_I64: [i64; 7] = [0, 1, -1, 2, -2, std::i64::MAX, std::i64::MIN];
@@ -99,6 +100,10 @@ fn iter_arbitrary_ints<T: SampleUniform + Clone>(
         .flatten()
 }
 
+fn iter_arbitrary_i8(interval: usize) -> impl Iterator<Item = i8> {
+    iter_arbitrary_ints(interval, &IMPORTANT_I8, std::i8::MIN..=std::i8::MAX)
+}
+
 fn iter_arbitrary_i16(interval: usize) -> impl Iterator<Item = i16> {
     iter_arbitrary_ints(interval, &IMPORTANT_I16, std::i16::MIN..=std::i16::MAX)
 }
@@ -109,6 +114,10 @@ fn iter_arbitrary_i32(interval: usize) -> impl Iterator<Item = i32> {
 
 fn iter_arbitrary_i64(interval: usize) -> impl Iterator<Item = i64> {
     iter_arbitrary_ints(interval, &IMPORTANT_I64, std::i64::MIN..=std::i64::MAX)
+}
+
+fn iter_arbitrary_blendv_i8() -> impl Iterator<Item = i8> {
+    [-1, 0].iter().cycle().copied()
 }
 
 fn iter_arbitrary_blendv_i16() -> impl Iterator<Item = i16> {
@@ -183,6 +192,14 @@ impl RandSimd {
             any: Box::new(iter_arbitrary_f64),
             blendv: Box::new(iter_arbitrary_blendv_f64),
             scalar_size: 8,
+        }
+    }
+    pub fn i8() -> IterRandSimdForScalar<i8, impl Iterator<Item = i8>, impl Iterator<Item = i8>>
+    {
+        IterRandSimdForScalar {
+            any: Box::new(iter_arbitrary_i8),
+            blendv: Box::new(iter_arbitrary_blendv_i8),
+            scalar_size: 1,
         }
     }
     pub fn i16() -> IterRandSimdForScalar<i16, impl Iterator<Item = i16>, impl Iterator<Item = i16>>

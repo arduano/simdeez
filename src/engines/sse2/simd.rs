@@ -5,6 +5,7 @@ use core::mem;
 
 pub struct Sse2;
 impl Simd for Sse2 {
+    type Vi8 = I8x16;
     type Vi16 = I16x8;
     type Vi32 = I32x4;
     type Vf32 = F32x4;

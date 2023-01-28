@@ -39,23 +39,78 @@ pub trait ScalarNumber: PartialEq + Copy + core::fmt::Display {
     fn is_undefined_behavior_when_casting(self) -> bool {
         false
     }
+
+    fn unchecked_add(self, other: Self) -> Self;
+}
+
+pub trait IntScalarNumber: ScalarNumber {
+    fn unsigned_cast_to_i64(self) -> i64;
+}
+
+impl ScalarNumber for i8 {
+    fn is_minimum_int(&self) -> bool {
+        *self == i8::MIN
+    }
+
+    fn unchecked_add(self, other: Self) -> Self {
+        self.wrapping_add(other)
+    }
+}
+
+impl IntScalarNumber for i8 {
+    fn unsigned_cast_to_i64(self) -> i64 {
+        self as u8 as u64 as i64
+    }
 }
 
 impl ScalarNumber for i16 {
     fn is_minimum_int(&self) -> bool {
         *self == i16::MIN
     }
+
+    fn unchecked_add(self, other: Self) -> Self {
+        self.wrapping_add(other)
+    }
 }
+
+impl IntScalarNumber for i16 {
+    fn unsigned_cast_to_i64(self) -> i64 {
+        self as u16 as u64 as i64
+    }
+}
+
 impl ScalarNumber for i32 {
     fn is_minimum_int(&self) -> bool {
         *self == i32::MIN
     }
+
+    fn unchecked_add(self, other: Self) -> Self {
+        self.wrapping_add(other)
+    }
 }
+
+impl IntScalarNumber for i32 {
+    fn unsigned_cast_to_i64(self) -> i64 {
+        self as u32 as u64 as i64
+    }
+}
+
 impl ScalarNumber for i64 {
     fn is_minimum_int(&self) -> bool {
         *self == i64::MIN
     }
+
+    fn unchecked_add(self, other: Self) -> Self {
+        self.wrapping_add(other)
+    }
 }
+
+impl IntScalarNumber for i64 {
+    fn unsigned_cast_to_i64(self) -> i64 {
+        self
+    }
+}
+
 impl ScalarNumber for f32 {
     fn almost_eq(self, other: Self, precision: EqPrecision) -> bool {
         if self.is_nan() && other.is_nan() {
@@ -103,6 +158,10 @@ impl ScalarNumber for f32 {
         // e.g. resulting in i32::MIN from a large positive float
         let range = (i32::MIN as f32)..=(i32::MAX as f32);
         !range.contains(&self)
+    }
+
+    fn unchecked_add(self, other: Self) -> Self {
+        self + other
     }
 }
 impl ScalarNumber for f64 {
@@ -152,6 +211,10 @@ impl ScalarNumber for f64 {
         // e.g. resulting in i64::MIN from a large positive float
         let range = (i64::MIN as f64)..=(i64::MAX as f64);
         !range.contains(&self)
+    }
+
+    fn unchecked_add(self, other: Self) -> Self {
+        self + other
     }
 }
 

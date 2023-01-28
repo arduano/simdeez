@@ -4,7 +4,7 @@ use crate::{InternalSimdBaseIo, SimdBase};
 
 use super::{
     fn_tuple::{Func, Tuple},
-    EqPrecision, ScalarNumber, SimdTupleIterable,
+    EqPrecision, IntScalarNumber, ScalarNumber, SimdTupleIterable,
 };
 
 /// For each input, get the result, then, run the checker function on the result
@@ -43,7 +43,6 @@ pub fn check_elementwise_function<
     });
 }
 
-/// Compares a SIMD function against a corresponding scalar function
 pub fn elementwise_eq_tester<
     N: ScalarNumber,
     RN: ScalarNumber,
@@ -67,7 +66,6 @@ pub fn elementwise_eq_tester<
     });
 }
 
-/// Compares a SIMD function against a corresponding scalar function
 pub fn bitshift_eq_tester<
     N: ScalarNumber + Eq,
     SimdArg: SimdBase<Scalar = N>,
@@ -93,18 +91,42 @@ pub fn bitshift_eq_tester<
     });
 }
 
-/// Compares a SIMD function against a corresponding scalar function
 pub fn horizontal_add_tester<
-    N: ScalarNumber + Add<Output = N> + Default,
+    RN: ScalarNumber + Add<Output = RN> + Default,
+    N: ScalarNumber + Add<Output = N> + Default + Into<RN>,
     SimdArg: SimdBase<Scalar = N>,
 >(
     inputs: impl Iterator<Item = (SimdArg,)>,
-    simd_fn: impl Func<(SimdArg,), Output = SimdArg::Scalar>,
+    simd_fn: impl Func<(SimdArg,), Output = RN>,
 ) {
     check_function(inputs, simd_fn, |result, args| {
-        let mut sum: N = Default::default();
+        let mut sum: RN = Default::default();
         for scalar in args.0.iter() {
-            sum = sum + scalar;
+            sum = sum.unchecked_add(scalar.into());
+        }
+
+        let equal = sum.almost_eq(result, EqPrecision::almost(5));
+        if !equal {
+            return Err(format!(
+                "Failed: Expected sum to be {}, got {}",
+                sum, result
+            ));
+        }
+        Ok(())
+    });
+}
+
+pub fn unsigned_horizontal_add_tester<
+    N: IntScalarNumber + Add<Output = N> + Default,
+    SimdArg: SimdBase<Scalar = N>,
+>(
+    inputs: impl Iterator<Item = (SimdArg,)>,
+    simd_fn: impl Func<(SimdArg,), Output = i64>,
+) {
+    check_function(inputs, simd_fn, |result, args| {
+        let mut sum: i64 = 0;
+        for scalar in args.0.iter() {
+            sum = sum.wrapping_add(scalar.unsigned_cast_to_i64());
         }
 
         let equal = sum.almost_eq(result, EqPrecision::almost(5));
@@ -161,9 +183,14 @@ macro_rules! const_bitshift_eq_tester {
 
 #[macro_export]
 macro_rules! horizontal_add_tester {
-    ($simd_kind:ident :: $simd_ty:ident, $inputs:expr) => {{
-        let f = <<$simd_kind as Simd>::$simd_ty as SimdFloat>::horizontal_add;
+    (signed $simd_kind:ident :: $simd_ty:ident, $inputs:expr) => {{
+        let f = <<$simd_kind as Simd>::$simd_ty as SimdBaseOps>::horizontal_add;
         horizontal_add_tester($inputs, f);
+    }};
+
+    (unsigned $simd_kind:ident :: $simd_ty:ident, $inputs:expr) => {{
+        let f = <<$simd_kind as Simd>::$simd_ty as SimdInt>::horizontal_unsigned_add;
+        unsigned_horizontal_add_tester($inputs, f);
     }};
 }
 
@@ -211,6 +238,7 @@ macro_rules! elementwise_eq_tester_impl {
     };
 
     (SimdBaseOps, $simd_fn:ident, $arg_cnt:ident, $precision:expr) => {
+        elementwise_eq_tester_impl!(@simdkind i8, SimdBaseOps, $simd_fn, $arg_cnt, $precision);
         elementwise_eq_tester_impl!(@simdkind i16, SimdBaseOps, $simd_fn, $arg_cnt, $precision);
         elementwise_eq_tester_impl!(@simdkind i32, SimdBaseOps, $simd_fn, $arg_cnt, $precision);
         elementwise_eq_tester_impl!(@simdkind i64, SimdBaseOps, $simd_fn, $arg_cnt, $precision);
@@ -219,6 +247,7 @@ macro_rules! elementwise_eq_tester_impl {
     };
 
     (SimdInt, $simd_fn:ident, $arg_cnt:ident, $precision:expr) => {
+        elementwise_eq_tester_impl!(@simdkind i8, SimdInt, $simd_fn, $arg_cnt, $precision);
         elementwise_eq_tester_impl!(@simdkind i16, SimdInt, $simd_fn, $arg_cnt, $precision);
         elementwise_eq_tester_impl!(@simdkind i32, SimdInt, $simd_fn, $arg_cnt, $precision);
         elementwise_eq_tester_impl!(@simdkind i64, SimdInt, $simd_fn, $arg_cnt, $precision);
@@ -284,6 +313,7 @@ macro_rules! bitshift_eq_tester_impl {
     };
 
     ($is_const:ident $simd_fn:ident) => {
+        bitshift_eq_tester_impl!(@simdkind $is_const, i8, $simd_fn);
         bitshift_eq_tester_impl!(@simdkind $is_const, i16, $simd_fn);
         bitshift_eq_tester_impl!(@simdkind $is_const, i32, $simd_fn);
         bitshift_eq_tester_impl!(@simdkind $is_const, i64, $simd_fn);
@@ -292,12 +322,13 @@ macro_rules! bitshift_eq_tester_impl {
 
 #[macro_export]
 macro_rules! horizontal_add_tester_impl {
-    (@full $simd:ident, $simd_ty:ident) => {
+    (@full $kind:ident, $simd:ident, $simd_ty:ident) => {
         with_feature_flag!($simd,
             paste::item! {
                 #[test]
-                fn [<horizontal_add_ $simd:lower _ $simd_ty>]() {
+                fn [<$kind _horizontal_add_ $simd:lower _ $simd_ty>]() {
                     horizontal_add_tester!(
+                        $kind
                         $simd:: [<V$simd_ty>],
                         RandSimd::$simd_ty().one_arg()
                     );
@@ -306,15 +337,26 @@ macro_rules! horizontal_add_tester_impl {
         );
     };
 
-    (@simdkind $simd_ty:ident) => {
-        horizontal_add_tester_impl!(@full Scalar, $simd_ty);
-        horizontal_add_tester_impl!(@full Avx2, $simd_ty);
-        horizontal_add_tester_impl!(@full Sse2, $simd_ty);
-        horizontal_add_tester_impl!(@full Sse41, $simd_ty);
+    (@simdkind $kind:ident, $simd_ty:ident) => {
+        horizontal_add_tester_impl!(@full $kind, Scalar, $simd_ty);
+        horizontal_add_tester_impl!(@full $kind, Avx2, $simd_ty);
+        horizontal_add_tester_impl!(@full $kind, Sse2, $simd_ty);
+        horizontal_add_tester_impl!(@full $kind, Sse41, $simd_ty);
     };
 
-    () => {
-        horizontal_add_tester_impl!(@simdkind f32);
-        horizontal_add_tester_impl!(@simdkind f64);
+    (signed) => {
+        horizontal_add_tester_impl!(@simdkind signed, i8);
+        horizontal_add_tester_impl!(@simdkind signed, i16);
+        horizontal_add_tester_impl!(@simdkind signed, i32);
+        horizontal_add_tester_impl!(@simdkind signed, i64);
+        horizontal_add_tester_impl!(@simdkind signed, f32);
+        horizontal_add_tester_impl!(@simdkind signed, f64);
+    };
+
+    (unsigned) => {
+        horizontal_add_tester_impl!(@simdkind unsigned, i8);
+        horizontal_add_tester_impl!(@simdkind unsigned, i16);
+        horizontal_add_tester_impl!(@simdkind unsigned, i32);
+        horizontal_add_tester_impl!(@simdkind unsigned, i64);
     };
 }

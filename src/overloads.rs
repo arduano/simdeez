@@ -352,6 +352,15 @@ macro_rules! impl_simd_float_overloads {
     };
 }
 
+macro_rules! horizontal_add_scalar {
+    (i8) => {i64};
+    (i16) => {i64};
+    (i32) => {i64};
+    (i64) => {i64};
+    (f32) => {f32};
+    (f64) => {f64}
+}
+
 macro_rules! define_simd_type {
     ($ty:ty, $width:literal, $underlying:ty) => {
         paste::item! {
@@ -362,6 +371,7 @@ macro_rules! define_simd_type {
             impl SimdConsts for [<$ty:upper x $width>] {
                 const WIDTH: usize = $width;
                 type Scalar = $ty;
+                type HorizontalAddScalar = horizontal_add_scalar!($ty);
                 type ArrayRepresentation = [$ty; $width];
                 type UnderlyingType = $underlying;
             }
@@ -376,6 +386,7 @@ macro_rules! define_simd_type {
             impl SimdConsts for [<$ty:upper x $width $suffix >] {
                 const WIDTH: usize = $width;
                 type Scalar = $ty;
+                type HorizontalAddScalar = horizontal_add_scalar!($ty);
                 type ArrayRepresentation = [$ty; $width];
                 type UnderlyingType = $underlying;
             }

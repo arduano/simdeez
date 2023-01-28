@@ -5,6 +5,7 @@ use crate::Simd;
 
 pub struct Avx2;
 impl Simd for Avx2 {
+    type Vi8 = I8x32;
     type Vi16 = I16x16;
     type Vi32 = I32x8;
     type Vf32 = F32x8;

@@ -79,4 +79,5 @@ elementwise_eq_tester_impl!(
 );
 elementwise_eq_tester_impl!(SimdInt64, cast_f64, one_arg, EqPrecision::exact());
 
-horizontal_add_tester_impl!();
+horizontal_add_tester_impl!(signed);
+horizontal_add_tester_impl!(unsigned);

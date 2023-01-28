@@ -6,9 +6,6 @@ mod io;
 mod iters;
 pub use iters::*;
 
-mod ops;
-pub use ops::*;
-
 mod specializations;
 pub use specializations::*;
 
@@ -17,6 +14,7 @@ pub use io::SimdBaseIo;
 
 pub trait SimdConsts: 'static + Copy + core::marker::Sync + core::marker::Send + Debug {
     type Scalar: Copy + Debug + core::marker::Sync + core::marker::Send;
+    type HorizontalAddScalar: Copy + Debug + core::marker::Sync + core::marker::Send;
     const WIDTH: usize;
 
     /// The type of the transmuted array representation. This is to make indexing operations easier.
@@ -119,6 +117,9 @@ pub trait SimdBaseOps:
 
     /// Element-wise minimum between two vectors.
     fn min(self, rhs: Self) -> Self;
+
+    /// Add every number in the vector together
+    fn horizontal_add(self) -> Self::HorizontalAddScalar;
 }
 
 pub trait SimdBase: SimdBaseOps + SimdBaseIo + SimdIter {}
