@@ -1,2 +1,3 @@
 [build]
 rustflags = "-C target-cpu=native"
+# rustflags = "-C target-feature=-sse4.1,-avx,-sse3"

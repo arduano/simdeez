@@ -194,8 +194,7 @@ impl RandSimd {
             scalar_size: 8,
         }
     }
-    pub fn i8() -> IterRandSimdForScalar<i8, impl Iterator<Item = i8>, impl Iterator<Item = i8>>
-    {
+    pub fn i8() -> IterRandSimdForScalar<i8, impl Iterator<Item = i8>, impl Iterator<Item = i8>> {
         IterRandSimdForScalar {
             any: Box::new(iter_arbitrary_i8),
             blendv: Box::new(iter_arbitrary_blendv_i8),

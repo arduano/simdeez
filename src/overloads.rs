@@ -353,12 +353,24 @@ macro_rules! impl_simd_float_overloads {
 }
 
 macro_rules! horizontal_add_scalar {
-    (i8) => {i64};
-    (i16) => {i64};
-    (i32) => {i64};
-    (i64) => {i64};
-    (f32) => {f32};
-    (f64) => {f64}
+    (i8) => {
+        i64
+    };
+    (i16) => {
+        i64
+    };
+    (i32) => {
+        i64
+    };
+    (i64) => {
+        i64
+    };
+    (f32) => {
+        f32
+    };
+    (f64) => {
+        f64
+    };
 }
 
 macro_rules! define_simd_type {
