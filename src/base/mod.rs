@@ -9,7 +9,7 @@ pub use iters::*;
 mod specializations;
 pub use specializations::*;
 
-pub(crate) use io::InternalSimdBaseIo;
+pub use io::InternalSimdBaseIo;
 pub use io::SimdBaseIo;
 
 pub trait SimdConsts: 'static + Copy + core::marker::Sync + core::marker::Send + Debug {
