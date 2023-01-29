@@ -1358,32 +1358,32 @@ macro_rules! fix_tuple_type {
 
 #[macro_export]
 macro_rules! simd_runtime_generate_v2 {
-    ($vis:vis fn $fn_name:ident ($($arg:ident:$typ:ty),* $(,)? ) -> $rt:ty $body:block  ) => {
+    ($vis:vis fn $fn_name:ident $(<$($lt:lifetime),+>)? ($($arg:ident:$typ:ty),* $(,)? ) -> $rt:ty $body:block  ) => {
         simdeez_paste_item! {
             // In order to pass arguments via generics like this, we need to convert the arguments
             // into tuples. This is part of the reason for the mess below.
 
             #[inline(always)]
-            $vis fn $fn_name($($arg:$typ,)*) -> $rt {
+            $vis fn $fn_name $(<$($lt),+>)?($($arg:$typ,)*) -> $rt {
                 let args_tuple = ($($arg,)*);
                 run_simd_runtime_decide::<[<__ $fn_name _dispatch_struct>], fix_tuple_type!(($($typ),*)), $rt>(args_tuple)
             }
 
             #[inline(always)]
-            $vis fn [<$fn_name _scalar>]($($arg:$typ,)*) -> $rt {
+            $vis fn [<$fn_name _scalar>] $(<$($lt),+>)?($($arg:$typ,)*) -> $rt {
                 let args_tuple = ($($arg,)*);
                 run_simd_runtime_scalar_only::<[<__ $fn_name _dispatch_struct>], fix_tuple_type!(($($typ),*)), $rt>(args_tuple)
             }
 
             #[inline(always)]
-            $vis unsafe fn [<__ $fn_name _generic>]<S: 'static + Simd>(args_tuple: ($($typ,)*)) -> $rt {
+            $vis unsafe fn [<__ $fn_name _generic>]<$($($lt,)+)? S: 'static + Simd>(args_tuple: ($($typ,)*)) -> $rt {
                 let ($($arg,)*) = args_tuple;
                 S::invoke(#[inline(always)] || $body)
             }
 
             struct [<__ $fn_name _dispatch_struct>];
 
-            impl SimdRunner<fix_tuple_type!(($($typ),*)), $rt> for [<__ $fn_name _dispatch_struct>] {
+            impl$(<$($lt),+>)? SimdRunner<fix_tuple_type!(($($typ),*)), $rt> for [<__ $fn_name _dispatch_struct>] {
                 unsafe fn run<S: Simd>(args_tuple: fix_tuple_type!(($($typ),*))) -> $rt {
                     [<__ $fn_name _generic>]::<S>(args_tuple)
                 }
