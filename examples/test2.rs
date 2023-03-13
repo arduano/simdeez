@@ -1,4 +1,3 @@
-use rand::Rng;
 use simdeez::{prelude::*, simd_runtime_generate_v2};
 
 struct NumberParser<'s> {

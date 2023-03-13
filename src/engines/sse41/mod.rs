@@ -1,6 +1,6 @@
 use crate::{
-    libm_ext::FloatExt, InternalSimdBaseIo, SimdBaseOps, SimdConsts, SimdFloat, SimdFloat32,
-    SimdFloat64, SimdInt, SimdInt16, SimdInt32, SimdInt64, SimdInt8,
+    InternalSimdBaseIo, SimdBaseOps, SimdConsts, SimdFloat, SimdFloat32, SimdFloat64, SimdInt,
+    SimdInt16, SimdInt32, SimdInt64, SimdInt8,
 };
 
 #[cfg(target_arch = "x86")]

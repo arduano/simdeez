@@ -5,11 +5,8 @@ use crate::{
 
 use core::ops::*;
 
-use crate::ops::Ops;
-
 mod simd;
 pub use self::simd::*;
-
 
 define_simd_type!(i8, 1, i8);
 impl_simd_int_overloads!(I8x1);
