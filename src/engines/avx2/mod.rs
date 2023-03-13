@@ -118,7 +118,7 @@ impl SimdBaseOps for I8x32 {
 
     #[inline(always)]
     fn and_not(self, rhs: Self) -> Self {
-        unsafe { I8x32(_mm256_andnot_si256(self.0, rhs.0)) }
+        unsafe { I8x32(_mm256_andnot_si256(rhs.0, self.0)) }
     }
 
     #[inline(always)]
@@ -336,7 +336,7 @@ impl SimdBaseOps for I16x16 {
 
     #[inline(always)]
     fn and_not(self, rhs: Self) -> Self {
-        unsafe { I16x16(_mm256_andnot_si256(self.0, rhs.0)) }
+        unsafe { I16x16(_mm256_andnot_si256(rhs.0, self.0)) }
     }
 
     #[inline(always)]
@@ -547,7 +547,7 @@ impl SimdBaseOps for I32x8 {
 
     #[inline(always)]
     fn and_not(self, rhs: Self) -> Self {
-        unsafe { I32x8(_mm256_andnot_si256(self.0, rhs.0)) }
+        unsafe { I32x8(_mm256_andnot_si256(rhs.0, self.0)) }
     }
 
     #[inline(always)]
@@ -569,7 +569,7 @@ impl SimdBaseOps for I32x8 {
 
     #[inline(always)]
     fn cmp_lt(self, rhs: Self) -> Self {
-        unsafe { I32x8(_mm256_cmpgt_epi32(rhs.0, self.0)) }
+        self.cmp_lte(rhs).and_not(self.cmp_eq(rhs))
     }
 
     #[inline(always)]
@@ -778,7 +778,7 @@ impl SimdBaseOps for I64x4 {
 
     #[inline(always)]
     fn and_not(self, rhs: Self) -> Self {
-        unsafe { I64x4(_mm256_andnot_si256(self.0, rhs.0)) }
+        unsafe { I64x4(_mm256_andnot_si256(rhs.0, self.0)) }
     }
 
     #[inline(always)]
@@ -1006,7 +1006,7 @@ impl SimdBaseOps for F32x8 {
 
     #[inline(always)]
     fn and_not(self, rhs: Self) -> Self {
-        unsafe { F32x8(_mm256_andnot_ps(self.0, rhs.0)) }
+        unsafe { F32x8(_mm256_andnot_ps(rhs.0, self.0)) }
     }
 
     #[inline(always)]
@@ -1257,7 +1257,7 @@ impl SimdBaseOps for F64x4 {
 
     #[inline(always)]
     fn and_not(self, rhs: Self) -> Self {
-        unsafe { F64x4(_mm256_andnot_pd(self.0, rhs.0)) }
+        unsafe { F64x4(_mm256_andnot_pd(rhs.0, self.0)) }
     }
 
     #[inline(always)]

@@ -121,14 +121,14 @@ impl SimdBaseOps for I8x16 {
 
     #[inline(always)]
     fn and_not(self, rhs: Self) -> Self {
-        unsafe { I8x16(_mm_andnot_si128(self.0, rhs.0)) }
+        unsafe { I8x16(_mm_andnot_si128(rhs.0, self.0)) }
     }
 
     #[inline(always)]
     fn blendv(self, a: Self, b: Self) -> Self {
         unsafe {
             let mask = self.cmp_eq(Self::set1(-1));
-            let a = mask.and_not(a);
+            let a = a.and_not(mask);
             let b = mask.bit_and(b);
             a.bit_or(b)
         }
@@ -360,14 +360,14 @@ impl SimdBaseOps for I16x8 {
 
     #[inline(always)]
     fn and_not(self, rhs: Self) -> Self {
-        unsafe { I16x8(_mm_andnot_si128(self.0, rhs.0)) }
+        unsafe { I16x8(_mm_andnot_si128(rhs.0, self.0)) }
     }
 
     #[inline(always)]
     fn blendv(self, a: Self, b: Self) -> Self {
         unsafe {
             let mask = self.cmp_eq(Self::set1(-1));
-            let a = mask.and_not(a);
+            let a = a.and_not(mask);
             let b = mask.bit_and(b);
             a.bit_or(b)
         }
@@ -600,14 +600,14 @@ impl SimdBaseOps for I32x4 {
 
     #[inline(always)]
     fn and_not(self, rhs: Self) -> Self {
-        unsafe { I32x4(_mm_andnot_si128(self.0, rhs.0)) }
+        unsafe { I32x4(_mm_andnot_si128(rhs.0, self.0)) }
     }
 
     #[inline(always)]
     fn blendv(self, a: Self, b: Self) -> Self {
         unsafe {
             let mask = self.cmp_eq(Self::set1(-1));
-            let a = mask.and_not(a);
+            let a = a.and_not(mask);
             let b = mask.bit_and(b);
             a.bit_or(b)
         }
@@ -841,14 +841,14 @@ impl SimdBaseOps for I64x2 {
 
     #[inline(always)]
     fn and_not(self, rhs: Self) -> Self {
-        unsafe { I64x2(_mm_andnot_si128(self.0, rhs.0)) }
+        unsafe { I64x2(_mm_andnot_si128(rhs.0, self.0)) }
     }
 
     #[inline(always)]
     fn blendv(self, a: Self, b: Self) -> Self {
         unsafe {
             let mask = self.cmp_eq(Self::set1(-1));
-            let a = mask.and_not(a);
+            let a = a.and_not(mask);
             let b = mask.bit_and(b);
             a.bit_or(b)
         }
@@ -1072,12 +1072,12 @@ impl SimdBaseOps for F32x4 {
 
     #[inline(always)]
     fn abs(self) -> Self {
-        unsafe { Self::set1(-0.0).and_not(self) }
+        unsafe { self.and_not(Self::set1(-0.0)) }
     }
 
     #[inline(always)]
     fn and_not(self, rhs: Self) -> Self {
-        unsafe { F32x4(_mm_andnot_ps(self.0, rhs.0)) }
+        unsafe { F32x4(_mm_andnot_ps(rhs.0, self.0)) }
     }
 
     #[inline(always)]
@@ -1338,12 +1338,12 @@ impl SimdBaseOps for F64x2 {
 
     #[inline(always)]
     fn abs(self) -> Self {
-        unsafe { Self::set1(-0.0).and_not(self) }
+        unsafe { self.and_not(Self::set1(-0.0)) }
     }
 
     #[inline(always)]
     fn and_not(self, rhs: Self) -> Self {
-        unsafe { F64x2(_mm_andnot_pd(self.0, rhs.0)) }
+        unsafe { F64x2(_mm_andnot_pd(rhs.0, self.0)) }
     }
 
     #[inline(always)]

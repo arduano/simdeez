@@ -106,7 +106,7 @@ impl SimdBaseOps for I8x1 {
 
     #[inline(always)]
     fn and_not(self, rhs: Self) -> Self {
-        I8x1(!self.0 & rhs.0)
+        I8x1(!rhs.0 & self.0)
     }
 
     #[inline(always)]
@@ -294,7 +294,7 @@ impl SimdBaseOps for I16x1 {
 
     #[inline(always)]
     fn and_not(self, rhs: Self) -> Self {
-        I16x1(!self.0 & rhs.0)
+        I16x1(!rhs.0 & self.0)
     }
 
     #[inline(always)]
@@ -476,7 +476,7 @@ impl SimdBaseOps for I32x1 {
 
     #[inline(always)]
     fn and_not(self, rhs: Self) -> Self {
-        I32x1(!self.0 & rhs.0)
+        I32x1(!rhs.0 & self.0)
     }
 
     #[inline(always)]
@@ -670,7 +670,7 @@ impl SimdBaseOps for I64x1 {
 
     #[inline(always)]
     fn and_not(self, rhs: Self) -> Self {
-        I64x1(!self.0 & rhs.0)
+        I64x1(!rhs.0 & self.0)
     }
 
     #[inline(always)]
@@ -858,7 +858,7 @@ impl SimdBaseOps for F32x1 {
 
     #[inline(always)]
     fn and_not(self, rhs: Self) -> Self {
-        F32x1(f32::from_bits((!self.0.to_bits()) & rhs.0.to_bits()))
+        F32x1(f32::from_bits((!rhs.0.to_bits()) & self.0.to_bits()))
     }
 
     #[inline(always)]
@@ -1120,7 +1120,7 @@ impl SimdBaseOps for F64x1 {
 
     #[inline(always)]
     fn and_not(self, rhs: Self) -> Self {
-        F64x1(f64::from_bits((!self.0.to_bits()) & rhs.0.to_bits()))
+        F64x1(f64::from_bits((!rhs.0.to_bits()) & self.0.to_bits()))
     }
 
     #[inline(always)]
