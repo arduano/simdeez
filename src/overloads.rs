@@ -697,6 +697,59 @@ macro_rules! impl_simd_float {
     };
 }
 
+macro_rules! impl_i8_simd_type {
+    ($engine:ident, $i8_ty:ident, $i16_ty:ident) => {
+        impl_simd_base!($engine, $i8_ty, i8, |self| {
+            self.partial_horizontal_add().partial_horizontal_add().partial_horizontal_add().partial_horizontal_add()
+        });
+        impl_simd_int!($engine, $i8_ty, i8);
+
+        impl SimdInt8 for $i8_ty {
+            type SimdI16 = $i16_ty;
+
+            #[inline(always)]
+            fn extend_to_i16(self) -> (Self::SimdI16, Self::SimdI16) {
+                let (a, b) = unsafe { Ops::<$engine, i8>::extend_i16(self.0) };
+                ($i16_ty(a), $i16_ty(b))
+            }
+
+            #[inline(always)]
+            fn unsigned_extend_to_i16(self) -> (Self::SimdI16, Self::SimdI16) {
+                todo!()
+            }
+
+            #[inline(always)]
+            fn get_mask(self) -> u32 {
+                unsafe { Ops::<$engine, i8>::get_mask(self.0) }
+            }
+        }
+    };
+}
+
+macro_rules! impl_i16_simd_type {
+    ($engine:ident, $i16_ty:ident, $i32_ty:ident) => {
+        impl_simd_base!($engine, $i16_ty, i16, |self| {
+            self.partial_horizontal_add().partial_horizontal_add().partial_horizontal_add()
+        });
+        impl_simd_int!($engine, $i16_ty, i16);
+
+        impl SimdInt16 for $i16_ty {
+            type SimdI32 = $i32_ty;
+
+            #[inline(always)]
+            fn extend_to_i32(self) -> (Self::SimdI32, Self::SimdI32) {
+                let (a, b) = unsafe { Ops::<$engine, i16>::extend_i32(self.0) };
+                ($i32_ty(a), $i32_ty(b))
+            }
+
+            #[inline(always)]
+            fn unsigned_extend_to_i32(self) -> (Self::SimdI32, Self::SimdI32) {
+                todo!()
+            }
+        }
+    };
+}
+
 macro_rules! impl_i32_simd_type {
     ($engine:ident, $i32_ty:ident, $f32_ty:ident, $i64_ty:ident) => {
         impl_simd_base!($engine, $i32_ty, i32, |self| {

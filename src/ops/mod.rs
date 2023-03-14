@@ -10,6 +10,12 @@ use core::arch::x86::*;
 #[cfg(target_arch = "x86_64")]
 use core::arch::x86_64::*;
 
+mod i8;
+pub use self::i8::*;
+
+mod i16;
+pub use self::i16::*;
+
 mod i32;
 pub use self::i32::*;
 

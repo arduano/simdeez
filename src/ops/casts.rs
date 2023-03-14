@@ -69,6 +69,74 @@ impl_op! {
 }
 
 impl_op! {
+    fn bitcast_binary<i8> {
+        for Avx2(a: __m256i) -> __m256 {
+            _mm256_castsi256_ps(a)
+        }
+        for Sse41(a: __m128i) -> __m128 {
+            _mm_castsi128_ps(a)
+        }
+        for Sse2(a: __m128i) -> __m128 {
+            _mm_castsi128_ps(a)
+        }
+        for Scalar(a: i8) -> u64 {
+            a as u64
+        }
+    }
+}
+
+impl_op! {
+    fn bitcast_i8<binary> {
+        for Avx2(a: __m256) -> __m256i {
+            _mm256_castps_si256(a)
+        }
+        for Sse41(a: __m128) -> __m128i {
+            _mm_castps_si128(a)
+        }
+        for Sse2(a: __m128) -> __m128i {
+            _mm_castps_si128(a)
+        }
+        for Scalar(a: u64) -> i8 {
+            a as i8
+        }
+    }
+}
+
+impl_op! {
+    fn bitcast_binary<i16> {
+        for Avx2(a: __m256i) -> __m256 {
+            _mm256_castsi256_ps(a)
+        }
+        for Sse41(a: __m128i) -> __m128 {
+            _mm_castsi128_ps(a)
+        }
+        for Sse2(a: __m128i) -> __m128 {
+            _mm_castsi128_ps(a)
+        }
+        for Scalar(a: i16) -> u64 {
+            a as u64
+        }
+    }
+}
+
+impl_op! {
+    fn bitcast_i16<binary> {
+        for Avx2(a: __m256) -> __m256i {
+            _mm256_castps_si256(a)
+        }
+        for Sse41(a: __m128) -> __m128i {
+            _mm_castps_si128(a)
+        }
+        for Sse2(a: __m128) -> __m128i {
+            _mm_castps_si128(a)
+        }
+        for Scalar(a: u64) -> i16 {
+            a as i16
+        }
+    }
+}
+
+impl_op! {
     fn bitcast_binary<i32> {
         for Avx2(a: __m256i) -> __m256 {
             _mm256_castsi256_ps(a)
