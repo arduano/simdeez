@@ -1,7 +1,7 @@
 use super::*;
 
 impl_op! {
-    fn i32_add {
+    fn add<i32> {
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             _mm256_add_epi32(a, b)
         }
@@ -18,7 +18,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn i32_sub {
+    fn sub<i32> {
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             _mm256_sub_epi32(a, b)
         }
@@ -35,7 +35,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn i32_mul {
+    fn mul<i32> {
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             _mm256_mullo_epi32(a, b)
         }
@@ -60,7 +60,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn i32_min {
+    fn min<i32> {
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             _mm256_min_epi32(a, b)
         }
@@ -78,7 +78,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn i32_max {
+    fn max<i32> {
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             _mm256_max_epi32(a, b)
         }
@@ -96,7 +96,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn i32_abs {
+    fn abs<i32> {
         for Avx2(a: __m256i) -> __m256i {
             _mm256_abs_epi32(a)
         }
@@ -114,7 +114,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn i32_eq {
+    fn eq<i32> {
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             _mm256_cmpeq_epi32(a, b)
         }
@@ -135,7 +135,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn i32_neq {
+    fn neq<i32> {
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             let eq = _mm256_cmpeq_epi32(a, b);
             _mm256_xor_si256(eq, _mm256_set1_epi32(u32::MAX as i32))
@@ -159,7 +159,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn i32_lt {
+    fn lt<i32> {
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             let gt = _mm256_cmpgt_epi32(a, b);
             let eq = _mm256_cmpeq_epi32(a, b);
@@ -186,7 +186,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn i32_lte {
+    fn lte<i32> {
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             let gt = _mm256_cmpgt_epi32(a, b);
             _mm256_xor_si256(gt, _mm256_set1_epi32(u32::MAX as i32))
@@ -210,7 +210,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn i32_gt {
+    fn gt<i32> {
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             _mm256_cmpgt_epi32(a, b)
         }
@@ -231,7 +231,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn i32_gte {
+    fn gte<i32> {
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             let gt = _mm256_cmpgt_epi32(a, b);
             let eq = _mm256_cmpeq_epi32(a, b);
@@ -258,7 +258,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn i32_blendv {
+    fn blendv<i32> {
         for Avx2(a: __m256i, b: __m256i, mask: __m256i) -> __m256i {
             _mm256_blendv_epi8(a, b, mask)
         }
@@ -279,7 +279,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn i32_shl {
+    fn shl<i32> {
         for Avx2(a: __m256i, rhs: i32) -> __m256i {
             _mm256_sll_epi32(a, _mm_cvtsi32_si128(rhs))
         }
@@ -296,7 +296,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn i32_shr {
+    fn shr<i32> {
         for Avx2(a: __m256i, rhs: i32) -> __m256i {
             _mm256_srl_epi32(a, _mm_cvtsi32_si128(rhs))
         }
@@ -312,8 +312,42 @@ impl_op! {
     }
 }
 
+impl_imm8_op! {
+    fn shl_const<i32, const BY: i32> {
+        for Avx2(a: __m256i) -> __m256i {
+            _mm256_slli_epi32(a, BY)
+        }
+        for Sse41(a: __m128i) -> __m128i {
+            _mm_slli_epi32(a, BY)
+        }
+        for Sse2(a: __m128i) -> __m128i {
+            _mm_slli_epi32(a, BY)
+        }
+        for Scalar(a: i32) -> i32 {
+            a << BY
+        }
+    }
+}
+
+impl_imm8_op! {
+    fn shr_const<i32, const BY: i32> {
+        for Avx2(a: __m256i) -> __m256i {
+            _mm256_srli_epi32(a, BY)
+        }
+        for Sse41(a: __m128i) -> __m128i {
+            _mm_srli_epi32(a, BY)
+        }
+        for Sse2(a: __m128i) -> __m128i {
+            _mm_srli_epi32(a, BY)
+        }
+        for Scalar(a: i32) -> i32 {
+            a >> BY
+        }
+    }
+}
+
 impl_op! {
-    fn i32_cast_f32 {
+    fn cast_f32<i32> {
         for Avx2(a: __m256i) -> __m256 {
             _mm256_cvtepi32_ps(a)
         }
@@ -330,7 +364,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn i32_bitcast_f32 {
+    fn bitcast_f32<i32> {
         for Avx2(a: __m256i) -> __m256 {
             _mm256_castsi256_ps(a)
         }
@@ -347,16 +381,17 @@ impl_op! {
 }
 
 impl_op! {
-    fn i32_extend_i64 {
+    fn extend_i64<i32> {
         for Avx2(val: __m256i) -> (__m256i, __m256i) {
             let a = _mm256_cvtepi32_epi64(_mm256_extracti128_si256(val, 0));
             let b = _mm256_cvtepi32_epi64(_mm256_extracti128_si256(val, 1));
             (a, b)
         }
         for Sse41(val: __m128i) -> (__m128i, __m128i) {
-            let a = _mm_cvtepi32_epi64(val);
-            let b = _mm_cvtepi32_epi64(_mm_shuffle_epi32(val, 0b11_10_11_10));
-            (a, b)
+            let arr = core::mem::transmute::<_, [i32; 4]>(val);
+            let a = [arr[0] as i64, arr[1] as i64];
+            let b = [arr[2] as i64, arr[3] as i64];
+            (core::mem::transmute(a), core::mem::transmute(b))
         }
         for Sse2(val: __m128i) -> (__m128i, __m128i) {
             let arr = core::mem::transmute::<_, [i32; 4]>(val);
@@ -371,7 +406,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn i32_zeroes {
+    fn zeroes<i32> {
         for Avx2() -> __m256i {
             _mm256_setzero_si256()
         }
@@ -388,7 +423,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn i32_set1 {
+    fn set1<i32> {
         for Avx2(val: i32) -> __m256i {
             _mm256_set1_epi32(val)
         }
@@ -405,7 +440,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn i32_load_unaligned {
+    fn load_unaligned<i32> {
         for Avx2(ptr: *const i32) -> __m256i {
             _mm256_loadu_si256(ptr as *const __m256i)
         }
@@ -422,7 +457,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn i32_load_aligned {
+    fn load_aligned<i32> {
         for Avx2(ptr: *const i32) -> __m256i {
             _mm256_load_si256(ptr as *const __m256i)
         }
@@ -439,7 +474,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn i32_store_unaligned {
+    fn store_unaligned<i32> {
         for Avx2(ptr: *mut i32, a: __m256i) {
             _mm256_storeu_si256(ptr as *mut __m256i, a)
         }
@@ -456,7 +491,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn i32_store_aligned {
+    fn store_aligned<i32> {
         for Avx2(ptr: *mut i32, a: __m256i) {
             _mm256_store_si256(ptr as *mut __m256i, a)
         }

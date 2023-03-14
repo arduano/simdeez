@@ -406,42 +406,44 @@ macro_rules! define_simd_type {
     };
 }
 
-macro_rules! impl_i32_simd_type {
-    ($engine:ident, $i32_ty:ident, $f32_ty:ident, $i64_ty:ident) => {
-        impl InternalSimdBaseIo for $i32_ty {
+macro_rules! impl_simd_base {
+    ($engine:ident, $ty:ident, $scalar_ty:ident, |$self:ident| {
+        $($hadd:tt)*
+    }) => {
+        impl InternalSimdBaseIo for $ty {
             #[inline(always)]
             unsafe fn zeroes() -> Self {
-                unsafe { Self(Ops::<$engine>::i32_zeroes()) }
+                unsafe { Self(Ops::<$engine, $scalar_ty>::zeroes()) }
             }
 
             #[inline(always)]
             unsafe fn set1(x: Self::Scalar) -> Self {
-                unsafe { Self(Ops::<$engine>::i32_set1(x)) }
+                unsafe { Self(Ops::<$engine, $scalar_ty>::set1(x)) }
             }
 
             #[inline(always)]
             unsafe fn load_from_array(array: Self::ArrayRepresentation) -> Self {
-                unsafe { Self(Ops::<$engine>::i32_load_aligned(array.as_ptr())) }
+                unsafe { Self(Ops::<$engine, $scalar_ty>::load_aligned(array.as_ptr())) }
             }
 
             #[inline(always)]
             unsafe fn load_from_ptr_unaligned(ptr: *const Self::Scalar) -> Self {
-                unsafe { Self(Ops::<$engine>::i32_load_unaligned(ptr)) }
+                unsafe { Self(Ops::<$engine, $scalar_ty>::load_unaligned(ptr)) }
             }
 
             #[inline(always)]
             unsafe fn copy_to_ptr_unaligned(self, ptr: *mut Self::Scalar) {
-                unsafe { Ops::<$engine>::i32_store_unaligned(ptr, self.0) }
+                unsafe { Ops::<$engine, $scalar_ty>::store_unaligned(ptr, self.0) }
             }
 
             #[inline(always)]
             unsafe fn load_from_ptr_aligned(ptr: *const Self::Scalar) -> Self {
-                unsafe { Self(Ops::<$engine>::i32_load_aligned(ptr)) }
+                unsafe { Self(Ops::<$engine, $scalar_ty>::load_aligned(ptr)) }
             }
 
             #[inline(always)]
             unsafe fn copy_to_ptr_aligned(self, ptr: *mut Self::Scalar) {
-                unsafe { Ops::<$engine>::i32_store_aligned(ptr, self.0) }
+                unsafe { Ops::<$engine, $scalar_ty>::store_aligned(ptr, self.0) }
             }
 
             #[inline(always)]
@@ -460,154 +462,247 @@ macro_rules! impl_i32_simd_type {
             }
         }
 
-        impl SimdBaseOps for $i32_ty {
+        impl SimdBaseOps for $ty {
             #[inline(always)]
             fn add(self, rhs: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::i32_add(self.0, rhs.0)) }
+                unsafe { Self(Ops::<$engine, $scalar_ty>::add(self.0, rhs.0)) }
             }
 
             #[inline(always)]
             fn sub(self, rhs: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::i32_sub(self.0, rhs.0)) }
+                unsafe { Self(Ops::<$engine, $scalar_ty>::sub(self.0, rhs.0)) }
             }
 
             #[inline(always)]
             fn mul(self, rhs: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::i32_mul(self.0, rhs.0)) }
+                unsafe { Self(Ops::<$engine, $scalar_ty>::mul(self.0, rhs.0)) }
             }
 
             #[inline(always)]
             fn bit_and(self, rhs: Self) -> Self {
                 unsafe {
-                    let left = Ops::<$engine>::i32_bitcast_binary(self.0);
-                    let right = Ops::<$engine>::i32_bitcast_binary(rhs.0);
-                    let result = Ops::<$engine>::bit_and(left, right);
-                    Self(Ops::<$engine>::binary_bitcast_i32(result))
+                    let left = Ops::<$engine, $scalar_ty>::bitcast_binary(self.0);
+                    let right = Ops::<$engine, $scalar_ty>::bitcast_binary(rhs.0);
+                    let result = Ops::<$engine, binary>::bit_and(left, right);
+                    paste! {
+                        Self(Ops::<$engine, binary>::[<bitcast_ $scalar_ty>](result))
+                    }
                 }
             }
 
             #[inline(always)]
             fn bit_or(self, rhs: Self) -> Self {
                 unsafe {
-                    let left = Ops::<$engine>::i32_bitcast_binary(self.0);
-                    let right = Ops::<$engine>::i32_bitcast_binary(rhs.0);
-                    let result = Ops::<$engine>::bit_or(left, right);
-                    Self(Ops::<$engine>::binary_bitcast_i32(result))
+                    let left = Ops::<$engine, $scalar_ty>::bitcast_binary(self.0);
+                    let right = Ops::<$engine, $scalar_ty>::bitcast_binary(rhs.0);
+                    let result = Ops::<$engine, binary>::bit_or(left, right);
+                    paste! {
+                        Self(Ops::<$engine, binary>::[<bitcast_ $scalar_ty>](result))
+                    }
                 }
             }
 
             #[inline(always)]
             fn bit_xor(self, rhs: Self) -> Self {
                 unsafe {
-                    let left = Ops::<$engine>::i32_bitcast_binary(self.0);
-                    let right = Ops::<$engine>::i32_bitcast_binary(rhs.0);
-                    let result = Ops::<$engine>::bit_xor(left, right);
-                    Self(Ops::<$engine>::binary_bitcast_i32(result))
+                    let left = Ops::<$engine, $scalar_ty>::bitcast_binary(self.0);
+                    let right = Ops::<$engine, $scalar_ty>::bitcast_binary(rhs.0);
+                    let result = Ops::<$engine, binary>::bit_xor(left, right);
+                    paste! {
+                        Self(Ops::<$engine, binary>::[<bitcast_ $scalar_ty>](result))
+                    }
                 }
             }
 
             #[inline(always)]
             fn bit_not(self) -> Self {
                 unsafe {
-                    let val = Ops::<$engine>::i32_bitcast_binary(self.0);
-                    let result = Ops::<$engine>::bit_not(val);
-                    Self(Ops::<$engine>::binary_bitcast_i32(result))
+                    let val = Ops::<$engine, $scalar_ty>::bitcast_binary(self.0);
+                    let result = Ops::<$engine, binary>::bit_not(val);
+                    paste! {
+                        Self(Ops::<$engine, binary>::[<bitcast_ $scalar_ty>](result))
+                    }
                 }
             }
 
             #[inline(always)]
             fn abs(self) -> Self {
-                unsafe { Self(Ops::<$engine>::i32_abs(self.0)) }
+                unsafe { Self(Ops::<$engine, $scalar_ty>::abs(self.0)) }
             }
 
             #[inline(always)]
             fn and_not(self, rhs: Self) -> Self {
                 unsafe {
-                    let left = Ops::<$engine>::i32_bitcast_binary(self.0);
-                    let right = Ops::<$engine>::i32_bitcast_binary(rhs.0);
-                    let result = Ops::<$engine>::bit_andnot(right, left);
-                    Self(Ops::<$engine>::binary_bitcast_i32(result))
+                    let left = Ops::<$engine, $scalar_ty>::bitcast_binary(self.0);
+                    let right = Ops::<$engine, $scalar_ty>::bitcast_binary(rhs.0);
+                    let result = Ops::<$engine, binary>::bit_andnot(right, left);
+                    paste! {
+                        Self(Ops::<$engine, binary>::[<bitcast_ $scalar_ty>](result))
+                    }
                 }
             }
 
             #[inline(always)]
             fn blendv(self, a: Self, b: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::i32_blendv(a.0, b.0, self.0)) }
+                unsafe { Self(Ops::<$engine, $scalar_ty>::blendv(a.0, b.0, self.0)) }
             }
 
             #[inline(always)]
             fn cmp_eq(self, rhs: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::i32_eq(self.0, rhs.0)) }
+                unsafe { Self(Ops::<$engine, $scalar_ty>::eq(self.0, rhs.0)) }
             }
 
             #[inline(always)]
             fn cmp_neq(self, rhs: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::i32_neq(self.0, rhs.0)) }
+                unsafe { Self(Ops::<$engine, $scalar_ty>::neq(self.0, rhs.0)) }
             }
 
             #[inline(always)]
             fn cmp_lt(self, rhs: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::i32_lt(self.0, rhs.0)) }
+                unsafe { Self(Ops::<$engine, $scalar_ty>::lt(self.0, rhs.0)) }
             }
 
             #[inline(always)]
             fn cmp_lte(self, rhs: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::i32_lte(self.0, rhs.0)) }
+                unsafe { Self(Ops::<$engine, $scalar_ty>::lte(self.0, rhs.0)) }
             }
 
             #[inline(always)]
             fn cmp_gt(self, rhs: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::i32_gt(self.0, rhs.0)) }
+                unsafe { Self(Ops::<$engine, $scalar_ty>::gt(self.0, rhs.0)) }
             }
 
             #[inline(always)]
             fn cmp_gte(self, rhs: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::i32_gte(self.0, rhs.0)) }
+                unsafe { Self(Ops::<$engine, $scalar_ty>::gte(self.0, rhs.0)) }
             }
 
             #[inline(always)]
             fn max(self, rhs: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::i32_max(self.0, rhs.0)) }
+                unsafe { Self(Ops::<$engine, $scalar_ty>::max(self.0, rhs.0)) }
             }
 
             #[inline(always)]
             fn min(self, rhs: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::i32_min(self.0, rhs.0)) }
+                unsafe { Self(Ops::<$engine, $scalar_ty>::min(self.0, rhs.0)) }
             }
 
             #[inline(always)]
-            fn horizontal_add(self) -> Self::HorizontalAddScalar {
-                self.partial_horizontal_add().partial_horizontal_add()
+            fn horizontal_add($self) -> Self::HorizontalAddScalar {
+                $($hadd)*
             }
         }
+    };
+}
 
-        impl SimdInt for $i32_ty {
+macro_rules! impl_simd_int {
+    ($engine:ident, $ty:ident, $scalar_ty:ident) => {
+        impl SimdInt for $ty {
             #[inline(always)]
             fn shl(self, rhs: i32) -> Self {
-                unsafe { Self(Ops::<$engine>::i32_shl(self.0, rhs)) }
+                unsafe { Self(Ops::<$engine, $scalar_ty>::shl(self.0, rhs)) }
             }
 
             #[inline(always)]
             fn shr(self, rhs: i32) -> Self {
-                unsafe { Self(Ops::<$engine>::i32_shr(self.0, rhs)) }
+                unsafe { Self(Ops::<$engine, $scalar_ty>::shr(self.0, rhs)) }
             }
 
             #[inline(always)]
             fn shl_const<const BY: i32>(self) -> Self {
-                todo!()
+                unsafe { Self(Ops::<$engine, $scalar_ty>::shl_const::<BY>(self.0)) }
             }
 
             #[inline(always)]
             fn shr_const<const BY: i32>(self) -> Self {
-                todo!()
+                unsafe { Self(Ops::<$engine, $scalar_ty>::shr_const::<BY>(self.0)) }
             }
 
             #[inline(always)]
             fn horizontal_unsigned_add(self) -> Self::HorizontalAddScalar {
-                self.partial_horizontal_unsigned_add()
-                    .horizontal_unsigned_add()
+                todo!()
             }
         }
+    };
+}
+
+macro_rules! impl_simd_float {
+    ($engine:ident, $ty:ident, $scalar_ty:ident) => {
+        impl SimdFloat for $ty {
+            #[inline(always)]
+            fn div(self, rhs: Self) -> Self {
+                unsafe { Self(Ops::<$engine, $scalar_ty>::div(self.0, rhs.0)) }
+            }
+
+            #[inline(always)]
+            fn ceil(self) -> Self {
+                unsafe { Self(Ops::<$engine, $scalar_ty>::ceil(self.0)) }
+            }
+
+            #[inline(always)]
+            fn floor(self) -> Self {
+                unsafe { Self(Ops::<$engine, $scalar_ty>::floor(self.0)) }
+            }
+
+            #[inline(always)]
+            fn round(self) -> Self {
+                unsafe { Self(Ops::<$engine, $scalar_ty>::round(self.0)) }
+            }
+
+            #[inline(always)]
+            fn fast_ceil(self) -> Self {
+                unsafe { Self(Ops::<$engine, $scalar_ty>::fast_ceil(self.0)) }
+            }
+
+            #[inline(always)]
+            fn fast_floor(self) -> Self {
+                unsafe { Self(Ops::<$engine, $scalar_ty>::fast_floor(self.0)) }
+            }
+
+            #[inline(always)]
+            fn fast_round(self) -> Self {
+                unsafe { Self(Ops::<$engine, $scalar_ty>::fast_round(self.0)) }
+            }
+
+            #[inline(always)]
+            fn mul_add(self, a: Self, b: Self) -> Self {
+                unsafe { Self(Ops::<$engine, $scalar_ty>::mul_add(self.0, a.0, b.0)) }
+            }
+
+            #[inline(always)]
+            fn mul_sub(self, a: Self, b: Self) -> Self {
+                unsafe { Self(Ops::<$engine, $scalar_ty>::mul_sub(self.0, a.0, b.0)) }
+            }
+
+            #[inline(always)]
+            fn neg_mul_add(self, a: Self, b: Self) -> Self {
+                unsafe { Self(Ops::<$engine, $scalar_ty>::neg_mul_add(self.0, a.0, b.0)) }
+            }
+
+            #[inline(always)]
+            fn neg_mul_sub(self, a: Self, b: Self) -> Self {
+                unsafe { Self(Ops::<$engine, $scalar_ty>::neg_mul_sub(self.0, a.0, b.0)) }
+            }
+
+            #[inline(always)]
+            fn sqrt(self) -> Self {
+                unsafe { Self(Ops::<$engine, $scalar_ty>::sqrt(self.0)) }
+            }
+
+            #[inline(always)]
+            fn rsqrt(self) -> Self {
+                unsafe { Self(Ops::<$engine, $scalar_ty>::rsqrt(self.0)) }
+            }
+        }
+    };
+}
+
+macro_rules! impl_i32_simd_type {
+    ($engine:ident, $i32_ty:ident, $f32_ty:ident, $i64_ty:ident) => {
+        impl_simd_base!($engine, $i32_ty, i32, |self| {
+            self.partial_horizontal_add().partial_horizontal_add()
+        });
+        impl_simd_int!($engine, $i32_ty, i32);
 
         impl SimdInt32 for $i32_ty {
             type SimdF32 = $f32_ty;
@@ -615,17 +710,17 @@ macro_rules! impl_i32_simd_type {
 
             #[inline(always)]
             fn bitcast_f32(self) -> Self::SimdF32 {
-                unsafe { $f32_ty(Ops::<$engine>::i32_bitcast_f32(self.0)) }
+                unsafe { $f32_ty(Ops::<$engine, i32>::bitcast_f32(self.0)) }
             }
 
             #[inline(always)]
             fn cast_f32(self) -> Self::SimdF32 {
-                unsafe { $f32_ty(Ops::<$engine>::i32_cast_f32(self.0)) }
+                unsafe { $f32_ty(Ops::<$engine, i32>::cast_f32(self.0)) }
             }
 
             #[inline(always)]
             fn extend_to_i64(self) -> (Self::SimdI64, Self::SimdI64) {
-                let (a, b) = unsafe { Ops::<$engine>::i32_extend_i64(self.0) };
+                let (a, b) = unsafe { Ops::<$engine, i32>::extend_i64(self.0) };
                 ($i64_ty(a), $i64_ty(b))
             }
 
@@ -637,264 +732,57 @@ macro_rules! impl_i32_simd_type {
     };
 }
 
+macro_rules! impl_i64_simd_type {
+    ($engine:ident, $i64_ty:ident, $f64_ty:ident) => {
+        impl_simd_base!($engine, $i64_ty, i64, |self| {
+            self.partial_horizontal_add()
+        });
+        impl_simd_int!($engine, $i64_ty, i64);
+
+        impl SimdInt64 for $i64_ty {
+            type SimdF64 = $f64_ty;
+
+            #[inline(always)]
+            fn bitcast_f64(self) -> Self::SimdF64 {
+                unsafe { $f64_ty(Ops::<$engine, i64>::bitcast_f64(self.0)) }
+            }
+
+            #[inline(always)]
+            fn cast_f64(self) -> Self::SimdF64 {
+                unsafe { $f64_ty(Ops::<$engine, i64>::cast_f64(self.0)) }
+            }
+
+            #[inline(always)]
+            fn partial_horizontal_add(self) -> i64 {
+                unsafe { Ops::<$engine, i64>::horizontal_add(self.0) }
+            }
+        }
+    };
+}
+
 macro_rules! impl_f32_simd_type {
     ($engine:ident, $f32_ty:ident, $i32_ty:ident) => {
-        impl InternalSimdBaseIo for $f32_ty {
-            #[inline(always)]
-            unsafe fn zeroes() -> Self {
-                Self(Ops::<$engine>::f32_zeroes())
-            }
-
-            #[inline(always)]
-            unsafe fn set1(x: Self::Scalar) -> Self {
-                Self(Ops::<$engine>::f32_set1(x))
-            }
-
-            #[inline(always)]
-            unsafe fn load_from_array(array: Self::ArrayRepresentation) -> Self {
-                Self(Ops::<$engine>::f32_load_unaligned(array.as_ptr()))
-            }
-
-            #[inline(always)]
-            unsafe fn load_from_ptr_unaligned(ptr: *const Self::Scalar) -> Self {
-                Self(Ops::<$engine>::f32_load_unaligned(ptr))
-            }
-
-            #[inline(always)]
-            unsafe fn copy_to_ptr_unaligned(self, ptr: *mut Self::Scalar) {
-                Ops::<$engine>::f32_store_unaligned(ptr, self.0);
-            }
-
-            #[inline(always)]
-            unsafe fn load_from_ptr_aligned(ptr: *const Self::Scalar) -> Self {
-                Self(Ops::<$engine>::f32_load_aligned(ptr))
-            }
-
-            #[inline(always)]
-            unsafe fn copy_to_ptr_aligned(self, ptr: *mut Self::Scalar) {
-                Ops::<$engine>::f32_store_aligned(ptr, self.0);
-            }
-
-            #[inline(always)]
-            unsafe fn underlying_value(self) -> Self::UnderlyingType {
-                self.0
-            }
-
-            #[inline(always)]
-            unsafe fn underlying_value_mut(&mut self) -> &mut Self::UnderlyingType {
-                &mut self.0
-            }
-
-            #[inline(always)]
-            unsafe fn from_underlying_value(value: Self::UnderlyingType) -> Self {
-                Self(value)
-            }
-        }
-
-        impl SimdBaseOps for $f32_ty {
-            #[inline(always)]
-            fn add(self, rhs: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::f32_add(self.0, rhs.0)) }
-            }
-
-            #[inline(always)]
-            fn sub(self, rhs: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::f32_sub(self.0, rhs.0)) }
-            }
-
-            #[inline(always)]
-            fn mul(self, rhs: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::f32_mul(self.0, rhs.0)) }
-            }
-
-            #[inline(always)]
-            fn bit_and(self, rhs: Self) -> Self {
-                unsafe {
-                    let left = Ops::<$engine>::f32_bitcast_binary(self.0);
-                    let right = Ops::<$engine>::f32_bitcast_binary(rhs.0);
-                    let result = Ops::<$engine>::bit_and(left, right);
-                    Self(Ops::<$engine>::binary_bitcast_f32(result))
-                }
-            }
-
-            #[inline(always)]
-            fn bit_or(self, rhs: Self) -> Self {
-                unsafe {
-                    let left = Ops::<$engine>::f32_bitcast_binary(self.0);
-                    let right = Ops::<$engine>::f32_bitcast_binary(rhs.0);
-                    let result = Ops::<$engine>::bit_or(left, right);
-                    Self(Ops::<$engine>::binary_bitcast_f32(result))
-                }
-            }
-
-            #[inline(always)]
-            fn bit_xor(self, rhs: Self) -> Self {
-                unsafe {
-                    let left = Ops::<$engine>::f32_bitcast_binary(self.0);
-                    let right = Ops::<$engine>::f32_bitcast_binary(rhs.0);
-                    let result = Ops::<$engine>::bit_xor(left, right);
-                    Self(Ops::<$engine>::binary_bitcast_f32(result))
-                }
-            }
-
-            #[inline(always)]
-            fn bit_not(self) -> Self {
-                unsafe {
-                    let val = Ops::<$engine>::f32_bitcast_binary(self.0);
-                    let result = Ops::<$engine>::bit_not(val);
-                    Self(Ops::<$engine>::binary_bitcast_f32(result))
-                }
-            }
-
-            #[inline(always)]
-            fn abs(self) -> Self {
-                unsafe { Self(Ops::<$engine>::f32_abs(self.0)) }
-            }
-
-            #[inline(always)]
-            fn and_not(self, rhs: Self) -> Self {
-                unsafe {
-                    let left = Ops::<$engine>::f32_bitcast_binary(self.0);
-                    let right = Ops::<$engine>::f32_bitcast_binary(rhs.0);
-                    let result = Ops::<$engine>::bit_andnot(right, left);
-                    Self(Ops::<$engine>::binary_bitcast_f32(result))
-                }
-            }
-
-            #[inline(always)]
-            fn blendv(self, a: Self, b: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::f32_blendv(a.0, b.0, self.0)) }
-            }
-
-            #[inline(always)]
-            fn cmp_eq(self, rhs: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::f32_eq(self.0, rhs.0)) }
-            }
-
-            #[inline(always)]
-            fn cmp_neq(self, rhs: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::f32_neq(self.0, rhs.0)) }
-            }
-
-            #[inline(always)]
-            fn cmp_lt(self, rhs: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::f32_lt(self.0, rhs.0)) }
-            }
-
-            #[inline(always)]
-            fn cmp_lte(self, rhs: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::f32_lte(self.0, rhs.0)) }
-            }
-
-            #[inline(always)]
-            fn cmp_gt(self, rhs: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::f32_gt(self.0, rhs.0)) }
-            }
-
-            #[inline(always)]
-            fn cmp_gte(self, rhs: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::f32_gte(self.0, rhs.0)) }
-            }
-
-            #[inline(always)]
-            fn max(self, rhs: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::f32_max(self.0, rhs.0)) }
-            }
-
-            #[inline(always)]
-            fn min(self, rhs: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::f32_min(self.0, rhs.0)) }
-            }
-
-            #[inline(always)]
-            fn horizontal_add(self) -> Self::Scalar {
-                unsafe { Ops::<$engine>::f32_horizontal_add(self.0) }
-            }
-        }
-
-        impl SimdFloat for $f32_ty {
-            #[inline(always)]
-            fn div(self, rhs: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::f32_div(self.0, rhs.0)) }
-            }
-
-            #[inline(always)]
-            fn ceil(self) -> Self {
-                unsafe { Self(Ops::<$engine>::f32_ceil(self.0)) }
-            }
-
-            #[inline(always)]
-            fn floor(self) -> Self {
-                unsafe { Self(Ops::<$engine>::f32_floor(self.0)) }
-            }
-
-            #[inline(always)]
-            fn round(self) -> Self {
-                unsafe { Self(Ops::<$engine>::f32_round(self.0)) }
-            }
-
-            #[inline(always)]
-            fn fast_ceil(self) -> Self {
-                unsafe { Self(Ops::<$engine>::f32_fast_ceil(self.0)) }
-            }
-
-            #[inline(always)]
-            fn fast_floor(self) -> Self {
-                unsafe { Self(Ops::<$engine>::f32_fast_floor(self.0)) }
-            }
-
-            #[inline(always)]
-            fn fast_round(self) -> Self {
-                unsafe { Self(Ops::<$engine>::f32_fast_round(self.0)) }
-            }
-
-            #[inline(always)]
-            fn mul_add(self, a: Self, b: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::f32_mul_add(self.0, a.0, b.0)) }
-            }
-
-            #[inline(always)]
-            fn mul_sub(self, a: Self, b: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::f32_mul_sub(self.0, a.0, b.0)) }
-            }
-
-            #[inline(always)]
-            fn neg_mul_add(self, a: Self, b: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::f32_neg_mul_add(self.0, a.0, b.0)) }
-            }
-
-            #[inline(always)]
-            fn neg_mul_sub(self, a: Self, b: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::f32_neg_mul_sub(self.0, a.0, b.0)) }
-            }
-
-            #[inline(always)]
-            fn sqrt(self) -> Self {
-                unsafe { Self(Ops::<$engine>::f32_sqrt(self.0)) }
-            }
-
-            #[inline(always)]
-            fn rsqrt(self) -> Self {
-                unsafe { Self(Ops::<$engine>::f32_rsqrt(self.0)) }
-            }
-        }
+        impl_simd_base!($engine, $f32_ty, f32, |self| {
+            unsafe { Ops::<$engine, f32>::horizontal_add(self.0) }
+        });
+        impl_simd_float!($engine, $f32_ty, f32);
 
         impl SimdFloat32 for $f32_ty {
             type SimdI32 = $i32_ty;
 
             #[inline(always)]
             fn bitcast_i32(self) -> Self::SimdI32 {
-                unsafe { $i32_ty(Ops::<$engine>::f32_bitcast_i32(self.0)) }
+                unsafe { $i32_ty(Ops::<$engine, f32>::bitcast_i32(self.0)) }
             }
 
             #[inline(always)]
             fn cast_i32(self) -> Self::SimdI32 {
-                unsafe { $i32_ty(Ops::<$engine>::f32_cast_i32(self.0)) }
+                unsafe { $i32_ty(Ops::<$engine, f32>::cast_i32(self.0)) }
             }
 
             #[inline(always)]
             fn fast_inverse(self) -> Self {
-                unsafe { Self(Ops::<$engine>::f32_recip(self.0)) }
+                unsafe { Self(Ops::<$engine, f32>::recip(self.0)) }
             }
         }
     };
@@ -902,257 +790,22 @@ macro_rules! impl_f32_simd_type {
 
 macro_rules! impl_f64_simd_type {
     ($engine:ident, $f64_ty:ident, $i64_ty:ident) => {
-        impl InternalSimdBaseIo for $f64_ty {
-            #[inline(always)]
-            unsafe fn zeroes() -> Self {
-                Self(Ops::<$engine>::f64_zeroes())
-            }
-
-            #[inline(always)]
-            unsafe fn set1(x: Self::Scalar) -> Self {
-                Self(Ops::<$engine>::f64_set1(x))
-            }
-
-            #[inline(always)]
-            unsafe fn load_from_array(array: Self::ArrayRepresentation) -> Self {
-                Self(Ops::<$engine>::f64_load_unaligned(array.as_ptr()))
-            }
-
-            #[inline(always)]
-            unsafe fn load_from_ptr_unaligned(ptr: *const Self::Scalar) -> Self {
-                Self(Ops::<$engine>::f64_load_unaligned(ptr))
-            }
-
-            #[inline(always)]
-            unsafe fn copy_to_ptr_unaligned(self, ptr: *mut Self::Scalar) {
-                Ops::<$engine>::f64_store_unaligned(ptr, self.0);
-            }
-
-            #[inline(always)]
-            unsafe fn load_from_ptr_aligned(ptr: *const Self::Scalar) -> Self {
-                Self(Ops::<$engine>::f64_load_aligned(ptr))
-            }
-
-            #[inline(always)]
-            unsafe fn copy_to_ptr_aligned(self, ptr: *mut Self::Scalar) {
-                Ops::<$engine>::f64_store_aligned(ptr, self.0);
-            }
-
-            #[inline(always)]
-            unsafe fn underlying_value(self) -> Self::UnderlyingType {
-                self.0
-            }
-
-            #[inline(always)]
-            unsafe fn underlying_value_mut(&mut self) -> &mut Self::UnderlyingType {
-                &mut self.0
-            }
-
-            #[inline(always)]
-            unsafe fn from_underlying_value(value: Self::UnderlyingType) -> Self {
-                Self(value)
-            }
-        }
-
-        impl SimdBaseOps for $f64_ty {
-            #[inline(always)]
-            fn add(self, rhs: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::f64_add(self.0, rhs.0)) }
-            }
-
-            #[inline(always)]
-            fn sub(self, rhs: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::f64_sub(self.0, rhs.0)) }
-            }
-
-            #[inline(always)]
-            fn mul(self, rhs: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::f64_mul(self.0, rhs.0)) }
-            }
-
-            #[inline(always)]
-            fn bit_and(self, rhs: Self) -> Self {
-                unsafe {
-                    let left = Ops::<$engine>::f64_bitcast_binary(self.0);
-                    let right = Ops::<$engine>::f64_bitcast_binary(rhs.0);
-                    let result = Ops::<$engine>::bit_and(left, right);
-                    Self(Ops::<$engine>::binary_bitcast_f64(result))
-                }
-            }
-
-            #[inline(always)]
-            fn bit_or(self, rhs: Self) -> Self {
-                unsafe {
-                    let left = Ops::<$engine>::f64_bitcast_binary(self.0);
-                    let right = Ops::<$engine>::f64_bitcast_binary(rhs.0);
-                    let result = Ops::<$engine>::bit_or(left, right);
-                    Self(Ops::<$engine>::binary_bitcast_f64(result))
-                }
-            }
-
-            #[inline(always)]
-            fn bit_xor(self, rhs: Self) -> Self {
-                unsafe {
-                    let left = Ops::<$engine>::f64_bitcast_binary(self.0);
-                    let right = Ops::<$engine>::f64_bitcast_binary(rhs.0);
-                    let result = Ops::<$engine>::bit_xor(left, right);
-                    Self(Ops::<$engine>::binary_bitcast_f64(result))
-                }
-            }
-
-            #[inline(always)]
-            fn bit_not(self) -> Self {
-                unsafe {
-                    let val = Ops::<$engine>::f64_bitcast_binary(self.0);
-                    let result = Ops::<$engine>::bit_not(val);
-                    Self(Ops::<$engine>::binary_bitcast_f64(result))
-                }
-            }
-
-            #[inline(always)]
-            fn abs(self) -> Self {
-                unsafe { Self(Ops::<$engine>::f64_abs(self.0)) }
-            }
-
-            #[inline(always)]
-            fn and_not(self, rhs: Self) -> Self {
-                unsafe {
-                    let left = Ops::<$engine>::f64_bitcast_binary(self.0);
-                    let right = Ops::<$engine>::f64_bitcast_binary(rhs.0);
-                    let result = Ops::<$engine>::bit_andnot(right, left);
-                    Self(Ops::<$engine>::binary_bitcast_f64(result))
-                }
-            }
-
-            #[inline(always)]
-            fn blendv(self, a: Self, b: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::f64_blendv(a.0, b.0, self.0)) }
-            }
-
-            #[inline(always)]
-            fn cmp_eq(self, rhs: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::f64_eq(self.0, rhs.0)) }
-            }
-
-            #[inline(always)]
-            fn cmp_neq(self, rhs: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::f64_neq(self.0, rhs.0)) }
-            }
-
-            #[inline(always)]
-            fn cmp_lt(self, rhs: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::f64_lt(self.0, rhs.0)) }
-            }
-
-            #[inline(always)]
-            fn cmp_lte(self, rhs: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::f64_lte(self.0, rhs.0)) }
-            }
-
-            #[inline(always)]
-            fn cmp_gt(self, rhs: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::f64_gt(self.0, rhs.0)) }
-            }
-
-            #[inline(always)]
-            fn cmp_gte(self, rhs: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::f64_gte(self.0, rhs.0)) }
-            }
-
-            #[inline(always)]
-            fn max(self, rhs: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::f64_max(self.0, rhs.0)) }
-            }
-
-            #[inline(always)]
-            fn min(self, rhs: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::f64_min(self.0, rhs.0)) }
-            }
-
-            #[inline(always)]
-            fn horizontal_add(self) -> Self::Scalar {
-                unsafe { Ops::<$engine>::f64_horizontal_add(self.0) }
-            }
-        }
-
-        impl SimdFloat for $f64_ty {
-            #[inline(always)]
-            fn div(self, rhs: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::f64_div(self.0, rhs.0)) }
-            }
-
-            #[inline(always)]
-            fn ceil(self) -> Self {
-                unsafe { Self(Ops::<$engine>::f64_ceil(self.0)) }
-            }
-
-            #[inline(always)]
-            fn floor(self) -> Self {
-                unsafe { Self(Ops::<$engine>::f64_floor(self.0)) }
-            }
-
-            #[inline(always)]
-            fn round(self) -> Self {
-                unsafe { Self(Ops::<$engine>::f64_round(self.0)) }
-            }
-
-            #[inline(always)]
-            fn fast_ceil(self) -> Self {
-                unsafe { Self(Ops::<$engine>::f64_fast_ceil(self.0)) }
-            }
-
-            #[inline(always)]
-            fn fast_floor(self) -> Self {
-                unsafe { Self(Ops::<$engine>::f64_fast_floor(self.0)) }
-            }
-
-            #[inline(always)]
-            fn fast_round(self) -> Self {
-                unsafe { Self(Ops::<$engine>::f64_fast_round(self.0)) }
-            }
-
-            #[inline(always)]
-            fn mul_add(self, a: Self, b: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::f64_mul_add(self.0, a.0, b.0)) }
-            }
-
-            #[inline(always)]
-            fn mul_sub(self, a: Self, b: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::f64_mul_sub(self.0, a.0, b.0)) }
-            }
-
-            #[inline(always)]
-            fn neg_mul_add(self, a: Self, b: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::f64_neg_mul_add(self.0, a.0, b.0)) }
-            }
-
-            #[inline(always)]
-            fn neg_mul_sub(self, a: Self, b: Self) -> Self {
-                unsafe { Self(Ops::<$engine>::f64_neg_mul_sub(self.0, a.0, b.0)) }
-            }
-
-            #[inline(always)]
-            fn sqrt(self) -> Self {
-                unsafe { Self(Ops::<$engine>::f64_sqrt(self.0)) }
-            }
-
-            #[inline(always)]
-            fn rsqrt(self) -> Self {
-                unsafe { Self(Ops::<$engine>::f64_rsqrt(self.0)) }
-            }
-        }
+        impl_simd_base!($engine, $f64_ty, f64, |self| {
+            unsafe { Ops::<$engine, f64>::horizontal_add(self.0) }
+        });
+        impl_simd_float!($engine, $f64_ty, f64);
 
         impl SimdFloat64 for $f64_ty {
             type SimdI64 = $i64_ty;
 
             #[inline(always)]
             fn bitcast_i64(self) -> Self::SimdI64 {
-                unsafe { $i64_ty(Ops::<$engine>::f64_bitcast_i64(self.0)) }
+                unsafe { $i64_ty(Ops::<$engine, f64>::bitcast_i64(self.0)) }
             }
 
             #[inline(always)]
             fn cast_i64(self) -> Self::SimdI64 {
-                unsafe { $i64_ty(Ops::<$engine>::f64_cast_i64(self.0)) }
+                unsafe { $i64_ty(Ops::<$engine, f64>::cast_i64(self.0)) }
             }
         }
     };

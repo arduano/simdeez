@@ -1,7 +1,7 @@
 use super::*;
 
 impl_op! {
-    fn f64_add {
+    fn add<f64> {
         for Avx2(a: __m256d, b: __m256d) -> __m256d {
             _mm256_add_pd(a, b)
         }
@@ -18,7 +18,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn f64_sub {
+    fn sub<f64> {
         for Avx2(a: __m256d, b: __m256d) -> __m256d {
             _mm256_sub_pd(a, b)
         }
@@ -35,7 +35,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn f64_mul {
+    fn mul<f64> {
         for Avx2(a: __m256d, b: __m256d) -> __m256d {
             _mm256_mul_pd(a, b)
         }
@@ -52,7 +52,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn f64_div {
+    fn div<f64> {
         for Avx2(a: __m256d, b: __m256d) -> __m256d {
             _mm256_div_pd(a, b)
         }
@@ -69,7 +69,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn f64_mul_add {
+    fn mul_add<f64> {
         for Avx2(a: __m256d, b: __m256d, c: __m256d) -> __m256d {
             _mm256_fmadd_pd(a, b, c)
         }
@@ -86,7 +86,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn f64_mul_sub {
+    fn mul_sub<f64> {
         for Avx2(a: __m256d, b: __m256d, c: __m256d) -> __m256d {
             _mm256_fmsub_pd(a, b, c)
         }
@@ -103,7 +103,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn f64_neg_mul_add {
+    fn neg_mul_add<f64> {
         for Avx2(a: __m256d, b: __m256d, c: __m256d) -> __m256d {
             _mm256_fnmadd_pd(a, b, c)
         }
@@ -120,7 +120,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn f64_neg_mul_sub {
+    fn neg_mul_sub<f64> {
         for Avx2(a: __m256d, b: __m256d, c: __m256d) -> __m256d {
             _mm256_fnmsub_pd(a, b, c)
         }
@@ -141,7 +141,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn f64_sqrt {
+    fn sqrt<f64> {
         for Avx2(a: __m256d) -> __m256d {
             _mm256_sqrt_pd(a)
         }
@@ -158,7 +158,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn f64_rsqrt {
+    fn rsqrt<f64> {
         for Avx2(a: __m256d) -> __m256d {
             let one = _mm256_set1_pd(1.0);
             _mm256_div_pd(one, _mm256_sqrt_pd(a))
@@ -178,7 +178,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn f64_min {
+    fn min<f64> {
         for Avx2(a: __m256d, b: __m256d) -> __m256d {
             _mm256_min_pd(a, b)
         }
@@ -195,7 +195,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn f64_max {
+    fn max<f64> {
         for Avx2(a: __m256d, b: __m256d) -> __m256d {
             _mm256_max_pd(a, b)
         }
@@ -212,7 +212,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn f64_abs {
+    fn abs<f64> {
         for Avx2(a: __m256d) -> __m256d {
             _mm256_andnot_pd(_mm256_set1_pd(-0.0), a)
         }
@@ -229,7 +229,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn f64_round {
+    fn round<f64> {
         for Avx2(a: __m256d) -> __m256d {
             _mm256_round_pd(a, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC)
         }
@@ -253,7 +253,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn f64_floor {
+    fn floor<f64> {
         for Avx2(a: __m256d) -> __m256d {
             _mm256_round_pd(a, _MM_FROUND_TO_NEG_INF | _MM_FROUND_NO_EXC)
         }
@@ -275,7 +275,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn f64_ceil {
+    fn ceil<f64> {
         for Avx2(a: __m256d) -> __m256d {
             _mm256_round_pd(a, _MM_FROUND_TO_POS_INF | _MM_FROUND_NO_EXC)
         }
@@ -297,58 +297,58 @@ impl_op! {
 }
 
 impl_op! {
-    fn f64_fast_round {
+    fn fast_round<f64> {
         for Avx2(a: __m256d) -> __m256d {
-            Self::f64_round(a)
+            Self::round(a)
         }
         for Sse41(a: __m128d) -> __m128d {
-            Self::f64_round(a)
+            Self::round(a)
         }
         for Sse2(a: __m128d) -> __m128d {
-            Self::f64_round(a)
+            Self::round(a)
         }
         for Scalar(a: f64) -> f64 {
-            Self::f64_round(a)
+            Self::round(a)
         }
     }
 }
 
 impl_op! {
-    fn f64_fast_floor {
+    fn fast_floor<f64> {
         for Avx2(a: __m256d) -> __m256d {
-            Self::f64_floor(a)
+            Self::floor(a)
         }
         for Sse41(a: __m128d) -> __m128d {
-            Self::f64_floor(a)
+            Self::floor(a)
         }
         for Sse2(a: __m128d) -> __m128d {
-            Self::f64_floor(a)
+            Self::floor(a)
         }
         for Scalar(a: f64) -> f64 {
-            Self::f64_floor(a)
+            Self::floor(a)
         }
     }
 }
 
 impl_op! {
-    fn f64_fast_ceil {
+    fn fast_ceil<f64> {
         for Avx2(a: __m256d) -> __m256d {
-            Self::f64_ceil(a)
+            Self::ceil(a)
         }
         for Sse41(a: __m128d) -> __m128d {
-            Self::f64_ceil(a)
+            Self::ceil(a)
         }
         for Sse2(a: __m128d) -> __m128d {
-            Self::f64_ceil(a)
+            Self::ceil(a)
         }
         for Scalar(a: f64) -> f64 {
-            Self::f64_ceil(a)
+            Self::ceil(a)
         }
     }
 }
 
 impl_op! {
-    fn f64_eq {
+    fn eq<f64> {
         for Avx2(a: __m256d, b: __m256d) -> __m256d {
             _mm256_cmp_pd(a, b, _CMP_EQ_OQ)
         }
@@ -369,7 +369,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn f64_neq {
+    fn neq<f64> {
         for Avx2(a: __m256d, b: __m256d) -> __m256d {
             _mm256_cmp_pd(a, b, _CMP_NEQ_OQ)
         }
@@ -390,7 +390,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn f64_lt {
+    fn lt<f64> {
         for Avx2(a: __m256d, b: __m256d) -> __m256d {
             _mm256_cmp_pd(a, b, _CMP_LT_OQ)
         }
@@ -411,7 +411,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn f64_lte {
+    fn lte<f64> {
         for Avx2(a: __m256d, b: __m256d) -> __m256d {
             _mm256_cmp_pd(a, b, _CMP_LE_OQ)
         }
@@ -432,7 +432,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn f64_gt {
+    fn gt<f64> {
         for Avx2(a: __m256d, b: __m256d) -> __m256d {
             _mm256_cmp_pd(a, b, _CMP_GT_OQ)
         }
@@ -453,7 +453,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn f64_gte {
+    fn gte<f64> {
         for Avx2(a: __m256d, b: __m256d) -> __m256d {
             _mm256_cmp_pd(a, b, _CMP_GE_OQ)
         }
@@ -474,7 +474,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn f64_blendv {
+    fn blendv<f64> {
         for Avx2(a: __m256d, b: __m256d, mask: __m256d) -> __m256d {
             _mm256_blendv_pd(a, b, mask)
         }
@@ -495,7 +495,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn f64_horizontal_add {
+    fn horizontal_add<f64> {
         for Avx2(a: __m256d) -> f64 {
             let a = _mm256_hadd_pd(a, a);
             let b = _mm256_hadd_pd(a, a);
@@ -528,7 +528,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn f64_cast_i64 {
+    fn cast_i64<f64> {
         for Avx2(a: __m256d) -> __m256i {
             let nums_arr = core::mem::transmute::<_, [f64; 4]>(a);
             let ceil = [
@@ -562,7 +562,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn f64_bitcast_i64 {
+    fn bitcast_i64<f64> {
         for Avx2(a: __m256d) -> __m256i {
             _mm256_castpd_si256(a)
         }
@@ -579,7 +579,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn f64_zeroes {
+    fn zeroes<f64> {
         for Avx2() -> __m256d {
             _mm256_setzero_pd()
         }
@@ -596,7 +596,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn f64_set1 {
+    fn set1<f64> {
         for Avx2(val: f64) -> __m256d {
             _mm256_set1_pd(val)
         }
@@ -613,7 +613,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn f64_load_unaligned {
+    fn load_unaligned<f64> {
         for Avx2(ptr: *const f64) -> __m256d {
             _mm256_loadu_pd(ptr)
         }
@@ -630,7 +630,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn f64_load_aligned {
+    fn load_aligned<f64> {
         for Avx2(ptr: *const f64) -> __m256d {
             _mm256_load_pd(ptr)
         }
@@ -647,7 +647,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn f64_store_unaligned {
+    fn store_unaligned<f64> {
         for Avx2(ptr: *mut f64, a: __m256d) {
             _mm256_storeu_pd(ptr, a)
         }
@@ -664,7 +664,7 @@ impl_op! {
 }
 
 impl_op! {
-    fn f64_store_aligned {
+    fn store_aligned<f64> {
         for Avx2(ptr: *mut f64, a: __m256d) {
             _mm256_store_pd(ptr, a)
         }

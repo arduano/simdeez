@@ -13,6 +13,9 @@ use core::arch::x86_64::*;
 mod i32;
 pub use self::i32::*;
 
+mod i64;
+pub use self::i64::*;
+
 mod f32;
 pub use self::f32::*;
 
@@ -25,7 +28,10 @@ pub use self::bit::*;
 mod casts;
 pub use self::casts::*;
 
-pub struct Ops<T>(PhantomData<T>);
+#[allow(non_camel_case_types)]
+pub struct binary;
+
+pub struct Ops<T, T2>(PhantomData<(T, T2)>);
 
 macro_rules! with_feature_flag {
     (Avx2, $($r:tt)+) => {
@@ -47,7 +53,7 @@ macro_rules! with_feature_flag {
 use with_feature_flag;
 
 macro_rules! impl_op {
-    (fn $name:ident {
+    (fn $name:ident < $scalar:ty > {
         $(
             for $engine:ident ($( $arg:ident : $arg_ty:ty ),*) $( -> $ret_ty:ty )? {
                 $( $body:tt )*
@@ -55,7 +61,7 @@ macro_rules! impl_op {
         )*
     }) => {
         $(
-            impl Ops<$engine> {
+            impl Ops<$engine, $scalar> {
                 with_feature_flag!(
                     $engine,
                     #[inline]
@@ -68,3 +74,26 @@ macro_rules! impl_op {
     }
 }
 use impl_op;
+
+macro_rules! impl_imm8_op {
+    (fn $name:ident < $scalar:ty, const $imm8:ident: $imm8ty:ty > {
+        $(
+            for $engine:ident ($( $arg:ident : $arg_ty:ty ),*) $( -> $ret_ty:ty )? {
+                $( $body:tt )*
+            }
+        )*
+    }) => {
+        $(
+            impl Ops<$engine, $scalar> {
+                with_feature_flag!(
+                    $engine,
+                    #[inline]
+                    pub unsafe fn $name < const $imm8: $imm8ty > ($($arg: $arg_ty),*) $( -> $ret_ty )? {
+                        $( $body )*
+                    }
+                );
+            }
+        )*
+    }
+}
+use impl_imm8_op;
