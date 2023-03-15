@@ -12,7 +12,7 @@ impl_op! {
             _mm_add_epi8(a, b)
         }
         for Scalar(a: i8, b: i8) -> i8 {
-            a + b
+            a.wrapping_add(b)
         }
     }
 }
@@ -29,7 +29,7 @@ impl_op! {
             _mm_sub_epi8(a, b)
         }
         for Scalar(a: i8, b: i8) -> i8 {
-            a - b
+            a.wrapping_sub(b)
         }
     }
 }
@@ -61,7 +61,7 @@ impl_op! {
             core::mem::transmute::<_, _>(arr1)
         }
         for Scalar(a: i8, b: i8) -> i8 {
-            a * b
+            a.wrapping_mul(b)
         }
     }
 }

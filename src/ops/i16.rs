@@ -12,7 +12,7 @@ impl_op! {
             _mm_add_epi16(a, b)
         }
         for Scalar(a: i16, b: i16) -> i16 {
-            a + b
+            a.wrapping_add(b)
         }
     }
 }
@@ -29,7 +29,7 @@ impl_op! {
             _mm_sub_epi16(a, b)
         }
         for Scalar(a: i16, b: i16) -> i16 {
-            a - b
+            a.wrapping_sub(b)
         }
     }
 }
@@ -46,7 +46,7 @@ impl_op! {
             _mm_mullo_epi16(a, b)
         }
         for Scalar(a: i16, b: i16) -> i16 {
-            a * b
+            a.wrapping_mul(b)
         }
     }
 }

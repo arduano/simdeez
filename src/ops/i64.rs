@@ -12,7 +12,7 @@ impl_op! {
             _mm_add_epi64(a, b)
         }
         for Scalar(a: i64, b: i64) -> i64 {
-            a + b
+            a.wrapping_add(b)
         }
     }
 }
@@ -29,7 +29,7 @@ impl_op! {
             _mm_sub_epi64(a, b)
         }
         for Scalar(a: i64, b: i64) -> i64 {
-            a - b
+            a.wrapping_sub(b)
         }
     }
 }
@@ -40,10 +40,10 @@ impl_op! {
             let a_arr = core::mem::transmute::<_, [i64; 4]>(a);
             let b_arr = core::mem::transmute::<_, [i64; 4]>(b);
             let c_arr = [
-                a_arr[0] * b_arr[0],
-                a_arr[1] * b_arr[1],
-                a_arr[2] * b_arr[2],
-                a_arr[3] * b_arr[3],
+                a_arr[0].wrapping_mul(b_arr[0]),
+                a_arr[1].wrapping_mul(b_arr[1]),
+                a_arr[2].wrapping_mul(b_arr[2]),
+                a_arr[3].wrapping_mul(b_arr[3]),
             ];
             core::mem::transmute::<_, __m256i>(c_arr)
         }
@@ -51,8 +51,8 @@ impl_op! {
             let a_arr = core::mem::transmute::<_, [i64; 2]>(a);
             let b_arr = core::mem::transmute::<_, [i64; 2]>(b);
             let c_arr = [
-                a_arr[0] * b_arr[0],
-                a_arr[1] * b_arr[1],
+                a_arr[0].wrapping_mul(b_arr[0]),
+                a_arr[1].wrapping_mul(b_arr[1]),
             ];
             core::mem::transmute::<_, __m128i>(c_arr)
         }
@@ -60,13 +60,13 @@ impl_op! {
             let a_arr = core::mem::transmute::<_, [i64; 2]>(a);
             let b_arr = core::mem::transmute::<_, [i64; 2]>(b);
             let c_arr = [
-                a_arr[0] * b_arr[0],
-                a_arr[1] * b_arr[1],
+                a_arr[0].wrapping_mul(b_arr[0]),
+                a_arr[1].wrapping_mul(b_arr[1]),
             ];
             core::mem::transmute::<_, __m128i>(c_arr)
         }
         for Scalar(a: i64, b: i64) -> i64 {
-            a * b
+            a.wrapping_mul(b)
         }
     }
 }
