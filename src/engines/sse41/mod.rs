@@ -1,17 +1,14 @@
-use crate::{
-    InternalSimdBaseIo, SimdBaseOps, SimdConsts, SimdFloat, SimdFloat32, SimdFloat64, SimdInt,
-    SimdInt16, SimdInt32, SimdInt64, SimdInt8,
-};
-
 #[cfg(target_arch = "x86")]
 use core::arch::x86::*;
-
 #[cfg(target_arch = "x86_64")]
 use core::arch::x86_64::*;
 
 use core::ops::*;
 
-use paste::paste;
+use crate::{
+    InternalSimdBaseIo, SimdBaseOps, SimdConsts, SimdFloat, SimdFloat32, SimdFloat64, SimdInt,
+    SimdInt16, SimdInt32, SimdInt64, SimdInt8,
+};
 
 use crate::ops::*;
 

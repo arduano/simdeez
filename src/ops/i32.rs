@@ -300,14 +300,14 @@ impl_op! {
         for Avx2(a: __m256i, rhs: i32) -> __m256i {
             _mm256_srl_epi32(a, _mm_cvtsi32_si128(rhs))
         }
-        for Sse41(a: __m128i, b: i32) -> __m128i {
-            _mm_srl_epi32(a, _mm_cvtsi32_si128(b))
+        for Sse41(a: __m128i, rhs: i32) -> __m128i {
+            _mm_srl_epi32(a, _mm_cvtsi32_si128(rhs))
         }
-        for Sse2(a: __m128i, b: i32) -> __m128i {
-            _mm_srl_epi32(a, _mm_cvtsi32_si128(b))
+        for Sse2(a: __m128i, rhs: i32) -> __m128i {
+            _mm_srl_epi32(a, _mm_cvtsi32_si128(rhs))
         }
-        for Scalar(a: i32, b: i32) -> i32 {
-            a >> b
+        for Scalar(a: i32, rhs: i32) -> i32 {
+            ((a as u32) >> rhs) as i32
         }
     }
 }
@@ -341,7 +341,7 @@ impl_imm8_op! {
             _mm_srli_epi32(a, BY)
         }
         for Scalar(a: i32) -> i32 {
-            a >> BY
+            ((a as u32) >> BY) as i32
         }
     }
 }
@@ -388,10 +388,7 @@ impl_op! {
             (a, b)
         }
         for Sse41(val: __m128i) -> (__m128i, __m128i) {
-            let arr = core::mem::transmute::<_, [i32; 4]>(val);
-            let a = [arr[0] as i64, arr[1] as i64];
-            let b = [arr[2] as i64, arr[3] as i64];
-            (core::mem::transmute(a), core::mem::transmute(b))
+            Ops::<Sse2, i32>::extend_i64(val)
         }
         for Sse2(val: __m128i) -> (__m128i, __m128i) {
             let arr = core::mem::transmute::<_, [i32; 4]>(val);
@@ -401,6 +398,28 @@ impl_op! {
         }
         for Scalar(val: i32) -> (i64, i64) {
             (val as i64, 0)
+        }
+    }
+}
+
+impl_op! {
+    fn unsigned_extend_i64<i32> {
+        for Avx2(val: __m256i) -> (__m256i, __m256i) {
+            let a = _mm256_cvtepu32_epi64(_mm256_extracti128_si256(val, 0));
+            let b = _mm256_cvtepu32_epi64(_mm256_extracti128_si256(val, 1));
+            (a, b)
+        }
+        for Sse41(val: __m128i) -> (__m128i, __m128i) {
+            Ops::<Sse2, i32>::unsigned_extend_i64(val)
+        }
+        for Sse2(val: __m128i) -> (__m128i, __m128i) {
+            let arr = core::mem::transmute::<_, [i32; 4]>(val);
+            let a = [arr[0] as u32 as u64 as i64, arr[1] as u32 as u64 as i64];
+            let b = [arr[2] as u32 as u64 as i64, arr[3] as u32 as u64 as i64];
+            (core::mem::transmute(a), core::mem::transmute(b))
+        }
+        for Scalar(val: i32) -> (i64, i64) {
+            (val as u32 as u64 as i64, 0)
         }
     }
 }

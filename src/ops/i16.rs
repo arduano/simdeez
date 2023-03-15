@@ -297,7 +297,7 @@ impl_op! {
             _mm_srl_epi16(a, _mm_cvtsi32_si128(rhs))
         }
         for Scalar(a: i16, rhs: i32) -> i16 {
-            a >> rhs
+            ((a as u16) >> rhs) as i16
         }
     }
 }
@@ -331,7 +331,7 @@ impl_imm8_op! {
             _mm_srli_epi16(a, BY)
         }
         for Scalar(a: i16) -> i16 {
-            a >> BY
+            ((a as u16) >> BY) as i16
         }
     }
 }
@@ -366,6 +366,40 @@ impl_op! {
         }
         for Scalar(val: i16) -> (i32, i32) {
             (val as i32, 0)
+        }
+    }
+}
+
+impl_op! {
+    fn unsigned_extend_i32<i16> {
+        for Avx2(val: __m256i) -> (__m256i, __m256i) {
+            let a = _mm256_cvtepu16_epi32(_mm256_extracti128_si256(val, 0));
+            let b = _mm256_cvtepu16_epi32(_mm256_extracti128_si256(val, 1));
+            (a, b)
+        }
+        for Sse41(val: __m128i) -> (__m128i, __m128i) {
+            let a = _mm_cvtepu16_epi32(val);
+            let b = _mm_cvtepu16_epi32(_mm_shuffle_epi32(val, 0b_01_00_11_10));
+            (a, b)
+        }
+        for Sse2(val: __m128i) -> (__m128i, __m128i) {
+            let arr = core::mem::transmute::<__m128i, [i16; 8]>(val);
+            let a = [
+                arr[0] as u16 as u32 as i32,
+                arr[1] as u16 as u32 as i32,
+                arr[2] as u16 as u32 as i32,
+                arr[3] as u16 as u32 as i32,
+            ];
+            let b = [
+                arr[4] as u16 as u32 as i32,
+                arr[5] as u16 as u32 as i32,
+                arr[6] as u16 as u32 as i32,
+                arr[7] as u16 as u32 as i32,
+            ];
+            (core::mem::transmute(a), core::mem::transmute(b))
+        }
+        for Scalar(val: i16) -> (i32, i32) {
+            (val as u16 as u32 as i32, 0)
         }
     }
 }

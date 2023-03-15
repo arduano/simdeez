@@ -484,7 +484,7 @@ macro_rules! impl_simd_base {
                     let left = Ops::<$engine, $scalar_ty>::bitcast_binary(self.0);
                     let right = Ops::<$engine, $scalar_ty>::bitcast_binary(rhs.0);
                     let result = Ops::<$engine, binary>::bit_and(left, right);
-                    paste! {
+                    paste::paste! {
                         Self(Ops::<$engine, binary>::[<bitcast_ $scalar_ty>](result))
                     }
                 }
@@ -496,7 +496,7 @@ macro_rules! impl_simd_base {
                     let left = Ops::<$engine, $scalar_ty>::bitcast_binary(self.0);
                     let right = Ops::<$engine, $scalar_ty>::bitcast_binary(rhs.0);
                     let result = Ops::<$engine, binary>::bit_or(left, right);
-                    paste! {
+                    paste::paste! {
                         Self(Ops::<$engine, binary>::[<bitcast_ $scalar_ty>](result))
                     }
                 }
@@ -508,7 +508,7 @@ macro_rules! impl_simd_base {
                     let left = Ops::<$engine, $scalar_ty>::bitcast_binary(self.0);
                     let right = Ops::<$engine, $scalar_ty>::bitcast_binary(rhs.0);
                     let result = Ops::<$engine, binary>::bit_xor(left, right);
-                    paste! {
+                    paste::paste! {
                         Self(Ops::<$engine, binary>::[<bitcast_ $scalar_ty>](result))
                     }
                 }
@@ -519,7 +519,7 @@ macro_rules! impl_simd_base {
                 unsafe {
                     let val = Ops::<$engine, $scalar_ty>::bitcast_binary(self.0);
                     let result = Ops::<$engine, binary>::bit_not(val);
-                    paste! {
+                    paste::paste! {
                         Self(Ops::<$engine, binary>::[<bitcast_ $scalar_ty>](result))
                     }
                 }
@@ -536,7 +536,7 @@ macro_rules! impl_simd_base {
                     let left = Ops::<$engine, $scalar_ty>::bitcast_binary(self.0);
                     let right = Ops::<$engine, $scalar_ty>::bitcast_binary(rhs.0);
                     let result = Ops::<$engine, binary>::bit_andnot(right, left);
-                    paste! {
+                    paste::paste! {
                         Self(Ops::<$engine, binary>::[<bitcast_ $scalar_ty>](result))
                     }
                 }
@@ -596,7 +596,9 @@ macro_rules! impl_simd_base {
 }
 
 macro_rules! impl_simd_int {
-    ($engine:ident, $ty:ident, $scalar_ty:ident) => {
+    ($engine:ident, $ty:ident, $scalar_ty:ident, |$self:ident| {
+        $($hadd:tt)*
+    }) => {
         impl SimdInt for $ty {
             #[inline(always)]
             fn shl(self, rhs: i32) -> Self {
@@ -619,8 +621,8 @@ macro_rules! impl_simd_int {
             }
 
             #[inline(always)]
-            fn horizontal_unsigned_add(self) -> Self::HorizontalAddScalar {
-                todo!()
+            fn horizontal_unsigned_add($self) -> Self::HorizontalAddScalar {
+                $($hadd)*
             }
         }
     };
@@ -700,9 +702,17 @@ macro_rules! impl_simd_float {
 macro_rules! impl_i8_simd_type {
     ($engine:ident, $i8_ty:ident, $i16_ty:ident) => {
         impl_simd_base!($engine, $i8_ty, i8, |self| {
-            self.partial_horizontal_add().partial_horizontal_add().partial_horizontal_add().partial_horizontal_add()
+            self.partial_horizontal_add()
+                .partial_horizontal_add()
+                .partial_horizontal_add()
+                .partial_horizontal_add()
         });
-        impl_simd_int!($engine, $i8_ty, i8);
+        impl_simd_int!($engine, $i8_ty, i8, |self| {
+            self.partial_horizontal_unsigned_add()
+                .partial_horizontal_unsigned_add()
+                .partial_horizontal_unsigned_add()
+                .partial_horizontal_add()
+        });
 
         impl SimdInt8 for $i8_ty {
             type SimdI16 = $i16_ty;
@@ -715,7 +725,8 @@ macro_rules! impl_i8_simd_type {
 
             #[inline(always)]
             fn unsigned_extend_to_i16(self) -> (Self::SimdI16, Self::SimdI16) {
-                todo!()
+                let (a, b) = unsafe { Ops::<$engine, i8>::unsigned_extend_i16(self.0) };
+                ($i16_ty(a), $i16_ty(b))
             }
 
             #[inline(always)]
@@ -729,9 +740,15 @@ macro_rules! impl_i8_simd_type {
 macro_rules! impl_i16_simd_type {
     ($engine:ident, $i16_ty:ident, $i32_ty:ident) => {
         impl_simd_base!($engine, $i16_ty, i16, |self| {
-            self.partial_horizontal_add().partial_horizontal_add().partial_horizontal_add()
+            self.partial_horizontal_add()
+                .partial_horizontal_add()
+                .partial_horizontal_add()
         });
-        impl_simd_int!($engine, $i16_ty, i16);
+        impl_simd_int!($engine, $i16_ty, i16, |self| {
+            self.partial_horizontal_unsigned_add()
+                .partial_horizontal_unsigned_add()
+                .partial_horizontal_add()
+        });
 
         impl SimdInt16 for $i16_ty {
             type SimdI32 = $i32_ty;
@@ -744,7 +761,8 @@ macro_rules! impl_i16_simd_type {
 
             #[inline(always)]
             fn unsigned_extend_to_i32(self) -> (Self::SimdI32, Self::SimdI32) {
-                todo!()
+                let (a, b) = unsafe { Ops::<$engine, i16>::unsigned_extend_i32(self.0) };
+                ($i32_ty(a), $i32_ty(b))
             }
         }
     };
@@ -755,7 +773,10 @@ macro_rules! impl_i32_simd_type {
         impl_simd_base!($engine, $i32_ty, i32, |self| {
             self.partial_horizontal_add().partial_horizontal_add()
         });
-        impl_simd_int!($engine, $i32_ty, i32);
+        impl_simd_int!($engine, $i32_ty, i32, |self| {
+            self.partial_horizontal_unsigned_add()
+                .partial_horizontal_add()
+        });
 
         impl SimdInt32 for $i32_ty {
             type SimdF32 = $f32_ty;
@@ -779,7 +800,8 @@ macro_rules! impl_i32_simd_type {
 
             #[inline(always)]
             fn unsigned_extend_to_i64(self) -> (Self::SimdI64, Self::SimdI64) {
-                todo!()
+                let (a, b) = unsafe { Ops::<$engine, i32>::unsigned_extend_i64(self.0) };
+                ($i64_ty(a), $i64_ty(b))
             }
         }
     };
@@ -790,7 +812,9 @@ macro_rules! impl_i64_simd_type {
         impl_simd_base!($engine, $i64_ty, i64, |self| {
             self.partial_horizontal_add()
         });
-        impl_simd_int!($engine, $i64_ty, i64);
+        impl_simd_int!($engine, $i64_ty, i64, |self| {
+            self.partial_horizontal_add()
+        });
 
         impl SimdInt64 for $i64_ty {
             type SimdF64 = $f64_ty;

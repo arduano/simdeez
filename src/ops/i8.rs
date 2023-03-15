@@ -338,7 +338,7 @@ impl_op! {
             _mm_andnot_si128(mask, shifted_i16)
         }
         for Scalar(a: i8, rhs: i32) -> i8 {
-            a >> rhs
+            ((a as u8) >> rhs) as i8
         }
     }
 }
@@ -372,7 +372,7 @@ impl_imm8_op! {
             Self::shr(a, BY)
         }
         for Scalar(a: i8) -> i8 {
-            a >> BY
+            ((a as u8) >> BY) as i8
         }
     }
 }
@@ -413,8 +413,50 @@ impl_op! {
             ];
             (core::mem::transmute(a), core::mem::transmute(b))
         }
-        for Scalar(val: i8) -> (i32, i32) {
-            (val as i32, 0)
+        for Scalar(val: i8) -> (i16, i16) {
+            (val as i16, 0)
+        }
+    }
+}
+
+impl_op! {
+    fn unsigned_extend_i16<i8> {
+        for Avx2(val: __m256i) -> (__m256i, __m256i) {
+            let a = _mm256_cvtepu8_epi16(_mm256_extracti128_si256(val, 0));
+            let b = _mm256_cvtepu8_epi16(_mm256_extracti128_si256(val, 1));
+            (a, b)
+        }
+        for Sse41(val: __m128i) -> (__m128i, __m128i) {
+            let a = _mm_cvtepu8_epi16(val);
+            let b = _mm_cvtepu8_epi16(_mm_shuffle_epi32(val, 0b_01_00_11_10));
+            (a, b)
+        }
+        for Sse2(val: __m128i) -> (__m128i, __m128i) {
+            let arr = core::mem::transmute::<__m128i, [i8; 16]>(val);
+            let a = [
+                arr[0] as u8 as u16 as i16,
+                arr[1] as u8 as u16 as i16,
+                arr[2] as u8 as u16 as i16,
+                arr[3] as u8 as u16 as i16,
+                arr[4] as u8 as u16 as i16,
+                arr[5] as u8 as u16 as i16,
+                arr[6] as u8 as u16 as i16,
+                arr[7] as u8 as u16 as i16,
+            ];
+            let b = [
+                arr[8] as u8 as u16 as i16,
+                arr[9] as u8 as u16 as i16,
+                arr[10] as u8 as u16 as i16,
+                arr[11] as u8 as u16 as i16,
+                arr[12] as u8 as u16 as i16,
+                arr[13] as u8 as u16 as i16,
+                arr[14] as u8 as u16 as i16,
+                arr[15] as u8 as u16 as i16,
+            ];
+            (core::mem::transmute(a), core::mem::transmute(b))
+        }
+        for Scalar(val: i8) -> (i16, i16) {
+            (val as u8 as u16 as i16, 0)
         }
     }
 }

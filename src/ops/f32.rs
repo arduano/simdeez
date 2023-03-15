@@ -551,7 +551,7 @@ impl_op! {
             _mm_cvtps_epi32(a)
         }
         for Scalar(a: f32) -> i32 {
-            a as i32
+            a.m_round() as i32
         }
     }
 }

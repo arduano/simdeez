@@ -318,14 +318,14 @@ impl_op! {
         for Avx2(a: __m256i, rhs: i32) -> __m256i {
             _mm256_srl_epi64(a, _mm_cvtsi32_si128(rhs))
         }
-        for Sse41(a: __m128i, b: i32) -> __m128i {
-            _mm_srl_epi64(a, _mm_cvtsi32_si128(b))
+        for Sse41(a: __m128i, rhs: i32) -> __m128i {
+            _mm_srl_epi64(a, _mm_cvtsi32_si128(rhs))
         }
-        for Sse2(a: __m128i, b: i32) -> __m128i {
-            _mm_srl_epi64(a, _mm_cvtsi32_si128(b))
+        for Sse2(a: __m128i, rhs: i32) -> __m128i {
+            _mm_srl_epi64(a, _mm_cvtsi32_si128(rhs))
         }
-        for Scalar(a: i64, b: i32) -> i64 {
-            a >> b
+        for Scalar(a: i64, rhs: i32) -> i64 {
+            ((a as u64) >> rhs) as i64
         }
     }
 }
@@ -359,7 +359,7 @@ impl_imm8_op! {
             _mm_srli_epi64(a, BY)
         }
         for Scalar(a: i64) -> i64 {
-            a >> BY
+            ((a as u64) >> BY) as i64
         }
     }
 }
