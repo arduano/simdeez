@@ -36,7 +36,7 @@ pub fn check_elementwise_function<
         let scalar_iter = args.iter_scalars();
         for (i, (scalar, expected)) in result.iter().zip(scalar_iter).enumerate() {
             if let Err(str) = check(scalar, expected) {
-                return Err(format!("Failed for element {}: {}", i, str));
+                return Err(format!("Failed for element {i}: {str}"));
             }
         }
         Ok(())
@@ -61,7 +61,7 @@ pub fn elementwise_eq_tester<
         let equal = scalar_result.almost_eq(result, precision);
         match equal {
             true => Ok(()),
-            false => Err(format!("Expected {}, got {}", scalar_result, result)),
+            false => Err(format!("Expected {scalar_result}, got {result}")),
         }
     });
 }
@@ -107,10 +107,7 @@ pub fn horizontal_add_tester<
 
         let equal = sum.almost_eq(result, EqPrecision::almost(5));
         if !equal {
-            return Err(format!(
-                "Failed: Expected sum to be {}, got {}",
-                sum, result
-            ));
+            return Err(format!("Failed: Expected sum to be {sum}, got {result}",));
         }
         Ok(())
     });
@@ -131,10 +128,7 @@ pub fn unsigned_horizontal_add_tester<
 
         let equal = sum.almost_eq(result, EqPrecision::almost(5));
         if !equal {
-            return Err(format!(
-                "Failed: Expected sum to be {}, got {}",
-                sum, result
-            ));
+            return Err(format!("Failed: Expected sum to be {sum}, got {result}",));
         }
         Ok(())
     });
