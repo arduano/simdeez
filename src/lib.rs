@@ -158,6 +158,8 @@ pub extern crate paste;
 #[cfg(test)]
 mod tests;
 
+mod ops;
+
 pub mod prelude;
 
 use core::ops::*;

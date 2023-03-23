@@ -76,7 +76,7 @@ pub trait SimdBaseOps:
     /// Element-wise absolute value
     fn abs(self) -> Self;
 
-    /// Binary and not between two vectors `(!a) & b`
+    /// Binary and not between two vectors `self & (!rhs)`
     fn and_not(self, rhs: Self) -> Self;
 
     /// Element-wise "blend" between two vectors. A is selected if the mask value
