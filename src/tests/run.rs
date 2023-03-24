@@ -1,3 +1,5 @@
+#![allow(unused_imports)]
+
 use crate::elementwise_eq_tester;
 
 use super::*;
