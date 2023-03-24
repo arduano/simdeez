@@ -1,4 +1,4 @@
-use crate::{elementwise_eq_tester};
+use crate::elementwise_eq_tester;
 
 use super::*;
 

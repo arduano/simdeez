@@ -1,19 +1,20 @@
 #![allow(dead_code)]
 
+#[cfg(target_arch = "aarch64")]
+use crate::engines::neon::Neon;
 use crate::engines::scalar::Scalar;
 #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
 use crate::engines::{avx2::Avx2, sse2::Sse2, sse41::Sse41};
-#[cfg(target_arch = "aarch64")]
-use crate::engines::{neon::Neon};
+
 use crate::libm_ext::FloatExt;
 use core::marker::PhantomData;
 
+#[cfg(target_arch = "aarch64")]
+use core::arch::aarch64::*;
 #[cfg(target_arch = "x86")]
 use core::arch::x86::*;
 #[cfg(target_arch = "x86_64")]
 use core::arch::x86_64::*;
-#[cfg(target_arch = "aarch64")]
-use core::arch::aarch64::*;
 
 mod i8;
 pub use self::i8::*;

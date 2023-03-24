@@ -538,14 +538,14 @@ pub trait Simd: 'static + Sync + Send {
     #[deprecated(
         note = "These functions have unpredictable behavior and will be deleted in the future. Please use a manual implementation instead."
     )]
-    unsafe fn castps_pd(a: Self::Vf32) -> Self::Vf64 {
+    unsafe fn castps_pd(_a: Self::Vf32) -> Self::Vf64 {
         panic!("Deprecated")
     }
     /// Converts the type of a f64 vector to a f32 vector without changing the underlying bits.
     #[deprecated(
         note = "These functions have unpredictable behavior and will be deleted in the future. Please use a manual implementation instead."
     )]
-    unsafe fn castpd_ps(a: Self::Vf64) -> Self::Vf32 {
+    unsafe fn castpd_ps(_a: Self::Vf64) -> Self::Vf32 {
         panic!("Deprecated")
     }
 
@@ -872,13 +872,13 @@ pub trait Simd: 'static + Sync + Send {
     #[deprecated(
         note = "These functions have unpredictable behavior and will be deleted in the future. Please use a manual implementation instead."
     )]
-    unsafe fn i32gather_epi32(arr: &[i32], index: Self::Vi32) -> Self::Vi32 {
+    unsafe fn i32gather_epi32(_arr: &[i32], _index: Self::Vi32) -> Self::Vi32 {
         panic!("Deprecated")
     }
     #[deprecated(
         note = "These functions have unpredictable behavior and will be deleted in the future. Please use a manual implementation instead."
     )]
-    unsafe fn i64gather_epi64(arr: &[i64], index: Self::Vi64) -> Self::Vi64 {
+    unsafe fn i64gather_epi64(_arr: &[i64], _index: Self::Vi64) -> Self::Vi64 {
         panic!("Deprecated")
     }
     /// Sse2 and Sse41 paths will simulate a gather by breaking out and
@@ -886,7 +886,7 @@ pub trait Simd: 'static + Sync + Send {
     #[deprecated(
         note = "These functions have unpredictable behavior and will be deleted in the future. Please use a manual implementation instead."
     )]
-    unsafe fn i32gather_ps(arr: &[f32], index: Self::Vi32) -> Self::Vf32 {
+    unsafe fn i32gather_ps(_arr: &[f32], _index: Self::Vi32) -> Self::Vf32 {
         panic!("Deprecated")
     }
 
@@ -951,7 +951,7 @@ pub trait Simd: 'static + Sync + Send {
     #[deprecated(
         note = "These functions have unpredictable behavior and will be deleted in the future. Please use a manual implementation instead."
     )]
-    unsafe fn maskload_epi32(mem_addr: &i32, mask: Self::Vi32) -> Self::Vi32 {
+    unsafe fn maskload_epi32(_mem_addr: &i32, _mask: Self::Vi32) -> Self::Vi32 {
         panic!("Deprecated")
     }
     /// Note, SSE2 and SSE4 will load when mask[i] is nonzero, where AVX2
@@ -960,7 +960,7 @@ pub trait Simd: 'static + Sync + Send {
     #[deprecated(
         note = "These functions have unpredictable behavior and will be deleted in the future. Please use a manual implementation instead."
     )]
-    unsafe fn maskload_epi64(mem_addr: &i64, mask: Self::Vi64) -> Self::Vi64 {
+    unsafe fn maskload_epi64(_mem_addr: &i64, _mask: Self::Vi64) -> Self::Vi64 {
         panic!("Deprecated")
     }
     /// Note, SSE2 and SSE4 will load when mask[i] is nonzero, where AVX2
@@ -969,7 +969,7 @@ pub trait Simd: 'static + Sync + Send {
     #[deprecated(
         note = "These functions have unpredictable behavior and will be deleted in the future. Please use a manual implementation instead."
     )]
-    unsafe fn maskload_ps(mem_addr: &f32, mask: Self::Vi32) -> Self::Vf32 {
+    unsafe fn maskload_ps(_mem_addr: &f32, _mask: Self::Vi32) -> Self::Vf32 {
         panic!("Deprecated")
     }
     /// Note, SSE2 and SSE4 will load when mask[i] is nonzero, where AVX2
@@ -978,7 +978,7 @@ pub trait Simd: 'static + Sync + Send {
     #[deprecated(
         note = "These functions have unpredictable behavior and will be deleted in the future. Please use a manual implementation instead."
     )]
-    unsafe fn maskload_pd(mem_addr: &f64, mask: Self::Vi64) -> Self::Vf64 {
+    unsafe fn maskload_pd(_mem_addr: &f64, _mask: Self::Vi64) -> Self::Vf64 {
         panic!("Deprecated")
     }
 
@@ -1280,7 +1280,7 @@ pub trait Simd: 'static + Sync + Send {
     #[deprecated(
         note = "These functions have unpredictable behavior and will be deleted in the future. Please use a manual implementation instead."
     )]
-    unsafe fn shuffle_epi32(a: Self::Vi32, imm8: i32) -> Self::Vi32 {
+    unsafe fn shuffle_epi32(_a: Self::Vi32, _imm8: i32) -> Self::Vi32 {
         panic!("Deprecated")
     }
 
