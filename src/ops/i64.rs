@@ -14,6 +14,9 @@ impl_op! {
         for Scalar(a: i64, b: i64) -> i64 {
             a.wrapping_add(b)
         }
+        for Neon(a: int64x2_t, b: int64x2_t) -> int64x2_t {
+            vaddq_s64(a, b)
+        }
     }
 }
 
@@ -30,6 +33,9 @@ impl_op! {
         }
         for Scalar(a: i64, b: i64) -> i64 {
             a.wrapping_sub(b)
+        }
+        for Neon(a: int64x2_t, b: int64x2_t) -> int64x2_t {
+            vsubq_s64(a, b)
         }
     }
 }
@@ -68,6 +74,15 @@ impl_op! {
         for Scalar(a: i64, b: i64) -> i64 {
             a.wrapping_mul(b)
         }
+        for Neon(a: int64x2_t, b: int64x2_t) -> int64x2_t {
+            let a_arr = core::mem::transmute::<_, [i64; 2]>(a);
+            let b_arr = core::mem::transmute::<_, [i64; 2]>(b);
+            let c_arr = [
+                a_arr[0].wrapping_mul(b_arr[0]),
+                a_arr[1].wrapping_mul(b_arr[1]),
+            ];
+            core::mem::transmute::<_, int64x2_t>(c_arr)
+        }
     }
 }
 
@@ -87,6 +102,11 @@ impl_op! {
         }
         for Scalar(a: i64, b: i64) -> i64 {
             a.min(b)
+        }
+        for Neon(a: int64x2_t, b: int64x2_t) -> int64x2_t {
+            let mask = vreinterpretq_s64_u64(vcgtq_s64(a, b));
+            let not_mask = vreinterpretq_s64_s32(vmvnq_s32(vreinterpretq_s32_s64(mask)));
+            vorrq_s64(vandq_s64(mask, b), vandq_s64(not_mask, a))
         }
     }
 }
@@ -108,6 +128,11 @@ impl_op! {
         for Scalar(a: i64, b: i64) -> i64 {
             a.max(b)
         }
+        for Neon(a: int64x2_t, b: int64x2_t) -> int64x2_t {
+            let mask = vreinterpretq_s64_u64(vcgtq_s64(a, b));
+            let not_mask = vreinterpretq_s64_s32(vmvnq_s32(vreinterpretq_s32_s64(mask)));
+            vorrq_s64(vandq_s64(mask, a), vandq_s64(not_mask, b))
+        }
     }
 }
 
@@ -127,6 +152,9 @@ impl_op! {
         }
         for Scalar(a: i64) -> i64 {
             a.abs()
+        }
+        for Neon(a: int64x2_t) -> int64x2_t {
+            vabsq_s64(a)
         }
     }
 }
@@ -148,6 +176,9 @@ impl_op! {
             } else {
                 0
             }
+        }
+        for Neon(a: int64x2_t, b: int64x2_t) -> int64x2_t {
+            vreinterpretq_s64_u64(vceqq_s64(a, b))
         }
     }
 }
@@ -172,6 +203,9 @@ impl_op! {
             } else {
                 0
             }
+        }
+        for Neon(a: int64x2_t, b: int64x2_t) -> int64x2_t {
+            vreinterpretq_s64_u32(vmvnq_u32(vreinterpretq_u32_u64(vceqq_s64(a, b))))
         }
     }
 }
@@ -200,6 +234,9 @@ impl_op! {
                 0
             }
         }
+        for Neon(a: int64x2_t, b: int64x2_t) -> int64x2_t {
+            vreinterpretq_s64_u64(vcltq_s64(a, b))
+        }
     }
 }
 
@@ -224,6 +261,9 @@ impl_op! {
                 0
             }
         }
+        for Neon(a: int64x2_t, b: int64x2_t) -> int64x2_t {
+            vreinterpretq_s64_u64(vcleq_s64(a, b))
+        }
     }
 }
 
@@ -244,6 +284,9 @@ impl_op! {
             } else {
                 0
             }
+        }
+        for Neon(a: int64x2_t, b: int64x2_t) -> int64x2_t {
+            vreinterpretq_s64_u64(vcgtq_s64(a, b))
         }
     }
 }
@@ -272,6 +315,9 @@ impl_op! {
                 0
             }
         }
+        for Neon(a: int64x2_t, b: int64x2_t) -> int64x2_t {
+            vreinterpretq_s64_u64(vcgeq_s64(a, b))
+        }
     }
 }
 
@@ -293,6 +339,9 @@ impl_op! {
                 b
             }
         }
+        for Neon(a: int64x2_t, b: int64x2_t, mask: int64x2_t) -> int64x2_t {
+            vbslq_s64(vreinterpretq_u64_s64(mask), b, a)
+        }
     }
 }
 
@@ -309,6 +358,10 @@ impl_op! {
         }
         for Scalar(a: i64, b: i32) -> i64 {
             a << b
+        }
+        for Neon(a: int64x2_t, rhs: i32) -> int64x2_t {
+            let rhs = Self::set1(rhs as i64);
+            vshlq_s64(a, rhs)
         }
     }
 }
@@ -327,6 +380,10 @@ impl_op! {
         for Scalar(a: i64, rhs: i32) -> i64 {
             ((a as u64) >> rhs) as i64
         }
+        for Neon(a: int64x2_t, rhs: i32) -> int64x2_t {
+            let rhs = Self::set1(-rhs as i64);
+            vreinterpretq_s64_u64(vshlq_u64(vreinterpretq_u64_s64(a), rhs))
+        }
     }
 }
 
@@ -344,6 +401,9 @@ impl_imm8_op! {
         for Scalar(a: i64) -> i64 {
             a << BY
         }
+        for Neon(a: int64x2_t) -> int64x2_t {
+            vshlq_n_s64(a, BY)
+        }
     }
 }
 
@@ -360,6 +420,9 @@ impl_imm8_op! {
         }
         for Scalar(a: i64) -> i64 {
             ((a as u64) >> BY) as i64
+        }
+        for Neon(a: int64x2_t) -> int64x2_t {
+            vreinterpretq_s64_u64(vshrq_n_u64(vreinterpretq_u64_s64(a), BY))
         }
     }
 }
@@ -395,6 +458,9 @@ impl_op! {
         for Scalar(a: i64) -> f64 {
             a as f64
         }
+        for Neon(a: int64x2_t) -> float64x2_t {
+            vcvtq_f64_s64(a)
+        }
     }
 }
 
@@ -411,6 +477,9 @@ impl_op! {
         }
         for Scalar(a: i64) -> f64 {
             f64::from_bits(a as u64)
+        }
+        for Neon(a: int64x2_t) -> float64x2_t {
+            core::mem::transmute::<_, float64x2_t>(a)
         }
     }
 }
@@ -438,6 +507,12 @@ impl_op! {
         for Scalar(val: i64) -> i64 {
             val
         }
+        for Neon(val: int64x2_t) -> i64 {
+            let a = val;
+            let b = vcombine_s64(vget_high_s64(a), vget_low_s64(a));
+            let c = vaddq_s64(a, b);
+            vgetq_lane_s64(c, 0)
+        }
     }
 }
 
@@ -454,6 +529,9 @@ impl_op! {
         }
         for Scalar() -> i64 {
             0
+        }
+        for Neon() -> int64x2_t {
+            vdupq_n_s64(0)
         }
     }
 }
@@ -472,6 +550,9 @@ impl_op! {
         for Scalar(val: i64) -> i64 {
             val
         }
+        for Neon(val: i64) -> int64x2_t {
+            vdupq_n_s64(val)
+        }
     }
 }
 
@@ -488,6 +569,9 @@ impl_op! {
         }
         for Scalar(ptr: *const i64) -> i64 {
             unsafe { *ptr }
+        }
+        for Neon(ptr: *const i64) -> int64x2_t {
+            vld1q_s64(ptr)
         }
     }
 }
@@ -506,6 +590,9 @@ impl_op! {
         for Scalar(ptr: *const i64) -> i64 {
             unsafe { *ptr }
         }
+        for Neon(ptr: *const i64) -> int64x2_t {
+            vld1q_s64(ptr)
+        }
     }
 }
 
@@ -523,6 +610,9 @@ impl_op! {
         for Scalar(ptr: *mut i64, a: i64) {
             unsafe { *ptr = a }
         }
+        for Neon(ptr: *mut i64, a: int64x2_t) {
+            vst1q_s64(ptr, a)
+        }
     }
 }
 
@@ -539,6 +629,9 @@ impl_op! {
         }
         for Scalar(ptr: *mut i64, a: i64) {
             unsafe { *ptr = a }
+        }
+        for Neon(ptr: *mut i64, a: int64x2_t) {
+            vst1q_s64(ptr, a)
         }
     }
 }

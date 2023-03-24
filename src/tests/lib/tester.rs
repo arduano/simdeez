@@ -154,14 +154,14 @@ macro_rules! bitshift_eq_tester {
 
 #[macro_export]
 macro_rules! const_bitshift_eq_tester {
-    ($simd_kind:ident :: $simd_ty:ident :: $fn_name:ident, $inputs:expr) => {{
+    ($scalar_ty:ident, $simd_kind:ident :: $simd_ty:ident :: $fn_name:ident, $inputs:expr) => {{
         let f = |val, s| {
             macro_rules! expand {
                 ($imm8:literal) => {
                     <<$simd_kind as Simd>::$simd_ty as SimdInt>::$fn_name::<$imm8>(val)
                 };
             }
-            test_constify_imm8!(s, expand)
+            test_constify_imm8_for_bitshift!($scalar_ty, s, expand)
         };
         let sf = |val, s| {
             macro_rules! expand {
@@ -169,7 +169,7 @@ macro_rules! const_bitshift_eq_tester {
                     <<Scalar as Simd>::$simd_ty as SimdInt>::$fn_name::<$imm8>(val)
                 };
             }
-            test_constify_imm8!(s, expand)
+            test_constify_imm8_for_bitshift!($scalar_ty, s, expand)
         };
         bitshift_eq_tester($inputs, f, sf);
     }};
@@ -202,6 +202,10 @@ macro_rules! with_feature_flag {
         #[cfg(target_feature = "sse4.1")]
         $($r)+
     };
+    (Neon, $($r:tt)+) => {
+        #[cfg(target_feature = "neon")]
+        $($r)+
+    };
     (Scalar, $($r:tt)+) => {
         $($r)+
     };
@@ -229,6 +233,7 @@ macro_rules! elementwise_eq_tester_impl {
         elementwise_eq_tester_impl!(@full Avx2, $simd_ty, $simd_base, $simd_fn, $arg_cnt, $precision);
         elementwise_eq_tester_impl!(@full Sse2, $simd_ty, $simd_base, $simd_fn, $arg_cnt, $precision);
         elementwise_eq_tester_impl!(@full Sse41, $simd_ty, $simd_base, $simd_fn, $arg_cnt, $precision);
+        elementwise_eq_tester_impl!(@full Neon, $simd_ty, $simd_base, $simd_fn, $arg_cnt, $precision);
     };
 
     (SimdBaseOps, $simd_fn:ident, $arg_cnt:ident, $precision:expr) => {
@@ -291,6 +296,7 @@ macro_rules! bitshift_eq_tester_impl {
                 #[test]
                 fn [<$simd_fn _ $simd:lower _ $simd_ty>]() {
                     const_bitshift_eq_tester!(
+                        $simd_ty,
                         $simd:: [<V$simd_ty>]::$simd_fn,
                         RandSimd::$simd_ty().one_arg_and_bitshift_arg()
                     );
@@ -304,6 +310,7 @@ macro_rules! bitshift_eq_tester_impl {
         bitshift_eq_tester_impl!(@full $is_const, Avx2, $simd_ty, $simd_fn);
         bitshift_eq_tester_impl!(@full $is_const, Sse2, $simd_ty, $simd_fn);
         bitshift_eq_tester_impl!(@full $is_const, Sse41, $simd_ty, $simd_fn);
+        bitshift_eq_tester_impl!(@full $is_const, Neon, $simd_ty, $simd_fn);
     };
 
     ($is_const:ident $simd_fn:ident) => {
@@ -336,6 +343,7 @@ macro_rules! horizontal_add_tester_impl {
         horizontal_add_tester_impl!(@full $kind, Avx2, $simd_ty);
         horizontal_add_tester_impl!(@full $kind, Sse2, $simd_ty);
         horizontal_add_tester_impl!(@full $kind, Sse41, $simd_ty);
+        horizontal_add_tester_impl!(@full $kind, Neon, $simd_ty);
     };
 
     (signed) => {

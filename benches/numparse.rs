@@ -15,6 +15,8 @@ impl<'a> NumberParser<'a> {
     }
 
     fn get_next(&mut self) -> Option<u64> {
+        #![allow(clippy::manual_is_ascii_check)]
+
         let is_num_byte = |b: u8| (b'0'..=b'9').contains(&b);
 
         if self.string.is_empty() {

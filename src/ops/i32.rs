@@ -14,6 +14,9 @@ impl_op! {
         for Scalar(a: i32, b: i32) -> i32 {
             a.wrapping_add(b)
         }
+        for Neon(a: int32x4_t, b: int32x4_t) -> int32x4_t {
+            vaddq_s32(a, b)
+        }
     }
 }
 
@@ -30,6 +33,9 @@ impl_op! {
         }
         for Scalar(a: i32, b: i32) -> i32 {
             a.wrapping_sub(b)
+        }
+        for Neon(a: int32x4_t, b: int32x4_t) -> int32x4_t {
+            vsubq_s32(a, b)
         }
     }
 }
@@ -56,6 +62,9 @@ impl_op! {
         for Scalar(a: i32, b: i32) -> i32 {
             a.wrapping_mul(b)
         }
+        for Neon(a: int32x4_t, b: int32x4_t) -> int32x4_t {
+            vmulq_s32(a, b)
+        }
     }
 }
 
@@ -73,6 +82,9 @@ impl_op! {
         }
         for Scalar(a: i32, b: i32) -> i32 {
             a.min(b)
+        }
+        for Neon(a: int32x4_t, b: int32x4_t) -> int32x4_t {
+            vminq_s32(a, b)
         }
     }
 }
@@ -92,6 +104,9 @@ impl_op! {
         for Scalar(a: i32, b: i32) -> i32 {
             a.max(b)
         }
+        for Neon(a: int32x4_t, b: int32x4_t) -> int32x4_t {
+            vmaxq_s32(a, b)
+        }
     }
 }
 
@@ -109,6 +124,9 @@ impl_op! {
         }
         for Scalar(a: i32) -> i32 {
             a.abs()
+        }
+        for Neon(a: int32x4_t) -> int32x4_t {
+            vabsq_s32(a)
         }
     }
 }
@@ -130,6 +148,9 @@ impl_op! {
             } else {
                 0
             }
+        }
+        for Neon(a: int32x4_t, b: int32x4_t) -> int32x4_t {
+            vreinterpretq_s32_u32(vceqq_s32(a, b))
         }
     }
 }
@@ -154,6 +175,9 @@ impl_op! {
             } else {
                 0
             }
+        }
+        for Neon(a: int32x4_t, b: int32x4_t) -> int32x4_t {
+            vreinterpretq_s32_u32(vmvnq_u32(vceqq_s32(a, b)))
         }
     }
 }
@@ -182,6 +206,9 @@ impl_op! {
                 0
             }
         }
+        for Neon(a: int32x4_t, b: int32x4_t) -> int32x4_t {
+            vreinterpretq_s32_u32(vcltq_s32(a, b))
+        }
     }
 }
 
@@ -206,6 +233,9 @@ impl_op! {
                 0
             }
         }
+        for Neon(a: int32x4_t, b: int32x4_t) -> int32x4_t {
+            vreinterpretq_s32_u32(vcleq_s32(a, b))
+        }
     }
 }
 
@@ -226,6 +256,9 @@ impl_op! {
             } else {
                 0
             }
+        }
+        for Neon(a: int32x4_t, b: int32x4_t) -> int32x4_t {
+            vreinterpretq_s32_u32(vcgtq_s32(a, b))
         }
     }
 }
@@ -254,6 +287,9 @@ impl_op! {
                 0
             }
         }
+        for Neon(a: int32x4_t, b: int32x4_t) -> int32x4_t {
+            vreinterpretq_s32_u32(vcgeq_s32(a, b))
+        }
     }
 }
 
@@ -275,6 +311,9 @@ impl_op! {
                 b
             }
         }
+        for Neon(a: int32x4_t, b: int32x4_t, mask: int32x4_t) -> int32x4_t {
+            vbslq_s32(vreinterpretq_u32_s32(mask), b, a)
+        }
     }
 }
 
@@ -283,14 +322,18 @@ impl_op! {
         for Avx2(a: __m256i, rhs: i32) -> __m256i {
             _mm256_sll_epi32(a, _mm_cvtsi32_si128(rhs))
         }
-        for Sse41(a: __m128i, b: i32) -> __m128i {
-            _mm_sll_epi32(a, _mm_cvtsi32_si128(b))
+        for Sse41(a: __m128i, rhs: i32) -> __m128i {
+            _mm_sll_epi32(a, _mm_cvtsi32_si128(rhs))
         }
-        for Sse2(a: __m128i, b: i32) -> __m128i {
-            _mm_sll_epi32(a, _mm_cvtsi32_si128(b))
+        for Sse2(a: __m128i, rhs: i32) -> __m128i {
+            _mm_sll_epi32(a, _mm_cvtsi32_si128(rhs))
         }
-        for Scalar(a: i32, b: i32) -> i32 {
-            a << b
+        for Scalar(a: i32, rhs: i32) -> i32 {
+            a << rhs
+        }
+        for Neon(a: int32x4_t, rhs: i32) -> int32x4_t {
+            let rhs = Self::set1(rhs as i32);
+            vshlq_s32(a, rhs)
         }
     }
 }
@@ -309,6 +352,10 @@ impl_op! {
         for Scalar(a: i32, rhs: i32) -> i32 {
             ((a as u32) >> rhs) as i32
         }
+        for Neon(a: int32x4_t, rhs: i32) -> int32x4_t {
+            let rhs = Self::set1(-rhs);
+            vreinterpretq_s32_u32(vshlq_u32(vreinterpretq_u32_s32(a), rhs))
+        }
     }
 }
 
@@ -325,6 +372,9 @@ impl_imm8_op! {
         }
         for Scalar(a: i32) -> i32 {
             a << BY
+        }
+        for Neon(a: int32x4_t) -> int32x4_t {
+            vshlq_n_s32(a, BY)
         }
     }
 }
@@ -343,6 +393,9 @@ impl_imm8_op! {
         for Scalar(a: i32) -> i32 {
             ((a as u32) >> BY) as i32
         }
+        for Neon(a: int32x4_t) -> int32x4_t {
+            vreinterpretq_s32_u32(vshrq_n_u32(vreinterpretq_u32_s32(a), BY))
+        }
     }
 }
 
@@ -360,6 +413,9 @@ impl_op! {
         for Scalar(a: i32) -> f32 {
             a as f32
         }
+        for Neon(a: int32x4_t) -> float32x4_t {
+            vcvtq_f32_s32(a)
+        }
     }
 }
 
@@ -376,6 +432,9 @@ impl_op! {
         }
         for Scalar(a: i32) -> f32 {
             f32::from_bits(a as u32)
+        }
+        for Neon(a: int32x4_t) -> float32x4_t {
+            core::mem::transmute(a)
         }
     }
 }
@@ -399,6 +458,11 @@ impl_op! {
         for Scalar(val: i32) -> (i64, i64) {
             (val as i64, 0)
         }
+        for Neon(val: int32x4_t) -> (int64x2_t, int64x2_t) {
+            let a = vmovl_s32(vget_low_s32(val));
+            let b = vmovl_s32(vget_high_s32(val));
+            (a, b)
+        }
     }
 }
 
@@ -421,6 +485,11 @@ impl_op! {
         for Scalar(val: i32) -> (i64, i64) {
             (val as u32 as u64 as i64, 0)
         }
+        for Neon(val: int32x4_t) -> (int64x2_t, int64x2_t) {
+            let a = vreinterpretq_s64_u64(vmovl_u32(vreinterpret_u32_s32(vget_low_s32(val))));
+            let b = vreinterpretq_s64_u64(vmovl_u32(vreinterpret_u32_s32(vget_high_s32(val))));
+            (a, b)
+        }
     }
 }
 
@@ -437,6 +506,9 @@ impl_op! {
         }
         for Scalar() -> i32 {
             0
+        }
+        for Neon() -> int32x4_t {
+            vdupq_n_s32(0)
         }
     }
 }
@@ -455,6 +527,9 @@ impl_op! {
         for Scalar(val: i32) -> i32 {
             val
         }
+        for Neon(val: i32) -> int32x4_t {
+            vdupq_n_s32(val)
+        }
     }
 }
 
@@ -471,6 +546,9 @@ impl_op! {
         }
         for Scalar(ptr: *const i32) -> i32 {
             unsafe { *ptr }
+        }
+        for Neon(ptr: *const i32) -> int32x4_t {
+            vld1q_s32(ptr)
         }
     }
 }
@@ -489,6 +567,9 @@ impl_op! {
         for Scalar(ptr: *const i32) -> i32 {
             unsafe { *ptr }
         }
+        for Neon(ptr: *const i32) -> int32x4_t {
+            vld1q_s32(ptr)
+        }
     }
 }
 
@@ -506,6 +587,9 @@ impl_op! {
         for Scalar(ptr: *mut i32, a: i32) {
             unsafe { *ptr = a }
         }
+        for Neon(ptr: *mut i32, a: int32x4_t) {
+            vst1q_s32(ptr, a)
+        }
     }
 }
 
@@ -522,6 +606,9 @@ impl_op! {
         }
         for Scalar(ptr: *mut i32, a: i32) {
             unsafe { *ptr = a }
+        }
+        for Neon(ptr: *mut i32, a: int32x4_t) {
+            vst1q_s32(ptr, a)
         }
     }
 }

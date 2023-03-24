@@ -164,6 +164,9 @@ pub mod prelude;
 
 use core::ops::*;
 
+#[cfg(target_arch = "aarch64")]
+use std::arch::is_aarch64_feature_detected;
+
 #[macro_use]
 mod macros;
 
@@ -534,9 +537,19 @@ pub trait Simd: 'static + Sync + Send {
     }
 
     /// Converts the type of a f32 vector to a f64 vector without changing the underlying bits.
-    unsafe fn castps_pd(a: Self::Vf32) -> Self::Vf64;
+    #[deprecated(
+        note = "These functions have unpredictable behavior and will be deleted in the future. Please use a manual implementation instead."
+    )]
+    unsafe fn castps_pd(_a: Self::Vf32) -> Self::Vf64 {
+        panic!("Deprecated")
+    }
     /// Converts the type of a f64 vector to a f32 vector without changing the underlying bits.
-    unsafe fn castpd_ps(a: Self::Vf64) -> Self::Vf32;
+    #[deprecated(
+        note = "These functions have unpredictable behavior and will be deleted in the future. Please use a manual implementation instead."
+    )]
+    unsafe fn castpd_ps(_a: Self::Vf64) -> Self::Vf32 {
+        panic!("Deprecated")
+    }
 
     /// Currently scalar will have different results in some cases depending on the
     /// current SSE rounding mode.
@@ -861,17 +874,23 @@ pub trait Simd: 'static + Sync + Send {
     #[deprecated(
         note = "These functions have unpredictable behavior and will be deleted in the future. Please use a manual implementation instead."
     )]
-    unsafe fn i32gather_epi32(arr: &[i32], index: Self::Vi32) -> Self::Vi32;
+    unsafe fn i32gather_epi32(_arr: &[i32], _index: Self::Vi32) -> Self::Vi32 {
+        panic!("Deprecated")
+    }
     #[deprecated(
         note = "These functions have unpredictable behavior and will be deleted in the future. Please use a manual implementation instead."
     )]
-    unsafe fn i64gather_epi64(arr: &[i64], index: Self::Vi64) -> Self::Vi64;
+    unsafe fn i64gather_epi64(_arr: &[i64], _index: Self::Vi64) -> Self::Vi64 {
+        panic!("Deprecated")
+    }
     /// Sse2 and Sse41 paths will simulate a gather by breaking out and
     /// doing scalar array accesses, because gather doesn't exist until Avx2.
     #[deprecated(
         note = "These functions have unpredictable behavior and will be deleted in the future. Please use a manual implementation instead."
     )]
-    unsafe fn i32gather_ps(arr: &[f32], index: Self::Vi32) -> Self::Vf32;
+    unsafe fn i32gather_ps(_arr: &[f32], _index: Self::Vi32) -> Self::Vf32 {
+        panic!("Deprecated")
+    }
 
     #[deprecated(
         note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
@@ -934,28 +953,36 @@ pub trait Simd: 'static + Sync + Send {
     #[deprecated(
         note = "These functions have unpredictable behavior and will be deleted in the future. Please use a manual implementation instead."
     )]
-    unsafe fn maskload_epi32(mem_addr: &i32, mask: Self::Vi32) -> Self::Vi32;
+    unsafe fn maskload_epi32(_mem_addr: &i32, _mask: Self::Vi32) -> Self::Vi32 {
+        panic!("Deprecated")
+    }
     /// Note, SSE2 and SSE4 will load when mask[i] is nonzero, where AVX2
     /// will store only when the high bit is set. To ensure portability
     /// ensure that the high bit is set.
     #[deprecated(
         note = "These functions have unpredictable behavior and will be deleted in the future. Please use a manual implementation instead."
     )]
-    unsafe fn maskload_epi64(mem_addr: &i64, mask: Self::Vi64) -> Self::Vi64;
+    unsafe fn maskload_epi64(_mem_addr: &i64, _mask: Self::Vi64) -> Self::Vi64 {
+        panic!("Deprecated")
+    }
     /// Note, SSE2 and SSE4 will load when mask[i] is nonzero, where AVX2
     /// will store only when the high bit is set. To ensure portability
     /// ensure that the high bit is set.
     #[deprecated(
         note = "These functions have unpredictable behavior and will be deleted in the future. Please use a manual implementation instead."
     )]
-    unsafe fn maskload_ps(mem_addr: &f32, mask: Self::Vi32) -> Self::Vf32;
+    unsafe fn maskload_ps(_mem_addr: &f32, _mask: Self::Vi32) -> Self::Vf32 {
+        panic!("Deprecated")
+    }
     /// Note, SSE2 and SSE4 will load when mask[i] is nonzero, where AVX2
     /// will store only when the high bit is set. To ensure portability
     /// ensure that the high bit is set.
     #[deprecated(
         note = "These functions have unpredictable behavior and will be deleted in the future. Please use a manual implementation instead."
     )]
-    unsafe fn maskload_pd(mem_addr: &f64, mask: Self::Vi64) -> Self::Vf64;
+    unsafe fn maskload_pd(_mem_addr: &f64, _mask: Self::Vi64) -> Self::Vf64 {
+        panic!("Deprecated")
+    }
 
     #[deprecated(
         note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
@@ -1255,7 +1282,9 @@ pub trait Simd: 'static + Sync + Send {
     #[deprecated(
         note = "These functions have unpredictable behavior and will be deleted in the future. Please use a manual implementation instead."
     )]
-    unsafe fn shuffle_epi32(a: Self::Vi32, imm8: i32) -> Self::Vi32;
+    unsafe fn shuffle_epi32(_a: Self::Vi32, _imm8: i32) -> Self::Vi32 {
+        panic!("Deprecated")
+    }
 
     cfg_if::cfg_if! {
         if #[cfg(feature = "sleef")] {
@@ -1323,9 +1352,10 @@ macro_rules! simd_runtime_generate {
             }
 
             #[target_feature(enable = "sse4.1")]
-                $vis unsafe fn [<$fn_name _sse41>]($($arg:$typ,)*) $(-> $rt)? {
+            $vis unsafe fn [<$fn_name _sse41>]($($arg:$typ,)*) $(-> $rt)? {
                 $fn_name::<Sse41>($($arg,)*)
             }
+
             #[target_feature(enable = "avx2")]
             $vis  unsafe fn [<$fn_name _avx2>]($($arg:$typ,)*) $(-> $rt)? {
                 $fn_name::<Avx2>($($arg,)*)
@@ -1403,15 +1433,27 @@ pub trait SimdRunner<A, R> {
 
 #[inline(always)]
 pub fn run_simd_runtime_decide<S: SimdRunner<A, R>, A, R>(args: A) -> R {
+    #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
     if is_x86_feature_detected!("avx2") {
-        unsafe { S::run::<engines::avx2::Avx2>(args) }
-    } else if is_x86_feature_detected!("sse4.1") {
-        unsafe { S::run::<engines::sse41::Sse41>(args) }
-    } else if is_x86_feature_detected!("sse2") {
-        unsafe { S::run::<engines::sse2::Sse2>(args) }
-    } else {
-        unsafe { S::run::<engines::scalar::Scalar>(args) }
+        return unsafe { S::run::<engines::avx2::Avx2>(args) };
     }
+
+    #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+    if is_x86_feature_detected!("sse4.1") {
+        return unsafe { S::run::<engines::sse41::Sse41>(args) };
+    }
+
+    #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+    if is_x86_feature_detected!("sse2") {
+        return unsafe { S::run::<engines::sse2::Sse2>(args) };
+    }
+
+    #[cfg(target_arch = "aarch64")]
+    if is_aarch64_feature_detected!("neon") {
+        return unsafe { S::run::<engines::neon::Neon>(args) };
+    }
+
+    unsafe { S::run::<engines::scalar::Scalar>(args) }
 }
 
 #[inline(always)]
