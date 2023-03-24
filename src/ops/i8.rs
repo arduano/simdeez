@@ -536,7 +536,7 @@ impl_op! {
             _mm_movemask_epi8(val) as u32
         }
         for Scalar(val: i8) -> u32 {
-            ((val as u8) & 0x80) as u32
+            ((val as u8) & 0x1) as u32
         }
         for Neon(val: int8x16_t) -> u32 {
             let val = vreinterpretq_u8_s8(val);
