@@ -163,6 +163,8 @@ mod ops;
 pub mod prelude;
 
 use core::ops::*;
+
+#[cfg(target_arch = "aarch64")]
 use std::arch::is_aarch64_feature_detected;
 
 #[macro_use]
