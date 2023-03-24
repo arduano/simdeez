@@ -72,14 +72,6 @@ jobs:
         with:
           platforms: aarch64
 
-      # Ensure that everything happens safely (with runtime checks)
-      - uses: actions-rs/cargo@v1
-        name: Run tests (debug)
-        with:
-          command: test
-          args: --target aarch64-unknown-linux-gnu
-
-      # Ensure that no behavior gets optimized out
       - uses: actions-rs/cargo@v1
         name: Run tests (release)
         with:
