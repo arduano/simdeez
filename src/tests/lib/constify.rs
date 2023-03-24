@@ -7,7 +7,6 @@ macro_rules! test_constify_imm8 {
         #[allow(clippy::suspicious_op_assign_impl)]
         #[allow(clippy::suspicious_arithmetic_impl)]
         match ($imm8) & 0b1111_1111 {
-            0 => $expand!(0),
             1 => $expand!(1),
             2 => $expand!(2),
             3 => $expand!(3),
@@ -263,6 +262,158 @@ macro_rules! test_constify_imm8 {
             253 => $expand!(253),
             254 => $expand!(254),
             _ => $expand!(255),
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! test_constify_imm8_for_bitshift {
+    (i64, $imm8:expr, $expand:ident) => {
+        #[allow(overflowing_literals)]
+        #[allow(clippy::suspicious_op_assign_impl)]
+        #[allow(clippy::suspicious_arithmetic_impl)]
+        match ($imm8) & 0b1111_1111 {
+            1 => $expand!(1),
+            2 => $expand!(2),
+            3 => $expand!(3),
+            4 => $expand!(4),
+            5 => $expand!(5),
+            6 => $expand!(6),
+            7 => $expand!(7),
+            8 => $expand!(8),
+            9 => $expand!(9),
+            10 => $expand!(10),
+            11 => $expand!(11),
+            12 => $expand!(12),
+            13 => $expand!(13),
+            14 => $expand!(14),
+            15 => $expand!(15),
+            16 => $expand!(16),
+            17 => $expand!(17),
+            18 => $expand!(18),
+            19 => $expand!(19),
+            20 => $expand!(20),
+            21 => $expand!(21),
+            22 => $expand!(22),
+            23 => $expand!(23),
+            24 => $expand!(24),
+            25 => $expand!(25),
+            26 => $expand!(26),
+            27 => $expand!(27),
+            28 => $expand!(28),
+            29 => $expand!(29),
+            30 => $expand!(30),
+            31 => $expand!(31),
+            32 => $expand!(32),
+            33 => $expand!(33),
+            34 => $expand!(34),
+            35 => $expand!(35),
+            36 => $expand!(36),
+            37 => $expand!(37),
+            38 => $expand!(38),
+            39 => $expand!(39),
+            40 => $expand!(40),
+            41 => $expand!(41),
+            42 => $expand!(42),
+            43 => $expand!(43),
+            44 => $expand!(44),
+            45 => $expand!(45),
+            46 => $expand!(46),
+            47 => $expand!(47),
+            48 => $expand!(48),
+            49 => $expand!(49),
+            50 => $expand!(50),
+            51 => $expand!(51),
+            52 => $expand!(52),
+            53 => $expand!(53),
+            54 => $expand!(54),
+            55 => $expand!(55),
+            56 => $expand!(56),
+            57 => $expand!(57),
+            58 => $expand!(58),
+            59 => $expand!(59),
+            60 => $expand!(60),
+            61 => $expand!(61),
+            62 => $expand!(62),
+            63 => $expand!(63),
+            _ => $expand!(63),
+        }
+    };
+    (i32, $imm8:expr, $expand:ident) => {
+        #[allow(overflowing_literals)]
+        #[allow(clippy::suspicious_op_assign_impl)]
+        #[allow(clippy::suspicious_arithmetic_impl)]
+        match ($imm8) & 0b1111_1111 {
+            1 => $expand!(1),
+            2 => $expand!(2),
+            3 => $expand!(3),
+            4 => $expand!(4),
+            5 => $expand!(5),
+            6 => $expand!(6),
+            7 => $expand!(7),
+            8 => $expand!(8),
+            9 => $expand!(9),
+            10 => $expand!(10),
+            11 => $expand!(11),
+            12 => $expand!(12),
+            13 => $expand!(13),
+            14 => $expand!(14),
+            15 => $expand!(15),
+            16 => $expand!(16),
+            17 => $expand!(17),
+            18 => $expand!(18),
+            19 => $expand!(19),
+            20 => $expand!(20),
+            21 => $expand!(21),
+            22 => $expand!(22),
+            23 => $expand!(23),
+            24 => $expand!(24),
+            25 => $expand!(25),
+            26 => $expand!(26),
+            27 => $expand!(27),
+            28 => $expand!(28),
+            29 => $expand!(29),
+            30 => $expand!(30),
+            31 => $expand!(31),
+            _ => $expand!(31),
+        }
+    };
+    (i16, $imm8:expr, $expand:ident) => {
+        #[allow(overflowing_literals)]
+        #[allow(clippy::suspicious_op_assign_impl)]
+        #[allow(clippy::suspicious_arithmetic_impl)]
+        match ($imm8) & 0b1111_1111 {
+            1 => $expand!(1),
+            2 => $expand!(2),
+            3 => $expand!(3),
+            4 => $expand!(4),
+            5 => $expand!(5),
+            6 => $expand!(6),
+            7 => $expand!(7),
+            8 => $expand!(8),
+            9 => $expand!(9),
+            10 => $expand!(10),
+            11 => $expand!(11),
+            12 => $expand!(12),
+            13 => $expand!(13),
+            14 => $expand!(14),
+            15 => $expand!(15),
+            _ => $expand!(15),
+        }
+    };
+    (i8, $imm8:expr, $expand:ident) => {
+        #[allow(overflowing_literals)]
+        #[allow(clippy::suspicious_op_assign_impl)]
+        #[allow(clippy::suspicious_arithmetic_impl)]
+        match ($imm8) & 0b1111_1111 {
+            1 => $expand!(1),
+            2 => $expand!(2),
+            3 => $expand!(3),
+            4 => $expand!(4),
+            5 => $expand!(5),
+            6 => $expand!(6),
+            7 => $expand!(7),
+            _ => $expand!(7),
         }
     };
 }

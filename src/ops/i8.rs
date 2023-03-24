@@ -14,6 +14,9 @@ impl_op! {
         for Scalar(a: i8, b: i8) -> i8 {
             a.wrapping_add(b)
         }
+        for Neon(a: int8x16_t, b: int8x16_t) -> int8x16_t {
+            vaddq_s8(a, b)
+        }
     }
 }
 
@@ -30,6 +33,9 @@ impl_op! {
         }
         for Scalar(a: i8, b: i8) -> i8 {
             a.wrapping_sub(b)
+        }
+        for Neon(a: int8x16_t, b: int8x16_t) -> int8x16_t {
+            vsubq_s8(a, b)
         }
     }
 }
@@ -63,6 +69,9 @@ impl_op! {
         for Scalar(a: i8, b: i8) -> i8 {
             a.wrapping_mul(b)
         }
+        for Neon(a: int8x16_t, b: int8x16_t) -> int8x16_t {
+            vmulq_s8(a, b)
+        }
     }
 }
 
@@ -80,6 +89,9 @@ impl_op! {
         }
         for Scalar(a: i8, b: i8) -> i8 {
             a.min(b)
+        }
+        for Neon(a: int8x16_t, b: int8x16_t) -> int8x16_t {
+            vminq_s8(a, b)
         }
     }
 }
@@ -99,6 +111,9 @@ impl_op! {
         for Scalar(a: i8, b: i8) -> i8 {
             a.max(b)
         }
+        for Neon(a: int8x16_t, b: int8x16_t) -> int8x16_t {
+            vmaxq_s8(a, b)
+        }
     }
 }
 
@@ -116,6 +131,9 @@ impl_op! {
         }
         for Scalar(a: i8) -> i8 {
             a.abs()
+        }
+        for Neon(a: int8x16_t) -> int8x16_t {
+            vabsq_s8(a)
         }
     }
 }
@@ -137,6 +155,9 @@ impl_op! {
             } else {
                 0
             }
+        }
+        for Neon(a: int8x16_t, b: int8x16_t) -> int8x16_t {
+            vreinterpretq_s8_u8(vceqq_s8(a, b))
         }
     }
 }
@@ -161,6 +182,9 @@ impl_op! {
             } else {
                 0
             }
+        }
+        for Neon(a: int8x16_t, b: int8x16_t) -> int8x16_t {
+            vreinterpretq_s8_u8(vmvnq_u8(vceqq_s8(a, b)))
         }
     }
 }
@@ -189,6 +213,9 @@ impl_op! {
                 0
             }
         }
+        for Neon(a: int8x16_t, b: int8x16_t) -> int8x16_t {
+            vreinterpretq_s8_u8(vcltq_s8(a, b))
+        }
     }
 }
 
@@ -213,6 +240,9 @@ impl_op! {
                 0
             }
         }
+        for Neon(a: int8x16_t, b: int8x16_t) -> int8x16_t {
+            vreinterpretq_s8_u8(vcleq_s8(a, b))
+        }
     }
 }
 
@@ -233,6 +263,9 @@ impl_op! {
             } else {
                 0
             }
+        }
+        for Neon(a: int8x16_t, b: int8x16_t) -> int8x16_t {
+            vreinterpretq_s8_u8(vcgtq_s8(a, b))
         }
     }
 }
@@ -261,6 +294,9 @@ impl_op! {
                 0
             }
         }
+        for Neon(a: int8x16_t, b: int8x16_t) -> int8x16_t {
+            vreinterpretq_s8_u8(vcgeq_s8(a, b))
+        }
     }
 }
 
@@ -281,6 +317,9 @@ impl_op! {
             } else {
                 b
             }
+        }
+        for Neon(a: int8x16_t, b: int8x16_t, mask: int8x16_t) -> int8x16_t {
+            vbslq_s8(vreinterpretq_u8_s8(mask), b, a)
         }
     }
 }
@@ -311,6 +350,10 @@ impl_op! {
         for Scalar(a: i8, rhs: i32) -> i8 {
             a << rhs
         }
+        for Neon(a: int8x16_t, rhs: i32) -> int8x16_t {
+            let rhs = Self::set1(rhs as i8);
+            vshlq_s8(a, rhs)
+        }
     }
 }
 
@@ -340,6 +383,10 @@ impl_op! {
         for Scalar(a: i8, rhs: i32) -> i8 {
             ((a as u8) >> rhs) as i8
         }
+        for Neon(a: int8x16_t, rhs: i32) -> int8x16_t {
+            let rhs = Self::set1(-rhs as i8);
+            vreinterpretq_s8_u8(vshlq_u8(vreinterpretq_u8_s8(a), rhs))
+        }
     }
 }
 
@@ -357,6 +404,9 @@ impl_imm8_op! {
         for Scalar(a: i8) -> i8 {
             a << BY
         }
+        for Neon(a: int8x16_t) -> int8x16_t {
+            vshlq_n_s8(a, BY)
+        }
     }
 }
 
@@ -373,6 +423,9 @@ impl_imm8_op! {
         }
         for Scalar(a: i8) -> i8 {
             ((a as u8) >> BY) as i8
+        }
+        for Neon(a: int8x16_t) -> int8x16_t {
+            vreinterpretq_s8_u8(vshrq_n_u8(vreinterpretq_u8_s8(a), BY))
         }
     }
 }
@@ -416,6 +469,11 @@ impl_op! {
         for Scalar(val: i8) -> (i16, i16) {
             (val as i16, 0)
         }
+        for Neon(val: int8x16_t) -> (int16x8_t, int16x8_t) {
+            let a = vmovl_s8(vget_low_s8(val));
+            let b = vmovl_s8(vget_high_s8(val));
+            (a, b)
+        }
     }
 }
 
@@ -458,6 +516,11 @@ impl_op! {
         for Scalar(val: i8) -> (i16, i16) {
             (val as u8 as u16 as i16, 0)
         }
+        for Neon(val: int8x16_t) -> (int16x8_t, int16x8_t) {
+            let a = vreinterpretq_s16_u16(vmovl_u8(vreinterpret_u8_s8(vget_low_s8(val))));
+            let b = vreinterpretq_s16_u16(vmovl_u8(vreinterpret_u8_s8(vget_high_s8(val))));
+            (a, b)
+        }
     }
 }
 
@@ -474,6 +537,22 @@ impl_op! {
         }
         for Scalar(val: i8) -> u32 {
             ((val as u8) & 0x80) as u32
+        }
+        for Neon(val: int8x16_t) -> u32 {
+            let val = vreinterpretq_u8_s8(val);
+
+            // Algorithm copied from here: https://stackoverflow.com/a/68694558
+            let uc_shift: [i8; 16] = [-7,-6,-5,-4,-3,-2,-1,0,-7,-6,-5,-4,-3,-2,-1,0];
+            let vshift: int8x16_t = std::mem::transmute(uc_shift);
+            let vmask = vandq_u8(val, vdupq_n_u8(0x80));
+
+            let vmask = vshlq_u8(vmask, vshift);
+
+            let mut out: u16 = 0;
+            out |= vaddv_u8(vget_low_u8(vmask)) as u16;
+            out |= (vaddv_u8(vget_high_u8(vmask)) as u16) << 8;
+
+            out as u32
         }
     }
 }
@@ -492,6 +571,9 @@ impl_op! {
         for Scalar() -> i8 {
             0
         }
+        for Neon() -> int8x16_t {
+            vdupq_n_s8(0)
+        }
     }
 }
 
@@ -508,6 +590,9 @@ impl_op! {
         }
         for Scalar(val: i8) -> i8 {
             val
+        }
+        for Neon(val: i8) -> int8x16_t {
+            vdupq_n_s8(val)
         }
     }
 }
@@ -526,6 +611,9 @@ impl_op! {
         for Scalar(ptr: *const i8) -> i8 {
             unsafe { *ptr }
         }
+        for Neon(ptr: *const i8) -> int8x16_t {
+            vld1q_s8(ptr as *const i8)
+        }
     }
 }
 
@@ -542,6 +630,9 @@ impl_op! {
         }
         for Scalar(ptr: *const i8) -> i8 {
             unsafe { *ptr }
+        }
+        for Neon(ptr: *const i8) -> int8x16_t {
+            vld1q_s8(ptr)
         }
     }
 }
@@ -560,6 +651,9 @@ impl_op! {
         for Scalar(ptr: *mut i8, a: i8) {
             unsafe { *ptr = a }
         }
+        for Neon(ptr: *mut i8, a: int8x16_t) {
+            vst1q_s8(ptr, a)
+        }
     }
 }
 
@@ -576,6 +670,9 @@ impl_op! {
         }
         for Scalar(ptr: *mut i8, a: i8) {
             unsafe { *ptr = a }
+        }
+        for Neon(ptr: *mut i8, a: int8x16_t) {
+            vst1q_s8(ptr, a)
         }
     }
 }

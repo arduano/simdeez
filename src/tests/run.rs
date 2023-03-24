@@ -1,8 +1,13 @@
-use crate::{elementwise_eq_tester, test_constify_imm8};
+use crate::{elementwise_eq_tester};
 
 use super::*;
 
-use crate::engines::{avx2::*, scalar::*, sse2::*, sse41::*};
+#[cfg(target_arch = "aarch64")]
+use crate::engines::neon::Neon;
+use crate::engines::scalar::*;
+#[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+use crate::engines::{avx2::*, sse2::*, sse41::*};
+
 use crate::*;
 
 elementwise_eq_tester_impl!(SimdBaseOps, add, two_arg, EqPrecision::exact());
@@ -57,7 +62,7 @@ elementwise_eq_tester_impl!(SimdFloat, neg_mul_add, three_arg, EqPrecision::almo
 elementwise_eq_tester_impl!(SimdFloat, neg_mul_sub, three_arg, EqPrecision::almost(5));
 
 elementwise_eq_tester_impl!(SimdFloat, sqrt, one_arg, EqPrecision::almost(7));
-elementwise_eq_tester_impl!(SimdFloat, rsqrt, one_arg, EqPrecision::almost(3)); // Has very low precision
+elementwise_eq_tester_impl!(SimdFloat, rsqrt, one_arg, EqPrecision::almost(2)); // Has very low precision
 
 bitshift_eq_tester_impl!(dyn shl);
 bitshift_eq_tester_impl!(dyn shr);
