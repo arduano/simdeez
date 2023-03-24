@@ -43,3 +43,40 @@ jobs:
         with:
           command: test
           args: --release
+
+  arm_tests:
+    name: Arm Neon Tests
+    runs-on: ubuntu-latest
+    env:
+      QEMU_LD_PREFIX: /usr/aarch64-linux-gnu
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        name: Initialize Cargo
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+          components: rustfmt, clippy
+
+      - uses: Swatinem/rust-cache@v2
+        name: Cargo Cache
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+        with:
+          platforms: aarch64
+
+      # Ensure that everything happens safely (with runtime checks)
+      - uses: actions-rs/cargo@v1
+        name: Run tests (debug)
+        with:
+          command: test
+          args: --target aarch64-unknown-linux-gnu
+
+      # Ensure that no behavior gets optimized out
+      - uses: actions-rs/cargo@v1
+        name: Run tests (release)
+        with:
+          command: test
+          args: --release --target aarch64-unknown-linux-gnu
