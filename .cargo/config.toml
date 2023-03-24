@@ -1,6 +1,6 @@
 [build]
 # rustflags = "-C target-cpu=native"
-# rustflags = "-C target-feature=-sse4.1,-avx,-sse3"
+rustflags = "-C target-feature=-sse4.1,-avx,-sse3"
 target = "aarch64-unknown-linux-gnu"
 
 [target.aarch64-unknown-linux-gnu]

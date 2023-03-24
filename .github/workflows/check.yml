@@ -3,8 +3,42 @@ on: [pull_request]
 name: Lints
 
 jobs:
-  tests:
-    name: Tests
+  checks:
+    name: Code Checks (formatting, clippy)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        name: Initialize Cargo
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+          components: rustfmt, clippy
+
+      - uses: Swatinem/rust-cache@v2
+        name: Cargo Cache
+
+      - uses: actions-rs/cargo@v1
+        name: Check code formatting
+        with:
+          command: fmt
+          args: --all -- --check
+
+      - uses: actions-rs/cargo@v1
+        name: Clippy check (x86)
+        with:
+          command: clippy
+          args: --all --all-targets -- --deny "warnings"
+
+      - uses: actions-rs/cargo@v1
+        name: Clippy check (arm64)
+        with:
+          command: clippy
+          args: --all --all-targets --target aarch64-unknown-linux-gnu -- --deny "warnings"
+
+  x86_tests:
+    name: x86 Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
