@@ -1,6 +1,7 @@
 pub use super::{
-    fix_tuple_type, run_simd_runtime_decide, run_simd_runtime_scalar_only, simd_invoke,
-    simd_runtime_generate_v2, Simd, SimdRunner,
+    __run_simd_runtime_decide, fix_tuple_type, run_simd_invoke_scalar, simd_invoke,
+    simd_runtime_generate, Simd, __SimdRunner, __run_simd_compiletime_select,
+    simd_compiletime_select,
 };
 
 pub use crate::base::{

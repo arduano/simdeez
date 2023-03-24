@@ -1,7 +1,7 @@
 use criterion::{criterion_group, criterion_main, Criterion};
 use rand::{Rng, SeedableRng};
 use rand_chacha::ChaCha8Rng;
-use simdeez::{prelude::*, simd_runtime_generate_v2};
+use simdeez::{prelude::*, simd_runtime_generate};
 
 struct NumberParser<'a> {
     string: &'a [u8],
@@ -154,7 +154,7 @@ fn scalar_get_max(prompt: &str) -> u64 {
     max
 }
 
-simd_runtime_generate_v2!(
+simd_runtime_generate!(
     fn simd_get_max(prompt: &str) -> u64 {
         let mut parser = NumberParserSimd::<S>::new(prompt);
 

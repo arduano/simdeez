@@ -1,8 +1,8 @@
 use rand::{Rng, SeedableRng};
 use rand_chacha::ChaCha8Rng;
-use simdeez::{prelude::*, simd_runtime_generate_v2};
+use simdeez::{prelude::*, simd_runtime_generate};
 
-simd_runtime_generate_v2!(
+simd_runtime_generate!(
     fn sum(source: &[f32], target: &mut [f32]) {
         let mut source = &source[..source.len()];
         let mut target = &mut target[..source.len()];
@@ -172,7 +172,7 @@ fn scalar_get_sum(prompt: &str) -> u64 {
     sum
 }
 
-simd_runtime_generate_v2!(
+simd_runtime_generate!(
     fn simd_get_sum(prompt: &str) -> u64 {
         let mut parser = NumberParserSimd::<S>::new(prompt);
 
