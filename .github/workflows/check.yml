@@ -9,10 +9,19 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
-        name: Initialize Cargo
+        name: Initialize Cargo x86
         with:
           profile: minimal
           toolchain: stable
+          override: true
+          components: rustfmt, clippy
+
+      - uses: actions-rs/toolchain@v1
+        name: Initialize Cargo aarch64
+        with:
+          profile: minimal
+          toolchain: stable
+          target: aarch64-unknown-linux-gnu
           override: true
           components: rustfmt, clippy
 
@@ -52,18 +61,6 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
         name: Cargo Cache
-
-      - uses: actions-rs/cargo@v1
-        name: Check code formatting
-        with:
-          command: fmt
-          args: --all -- --check
-
-      - uses: actions-rs/cargo@v1
-        name: Check code with clippy
-        with:
-          command: clippy
-          args: --all -- --deny "warnings"
 
       # Ensure that everything happens safely (with runtime checks)
       - uses: actions-rs/cargo@v1
