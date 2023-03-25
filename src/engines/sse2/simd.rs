@@ -105,12 +105,7 @@ impl Simd for Sse2 {
     }
 
     #[inline(always)]
-    unsafe fn shuffle_epi32(a: Self::Vi32, imm8: i32) -> Self::Vi32 {
-        macro_rules! call {
-            ($imm8:expr) => {
-                I32x4(_mm_shuffle_epi32(a.0, $imm8))
-            };
-        }
-        constify_imm8!(imm8, call)
+    unsafe fn shuffle_epi32<const IMM8: i32>(a: Self::Vi32) -> Self::Vi32 {
+        I32x4(_mm_shuffle_epi32(a.0, IMM8))
     }
 }

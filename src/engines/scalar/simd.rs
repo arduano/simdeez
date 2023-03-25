@@ -82,7 +82,7 @@ impl Simd for Scalar {
     }
 
     #[inline(always)]
-    unsafe fn shuffle_epi32(a: Self::Vi32, _imm8: i32) -> Self::Vi32 {
+    unsafe fn shuffle_epi32<const IMM8: i32>(a: Self::Vi32) -> Self::Vi32 {
         a
     }
 }
