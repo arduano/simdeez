@@ -659,6 +659,11 @@ macro_rules! impl_simd_int {
             fn horizontal_unsigned_add($self) -> Self::HorizontalAddScalar {
                 $($hadd)*
             }
+
+            #[inline(always)]
+            fn from_i64(value: i64) -> Self {
+                Self::set1(value as $scalar_ty)
+            }
         }
     };
 }
@@ -729,6 +734,11 @@ macro_rules! impl_simd_float {
             #[inline(always)]
             fn rsqrt(self) -> Self {
                 unsafe { Self(Ops::<$engine, $scalar_ty>::rsqrt(self.0)) }
+            }
+
+            #[inline(always)]
+            fn from_f64(value: f64) -> Self {
+                Self::set1(value as $scalar_ty)
             }
         }
     };

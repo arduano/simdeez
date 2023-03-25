@@ -39,6 +39,8 @@ pub trait SimdInt:
     /// Add every number in the vector together in unsigned arithmetic. When expanding the size of each number,
     /// it treats the numbers as unsigned, meaning the sign bit doesn't get moved around.
     fn horizontal_unsigned_add(self) -> Self::HorizontalAddScalar;
+
+    fn from_i64(value: i64) -> Self;
 }
 
 /// Operations shared by 8 bit int types
@@ -271,6 +273,8 @@ pub trait SimdFloat:
 
     /// Element-wise approximate inverse square root
     fn rsqrt(self) -> Self;
+
+    fn from_f64(value: f64) -> Self;
 }
 
 /// Operations shared by 32 bit float types
