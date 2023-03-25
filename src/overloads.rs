@@ -374,6 +374,32 @@ macro_rules! horizontal_add_scalar {
 }
 
 macro_rules! define_simd_type {
+    (Scalar, $ty:ty, $width:literal, $underlying:ty) => {
+        paste::item! {
+            #[derive(Copy, Clone)]
+            pub struct [<$ty:upper x $width>](pub $underlying);
+            impl_simd_base_overloads!([<$ty:upper x $width>]);
+
+            impl SimdConsts for [<$ty:upper x $width>] {
+                const WIDTH: usize = $width;
+                type Scalar = $ty;
+                type HorizontalAddScalar = horizontal_add_scalar!($ty);
+                type ArrayRepresentation = [$ty; $width];
+                type UnderlyingType = $underlying;
+            }
+
+            impl [<SimdTransmute $ty:upper>] for [<$ty:upper x $width>] {
+                fn [<try_transmute_ scalar>](&self) -> $underlying {
+                    self.0
+                }
+
+                fn [<try_transmute_from_ scalar>](val: $underlying) -> Self {
+                    Self(val)
+                }
+            }
+        }
+    };
+
     ($engine:ident, $ty:ty, $width:literal, $underlying:ty) => {
         paste::item! {
             #[derive(Copy, Clone)]
