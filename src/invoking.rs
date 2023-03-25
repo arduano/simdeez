@@ -24,7 +24,7 @@ macro_rules! __simd_generate_base {
             // into tuples. This is part of the reason for the mess below.
 
             #[inline(always)]
-            $vis unsafe fn [<__ $fn_name _generic>]<$($($lt,)+)? S: 'static + Simd>(args_tuple: ($($typ,)*)) -> $rt {
+            $vis unsafe fn [<$fn_name _generic>]<$($($lt,)+)? S: 'static + Simd>(args_tuple: ($($typ,)*)) -> $rt {
                 let ($($arg,)*) = args_tuple;
                 S::invoke(#[inline(always)] || $body)
             }
@@ -33,7 +33,7 @@ macro_rules! __simd_generate_base {
 
             impl$(<$($lt),+>)? __SimdRunner<fix_tuple_type!(($($typ),*)), $rt> for [<__ $fn_name _dispatch_struct>] {
                 unsafe fn run<S: Simd>(args_tuple: fix_tuple_type!(($($typ),*))) -> $rt {
-                    [<__ $fn_name _generic>]::<S>(args_tuple)
+                    [<$fn_name _generic>]::<S>(args_tuple)
                 }
             }
         }
