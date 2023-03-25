@@ -18,22 +18,29 @@ macro_rules! fix_tuple_type {
 
 #[macro_export]
 macro_rules! __simd_generate_base {
-    ($vis:vis fn $fn_name:ident $(<$($lt:lifetime),+>)? ($($arg:ident:$typ:ty),* ) -> $rt:ty $body:block  ) => {
+    ($(#[$meta:meta])* $vis:vis fn $fn_name:ident $(<$($lt:lifetime),+>)? ($($arg:ident:$typ:ty),* ) -> $rt:ty $body:block  ) => {
         simdeez_paste_item! {
             // In order to pass arguments via generics like this, we need to convert the arguments
             // into tuples. This is part of the reason for the mess below.
 
             #[inline(always)]
-            $vis unsafe fn [<$fn_name _generic>]<$($($lt,)+)? S: 'static + Simd>(args_tuple: ($($typ,)*)) -> $rt {
+            $vis unsafe fn [<__ $fn_name _generic>]<$($($lt,)+)? S: 'static + Simd>(args_tuple: ($($typ,)*)) -> $rt {
                 let ($($arg,)*) = args_tuple;
                 S::invoke(#[inline(always)] || $body)
+            }
+
+            $(#[$meta])*
+            #[inline(always)]
+            $vis fn [<$fn_name _generic>] <S: Simd, $($($lt),+)?>($($arg:$typ,)*) -> $rt {
+                let args_tuple = ($($arg,)*);
+                __run_simd_generic::<S, [<__ $fn_name _dispatch_struct>], fix_tuple_type!(($($typ),*)), $rt>(args_tuple)
             }
 
             struct [<__ $fn_name _dispatch_struct>];
 
             impl$(<$($lt),+>)? __SimdRunner<fix_tuple_type!(($($typ),*)), $rt> for [<__ $fn_name _dispatch_struct>] {
                 unsafe fn run<S: Simd>(args_tuple: fix_tuple_type!(($($typ),*))) -> $rt {
-                    [<$fn_name _generic>]::<S>(args_tuple)
+                    [<__ $fn_name _generic>]::<S>(args_tuple)
                 }
             }
         }
@@ -61,7 +68,7 @@ macro_rules! simd_runtime_generate {
                 __run_simd_invoke_scalar::<[<__ $fn_name _dispatch_struct>], fix_tuple_type!(($($typ),*)), $rt>(args_tuple)
             }
 
-            __simd_generate_base!($vis fn $fn_name $(<$($lt),+>)? ($($arg:$typ),* ) -> $rt $body);
+            __simd_generate_base!($(#[$meta])* $vis fn $fn_name $(<$($lt),+>)? ($($arg:$typ),* ) -> $rt $body);
         }
     };
     ($(#[$meta:meta])* $vis:vis fn $fn_name:ident ($($arg:ident:$typ:ty),* $(,)? ) $body:block  ) => {
@@ -87,7 +94,7 @@ macro_rules! simd_compiletime_select {
                 __run_simd_invoke_scalar::<[<__ $fn_name _dispatch_struct>], fix_tuple_type!(($($typ),*)), $rt>(args_tuple)
             }
 
-            __simd_generate_base!($vis fn $fn_name $(<$($lt),+>)? ($($arg:$typ),* ) -> $rt $body);
+            __simd_generate_base!($(#[$meta])* $vis fn $fn_name $(<$($lt),+>)? ($($arg:$typ),* ) -> $rt $body);
         }
     };
     ($(#[$meta:meta])* $vis:vis fn $fn_name:ident ($($arg:ident:$typ:ty),* $(,)? ) $body:block  ) => {
@@ -139,7 +146,7 @@ macro_rules! simd_unsafe_generate_all {
                 __run_simd_invoke_neon::<[<__ $fn_name _dispatch_struct>], fix_tuple_type!(($($typ),*)), $rt>(args_tuple)
             }
 
-            __simd_generate_base!($vis fn $fn_name $(<$($lt),+>)? ($($arg:$typ),* ) -> $rt $body);
+            __simd_generate_base!($(#[$meta])* $vis fn $fn_name $(<$($lt),+>)? ($($arg:$typ),* ) -> $rt $body);
         }
     };
     ($(#[$meta:meta])* $vis:vis fn $fn_name:ident ($($arg:ident:$typ:ty),* $(,)? ) $body:block  ) => {
@@ -174,6 +181,11 @@ pub fn __run_simd_runtime_decide<S: __SimdRunner<A, R>, A, R>(args: A) -> R {
     }
 
     unsafe { S::run::<engines::scalar::Scalar>(args) }
+}
+
+#[inline(always)]
+pub fn __run_simd_generic<E: Simd, S: __SimdRunner<A, R>, A, R>(args: A) -> R {
+    unsafe { S::run::<E>(args) }
 }
 
 #[inline(always)]
