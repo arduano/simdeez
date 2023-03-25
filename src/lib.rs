@@ -149,109 +149,66 @@
     feature(core_intrinsics)
 )]
 #![allow(clippy::missing_safety_doc)] // TODO: Work on the safety of functions
-#![cfg_attr(feature = "no_std", no_std)]
+#![cfg_attr(all(feature = "no_std", not(test)), no_std)]
 #[macro_use]
 #[cfg(test)]
 extern crate std;
 pub extern crate paste;
 
-use core::fmt::Debug;
+#[cfg(test)]
+mod tests;
+
+mod ops;
+
+pub mod prelude;
+
 use core::ops::*;
 
+mod invoking;
+
 #[macro_use]
-mod macros;
+mod overloads;
+
+mod base;
+pub use base::*;
 
 mod libm_ext;
 
-#[cfg(target_arch = "x86_64")]
-pub mod avx2;
-pub mod scalar;
-#[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
-pub mod sse2;
-#[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
-pub mod sse41;
-// coming soon
-//#[cfg(target_arch = "wasm32")]
-//pub mod wasm32;
-//pub mod avx;
+mod engines;
 
-/// Grouping all the constraints shared by associated types in
-/// the Simd trait into this marker trait drastically reduces
-/// compile time.
-pub trait SimdBase<T, U>:
-    Copy
-    + Debug
-    + IndexMut<usize>
-    + Add<T, Output = T>
-    + Sub<T, Output = T>
-    + AddAssign<T>
-    + SubAssign<T>
-    + BitAnd<T, Output = T>
-    + BitOr<T, Output = T>
-    + BitXor<T, Output = T>
-    + BitAndAssign<T>
-    + BitOrAssign<T>
-    + BitXorAssign<T>
-    + Index<usize, Output = U>
-    + core::marker::Sync
-    + core::marker::Send
-{
-    const WIDTH: usize;
-}
-
-/// 16 and 32 bit int types share all of these
-/// constraints, grouping them here speeds up
-/// compile times considerably
-pub trait SimdSmallInt<T, U>:
-    SimdBase<T, U>
-    + Mul<T, Output = T>
-    + MulAssign<T>
-    + Not<Output = T>
-    + Shl<i32, Output = T>
-    + ShlAssign<i32>
-    + Shr<i32, Output = T>
-    + ShrAssign<i32>
-{
-}
-
-/// f32 and f64 share these constraints, grouping
-/// them here speeds up compile times considerably
-pub trait SimdFloat<T, U>:
-    SimdBase<T, U>
-    + Mul<T, Output = T>
-    + Div<T, Output = T>
-    + MulAssign<T>
-    + DivAssign<T>
-    + Not<Output = T>
-{
-}
+pub use engines::scalar;
 
 /// The abstract SIMD trait which is implemented by Avx2, Sse41, etc
-pub trait Simd: Sync + Send {
+pub trait Simd: 'static + Sync + Send {
+    /// Vector of i8s.  Corresponds to __m128i when used
+    /// with the Sse impl, __m256i when used with Avx2, or a single i8
+    /// when used with Scalar.
+    type Vi8: SimdInt8<Scalar = i8> + SimdBaseIo;
+
     /// Vector of i16s.  Corresponds to __m128i when used
     /// with the Sse impl, __m256i when used with Avx2, or a single i16
     /// when used with Scalar.
-    type Vi16: SimdSmallInt<Self::Vi16, i16>;
+    type Vi16: SimdInt16<Scalar = i16> + SimdBaseIo;
 
     /// Vector of i32s.  Corresponds to __m128i when used
     /// with the Sse impl, __m256i when used with Avx2, or a single i32
     /// when used with Scalar.
-    type Vi32: SimdSmallInt<Self::Vi32, i32>;
+    type Vi32: SimdInt32<Engine = Self, Scalar = i32> + SimdBaseIo;
 
     /// Vector of i64s.  Corresponds to __m128i when used
     /// with the Sse impl, __m256i when used with Avx2, or a single i64
     /// when used with Scalar.
-    type Vi64: SimdBase<Self::Vi64, i64> + Not<Output = Self::Vi64>;
+    type Vi64: SimdInt64<Engine = Self, Scalar = i64> + SimdBaseIo;
 
     /// Vector of f32s.  Corresponds to __m128 when used
     /// with the Sse impl, __m256 when used with Avx2, or a single f32
     /// when used with Scalar.
-    type Vf32: SimdFloat<Self::Vf32, f32>;
+    type Vf32: SimdFloat32<Engine = Self, Scalar = f32> + SimdBaseIo;
 
     /// Vector of f64s.  Corresponds to __m128d when used
     /// with the Sse impl, __m256d when used with Avx2, or a single f64
     /// when used with Scalar.
-    type Vf64: SimdFloat<Self::Vf64, f64>;
+    type Vf64: SimdFloat64<Engine = Self, Scalar = f64> + SimdBaseIo;
 
     // The width of the vector lane.  Necessary for creating
     // lane width agnostic code.
@@ -266,334 +223,1063 @@ pub trait Simd: Sync + Send {
     #[deprecated(note = "The VI64_WIDTH is deprecated, please use the Vi64::WIDTH instead.")]
     const VI64_WIDTH: usize = Self::Vi64::WIDTH;
 
+    fn invoke<R>(f: impl FnOnce() -> R) -> R;
+
     #[inline(always)]
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
     unsafe fn mul_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
         a * b
     }
     #[inline(always)]
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
     unsafe fn mul_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
         a * b
     }
     #[inline(always)]
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
     unsafe fn not_epi32(a: Self::Vi32) -> Self::Vi32 {
         !a
     }
     #[inline(always)]
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
     unsafe fn not_epi64(a: Self::Vi64) -> Self::Vi64 {
         !a
     }
     #[inline(always)]
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
     unsafe fn or_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         a | b
     }
     #[inline(always)]
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
     unsafe fn or_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
         a | b
     }
     #[inline(always)]
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
     unsafe fn or_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
         a | b
     }
     #[inline(always)]
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
     unsafe fn or_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
         a | b
     }
     #[inline(always)]
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
     unsafe fn xor_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         a ^ b
     }
     #[inline(always)]
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
     unsafe fn xor_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
         a ^ b
     }
     #[inline(always)]
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
     unsafe fn xor_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
         a ^ b
     }
     #[inline(always)]
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
     unsafe fn xor_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
         a ^ b
     }
     /// amt must be a constant
     #[inline(always)]
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
     unsafe fn slli_epi32(a: Self::Vi32, amt_const: i32) -> Self::Vi32 {
         a << amt_const
     }
     /// amt must be a constant
     #[inline(always)]
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
     unsafe fn srai_epi32(a: Self::Vi32, amt_const: i32) -> Self::Vi32 {
         a >> amt_const
     }
     #[inline(always)]
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
     unsafe fn div_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
         a / b
     }
     #[inline(always)]
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
     unsafe fn div_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
         a / b
     }
     #[inline(always)]
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
     unsafe fn add_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 {
         a + b
     }
     #[inline(always)]
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
     unsafe fn sub_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 {
         a - b
     }
     #[inline(always)]
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
     unsafe fn add_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         a + b
     }
     #[inline(always)]
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
     unsafe fn add_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
         a + b
     }
     #[inline(always)]
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
     unsafe fn add_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
         a + b
     }
     #[inline(always)]
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
     unsafe fn add_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
         a + b
     }
     #[inline(always)]
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
     unsafe fn and_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         a & b
     }
     #[inline(always)]
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
     unsafe fn and_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
         a & b
     }
     #[inline(always)]
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
     unsafe fn and_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
         a & b
     }
     #[inline(always)]
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
     unsafe fn and_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
         a & b
     }
 
-    unsafe fn abs_ps(a: Self::Vf32) -> Self::Vf32;
-    unsafe fn abs_pd(a: Self::Vf64) -> Self::Vf64;
-    unsafe fn mullo_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16;
-    unsafe fn andnot_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
-    unsafe fn andnot_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
-    unsafe fn andnot_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
-    unsafe fn andnot_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn abs_ps(a: Self::Vf32) -> Self::Vf32 {
+        a.abs()
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn abs_pd(a: Self::Vf64) -> Self::Vf64 {
+        a.abs()
+    }
+
+    // Mullo is implemented for Sse2 by combining other Sse2 operations.
+
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn mullo_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
+        a * b
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn mullo_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
+        a * b
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn mullo_epi16(a: Self::Vi16, b: Self::Vi16) -> Self::Vi16 {
+        a * b
+    }
+
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn andnot_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
+        a.and_not(b)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn andnot_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        a.and_not(b)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn andnot_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
+        a.and_not(b)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn andnot_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
+        a.and_not(b)
+    }
+
     /// Note SSE2 will select B only when all bits are 1, while SSE41 and AVX2 only
     /// check the high bit. To maintain portability ensure all bits are 1 when using
     /// blend. Results of comparison operations adhere to this.
-    unsafe fn blendv_epi32(a: Self::Vi32, b: Self::Vi32, mask: Self::Vi32) -> Self::Vi32;
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn blendv_epi32(a: Self::Vi32, b: Self::Vi32, mask: Self::Vi32) -> Self::Vi32 {
+        a.blendv(b, mask)
+    }
     /// Note SSE2 will select B only when all bits are 1, while SSE41 and AVX2 only
     /// check the high bit. To maintain portability ensure all bits are 1 when using
     /// blend. Results of comparison operations adhere to this.
-    unsafe fn blendv_epi64(a: Self::Vi64, b: Self::Vi64, mask: Self::Vi64) -> Self::Vi64;
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn blendv_epi64(a: Self::Vi64, b: Self::Vi64, mask: Self::Vi64) -> Self::Vi64 {
+        a.blendv(b, mask)
+    }
     /// Note SSE2 will select B only when all bits are 1, while SSE41 and AVX2 only
     /// check the high bit. To maintain portability ensure all bits are 1 when using
     /// blend. Results of comparison operations adhere to this.
-    unsafe fn blendv_ps(a: Self::Vf32, b: Self::Vf32, mask: Self::Vf32) -> Self::Vf32;
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn blendv_ps(a: Self::Vf32, b: Self::Vf32, mask: Self::Vf32) -> Self::Vf32 {
+        a.blendv(b, mask)
+    }
     /// Note SSE2 will select B only when all bits are 1, while SSE41 and AVX2 only
     /// check the high bit. To maintain portability ensure all bits are 1 when using
     /// blend. Results of comparison operations adhere to this.
-    unsafe fn blendv_pd(a: Self::Vf64, b: Self::Vf64, mask: Self::Vf64) -> Self::Vf64;
-    unsafe fn castps_epi32(a: Self::Vf32) -> Self::Vi32;
-    unsafe fn castpd_epi64(a: Self::Vf64) -> Self::Vi64;
-    unsafe fn castepi32_ps(a: Self::Vi32) -> Self::Vf32;
-    unsafe fn castepi64_pd(a: Self::Vi64) -> Self::Vf64;
-    unsafe fn castps_pd(a: Self::Vf32) -> Self::Vf64;
-    unsafe fn castpd_ps(a: Self::Vf64) -> Self::Vf32;
-    unsafe fn ceil_ps(a: Self::Vf32) -> Self::Vf32;
-    unsafe fn ceil_pd(a: Self::Vf64) -> Self::Vf64;
-    unsafe fn cmpeq_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
-    unsafe fn cmpneq_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
-    unsafe fn cmpge_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
-    unsafe fn cmpgt_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
-    unsafe fn cmple_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
-    unsafe fn cmplt_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
-    unsafe fn cmpeq_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
-    unsafe fn cmpneq_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
-    unsafe fn cmpge_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
-    unsafe fn cmpgt_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
-    unsafe fn cmple_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
-    unsafe fn cmplt_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
-    unsafe fn cmpeq_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
-    unsafe fn cmpneq_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
-    unsafe fn cmpge_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
-    unsafe fn cmpgt_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
-    unsafe fn cmple_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
-    unsafe fn cmplt_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
-    unsafe fn cmpeq_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
-    unsafe fn cmpneq_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
-    unsafe fn cmpge_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
-    unsafe fn cmpgt_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
-    unsafe fn cmple_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
-    unsafe fn cmplt_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
-    unsafe fn cvtepi32_ps(a: Self::Vi32) -> Self::Vf32;
-    unsafe fn cvtepi64_pd(a: Self::Vi64) -> Self::Vf64;
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn blendv_pd(a: Self::Vf64, b: Self::Vf64, mask: Self::Vf64) -> Self::Vf64 {
+        a.blendv(b, mask)
+    }
+
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn castps_epi32(a: Self::Vf32) -> Self::Vi32 {
+        a.bitcast_i32()
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn castpd_epi64(a: Self::Vf64) -> Self::Vi64 {
+        a.bitcast_i64()
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn castepi32_ps(a: Self::Vi32) -> Self::Vf32 {
+        a.bitcast_f32()
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn castepi64_pd(a: Self::Vi64) -> Self::Vf64 {
+        a.bitcast_f64()
+    }
+
+    /// Converts the type of a f32 vector to a f64 vector without changing the underlying bits.
+    #[deprecated(
+        note = "These functions have unpredictable behavior and will be deleted in the future. Please use a manual implementation instead."
+    )]
+    unsafe fn castps_pd(_a: Self::Vf32) -> Self::Vf64 {
+        panic!("Deprecated")
+    }
+    /// Converts the type of a f64 vector to a f32 vector without changing the underlying bits.
+    #[deprecated(
+        note = "These functions have unpredictable behavior and will be deleted in the future. Please use a manual implementation instead."
+    )]
+    unsafe fn castpd_ps(_a: Self::Vf64) -> Self::Vf32 {
+        panic!("Deprecated")
+    }
 
     /// Currently scalar will have different results in some cases depending on the
     /// current SSE rounding mode.
-    unsafe fn cvtps_epi32(a: Self::Vf32) -> Self::Vi32;
-    unsafe fn cvtpd_epi64(a: Self::Vf64) -> Self::Vi64;
-    unsafe fn floor_ps(a: Self::Vf32) -> Self::Vf32;
-    unsafe fn floor_pd(a: Self::Vf64) -> Self::Vf64;
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn cvtps_epi32(a: Self::Vf32) -> Self::Vi32 {
+        a.cast_i32()
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn cvtpd_epi64(a: Self::Vf64) -> Self::Vi64 {
+        a.cast_i64()
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn cvtepi32_ps(a: Self::Vi32) -> Self::Vf32 {
+        a.cast_f32()
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn cvtepi64_pd(a: Self::Vi64) -> Self::Vf64 {
+        a.cast_f64()
+    }
+
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn cmpeq_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
+        a.cmp_eq(b)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn cmpneq_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
+        a.cmp_neq(b)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn cmpge_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
+        a.cmp_gte(b)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn cmpgt_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
+        a.cmp_gt(b)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn cmple_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
+        a.cmp_lte(b)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn cmplt_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
+        a.cmp_lt(b)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn cmpeq_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
+        a.cmp_eq(b)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn cmpneq_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
+        a.cmp_neq(b)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn cmpge_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
+        a.cmp_gte(b)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn cmpgt_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
+        a.cmp_gt(b)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn cmple_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
+        a.cmp_lte(b)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn cmplt_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
+        a.cmp_lt(b)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn cmpeq_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
+        a.cmp_eq(b)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn cmpneq_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
+        a.cmp_neq(b)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn cmpge_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
+        a.cmp_gte(b)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn cmpgt_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
+        a.cmp_gt(b)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn cmple_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
+        a.cmp_lte(b)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn cmplt_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
+        a.cmp_lt(b)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn cmpeq_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        a.cmp_eq(b)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn cmpneq_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        a.cmp_neq(b)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn cmpge_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        a.cmp_gte(b)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn cmpgt_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        a.cmp_gt(b)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn cmple_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        a.cmp_lte(b)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn cmplt_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        a.cmp_lt(b)
+    }
+
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn ceil_ps(a: Self::Vf32) -> Self::Vf32 {
+        a.ceil()
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn ceil_pd(a: Self::Vf64) -> Self::Vf64 {
+        a.ceil()
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn floor_ps(a: Self::Vf32) -> Self::Vf32 {
+        a.floor()
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn floor_pd(a: Self::Vf64) -> Self::Vf64 {
+        a.floor()
+    }
     /// When using Sse2, fastround uses a faster version of floor
     /// that only works on floating point values small enough to fit in
     /// an i32.  This is a big performance boost if you don't need
     /// a complete floor.
-    unsafe fn fast_round_ps(a: Self::Vf32) -> Self::Vf32;
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn fast_round_ps(a: Self::Vf32) -> Self::Vf32 {
+        a.fast_round()
+    }
     /// When using Sse2, fastceil uses a faster version of floor
     /// that only works on floating point values small enough to fit in
     /// an i32.  This is a big performance boost if you don't need
     /// a complete floor.
-    unsafe fn fast_ceil_ps(a: Self::Vf32) -> Self::Vf32;
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn fast_ceil_ps(a: Self::Vf32) -> Self::Vf32 {
+        a.fast_ceil()
+    }
     /// When using Sse2, fastfloor uses a faster version of floor
     /// that only works on floating point values small enough to fit in
     /// an i32.  This is a big performance boost if you don't need
     /// a complete floor.
-    unsafe fn fast_floor_ps(a: Self::Vf32) -> Self::Vf32;
-    unsafe fn fast_floor_pd(a: Self::Vf64) -> Self::Vf64;
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn fast_floor_ps(a: Self::Vf32) -> Self::Vf32 {
+        a.fast_floor()
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn fast_floor_pd(a: Self::Vf64) -> Self::Vf64 {
+        a.fast_floor()
+    }
     /// Actual FMA instructions will be used when Avx2 is used,
     /// otherwise a mul and add are used to replicate it, allowing you to
     /// just always use FMA in your code and get best perf in both cases.
-    unsafe fn fmadd_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32;
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn fmadd_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32 {
+        a.mul_add(b, c)
+    }
     /// Actual FMA instructions will be used when Avx2 is used,
     /// otherwise a mul and add are used to replicate it, allowing you to
     /// just always use FMA in your code and get best perf in both cases.
-    unsafe fn fnmadd_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32;
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn fnmadd_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32 {
+        a.neg_mul_add(b, c)
+    }
     /// Actual FMA instructions will be used when Avx2 is used,
     /// otherwise a mul and add are used to replicate it, allowing you to
     /// just always use FMA in your code and get best perf in both cases.
-    unsafe fn fmadd_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64;
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn fmadd_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64 {
+        a.mul_add(b, c)
+    }
     /// Actual FMA instructions will be used when Avx2 is used,
     /// otherwise a mul and add are used to replicate it, allowing you to
     /// just always use FMA in your code and get best perf in both cases.
-    unsafe fn fnmadd_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64;
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn fnmadd_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64 {
+        a.neg_mul_add(b, c)
+    }
     /// Actual FMA instructions will be used when Avx2 is used,
     /// otherwise a mul and sub are used to replicate it, allowing you to
     /// just always use FMA in your code and get best perf in both cases.
-    unsafe fn fmsub_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32;
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn fmsub_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32 {
+        a.neg_mul_sub(b, c)
+    }
     /// Actual FMA instructions will be used when Avx2 is used,
     /// otherwise a mul and sub are used to replicate it, allowing you to
     /// just always use FMA in your code and get best perf in both cases.
-    unsafe fn fnmsub_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32;
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn fnmsub_ps(a: Self::Vf32, b: Self::Vf32, c: Self::Vf32) -> Self::Vf32 {
+        a.mul_sub(b, c)
+    }
     /// Actual FMA instructions will be used when Avx2 is used,
     /// otherwise a mul and sub are used to replicate it, allowing you to
     /// just always use FMA in your code and get best perf in both cases.
-    unsafe fn fmsub_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64;
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn fmsub_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64 {
+        a.neg_mul_sub(b, c)
+    }
     /// Actual FMA instructions will be used when Avx2 is used,
     /// otherwise a mul and sub are used to replicate it, allowing you to
     /// just always use FMA in your code and get best perf in both cases.
-    unsafe fn fnmsub_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64;
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn fnmsub_pd(a: Self::Vf64, b: Self::Vf64, c: Self::Vf64) -> Self::Vf64 {
+        a.mul_sub(b, c)
+    }
     /// Adds all lanes together. Distinct from h_add which adds pairs.
-    unsafe fn horizontal_add_ps(a: Self::Vf32) -> f32;
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn horizontal_add_ps(a: Self::Vf32) -> f32 {
+        a.horizontal_add()
+    }
     /// Adds all lanes together. Distinct from h_add which adds pairs.
-    unsafe fn horizontal_add_pd(a: Self::Vf64) -> f64;
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn horizontal_add_pd(a: Self::Vf64) -> f64 {
+        a.horizontal_add()
+    }
     /// Sse2 and Sse41 paths will simulate a gather by breaking out and
     /// doing scalar array accesses, because gather doesn't exist until Avx2.
-    unsafe fn i32gather_epi32(arr: &[i32], index: Self::Vi32) -> Self::Vi32;
-    unsafe fn i64gather_epi64(arr: &[i64], index: Self::Vi64) -> Self::Vi64;
+    #[deprecated(
+        note = "These functions have unpredictable behavior and will be deleted in the future. Please use a manual implementation instead."
+    )]
+    unsafe fn i32gather_epi32(_arr: &[i32], _index: Self::Vi32) -> Self::Vi32 {
+        panic!("Deprecated")
+    }
+    #[deprecated(
+        note = "These functions have unpredictable behavior and will be deleted in the future. Please use a manual implementation instead."
+    )]
+    unsafe fn i64gather_epi64(_arr: &[i64], _index: Self::Vi64) -> Self::Vi64 {
+        panic!("Deprecated")
+    }
     /// Sse2 and Sse41 paths will simulate a gather by breaking out and
     /// doing scalar array accesses, because gather doesn't exist until Avx2.
-    unsafe fn i32gather_ps(arr: &[f32], index: Self::Vi32) -> Self::Vf32;
-    unsafe fn load_ps(a: &f32) -> Self::Vf32;
-    unsafe fn load_pd(a: &f64) -> Self::Vf64;
-    unsafe fn load_epi16(a: &i16) -> Self::Vi16;
-    unsafe fn load_epi32(a: &i32) -> Self::Vi32;
-    unsafe fn load_epi64(a: &i64) -> Self::Vi64;
-    unsafe fn loadu_ps(a: &f32) -> Self::Vf32;
-    unsafe fn loadu_pd(a: &f64) -> Self::Vf64;
-    unsafe fn loadu_epi32(a: &i32) -> Self::Vi32;
-    unsafe fn loadu_epi64(a: &i64) -> Self::Vi64;
+    #[deprecated(
+        note = "These functions have unpredictable behavior and will be deleted in the future. Please use a manual implementation instead."
+    )]
+    unsafe fn i32gather_ps(_arr: &[f32], _index: Self::Vi32) -> Self::Vf32 {
+        panic!("Deprecated")
+    }
+
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn load_ps(a: &f32) -> Self::Vf32 {
+        SimdBaseIo::load_from_ptr_aligned(a)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn load_pd(a: &f64) -> Self::Vf64 {
+        SimdBaseIo::load_from_ptr_aligned(a)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn load_epi16(a: &i16) -> Self::Vi16 {
+        SimdBaseIo::load_from_ptr_aligned(a)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn load_epi32(a: &i32) -> Self::Vi32 {
+        SimdBaseIo::load_from_ptr_aligned(a)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn load_epi64(a: &i64) -> Self::Vi64 {
+        SimdBaseIo::load_from_ptr_aligned(a)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn loadu_ps(a: &f32) -> Self::Vf32 {
+        SimdBaseIo::load_from_ptr_unaligned(a)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn loadu_pd(a: &f64) -> Self::Vf64 {
+        SimdBaseIo::load_from_ptr_unaligned(a)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn loadu_epi32(a: &i32) -> Self::Vi32 {
+        SimdBaseIo::load_from_ptr_unaligned(a)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn loadu_epi64(a: &i64) -> Self::Vi64 {
+        SimdBaseIo::load_from_ptr_unaligned(a)
+    }
+
     /// Note, SSE2 and SSE4 will load when mask[i] is nonzero, where AVX2
     /// will store only when the high bit is set. To ensure portability
     /// ensure that the high bit is set.
-    unsafe fn maskload_epi32(mem_addr: &i32, mask: Self::Vi32) -> Self::Vi32;
+    #[deprecated(
+        note = "These functions have unpredictable behavior and will be deleted in the future. Please use a manual implementation instead."
+    )]
+    unsafe fn maskload_epi32(_mem_addr: &i32, _mask: Self::Vi32) -> Self::Vi32 {
+        panic!("Deprecated")
+    }
     /// Note, SSE2 and SSE4 will load when mask[i] is nonzero, where AVX2
     /// will store only when the high bit is set. To ensure portability
     /// ensure that the high bit is set.
-    unsafe fn maskload_epi64(mem_addr: &i64, mask: Self::Vi64) -> Self::Vi64;
+    #[deprecated(
+        note = "These functions have unpredictable behavior and will be deleted in the future. Please use a manual implementation instead."
+    )]
+    unsafe fn maskload_epi64(_mem_addr: &i64, _mask: Self::Vi64) -> Self::Vi64 {
+        panic!("Deprecated")
+    }
     /// Note, SSE2 and SSE4 will load when mask[i] is nonzero, where AVX2
     /// will store only when the high bit is set. To ensure portability
     /// ensure that the high bit is set.
-    unsafe fn maskload_ps(mem_addr: &f32, mask: Self::Vi32) -> Self::Vf32;
+    #[deprecated(
+        note = "These functions have unpredictable behavior and will be deleted in the future. Please use a manual implementation instead."
+    )]
+    unsafe fn maskload_ps(_mem_addr: &f32, _mask: Self::Vi32) -> Self::Vf32 {
+        panic!("Deprecated")
+    }
     /// Note, SSE2 and SSE4 will load when mask[i] is nonzero, where AVX2
     /// will store only when the high bit is set. To ensure portability
     /// ensure that the high bit is set.
-    unsafe fn maskload_pd(mem_addr: &f64, mask: Self::Vi64) -> Self::Vf64;
-    unsafe fn store_ps(mem_addr: &mut f32, a: Self::Vf32);
-    unsafe fn store_pd(mem_addr: &mut f64, a: Self::Vf64);
-    unsafe fn store_epi32(mem_addr: &mut i32, a: Self::Vi32);
-    unsafe fn store_epi64(mem_addr: &mut i64, a: Self::Vi64);
-    unsafe fn storeu_ps(mem_addr: &mut f32, a: Self::Vf32);
-    unsafe fn storeu_pd(mem_addr: &mut f64, a: Self::Vf64);
-    unsafe fn storeu_epi32(mem_addr: &mut i32, a: Self::Vi32);
-    unsafe fn storeu_epi64(mem_addr: &mut i64, a: Self::Vi64);
+    #[deprecated(
+        note = "These functions have unpredictable behavior and will be deleted in the future. Please use a manual implementation instead."
+    )]
+    unsafe fn maskload_pd(_mem_addr: &f64, _mask: Self::Vi64) -> Self::Vf64 {
+        panic!("Deprecated")
+    }
+
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn store_ps(mem_addr: &mut f32, a: Self::Vf32) {
+        SimdBaseIo::copy_to_ptr_aligned(a, mem_addr)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn store_pd(mem_addr: &mut f64, a: Self::Vf64) {
+        SimdBaseIo::copy_to_ptr_aligned(a, mem_addr)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn store_epi32(mem_addr: &mut i32, a: Self::Vi32) {
+        SimdBaseIo::copy_to_ptr_aligned(a, mem_addr)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn store_epi64(mem_addr: &mut i64, a: Self::Vi64) {
+        SimdBaseIo::copy_to_ptr_aligned(a, mem_addr)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn storeu_ps(mem_addr: &mut f32, a: Self::Vf32) {
+        SimdBaseIo::copy_to_ptr_unaligned(a, mem_addr)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn storeu_pd(mem_addr: &mut f64, a: Self::Vf64) {
+        SimdBaseIo::copy_to_ptr_unaligned(a, mem_addr)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn storeu_epi32(mem_addr: &mut i32, a: Self::Vi32) {
+        SimdBaseIo::copy_to_ptr_unaligned(a, mem_addr)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn storeu_epi64(mem_addr: &mut i64, a: Self::Vi64) {
+        SimdBaseIo::copy_to_ptr_unaligned(a, mem_addr)
+    }
+
     /// Note, SSE2 and SSE4 will store when mask[i] is nonzero, where AVX2
     /// will store only when the high bit is set. To ensure portability ensure the
     /// high bit is set.
-    unsafe fn maskstore_epi32(mem_addr: &mut i32, mask: Self::Vi32, a: Self::Vi32);
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn maskstore_epi32(mem_addr: &mut i32, mask: Self::Vi32, a: Self::Vi32) {
+        if mask[0] != 0 {
+            *mem_addr = a[0];
+        }
+    }
     /// Note, SSE2 and SSE4 will store when mask[i] is nonzero, where AVX2
     /// will store only when the high bit is set. To ensure portability ensure the
     /// high bit is set.
-    unsafe fn maskstore_epi64(mem_addr: &mut i64, mask: Self::Vi64, a: Self::Vi64);
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn maskstore_epi64(mem_addr: &mut i64, mask: Self::Vi64, a: Self::Vi64) {
+        if mask[0] != 0 {
+            *mem_addr = a[0];
+        }
+    }
     /// Note, SSE2 and SSE4 will store when mask[i] is nonzero, where AVX2
     /// will store only when the high bit is set. To ensure portability ensure the
     /// high bit is set.
-    unsafe fn maskstore_ps(mem_addr: &mut f32, mask: Self::Vi32, a: Self::Vf32);
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn maskstore_ps(mem_addr: &mut f32, mask: Self::Vi32, a: Self::Vf32) {
+        if mask[0] != 0 {
+            *mem_addr = a[0];
+        }
+    }
     /// Note, SSE2 and SSE4 will store when mask[i] is nonzero, where AVX2
     /// will store only when the high bit is set. To ensure portability ensure the
     /// high bit is set.
-    unsafe fn maskstore_pd(mem_addr: &mut f64, mask: Self::Vi64, a: Self::Vf64);
-    unsafe fn max_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
-    unsafe fn min_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
-    unsafe fn max_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
-    unsafe fn min_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
-    unsafe fn max_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
-    unsafe fn min_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64;
-    /// Mullo is implemented for Sse2 by combining other Sse2 operations.
-    unsafe fn mullo_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32;
-    unsafe fn mullo_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64;
-    unsafe fn rcp_ps(a: Self::Vf32) -> Self::Vf32;
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn maskstore_pd(mem_addr: &mut f64, mask: Self::Vi64, a: Self::Vf64) {
+        if mask[0] != 0 {
+            *mem_addr = a[0];
+        }
+    }
+
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn max_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
+        a.max(b)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn min_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
+        a.min(b)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn max_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
+        a.max(b)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn min_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
+        a.min(b)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn max_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        a.max(b)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn min_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
+        a.min(b)
+    }
+
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn rcp_ps(a: Self::Vf32) -> Self::Vf32 {
+        a.fast_inverse()
+    }
     /// Round is implemented for Sse2 by combining other Sse2 operations.
-    unsafe fn round_ps(a: Self::Vf32) -> Self::Vf32;
-    unsafe fn round_pd(a: Self::Vf64) -> Self::Vf64;
-    unsafe fn set1_epi32(a: i32) -> Self::Vi32;
-    unsafe fn set1_epi64(a: i64) -> Self::Vi64;
-    unsafe fn set1_ps(a: f32) -> Self::Vf32;
-    unsafe fn set1_pd(a: f64) -> Self::Vf64;
-    unsafe fn setzero_ps() -> Self::Vf32;
-    unsafe fn setzero_pd() -> Self::Vf64;
-    unsafe fn setzero_epi32() -> Self::Vi32;
-    unsafe fn setzero_epi64() -> Self::Vi64;
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn round_ps(a: Self::Vf32) -> Self::Vf32 {
+        a.round()
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn round_pd(a: Self::Vf64) -> Self::Vf64 {
+        a.round()
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn set1_epi32(a: i32) -> Self::Vi32 {
+        SimdBaseIo::set1(a)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn set1_epi64(a: i64) -> Self::Vi64 {
+        SimdBaseIo::set1(a)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn set1_ps(a: f32) -> Self::Vf32 {
+        SimdBaseIo::set1(a)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn set1_pd(a: f64) -> Self::Vf64 {
+        SimdBaseIo::set1(a)
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn setzero_ps() -> Self::Vf32 {
+        SimdBaseIo::zeroes()
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn setzero_pd() -> Self::Vf64 {
+        SimdBaseIo::zeroes()
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn setzero_epi32() -> Self::Vi32 {
+        SimdBaseIo::zeroes()
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn setzero_epi64() -> Self::Vi64 {
+        SimdBaseIo::zeroes()
+    }
+
     /// amt must be a constant
-    unsafe fn srai_epi64(a: Self::Vi64, amt_const: i32) -> Self::Vi64;
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn srai_epi64(a: Self::Vi64, amt_const: i32) -> Self::Vi64 {
+        let shifted = a >> amt_const;
+        let ones: Self::Vi64 = SimdBaseIo::set1(i64::MAX);
+        let mask = ones << (64 - amt_const);
+        shifted ^ mask
+    }
     /// amt must be a constant
-    unsafe fn srli_epi32(a: Self::Vi32, amt_const: i32) -> Self::Vi32;
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn srli_epi32(a: Self::Vi32, amt_const: i32) -> Self::Vi32 {
+        a >> amt_const
+    }
 
     /// amt does not have to be a constant, but may be slower than the srai version
-    unsafe fn sra_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32;
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn sra_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32 {
+        let shifted = a >> amt;
+        let ones: Self::Vi32 = SimdBaseIo::set1(i32::MAX);
+        let mask = ones << (32 - amt);
+        shifted ^ mask
+    }
+
     /// amt does not have to be a constant, but may be slower than the srli version
-    unsafe fn srl_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32;
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn srl_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32 {
+        a >> amt
+    }
     /// amt does not have to be a constant, but may be slower than the slli version
-    unsafe fn sll_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32;
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn sll_epi32(a: Self::Vi32, amt: i32) -> Self::Vi32 {
+        a << amt
+    }
+
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
     unsafe fn sub_epi32(a: Self::Vi32, b: Self::Vi32) -> Self::Vi32 {
         a - b
     }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
     unsafe fn sub_epi64(a: Self::Vi64, b: Self::Vi64) -> Self::Vi64 {
         a - b
     }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
     unsafe fn sub_ps(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32 {
         a - b
     }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
     unsafe fn sub_pd(a: Self::Vf64, b: Self::Vf64) -> Self::Vf64 {
         a - b
     }
-    unsafe fn sqrt_ps(a: Self::Vf32) -> Self::Vf32;
-    unsafe fn rsqrt_ps(a: Self::Vf32) -> Self::Vf32;
-    unsafe fn sqrt_pd(a: Self::Vf64) -> Self::Vf64;
-    unsafe fn rsqrt_pd(a: Self::Vf64) -> Self::Vf64;
-    unsafe fn shuffle_epi32(a: Self::Vi32, imm8: i32) -> Self::Vi32;
+
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn sqrt_ps(a: Self::Vf32) -> Self::Vf32 {
+        a.sqrt()
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn rsqrt_ps(a: Self::Vf32) -> Self::Vf32 {
+        a.rsqrt()
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn sqrt_pd(a: Self::Vf64) -> Self::Vf64 {
+        a.sqrt()
+    }
+    #[deprecated(
+        note = "Functions on the Simd trait are deprecated, please use the functions on the Vf32, Vf64, Vi16, Vi32, and Vi64 types instead."
+    )]
+    unsafe fn rsqrt_pd(a: Self::Vf64) -> Self::Vf64 {
+        a.rsqrt()
+    }
+
+    /// Using the shuffle function is undefined behavior because imm8 behaves differently on different
+    /// architectures.
+    #[deprecated(
+        note = "These functions have unpredictable behavior and will be deleted in the future. Please use a manual implementation instead."
+    )]
+    unsafe fn shuffle_epi32<const IMM8: i32>(_a: Self::Vi32) -> Self::Vi32 {
+        panic!("Deprecated")
+    }
 
     cfg_if::cfg_if! {
         if #[cfg(feature = "sleef")] {
@@ -633,90 +1319,4 @@ pub trait Simd: Sync + Send {
             unsafe fn fmod_ps(a:Self::Vf32,b:Self::Vf32) -> Self::Vf32;
         }
     }
-}
-
-/// Generates a generic version of your function (fn_name), and versions for:
-/// * AVX2 (fn_name_avx2)
-/// * AVX (fn_name_avx)
-/// * SSE41 (fn_name_sse41)
-/// * SSE2 (fn_name_sse2)
-/// * Scalar fallback (fn_name_scalar)
-/// Finally, it also generates a function which will select at runtime the fastest version
-/// from above that the cpu supports. (fn_name_runtime_select)
-#[macro_export]
-macro_rules! simd_runtime_generate {
-  ($vis:vis fn $fn_name:ident ($($arg:ident:$typ:ty),* $(,)? ) $(-> $rt:ty)? $body:block  ) => {
-        #[inline(always)]
-        $vis unsafe fn $fn_name<S: 'static + Simd>($($arg:$typ,)*) $(-> $rt)?
-            $body
-
-        paste::item! {
-            $vis unsafe fn [<$fn_name _scalar>]($($arg:$typ,)*) $(-> $rt)? {
-                $fn_name::<Scalar>($($arg,)*)
-            }
-
-            #[target_feature(enable = "sse2")]
-            $vis  unsafe fn [<$fn_name _sse2>]($($arg:$typ,)*) $(-> $rt)? {
-                $fn_name::<Sse2>($($arg,)*)
-            }
-
-            #[target_feature(enable = "sse4.1")]
-                $vis unsafe fn [<$fn_name _sse41>]($($arg:$typ,)*) $(-> $rt)? {
-                $fn_name::<Sse41>($($arg,)*)
-            }
-            #[target_feature(enable = "avx2")]
-            $vis  unsafe fn [<$fn_name _avx2>]($($arg:$typ,)*) $(-> $rt)? {
-                $fn_name::<Avx2>($($arg,)*)
-            }
-            $vis  fn [<$fn_name _runtime_select>]($($arg:$typ,)*) $(-> $rt)? {
-                if is_x86_feature_detected!("avx2") {
-                    unsafe { [<$fn_name _avx2>]($($arg,)*) }
-                } else if is_x86_feature_detected!("sse4.1") {
-                    unsafe { [<$fn_name _sse41>]($($arg,)*) }
-                } else if is_x86_feature_detected!("sse2") {
-                    unsafe { [<$fn_name _sse2>]($($arg,)*) }
-                } else {
-                    unsafe { [<$fn_name _scalar>]($($arg,)*) }
-                }
-            }
-        }
-    };
-
-}
-
-/// Generates a generic version of your function (fn_name)
-/// And the fastest version supported by your rust compilation settings
-/// (fn_name_compiletime)
-#[macro_export]
-macro_rules! simd_compiletime_generate {
- ($vis:vis fn $fn_name:ident ($($arg:ident:$typ:ty),* $(,)? ) $(-> $rt:ty)? $body:block  ) => {
-        #[inline(always)]
-        $vis unsafe fn $fn_name<S: Simd>($($arg:$typ,)*) $(-> $rt)?
-            $body
-
-        paste::item! {
-            #[cfg(target_feature = "avx2")]
-            $vis fn [<$fn_name _compiletime>]($($arg:$typ,)*) $(-> $rt)? {
-                unsafe { $fn_name::<Avx2>($($arg,)*) }
-            }
-
-            #[cfg(all(target_feature = "sse4.1",not(target_feature = "avx2")))]
-            $vis fn [<$fn_name _compiletime>]($($arg:$typ,)*) $(-> $rt)? {
-                unsafe { $fn_name::<Sse41>($($arg,)*) }
-            }
-            #[cfg(all(target_feature = "sse2",not(any(target_feature="sse4.1",target_feature = "avx2"))))]
-            $vis fn [<$fn_name _compiletime>]($($arg:$typ,)*) $(-> $rt)? {
-               unsafe { $fn_name::<Sse2>($($arg,)*) }
-            }
-
-            #[cfg(not(any(target_feature="sse4.1",target_feature = "avx2",target_feature="sse2")))]
-            $vis fn [<$fn_name _compiletime>]($($arg:$typ,)*) $(-> $rt)? {
-               unsafe { $fn_name::<Scalar>($($arg,)*) }
-            }
-
-
-       }
-
-    };
-
 }

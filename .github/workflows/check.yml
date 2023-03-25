@@ -1,10 +1,53 @@
 on: [pull_request]
 
-name: Lints
+name: Tests
 
 jobs:
-  clippy:
-    name: Clippy
+  checks:
+    name: Code Checks (formatting, clippy)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        name: Initialize Cargo x86
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+          components: rustfmt, clippy
+
+      - uses: actions-rs/toolchain@v1
+        name: Initialize Cargo aarch64
+        with:
+          profile: minimal
+          toolchain: stable
+          target: aarch64-unknown-linux-gnu
+          override: true
+          components: rustfmt, clippy
+
+      - uses: Swatinem/rust-cache@v2
+        name: Cargo Cache
+
+      - uses: actions-rs/cargo@v1
+        name: Check code formatting
+        with:
+          command: fmt
+          args: --all -- --check
+
+      - uses: actions-rs/cargo@v1
+        name: Clippy check (x86)
+        with:
+          command: clippy
+          args: --all --all-targets -- --deny "warnings"
+
+      - uses: actions-rs/cargo@v1
+        name: Clippy check (arm64)
+        with:
+          command: clippy
+          args: --all --all-targets --target aarch64-unknown-linux-gnu -- --deny "warnings"
+
+  x86_tests:
+    name: x86 Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -19,19 +62,49 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         name: Cargo Cache
 
+      # Ensure that everything happens safely (with runtime checks)
       - uses: actions-rs/cargo@v1
-        name: Check code formatting
-        with:
-          command: fmt
-          args: --all -- --check
-
-      - uses: actions-rs/cargo@v1
-        name: Check code with clippy
-        with:
-          command: clippy
-          args: --all -- --deny "warnings"
-
-      - uses: actions-rs/cargo@v1
-        name: Run tests
+        name: Run tests (debug)
         with:
           command: test
+
+      # Ensure that no behavior gets optimized out
+      - uses: actions-rs/cargo@v1
+        name: Run tests (release)
+        with:
+          command: test
+          args: --release
+
+  arm_tests:
+    name: Arm Neon Tests
+    runs-on: ubuntu-latest
+    env:
+      QEMU_LD_PREFIX: /usr/aarch64-linux-gnu
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: sudo apt-get install -y gcc-aarch64-linux-gnu qemu-user
+
+      - uses: actions-rs/toolchain@v1
+        name: Initialize Cargo
+        with:
+          profile: minimal
+          toolchain: stable
+          target: aarch64-unknown-linux-gnu
+          override: true
+          components: rustfmt, clippy
+
+      - uses: Swatinem/rust-cache@v2
+        name: Cargo Cache
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+        with:
+          platforms: aarch64
+
+      - uses: actions-rs/cargo@v1
+        name: Run tests (release)
+        with:
+          command: test
+          args: --release --target aarch64-unknown-linux-gnu
