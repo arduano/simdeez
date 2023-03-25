@@ -372,6 +372,7 @@ macro_rules! define_simd_type {
                 type HorizontalAddScalar = horizontal_add_scalar!($ty);
                 type ArrayRepresentation = [$ty; $width];
                 type UnderlyingType = $underlying;
+                type Engine = Scalar;
             }
 
             impl [<SimdTransmute $ty:upper>] for [<$ty:upper x $width>] {
@@ -398,6 +399,7 @@ macro_rules! define_simd_type {
                 type HorizontalAddScalar = horizontal_add_scalar!($ty);
                 type ArrayRepresentation = [$ty; $width];
                 type UnderlyingType = $underlying;
+                type Engine = $engine;
             }
 
             impl [<SimdTransmute $ty:upper>] for [<$ty:upper x $width>] {
@@ -423,6 +425,7 @@ macro_rules! define_simd_type {
                 type HorizontalAddScalar = horizontal_add_scalar!($ty);
                 type ArrayRepresentation = [$ty; $width];
                 type UnderlyingType = $underlying;
+                type Engine = $engine;
             }
 
             impl [<SimdTransmute $ty:upper>] for [<$ty:upper x $width $suffix >] {
@@ -747,16 +750,14 @@ macro_rules! impl_i8_simd_type {
         });
 
         impl SimdInt8 for $i8_ty {
-            type SimdI16 = $i16_ty;
-
             #[inline(always)]
-            fn extend_to_i16(self) -> (Self::SimdI16, Self::SimdI16) {
+            fn extend_to_i16(self) -> (<Self::Engine as Simd>::Vi16, <Self::Engine as Simd>::Vi16) {
                 let (a, b) = unsafe { Ops::<$engine, i8>::extend_i16(self.0) };
                 ($i16_ty(a), $i16_ty(b))
             }
 
             #[inline(always)]
-            fn unsigned_extend_to_i16(self) -> (Self::SimdI16, Self::SimdI16) {
+            fn unsigned_extend_to_i16(self) -> (<Self::Engine as Simd>::Vi16, <Self::Engine as Simd>::Vi16) {
                 let (a, b) = unsafe { Ops::<$engine, i8>::unsigned_extend_i16(self.0) };
                 ($i16_ty(a), $i16_ty(b))
             }
@@ -783,16 +784,14 @@ macro_rules! impl_i16_simd_type {
         });
 
         impl SimdInt16 for $i16_ty {
-            type SimdI32 = $i32_ty;
-
             #[inline(always)]
-            fn extend_to_i32(self) -> (Self::SimdI32, Self::SimdI32) {
+            fn extend_to_i32(self) -> (<Self::Engine as Simd>::Vi32, <Self::Engine as Simd>::Vi32) {
                 let (a, b) = unsafe { Ops::<$engine, i16>::extend_i32(self.0) };
                 ($i32_ty(a), $i32_ty(b))
             }
 
             #[inline(always)]
-            fn unsigned_extend_to_i32(self) -> (Self::SimdI32, Self::SimdI32) {
+            fn unsigned_extend_to_i32(self) -> (<Self::Engine as Simd>::Vi32, <Self::Engine as Simd>::Vi32) {
                 let (a, b) = unsafe { Ops::<$engine, i16>::unsigned_extend_i32(self.0) };
                 ($i32_ty(a), $i32_ty(b))
             }
@@ -811,27 +810,24 @@ macro_rules! impl_i32_simd_type {
         });
 
         impl SimdInt32 for $i32_ty {
-            type SimdF32 = $f32_ty;
-            type SimdI64 = $i64_ty;
-
             #[inline(always)]
-            fn bitcast_f32(self) -> Self::SimdF32 {
+            fn bitcast_f32(self) -> <Self::Engine as Simd>::Vf32 {
                 unsafe { $f32_ty(Ops::<$engine, i32>::bitcast_f32(self.0)) }
             }
 
             #[inline(always)]
-            fn cast_f32(self) -> Self::SimdF32 {
+            fn cast_f32(self) -> <Self::Engine as Simd>::Vf32 {
                 unsafe { $f32_ty(Ops::<$engine, i32>::cast_f32(self.0)) }
             }
 
             #[inline(always)]
-            fn extend_to_i64(self) -> (Self::SimdI64, Self::SimdI64) {
+            fn extend_to_i64(self) -> (<Self::Engine as Simd>::Vi64, <Self::Engine as Simd>::Vi64) {
                 let (a, b) = unsafe { Ops::<$engine, i32>::extend_i64(self.0) };
                 ($i64_ty(a), $i64_ty(b))
             }
 
             #[inline(always)]
-            fn unsigned_extend_to_i64(self) -> (Self::SimdI64, Self::SimdI64) {
+            fn unsigned_extend_to_i64(self) -> (<Self::Engine as Simd>::Vi64, <Self::Engine as Simd>::Vi64) {
                 let (a, b) = unsafe { Ops::<$engine, i32>::unsigned_extend_i64(self.0) };
                 ($i64_ty(a), $i64_ty(b))
             }
@@ -849,15 +845,13 @@ macro_rules! impl_i64_simd_type {
         });
 
         impl SimdInt64 for $i64_ty {
-            type SimdF64 = $f64_ty;
-
             #[inline(always)]
-            fn bitcast_f64(self) -> Self::SimdF64 {
+            fn bitcast_f64(self) -> <Self::Engine as Simd>::Vf64 {
                 unsafe { $f64_ty(Ops::<$engine, i64>::bitcast_f64(self.0)) }
             }
 
             #[inline(always)]
-            fn cast_f64(self) -> Self::SimdF64 {
+            fn cast_f64(self) -> <Self::Engine as Simd>::Vf64 {
                 unsafe { $f64_ty(Ops::<$engine, i64>::cast_f64(self.0)) }
             }
 
@@ -877,15 +871,13 @@ macro_rules! impl_f32_simd_type {
         impl_simd_float!($engine, $f32_ty, f32);
 
         impl SimdFloat32 for $f32_ty {
-            type SimdI32 = $i32_ty;
-
             #[inline(always)]
-            fn bitcast_i32(self) -> Self::SimdI32 {
+            fn bitcast_i32(self) -> <Self::Engine as Simd>::Vi32 {
                 unsafe { $i32_ty(Ops::<$engine, f32>::bitcast_i32(self.0)) }
             }
 
             #[inline(always)]
-            fn cast_i32(self) -> Self::SimdI32 {
+            fn cast_i32(self) -> <Self::Engine as Simd>::Vi32 {
                 unsafe { $i32_ty(Ops::<$engine, f32>::cast_i32(self.0)) }
             }
 
@@ -905,15 +897,13 @@ macro_rules! impl_f64_simd_type {
         impl_simd_float!($engine, $f64_ty, f64);
 
         impl SimdFloat64 for $f64_ty {
-            type SimdI64 = $i64_ty;
-
             #[inline(always)]
-            fn bitcast_i64(self) -> Self::SimdI64 {
+            fn bitcast_i64(self) -> <Self::Engine as Simd>::Vi64 {
                 unsafe { $i64_ty(Ops::<$engine, f64>::bitcast_i64(self.0)) }
             }
 
             #[inline(always)]
-            fn cast_i64(self) -> Self::SimdI64 {
+            fn cast_i64(self) -> <Self::Engine as Simd>::Vi64 {
                 unsafe { $i64_ty(Ops::<$engine, f64>::cast_i64(self.0)) }
             }
         }

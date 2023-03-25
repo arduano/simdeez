@@ -14,6 +14,8 @@ pub use specializations::*;
 
 pub use io::SimdBaseIo;
 
+use crate::Simd;
+
 pub trait SimdConsts: 'static + Copy + core::marker::Sync + core::marker::Send + Debug {
     type Scalar: Copy + Debug + core::marker::Sync + core::marker::Send;
     type HorizontalAddScalar: Copy + Debug + core::marker::Sync + core::marker::Send;
@@ -25,6 +27,8 @@ pub trait SimdConsts: 'static + Copy + core::marker::Sync + core::marker::Send +
 
     /// The underlying intrinsic SIMD type.
     type UnderlyingType: Copy + Debug + core::marker::Sync + core::marker::Send;
+
+    type Engine: Simd;
 }
 
 /// Operations shared by all SIMD types

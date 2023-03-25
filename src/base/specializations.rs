@@ -1,5 +1,5 @@
 use super::transmute::*;
-use crate::SimdBaseOps;
+use crate::{Simd, SimdBaseOps};
 use core::ops::*;
 
 /// Operations shared by 16 and 32 bit int types
@@ -43,19 +43,18 @@ pub trait SimdInt:
 
 /// Operations shared by 8 bit int types
 pub trait SimdInt8: SimdInt<Scalar = i8, HorizontalAddScalar = i64> + SimdTransmuteI8 {
-    type SimdI16: SimdInt16;
-
     /// Splits the vector into two halves, then extends them both to be i16. This is useful for horizontal adding.
-    fn extend_to_i16(self) -> (Self::SimdI16, Self::SimdI16);
+    fn extend_to_i16(self) -> (<Self::Engine as Simd>::Vi16, <Self::Engine as Simd>::Vi16);
 
     /// Splits the vector into two halves, then extends them both to be i16. This is useful for horizontal adding.
     /// The numbers are treated as unsigned, so the sign bit isn't moved. This is more efficient on some instruction sets.
-    fn unsigned_extend_to_i16(self) -> (Self::SimdI16, Self::SimdI16);
+    fn unsigned_extend_to_i16(self)
+        -> (<Self::Engine as Simd>::Vi16, <Self::Engine as Simd>::Vi16);
 
     /// Adds (arbitrary) pairs of values in the vector, returning a i16 version of the vector.
     /// The way the pairs are chosen is implementation-defined.
     #[inline(always)]
-    fn partial_horizontal_add(self) -> Self::SimdI16 {
+    fn partial_horizontal_add(self) -> <Self::Engine as Simd>::Vi16 {
         let (a, b) = self.extend_to_i16();
         a + b
     }
@@ -64,7 +63,7 @@ pub trait SimdInt8: SimdInt<Scalar = i8, HorizontalAddScalar = i64> + SimdTransm
     /// When extending the numbers, they're treated as unsigned wich performs more efficiently on some instruction sets.
     /// The way the pairs are chosen is implementation-defined.
     #[inline(always)]
-    fn partial_horizontal_unsigned_add(self) -> Self::SimdI16 {
+    fn partial_horizontal_unsigned_add(self) -> <Self::Engine as Simd>::Vi16 {
         let (a, b) = self.unsigned_extend_to_i16();
         a + b
     }
@@ -141,19 +140,18 @@ pub trait SimdInt8: SimdInt<Scalar = i8, HorizontalAddScalar = i64> + SimdTransm
 
 /// Operations shared by 16 bit int types
 pub trait SimdInt16: SimdInt<Scalar = i16, HorizontalAddScalar = i64> + SimdTransmuteI16 {
-    type SimdI32: SimdInt32;
-
     /// Splits the vector into two halves, then extends them both to be i32. This is useful for horizontal adding.
-    fn extend_to_i32(self) -> (Self::SimdI32, Self::SimdI32);
+    fn extend_to_i32(self) -> (<Self::Engine as Simd>::Vi32, <Self::Engine as Simd>::Vi32);
 
     /// Splits the vector into two halves, then extends them both to be i32. This is useful for horizontal adding.
     /// The numbers are treated as unsigned, so the sign bit isn't moved. This is more efficient on some instruction sets.
-    fn unsigned_extend_to_i32(self) -> (Self::SimdI32, Self::SimdI32);
+    fn unsigned_extend_to_i32(self)
+        -> (<Self::Engine as Simd>::Vi32, <Self::Engine as Simd>::Vi32);
 
     /// Adds (arbitrary) pairs of values in the vector, returning a i32 version of the vector.
     /// The way the pairs are chosen is implementation-defined.
     #[inline(always)]
-    fn partial_horizontal_add(self) -> Self::SimdI32 {
+    fn partial_horizontal_add(self) -> <Self::Engine as Simd>::Vi32 {
         let (a, b) = self.extend_to_i32();
         a + b
     }
@@ -162,7 +160,7 @@ pub trait SimdInt16: SimdInt<Scalar = i16, HorizontalAddScalar = i64> + SimdTran
     /// When extending the numbers, they're treated as unsigned wich performs more efficiently on some instruction sets.
     /// The way the pairs are chosen is implementation-defined.
     #[inline(always)]
-    fn partial_horizontal_unsigned_add(self) -> Self::SimdI32 {
+    fn partial_horizontal_unsigned_add(self) -> <Self::Engine as Simd>::Vi32 {
         let (a, b) = self.unsigned_extend_to_i32();
         a + b
     }
@@ -170,27 +168,25 @@ pub trait SimdInt16: SimdInt<Scalar = i16, HorizontalAddScalar = i64> + SimdTran
 
 /// Operations shared by 32 bit int types
 pub trait SimdInt32: SimdInt<Scalar = i32, HorizontalAddScalar = i64> + SimdTransmuteI32 {
-    type SimdF32: SimdFloat32;
-    type SimdI64: SimdInt64;
-
     /// Bit cast to f32.
     /// This function is only used for compilation and does not generate any instructions, thus it has zero latency.
-    fn bitcast_f32(self) -> Self::SimdF32;
+    fn bitcast_f32(self) -> <Self::Engine as Simd>::Vf32;
 
     /// Element-wise cast to f32
-    fn cast_f32(self) -> Self::SimdF32;
+    fn cast_f32(self) -> <Self::Engine as Simd>::Vf32;
 
     /// Splits the vector into two halves, then extends them both to be i64. This is useful for horizontal adding.
-    fn extend_to_i64(self) -> (Self::SimdI64, Self::SimdI64);
+    fn extend_to_i64(self) -> (<Self::Engine as Simd>::Vi64, <Self::Engine as Simd>::Vi64);
 
     /// Splits the vector into two halves, then extends them both to be i32. This is useful for horizontal adding.
     /// The numbers are treated as unsigned, so the sign bit isn't moved. This is more efficient on some instruction sets.
-    fn unsigned_extend_to_i64(self) -> (Self::SimdI64, Self::SimdI64);
+    fn unsigned_extend_to_i64(self)
+        -> (<Self::Engine as Simd>::Vi64, <Self::Engine as Simd>::Vi64);
 
     /// Adds (arbitrary) pairs of values in the vector, returning a i64 version of the vector.
     /// The way the pairs are chosen is implementation-defined.
     #[inline(always)]
-    fn partial_horizontal_add(self) -> Self::SimdI64 {
+    fn partial_horizontal_add(self) -> <Self::Engine as Simd>::Vi64 {
         let (a, b) = self.extend_to_i64();
         a + b
     }
@@ -199,7 +195,7 @@ pub trait SimdInt32: SimdInt<Scalar = i32, HorizontalAddScalar = i64> + SimdTran
     /// When extending the numbers, they're treated as unsigned wich performs more efficiently on some instruction sets.
     /// The way the pairs are chosen is implementation-defined.
     #[inline(always)]
-    fn partial_horizontal_unsigned_add(self) -> Self::SimdI64 {
+    fn partial_horizontal_unsigned_add(self) -> <Self::Engine as Simd>::Vi64 {
         let (a, b) = self.unsigned_extend_to_i64();
         a + b
     }
@@ -207,14 +203,12 @@ pub trait SimdInt32: SimdInt<Scalar = i32, HorizontalAddScalar = i64> + SimdTran
 
 /// Operations shared by 64 bt int types
 pub trait SimdInt64: SimdInt<Scalar = i64, HorizontalAddScalar = i64> + SimdTransmuteI64 {
-    type SimdF64: SimdFloat64;
-
     /// Bit cast to f64.
     /// This function is only used for compilation and does not generate any instructions, thus it has zero latency.
-    fn bitcast_f64(self) -> Self::SimdF64;
+    fn bitcast_f64(self) -> <Self::Engine as Simd>::Vf64;
 
     /// Element-wise cast to f64
-    fn cast_f64(self) -> Self::SimdF64;
+    fn cast_f64(self) -> <Self::Engine as Simd>::Vf64;
 
     fn partial_horizontal_add(self) -> i64;
 }
@@ -283,15 +277,13 @@ pub trait SimdFloat:
 pub trait SimdFloat32:
     SimdFloat<Scalar = f32, HorizontalAddScalar = f32> + SimdTransmuteF32
 {
-    type SimdI32: SimdInt32;
-
     /// Bit cast to i32.
     /// This function is only used for compilation and does not generate any instructions, thus it has zero latency.
-    fn bitcast_i32(self) -> Self::SimdI32;
+    fn bitcast_i32(self) -> <Self::Engine as Simd>::Vi32;
 
     /// Element-wise cast to i32 (rounded, not floored). Note, this may cause undefined behavior when casting from
     /// numbers outside the range of i32. E.g. a very large positive float may become i32::MIN.
-    fn cast_i32(self) -> Self::SimdI32;
+    fn cast_i32(self) -> <Self::Engine as Simd>::Vi32;
 
     /// Element-wise fast reciprocal (1.0 / x)
     fn fast_inverse(self) -> Self;
@@ -340,12 +332,10 @@ pub trait SimdFloat32:
 pub trait SimdFloat64:
     SimdFloat<Scalar = f64, HorizontalAddScalar = f64> + SimdTransmuteF64
 {
-    type SimdI64: SimdInt64;
-
     /// Bit cast to i64.
     /// This function is only used for compilation and does not generate any instructions, thus it has zero latency.
-    fn bitcast_i64(self) -> Self::SimdI64;
+    fn bitcast_i64(self) -> <Self::Engine as Simd>::Vi64;
 
     /// Element-wise cast to i64 (rounded, not floored).
-    fn cast_i64(self) -> Self::SimdI64;
+    fn cast_i64(self) -> <Self::Engine as Simd>::Vi64;
 }
