@@ -6,6 +6,9 @@ mod io;
 mod iters;
 pub use iters::*;
 
+mod transmute;
+pub use transmute::*;
+
 mod specializations;
 pub use specializations::*;
 

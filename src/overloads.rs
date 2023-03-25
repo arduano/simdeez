@@ -374,7 +374,7 @@ macro_rules! horizontal_add_scalar {
 }
 
 macro_rules! define_simd_type {
-    ($ty:ty, $width:literal, $underlying:ty) => {
+    ($engine:ident, $ty:ty, $width:literal, $underlying:ty) => {
         paste::item! {
             #[derive(Copy, Clone)]
             pub struct [<$ty:upper x $width>]($underlying);
@@ -387,9 +387,19 @@ macro_rules! define_simd_type {
                 type ArrayRepresentation = [$ty; $width];
                 type UnderlyingType = $underlying;
             }
+
+            impl [<SimdTransmute $ty:upper>] for [<$ty:upper x $width>] {
+                fn [<try_transmute_ $engine:lower>](&self) -> $underlying {
+                    self.0
+                }
+
+                fn [<try_transmute_from_ $engine:lower>](val: $underlying) -> Self {
+                    Self(val)
+                }
+            }
         }
     };
-    ($ty:ty, $width:literal, $underlying:ty, $suffix:ident) => {
+    ($engine:ident, $ty:ty, $width:literal, $underlying:ty, $suffix:ident) => {
         paste::item! {
             #[derive(Copy, Clone)]
             pub struct [<$ty:upper x $width $suffix>]($underlying);
@@ -401,6 +411,16 @@ macro_rules! define_simd_type {
                 type HorizontalAddScalar = horizontal_add_scalar!($ty);
                 type ArrayRepresentation = [$ty; $width];
                 type UnderlyingType = $underlying;
+            }
+
+            impl [<SimdTransmute $ty:upper>] for [<$ty:upper x $width $suffix >] {
+                fn [<try_transmute_ $engine:lower>](&self) -> $underlying {
+                    self.0
+                }
+
+                fn [<try_transmute_from_ $engine:lower>](val: $underlying) -> Self {
+                    Self(val)
+                }
             }
         }
     };

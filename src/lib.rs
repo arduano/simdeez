@@ -174,9 +174,6 @@ pub use base::*;
 
 mod libm_ext;
 
-#[cfg(feature = "unsafe_inner_access")]
-pub mod engines;
-#[cfg(not(feature = "unsafe_inner_access"))]
 mod engines;
 
 pub use engines::scalar;

@@ -1,3 +1,4 @@
+use super::transmute::*;
 use crate::{InternalSimdBaseIo, SimdBaseOps};
 use core::ops::*;
 
@@ -41,7 +42,9 @@ pub trait SimdInt:
 }
 
 /// Operations shared by 8 bit int types
-pub trait SimdInt8: SimdInt<Scalar = i8, HorizontalAddScalar = i64> + InternalSimdBaseIo {
+pub trait SimdInt8:
+    SimdInt<Scalar = i8, HorizontalAddScalar = i64> + InternalSimdBaseIo + SimdTransmuteI8
+{
     type SimdI16: SimdInt16;
 
     /// Splits the vector into two halves, then extends them both to be i16. This is useful for horizontal adding.
@@ -139,7 +142,7 @@ pub trait SimdInt8: SimdInt<Scalar = i8, HorizontalAddScalar = i64> + InternalSi
 }
 
 /// Operations shared by 16 bit int types
-pub trait SimdInt16: SimdInt<Scalar = i16, HorizontalAddScalar = i64> {
+pub trait SimdInt16: SimdInt<Scalar = i16, HorizontalAddScalar = i64> + SimdTransmuteI16 {
     type SimdI32: SimdInt32;
 
     /// Splits the vector into two halves, then extends them both to be i32. This is useful for horizontal adding.
@@ -168,7 +171,7 @@ pub trait SimdInt16: SimdInt<Scalar = i16, HorizontalAddScalar = i64> {
 }
 
 /// Operations shared by 32 bit int types
-pub trait SimdInt32: SimdInt<Scalar = i32, HorizontalAddScalar = i64> {
+pub trait SimdInt32: SimdInt<Scalar = i32, HorizontalAddScalar = i64> + SimdTransmuteI32 {
     type SimdF32: SimdFloat32;
     type SimdI64: SimdInt64;
 
@@ -205,7 +208,7 @@ pub trait SimdInt32: SimdInt<Scalar = i32, HorizontalAddScalar = i64> {
 }
 
 /// Operations shared by 64 bt int types
-pub trait SimdInt64: SimdInt<Scalar = i64, HorizontalAddScalar = i64> {
+pub trait SimdInt64: SimdInt<Scalar = i64, HorizontalAddScalar = i64> + SimdTransmuteI64 {
     type SimdF64: SimdFloat64;
 
     /// Bit cast to f64.
@@ -279,7 +282,9 @@ pub trait SimdFloat:
 }
 
 /// Operations shared by 32 bit float types
-pub trait SimdFloat32: SimdFloat<Scalar = f32, HorizontalAddScalar = f32> {
+pub trait SimdFloat32:
+    SimdFloat<Scalar = f32, HorizontalAddScalar = f32> + SimdTransmuteF32
+{
     type SimdI32: SimdInt32;
 
     /// Bit cast to i32.
@@ -334,7 +339,9 @@ pub trait SimdFloat32: SimdFloat<Scalar = f32, HorizontalAddScalar = f32> {
 }
 
 /// Operations shared by 64 bit float types
-pub trait SimdFloat64: SimdFloat<Scalar = f64, HorizontalAddScalar = f64> {
+pub trait SimdFloat64:
+    SimdFloat<Scalar = f64, HorizontalAddScalar = f64> + SimdTransmuteF64
+{
     type SimdI64: SimdInt64;
 
     /// Bit cast to i64.

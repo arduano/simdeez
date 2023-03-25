@@ -18,7 +18,6 @@ doctest = false
 default = []
 sleef = ["sleef-sys"]
 no_std = ["dep:libm"]
-unsafe_inner_access = []
 
 [dependencies]
 paste = "1.0.11"

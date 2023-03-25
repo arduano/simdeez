@@ -193,7 +193,6 @@ pub fn __run_simd_compiletime_select<S: __SimdRunner<A, R>, A, R>(args: A) -> R 
 }
 
 #[inline(always)]
-#[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
 pub fn __run_simd_invoke_scalar<S: __SimdRunner<A, R>, A, R>(args: A) -> R {
     unsafe { S::run::<engines::scalar::Scalar>(args) }
 }
