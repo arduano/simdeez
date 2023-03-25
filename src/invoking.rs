@@ -1,5 +1,8 @@
 use crate::{engines, Simd};
 
+#[cfg(target_arch = "aarch64")]
+use std::arch::is_aarch64_feature_detected;
+
 #[macro_export]
 macro_rules! fix_tuple_type {
     (()) => {
