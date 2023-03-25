@@ -179,6 +179,8 @@ pub mod engines;
 #[cfg(not(feature = "unsafe_inner_access"))]
 mod engines;
 
+pub use engines::scalar;
+
 /// The abstract SIMD trait which is implemented by Avx2, Sse41, etc
 pub trait Simd: 'static + Sync + Send {
     /// Vector of i8s.  Corresponds to __m128i when used
