@@ -767,7 +767,9 @@ macro_rules! impl_i8_simd_type {
             }
 
             #[inline(always)]
-            fn unsigned_extend_to_i16(self) -> (<Self::Engine as Simd>::Vi16, <Self::Engine as Simd>::Vi16) {
+            fn unsigned_extend_to_i16(
+                self,
+            ) -> (<Self::Engine as Simd>::Vi16, <Self::Engine as Simd>::Vi16) {
                 let (a, b) = unsafe { Ops::<$engine, i8>::unsigned_extend_i16(self.0) };
                 ($i16_ty(a), $i16_ty(b))
             }
@@ -801,7 +803,9 @@ macro_rules! impl_i16_simd_type {
             }
 
             #[inline(always)]
-            fn unsigned_extend_to_i32(self) -> (<Self::Engine as Simd>::Vi32, <Self::Engine as Simd>::Vi32) {
+            fn unsigned_extend_to_i32(
+                self,
+            ) -> (<Self::Engine as Simd>::Vi32, <Self::Engine as Simd>::Vi32) {
                 let (a, b) = unsafe { Ops::<$engine, i16>::unsigned_extend_i32(self.0) };
                 ($i32_ty(a), $i32_ty(b))
             }
@@ -837,7 +841,9 @@ macro_rules! impl_i32_simd_type {
             }
 
             #[inline(always)]
-            fn unsigned_extend_to_i64(self) -> (<Self::Engine as Simd>::Vi64, <Self::Engine as Simd>::Vi64) {
+            fn unsigned_extend_to_i64(
+                self,
+            ) -> (<Self::Engine as Simd>::Vi64, <Self::Engine as Simd>::Vi64) {
                 let (a, b) = unsafe { Ops::<$engine, i32>::unsigned_extend_i64(self.0) };
                 ($i64_ty(a), $i64_ty(b))
             }
