@@ -1,6 +1,6 @@
-use crate::InternalSimdBaseIo;
+use crate::SimdBaseIo;
 
-pub trait SimdIter: InternalSimdBaseIo {
+pub trait SimdIter: SimdBaseIo {
     #[inline(always)]
     fn iter(&self) -> SimdArrayIterator<'_, Self> {
         SimdArrayIterator {
@@ -18,14 +18,14 @@ pub trait SimdIter: InternalSimdBaseIo {
     }
 }
 
-impl<T: InternalSimdBaseIo> SimdIter for T {}
+impl<T: SimdBaseIo> SimdIter for T {}
 
-pub struct SimdArrayIterator<'a, S: InternalSimdBaseIo> {
+pub struct SimdArrayIterator<'a, S: SimdBaseIo> {
     simd: &'a S,
     index: usize,
 }
 
-impl<'a, S: InternalSimdBaseIo> Iterator for SimdArrayIterator<'a, S> {
+impl<'a, S: SimdBaseIo> Iterator for SimdArrayIterator<'a, S> {
     type Item = S::Scalar;
 
     #[inline(always)]
@@ -42,12 +42,12 @@ impl<'a, S: InternalSimdBaseIo> Iterator for SimdArrayIterator<'a, S> {
     }
 }
 
-pub struct SimdArrayMutIterator<'a, S: InternalSimdBaseIo> {
+pub struct SimdArrayMutIterator<'a, S: SimdBaseIo> {
     simd: &'a mut S,
     index: usize,
 }
 
-impl<'a, S: InternalSimdBaseIo> Iterator for SimdArrayMutIterator<'a, S> {
+impl<'a, S: SimdBaseIo> Iterator for SimdArrayMutIterator<'a, S> {
     type Item = &'a mut S::Scalar;
 
     #[inline(always)]

@@ -9,7 +9,7 @@ use rand::{
 };
 use rand_chacha::{rand_core::SeedableRng, ChaCha8Rng};
 
-use crate::{InternalSimdBaseIo, SimdBase};
+use crate::{SimdBase, SimdBaseIo};
 
 use super::ScalarNumber;
 
@@ -157,8 +157,8 @@ fn iter_arbitrary_bitshift_ints(max: u32) -> impl Iterator<Item = i32> {
 fn iter_as_simd<S: SimdBase<Scalar = N>, N>(
     mut iter: impl Iterator<Item = N>,
 ) -> impl Iterator<Item = S> {
-    iter::repeat_with(move || unsafe {
-        let mut v = <S as InternalSimdBaseIo>::zeroes();
+    iter::repeat_with(move || {
+        let mut v = <S as SimdBaseIo>::zeroes();
         for i in 0..S::WIDTH {
             v[i] = iter.next().unwrap();
         }

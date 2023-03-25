@@ -12,7 +12,6 @@ pub use transmute::*;
 mod specializations;
 pub use specializations::*;
 
-pub use io::InternalSimdBaseIo;
 pub use io::SimdBaseIo;
 
 pub trait SimdConsts: 'static + Copy + core::marker::Sync + core::marker::Send + Debug {
@@ -31,6 +30,7 @@ pub trait SimdConsts: 'static + Copy + core::marker::Sync + core::marker::Send +
 /// Operations shared by all SIMD types
 pub trait SimdBaseOps:
     SimdConsts
+    + SimdBaseIo
     + IndexMut<usize>
     + Index<usize, Output = <Self as SimdConsts>::Scalar>
     + Add<Self, Output = Self>

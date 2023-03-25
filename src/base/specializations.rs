@@ -1,5 +1,5 @@
 use super::transmute::*;
-use crate::{InternalSimdBaseIo, SimdBaseOps};
+use crate::SimdBaseOps;
 use core::ops::*;
 
 /// Operations shared by 16 and 32 bit int types
@@ -42,9 +42,7 @@ pub trait SimdInt:
 }
 
 /// Operations shared by 8 bit int types
-pub trait SimdInt8:
-    SimdInt<Scalar = i8, HorizontalAddScalar = i64> + InternalSimdBaseIo + SimdTransmuteI8
-{
+pub trait SimdInt8: SimdInt<Scalar = i8, HorizontalAddScalar = i64> + SimdTransmuteI8 {
     type SimdI16: SimdInt16;
 
     /// Splits the vector into two halves, then extends them both to be i16. This is useful for horizontal adding.
@@ -135,7 +133,7 @@ pub trait SimdInt8:
     /// Index will always be smaller than Self::WIDTH.
     #[inline(always)]
     fn index_of_first_eq(self, value: i8) -> Option<usize> {
-        let value = unsafe { Self::set1(value) };
+        let value = Self::set1(value);
         let mask = self.cmp_eq(value);
         mask.index_of_first_truthy()
     }

@@ -25,7 +25,7 @@ macro_rules! impl_simd_base_overloads {
 
             #[inline(always)]
             fn add(self, rhs: <Self as SimdConsts>::Scalar) -> Self {
-                unsafe { SimdBaseOps::add(self, <Self as InternalSimdBaseIo>::set1(rhs)) }
+                SimdBaseOps::add(self, <Self as SimdBaseIo>::set1(rhs))
             }
         }
 
@@ -34,16 +34,14 @@ macro_rules! impl_simd_base_overloads {
 
             #[inline(always)]
             fn add(self, rhs: $s) -> $s {
-                unsafe { SimdBaseOps::add(<$s as InternalSimdBaseIo>::set1(self), rhs) }
+                SimdBaseOps::add(<$s as SimdBaseIo>::set1(self), rhs)
             }
         }
 
         impl AddAssign<<Self as SimdConsts>::Scalar> for $s {
             #[inline(always)]
             fn add_assign(&mut self, rhs: <Self as SimdConsts>::Scalar) {
-                unsafe {
-                    *self = SimdBaseOps::add(*self, <Self as InternalSimdBaseIo>::set1(rhs));
-                }
+                *self = SimdBaseOps::add(*self, <Self as SimdBaseIo>::set1(rhs));
             }
         }
 
@@ -68,7 +66,7 @@ macro_rules! impl_simd_base_overloads {
 
             #[inline(always)]
             fn sub(self, rhs: <Self as SimdConsts>::Scalar) -> Self {
-                unsafe { SimdBaseOps::sub(self, <Self as InternalSimdBaseIo>::set1(rhs)) }
+                SimdBaseOps::sub(self, <Self as SimdBaseIo>::set1(rhs))
             }
         }
 
@@ -77,16 +75,14 @@ macro_rules! impl_simd_base_overloads {
 
             #[inline(always)]
             fn sub(self, rhs: $s) -> $s {
-                unsafe { SimdBaseOps::sub(<$s as InternalSimdBaseIo>::set1(self), rhs) }
+                SimdBaseOps::sub(<$s as SimdBaseIo>::set1(self), rhs)
             }
         }
 
         impl SubAssign<<Self as SimdConsts>::Scalar> for $s {
             #[inline(always)]
             fn sub_assign(&mut self, rhs: <Self as SimdConsts>::Scalar) {
-                unsafe {
-                    *self = SimdBaseOps::sub(*self, <Self as InternalSimdBaseIo>::set1(rhs));
-                }
+                *self = SimdBaseOps::sub(*self, <Self as SimdBaseIo>::set1(rhs));
             }
         }
 
@@ -111,16 +107,14 @@ macro_rules! impl_simd_base_overloads {
 
             #[inline(always)]
             fn mul(self, rhs: <Self as SimdConsts>::Scalar) -> Self {
-                unsafe { SimdBaseOps::mul(self, <Self as InternalSimdBaseIo>::set1(rhs)) }
+                SimdBaseOps::mul(self, <Self as SimdBaseIo>::set1(rhs))
             }
         }
 
         impl MulAssign<<Self as SimdConsts>::Scalar> for $s {
             #[inline(always)]
             fn mul_assign(&mut self, rhs: <Self as SimdConsts>::Scalar) {
-                unsafe {
-                    *self = SimdBaseOps::mul(*self, <Self as InternalSimdBaseIo>::set1(rhs));
-                }
+                *self = SimdBaseOps::mul(*self, <Self as SimdBaseIo>::set1(rhs));
             }
         }
 
@@ -129,7 +123,7 @@ macro_rules! impl_simd_base_overloads {
 
             #[inline(always)]
             fn mul(self, rhs: $s) -> $s {
-                unsafe { SimdBaseOps::mul(<$s as InternalSimdBaseIo>::set1(self), rhs) }
+                SimdBaseOps::mul(<$s as SimdBaseIo>::set1(self), rhs)
             }
         }
 
@@ -154,16 +148,14 @@ macro_rules! impl_simd_base_overloads {
 
             #[inline(always)]
             fn bitand(self, rhs: <Self as SimdConsts>::Scalar) -> Self {
-                unsafe { SimdBaseOps::bit_and(self, InternalSimdBaseIo::set1(rhs)) }
+                SimdBaseOps::bit_and(self, SimdBaseIo::set1(rhs))
             }
         }
 
         impl BitAndAssign<<Self as SimdConsts>::Scalar> for $s {
             #[inline(always)]
             fn bitand_assign(&mut self, rhs: <Self as SimdConsts>::Scalar) {
-                unsafe {
-                    *self = SimdBaseOps::bit_and(*self, InternalSimdBaseIo::set1(rhs));
-                }
+                *self = SimdBaseOps::bit_and(*self, SimdBaseIo::set1(rhs));
             }
         }
 
@@ -188,16 +180,14 @@ macro_rules! impl_simd_base_overloads {
 
             #[inline(always)]
             fn bitor(self, rhs: <Self as SimdConsts>::Scalar) -> Self {
-                unsafe { SimdBaseOps::bit_or(self, InternalSimdBaseIo::set1(rhs)) }
+                SimdBaseOps::bit_or(self, SimdBaseIo::set1(rhs))
             }
         }
 
         impl BitOrAssign<<Self as SimdConsts>::Scalar> for $s {
             #[inline(always)]
             fn bitor_assign(&mut self, rhs: <Self as SimdConsts>::Scalar) {
-                unsafe {
-                    *self = SimdBaseOps::bit_or(*self, InternalSimdBaseIo::set1(rhs));
-                }
+                *self = SimdBaseOps::bit_or(*self, SimdBaseIo::set1(rhs));
             }
         }
 
@@ -222,16 +212,14 @@ macro_rules! impl_simd_base_overloads {
 
             #[inline(always)]
             fn bitxor(self, rhs: <Self as SimdConsts>::Scalar) -> Self {
-                unsafe { SimdBaseOps::bit_xor(self, InternalSimdBaseIo::set1(rhs)) }
+                SimdBaseOps::bit_xor(self, SimdBaseIo::set1(rhs))
             }
         }
 
         impl BitXorAssign<<Self as SimdConsts>::Scalar> for $s {
             #[inline(always)]
             fn bitxor_assign(&mut self, rhs: <Self as SimdConsts>::Scalar) {
-                unsafe {
-                    *self = SimdBaseOps::bit_xor(*self, InternalSimdBaseIo::set1(rhs));
-                }
+                *self = SimdBaseOps::bit_xor(*self, SimdBaseIo::set1(rhs));
             }
         }
 
@@ -249,7 +237,7 @@ macro_rules! impl_simd_base_overloads {
 
             #[inline(always)]
             fn neg(self) -> Self {
-                unsafe { <Self as InternalSimdBaseIo>::zeroes() - self }
+                <Self as SimdBaseIo>::zeroes() - self
             }
         }
 
@@ -337,16 +325,14 @@ macro_rules! impl_simd_float_overloads {
 
             #[inline(always)]
             fn div(self, rhs: <Self as SimdConsts>::Scalar) -> Self {
-                unsafe { SimdFloat::div(self, <Self as InternalSimdBaseIo>::set1(rhs)) }
+                SimdFloat::div(self, <Self as SimdBaseIo>::set1(rhs))
             }
         }
 
         impl DivAssign<<Self as SimdConsts>::Scalar> for $s {
             #[inline(always)]
             fn div_assign(&mut self, rhs: <Self as SimdConsts>::Scalar) {
-                unsafe {
-                    *self = SimdFloat::div(*self, <Self as InternalSimdBaseIo>::set1(rhs));
-                }
+                *self = SimdFloat::div(*self, <Self as SimdBaseIo>::set1(rhs));
             }
         }
     };
@@ -456,14 +442,14 @@ macro_rules! impl_simd_base {
     ($engine:ident, $ty:ident, $scalar_ty:ident, |$self:ident| {
         $($hadd:tt)*
     }) => {
-        impl InternalSimdBaseIo for $ty {
+        impl SimdBaseIo for $ty {
             #[inline(always)]
-            unsafe fn zeroes() -> Self {
+            fn zeroes() -> Self {
                 unsafe { Self(Ops::<$engine, $scalar_ty>::zeroes()) }
             }
 
             #[inline(always)]
-            unsafe fn set1(x: Self::Scalar) -> Self {
+            fn set1(x: Self::Scalar) -> Self {
                 unsafe { Self(Ops::<$engine, $scalar_ty>::set1(x)) }
             }
 

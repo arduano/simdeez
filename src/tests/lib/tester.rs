@@ -1,6 +1,6 @@
 use core::{fmt::Debug, ops::Add};
 
-use crate::{InternalSimdBaseIo, SimdBase};
+use crate::{SimdBase, SimdBaseIo};
 
 use super::{
     fn_tuple::{Func, Tuple},
@@ -75,10 +75,10 @@ pub fn bitshift_eq_tester<
     simd_fn: impl Func<(SimdArg, i32), Output = SimdArg>,
     scalar_fn: impl Func<(ScalarArg, i32), Output = ScalarArg>,
 ) {
-    check_function(inputs, simd_fn, |result, args| unsafe {
+    check_function(inputs, simd_fn, |result, args| {
         for i in 0..SimdArg::WIDTH {
             let scalar_result =
-                scalar_fn.call((<ScalarArg as InternalSimdBaseIo>::set1(args.0[i]), args.1))[0];
+                scalar_fn.call((<ScalarArg as SimdBaseIo>::set1(args.0[i]), args.1))[0];
             let equal = scalar_result == result[i];
             if !equal {
                 return Err(format!(

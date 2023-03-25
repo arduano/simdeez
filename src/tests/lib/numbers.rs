@@ -1,4 +1,4 @@
-use crate::{InternalSimdBaseIo, SimdBase};
+use crate::{SimdBase, SimdBaseIo};
 
 #[derive(Clone, Copy, Debug)]
 pub enum EqPrecision {
@@ -238,7 +238,7 @@ impl<S: ScalarNumber, T: SimdBase<Scalar = S>> SimdTupleIterable<S> for (T,) {
     }
 
     fn wrap_scalars<V: SimdBase<Scalar = S>>(scalars: Self::AsScalar) -> Self::AsTuple<V> {
-        unsafe { (<V as InternalSimdBaseIo>::set1(scalars.0),) }
+        (<V as SimdBaseIo>::set1(scalars.0),)
     }
 }
 
@@ -253,12 +253,10 @@ impl<S: ScalarNumber, T: SimdBase<Scalar = S>> SimdTupleIterable<S> for (T, T) {
     }
 
     fn wrap_scalars<V: SimdBase<Scalar = S>>(scalars: Self::AsScalar) -> Self::AsTuple<V> {
-        unsafe {
-            (
-                <V as InternalSimdBaseIo>::set1(scalars.0),
-                <V as InternalSimdBaseIo>::set1(scalars.1),
-            )
-        }
+        (
+            <V as SimdBaseIo>::set1(scalars.0),
+            <V as SimdBaseIo>::set1(scalars.1),
+        )
     }
 }
 
@@ -273,12 +271,10 @@ impl<S: ScalarNumber, T: SimdBase<Scalar = S>> SimdTupleIterable<S> for (T, T, T
     }
 
     fn wrap_scalars<V: SimdBase<Scalar = S>>(scalars: Self::AsScalar) -> Self::AsTuple<V> {
-        unsafe {
-            (
-                <V as InternalSimdBaseIo>::set1(scalars.0),
-                <V as InternalSimdBaseIo>::set1(scalars.1),
-                <V as InternalSimdBaseIo>::set1(scalars.2),
-            )
-        }
+        (
+            <V as SimdBaseIo>::set1(scalars.0),
+            <V as SimdBaseIo>::set1(scalars.1),
+            <V as SimdBaseIo>::set1(scalars.2),
+        )
     }
 }
