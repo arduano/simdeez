@@ -42,17 +42,19 @@ macro_rules! __simd_generate_base {
 
 #[macro_export]
 macro_rules! simd_runtime_generate {
-    ($vis:vis fn $fn_name:ident $(<$($lt:lifetime),+>)? ($($arg:ident:$typ:ty),* $(,)? ) -> $rt:ty $body:block  ) => {
+    ($(#[$meta:meta])* $vis:vis fn $fn_name:ident $(<$($lt:lifetime),+>)? ($($arg:ident:$typ:ty),* $(,)? ) -> $rt:ty $body:block  ) => {
         simdeez_paste_item! {
             // In order to pass arguments via generics like this, we need to convert the arguments
             // into tuples. This is part of the reason for the mess below.
 
+            $(#[$meta])*
             #[inline(always)]
             $vis fn $fn_name $(<$($lt),+>)?($($arg:$typ,)*) -> $rt {
                 let args_tuple = ($($arg,)*);
                 __run_simd_runtime_decide::<[<__ $fn_name _dispatch_struct>], fix_tuple_type!(($($typ),*)), $rt>(args_tuple)
             }
 
+            $(#[$meta])*
             #[inline(always)]
             $vis fn [<$fn_name _scalar>] $(<$($lt),+>)?($($arg:$typ,)*) -> $rt {
                 let args_tuple = ($($arg,)*);
@@ -62,21 +64,23 @@ macro_rules! simd_runtime_generate {
             __simd_generate_base!($vis fn $fn_name $(<$($lt),+>)? ($($arg:$typ),* ) -> $rt $body);
         }
     };
-    ($vis:vis fn $fn_name:ident ($($arg:ident:$typ:ty),* $(,)? ) $body:block  ) => {
-        simd_runtime_generate!($vis fn $fn_name ($($arg:$typ),*) -> () $body);
+    ($(#[$meta:meta])* $vis:vis fn $fn_name:ident ($($arg:ident:$typ:ty),* $(,)? ) $body:block  ) => {
+        simd_runtime_generate!($(#[$meta])* $vis fn $fn_name ($($arg:$typ),*) -> () $body);
     };
 }
 
 #[macro_export]
 macro_rules! simd_compiletime_select {
-    ($vis:vis fn $fn_name:ident $(<$($lt:lifetime),+>)? ($($arg:ident:$typ:ty),* $(,)? ) -> $rt:ty $body:block  ) => {
+    ($(#[$meta:meta])* $vis:vis fn $fn_name:ident $(<$($lt:lifetime),+>)? ($($arg:ident:$typ:ty),* $(,)? ) -> $rt:ty $body:block  ) => {
         simdeez_paste_item! {
+            $(#[$meta])*
             #[inline(always)]
             $vis fn $fn_name $(<$($lt),+>)?($($arg:$typ,)*) -> $rt {
                 let args_tuple = ($($arg,)*);
                 __run_simd_compiletime_select::<[<__ $fn_name _dispatch_struct>], fix_tuple_type!(($($typ),*)), $rt>(args_tuple)
             }
 
+            $(#[$meta])*
             #[inline(always)]
             $vis fn [<$fn_name _scalar>] $(<$($lt),+>)?($($arg:$typ,)*) -> $rt {
                 let args_tuple = ($($arg,)*);
@@ -86,15 +90,16 @@ macro_rules! simd_compiletime_select {
             __simd_generate_base!($vis fn $fn_name $(<$($lt),+>)? ($($arg:$typ),* ) -> $rt $body);
         }
     };
-    ($vis:vis fn $fn_name:ident ($($arg:ident:$typ:ty),* $(,)? ) $body:block  ) => {
-        simd_runtime_generate!($vis fn $fn_name ($($arg:$typ),*) -> () $body);
+    ($(#[$meta:meta])* $vis:vis fn $fn_name:ident ($($arg:ident:$typ:ty),* $(,)? ) $body:block  ) => {
+        simd_runtime_generate!($(#[$meta])* $vis fn $fn_name ($($arg:$typ),*) -> () $body);
     };
 }
 
 #[macro_export]
 macro_rules! simd_unsafe_generate_all {
-    ($vis:vis fn $fn_name:ident $(<$($lt:lifetime),+>)? ($($arg:ident:$typ:ty),* $(,)? ) -> $rt:ty $body:block  ) => {
+    ($(#[$meta:meta])* $vis:vis fn $fn_name:ident $(<$($lt:lifetime),+>)? ($($arg:ident:$typ:ty),* $(,)? ) -> $rt:ty $body:block  ) => {
         simdeez_paste_item! {
+            $(#[$meta])*
             #[inline(always)]
             #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
             $vis fn [<$fn_name _scalar>] $(<$($lt),+>)?($($arg:$typ,)*) -> $rt {
@@ -102,6 +107,7 @@ macro_rules! simd_unsafe_generate_all {
                 __run_simd_invoke_scalar::<[<__ $fn_name _dispatch_struct>], fix_tuple_type!(($($typ),*)), $rt>(args_tuple)
             }
 
+            $(#[$meta])*
             #[inline(always)]
             #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
             $vis unsafe fn [<$fn_name _sse2>] $(<$($lt),+>)?($($arg:$typ,)*) -> $rt {
@@ -109,6 +115,7 @@ macro_rules! simd_unsafe_generate_all {
                 __run_simd_invoke_sse2::<[<__ $fn_name _dispatch_struct>], fix_tuple_type!(($($typ),*)), $rt>(args_tuple)
             }
 
+            $(#[$meta])*
             #[inline(always)]
             #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
             $vis unsafe fn [<$fn_name _sse41>] $(<$($lt),+>)?($($arg:$typ,)*) -> $rt {
@@ -116,6 +123,7 @@ macro_rules! simd_unsafe_generate_all {
                 __run_simd_invoke_sse41::<[<__ $fn_name _dispatch_struct>], fix_tuple_type!(($($typ),*)), $rt>(args_tuple)
             }
 
+            $(#[$meta])*
             #[inline(always)]
             #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
             $vis unsafe fn [<$fn_name _avx2>] $(<$($lt),+>)?($($arg:$typ,)*) -> $rt {
@@ -123,6 +131,7 @@ macro_rules! simd_unsafe_generate_all {
                 __run_simd_invoke_avx2::<[<__ $fn_name _dispatch_struct>], fix_tuple_type!(($($typ),*)), $rt>(args_tuple)
             }
 
+            $(#[$meta])*
             #[inline(always)]
             #[cfg(target_arch = "aarch64")]
             $vis unsafe fn [<$fn_name _neon>] $(<$($lt),+>)?($($arg:$typ,)*) -> $rt {
@@ -133,8 +142,8 @@ macro_rules! simd_unsafe_generate_all {
             __simd_generate_base!($vis fn $fn_name $(<$($lt),+>)? ($($arg:$typ),* ) -> $rt $body);
         }
     };
-    ($vis:vis fn $fn_name:ident ($($arg:ident:$typ:ty),* $(,)? ) $body:block  ) => {
-        simd_runtime_generate!($vis fn $fn_name ($($arg:$typ),*) -> () $body);
+    ($(#[$meta:meta])* $vis:vis fn $fn_name:ident ($($arg:ident:$typ:ty),* $(,)? ) $body:block  ) => {
+        simd_runtime_generate!($(#[$meta])* $vis fn $fn_name ($($arg:$typ),*) -> () $body);
     };
 }
 
