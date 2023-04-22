@@ -31,7 +31,7 @@ macro_rules! __simd_generate_base {
 
             $(#[$meta])*
             #[inline(always)]
-            $vis fn [<$fn_name _generic>] <S: Simd, $($($lt),+)?>($($arg:$typ,)*) -> $rt {
+            $vis fn [<$fn_name _generic>] <$($($lt),+,)? S: Simd>($($arg:$typ,)*) -> $rt {
                 let args_tuple = ($($arg,)*);
                 __run_simd_generic::<S, [<__ $fn_name _dispatch_struct>], fix_tuple_type!(($($typ),*)), $rt>(args_tuple)
             }

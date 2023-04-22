@@ -41,6 +41,7 @@ pub trait SimdBaseOps:
     + Add<<Self as SimdConsts>::Scalar, Output = Self>
     + AddAssign<Self>
     + AddAssign<<Self as SimdConsts>::Scalar>
+    + Neg<Output = Self>
     + Sub<Self, Output = Self>
     + Sub<<Self as SimdConsts>::Scalar, Output = Self>
     + SubAssign<Self>
@@ -69,6 +70,11 @@ pub trait SimdBaseOps:
     fn sub(self, rhs: Self) -> Self;
     /// Element-wise multiply between two vectors
     fn mul(self, rhs: Self) -> Self;
+
+    /// Element-wise negative of all elements
+    fn neg(self) -> Self {
+        Self::zeroes() - self
+    }
 
     /// Binary and between two vectors
     fn bit_and(self, rhs: Self) -> Self;
