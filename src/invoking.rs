@@ -191,6 +191,7 @@ pub fn __run_simd_generic<E: Simd, S: __SimdRunner<A, R>, A, R>(args: A) -> R {
 #[inline(always)]
 pub fn __run_simd_compiletime_select<S: __SimdRunner<A, R>, A, R>(args: A) -> R {
     #![allow(unreachable_code)]
+    #![allow(clippy::needless_return)]
 
     #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
     {
@@ -210,7 +211,7 @@ pub fn __run_simd_compiletime_select<S: __SimdRunner<A, R>, A, R>(args: A) -> R 
         return unsafe { S::run::<engines::neon::Neon>(args) };
     }
 
-    unsafe { S::run::<engines::scalar::Scalar>(args) };
+    return unsafe { S::run::<engines::scalar::Scalar>(args) };
 }
 
 #[inline(always)]
