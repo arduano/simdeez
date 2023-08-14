@@ -49,6 +49,7 @@
 //! # Example
 //!
 //! ```rust
+//!     use simdeez::prelude::*;
 //!     use simdeez::*;
 //!     use simdeez::scalar::*;
 //!     use simdeez::sse2::*;
