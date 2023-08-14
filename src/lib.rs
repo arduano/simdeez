@@ -78,8 +78,8 @@
 //!         // so that it will work with any size vector.
 //!         // the width of a vector type is provided as a constant
 //!         // so the compiler is free to optimize it more.
-//!         // S::VF32_WIDTH is a constant, 4 when using SSE, 8 when using AVX2, etc
-//!         while x1.len() >= S::VF32_WIDTH {
+//!         // S::Vf32::WIDTH is a constant, 4 when using SSE, 8 when using AVX2, etc
+//!         while x1.len() >= S::Vf32::WIDTH {
 //!             //load data from your vec into an SIMD value
 //!             let xv1 = S::loadu_ps(&x1[0]);
 //!             let yv1 = S::loadu_ps(&y1[0]);
@@ -97,15 +97,15 @@
 //!             S::storeu_ps(&mut res[0], distance);
 //!
 //!             // Move each slice to the next position
-//!             x1 = &x1[S::VF32_WIDTH..];
-//!             y1 = &y1[S::VF32_WIDTH..];
-//!             x2 = &x2[S::VF32_WIDTH..];
-//!             y2 = &y2[S::VF32_WIDTH..];
-//!             res = &mut res[S::VF32_WIDTH..];
+//!             x1 = &x1[S::Vf32::WIDTH..];
+//!             y1 = &y1[S::Vf32::WIDTH..];
+//!             x2 = &x2[S::Vf32::WIDTH..];
+//!             y2 = &y2[S::Vf32::WIDTH..];
+//!             res = &mut res[S::Vf32::WIDTH..];
 //!         }
 //!
 //!         // (Optional) Compute the remaining elements. Not necessary if you are sure the length
-//!         // of your data is always a multiple of the maximum S::VF32_WIDTH you compile for (4 for SSE, 8 for AVX2, etc).
+//!         // of your data is always a multiple of the maximum S::Vf32::WIDTH you compile for (4 for SSE, 8 for AVX2, etc).
 //!         // This can be asserted by putting `assert_eq!(x1.len(), 0);` here
 //!         for i in 0..x1.len() {
 //!             let mut xdiff = x1[i] - x2[i];
