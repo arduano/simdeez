@@ -943,7 +943,7 @@ pub trait Simd: 'static + Sync + Send {
         SimdBaseIo::load_from_ptr_unaligned(a)
     }
 
-    /// Note, SSE2 and SSE4 will load when mask[i] is nonzero, where AVX2
+    /// Note, SSE2 and SSE4 will load when mask\[i\] is nonzero, where AVX2
     /// will store only when the high bit is set. To ensure portability
     /// ensure that the high bit is set.
     #[deprecated(
@@ -952,7 +952,7 @@ pub trait Simd: 'static + Sync + Send {
     unsafe fn maskload_epi32(_mem_addr: &i32, _mask: Self::Vi32) -> Self::Vi32 {
         panic!("Deprecated")
     }
-    /// Note, SSE2 and SSE4 will load when mask[i] is nonzero, where AVX2
+    /// Note, SSE2 and SSE4 will load when mask\[i\] is nonzero, where AVX2
     /// will store only when the high bit is set. To ensure portability
     /// ensure that the high bit is set.
     #[deprecated(
@@ -961,7 +961,7 @@ pub trait Simd: 'static + Sync + Send {
     unsafe fn maskload_epi64(_mem_addr: &i64, _mask: Self::Vi64) -> Self::Vi64 {
         panic!("Deprecated")
     }
-    /// Note, SSE2 and SSE4 will load when mask[i] is nonzero, where AVX2
+    /// Note, SSE2 and SSE4 will load when mask\[i\] is nonzero, where AVX2
     /// will store only when the high bit is set. To ensure portability
     /// ensure that the high bit is set.
     #[deprecated(
@@ -970,7 +970,7 @@ pub trait Simd: 'static + Sync + Send {
     unsafe fn maskload_ps(_mem_addr: &f32, _mask: Self::Vi32) -> Self::Vf32 {
         panic!("Deprecated")
     }
-    /// Note, SSE2 and SSE4 will load when mask[i] is nonzero, where AVX2
+    /// Note, SSE2 and SSE4 will load when mask\[i\] is nonzero, where AVX2
     /// will store only when the high bit is set. To ensure portability
     /// ensure that the high bit is set.
     #[deprecated(
@@ -1029,7 +1029,7 @@ pub trait Simd: 'static + Sync + Send {
         SimdBaseIo::copy_to_ptr_unaligned(a, mem_addr)
     }
 
-    /// Note, SSE2 and SSE4 will store when mask[i] is nonzero, where AVX2
+    /// Note, SSE2 and SSE4 will store when mask\[i\] is nonzero, where AVX2
     /// will store only when the high bit is set. To ensure portability ensure the
     /// high bit is set.
     #[deprecated(
@@ -1040,7 +1040,7 @@ pub trait Simd: 'static + Sync + Send {
             *mem_addr = a[0];
         }
     }
-    /// Note, SSE2 and SSE4 will store when mask[i] is nonzero, where AVX2
+    /// Note, SSE2 and SSE4 will store when mask\[i\] is nonzero, where AVX2
     /// will store only when the high bit is set. To ensure portability ensure the
     /// high bit is set.
     #[deprecated(
@@ -1051,7 +1051,7 @@ pub trait Simd: 'static + Sync + Send {
             *mem_addr = a[0];
         }
     }
-    /// Note, SSE2 and SSE4 will store when mask[i] is nonzero, where AVX2
+    /// Note, SSE2 and SSE4 will store when mask\[i\] is nonzero, where AVX2
     /// will store only when the high bit is set. To ensure portability ensure the
     /// high bit is set.
     #[deprecated(
@@ -1062,7 +1062,7 @@ pub trait Simd: 'static + Sync + Send {
             *mem_addr = a[0];
         }
     }
-    /// Note, SSE2 and SSE4 will store when mask[i] is nonzero, where AVX2
+    /// Note, SSE2 and SSE4 will store when mask\[i\] is nonzero, where AVX2
     /// will store only when the high bit is set. To ensure portability ensure the
     /// high bit is set.
     #[deprecated(
