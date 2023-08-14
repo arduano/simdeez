@@ -50,20 +50,16 @@
 //!
 //! ```rust
 //!     use simdeez::prelude::*;
-//!     use simdeez::*;
+//!
+//!     use simdeez::avx2::*;
 //!     use simdeez::scalar::*;
 //!     use simdeez::sse2::*;
 //!     use simdeez::sse41::*;
-//!     use simdeez::avx2::*;
+//!
 //!     // If you want your SIMD function to use use runtime feature detection to call
 //!     // the fastest available version, use the simd_runtime_generate macro:
 //!     simd_runtime_generate!(
-//!     fn distance(
-//!         x1: &[f32],
-//!         y1: &[f32],
-//!         x2: &[f32],
-//!         y2: &[f32]) -> Vec<f32> {
-//!
+//!     fn distance(x1: &[f32], y1: &[f32], x2: &[f32], y2: &[f32]) -> Vec<f32> {
 //!         let mut result: Vec<f32> = Vec::with_capacity(x1.len());
 //!         result.set_len(x1.len()); // for efficiency
 //!
@@ -78,23 +74,21 @@
 //!         // so that it will work with any size vector.
 //!         // the width of a vector type is provided as a constant
 //!         // so the compiler is free to optimize it more.
-//!         // S::Vf32::WIDTH is a constant, 4 when using SSE, 8 when using AVX2, etc
+//!         // S::Simd::Vf32::WIDTH is a constant, 4 when using SSE, 8 when using AVX2, etc
 //!         while x1.len() >= S::Vf32::WIDTH {
 //!             //load data from your vec into an SIMD value
-//!             let xv1 = S::loadu_ps(&x1[0]);
-//!             let yv1 = S::loadu_ps(&y1[0]);
-//!             let xv2 = S::loadu_ps(&x2[0]);
-//!             let yv2 = S::loadu_ps(&y2[0]);
+//!             let xv1 = S::Vf32::load_from_slice(x1);
+//!             let yv1 = S::Vf32::load_from_slice(y1);
+//!             let xv2 = S::Vf32::load_from_slice(x2);
+//!             let yv2 = S::Vf32::load_from_slice(y2);
 //!
-//!             // Use the usual intrinsic syntax if you prefer
-//!             let mut xdiff = S::sub_ps(xv1, xv2);
-//!             // Or use operater overloading if you like
+//!             let mut xdiff = xv1 - xv2;
 //!             let mut ydiff = yv1 - yv2;
 //!             xdiff *= xdiff;
 //!             ydiff *= ydiff;
-//!             let distance = S::sqrt_ps(xdiff + ydiff);
+//!             let distance = (xdiff + ydiff).sqrt();
 //!             // Store the SIMD value into the result vec
-//!             S::storeu_ps(&mut res[0], distance);
+//!             distance.copy_to_slice(&mut res);
 //!
 //!             // Move each slice to the next position
 //!             x1 = &x1[S::Vf32::WIDTH..];
@@ -105,7 +99,7 @@
 //!         }
 //!
 //!         // (Optional) Compute the remaining elements. Not necessary if you are sure the length
-//!         // of your data is always a multiple of the maximum S::Vf32::WIDTH you compile for (4 for SSE, 8 for AVX2, etc).
+//!         // of your data is always a multiple of the maximum S::Simd::Vf32::WIDTH you compile for (4 for SSE, 8 for AVX2, etc).
 //!         // This can be asserted by putting `assert_eq!(x1.len(), 0);` here
 //!         for i in 0..x1.len() {
 //!             let mut xdiff = x1[i] - x2[i];
