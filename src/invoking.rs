@@ -36,6 +36,7 @@ macro_rules! __simd_generate_base {
                 __run_simd_generic::<S, [<__ $fn_name _dispatch_struct>], fix_tuple_type!(($($typ),*)), $rt>(args_tuple)
             }
 
+            #[allow(non_camel_case_types)]
             struct [<__ $fn_name _dispatch_struct>];
 
             impl$(<$($lt),+>)? __SimdRunner<fix_tuple_type!(($($typ),*)), $rt> for [<__ $fn_name _dispatch_struct>] {
