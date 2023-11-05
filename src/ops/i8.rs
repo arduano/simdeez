@@ -612,7 +612,7 @@ impl_op! {
             unsafe { *ptr }
         }
         for Neon(ptr: *const i8) -> int8x16_t {
-            vld1q_s8(ptr as *const i8)
+            vld1q_s8(ptr)
         }
     }
 }

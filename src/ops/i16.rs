@@ -522,7 +522,7 @@ impl_op! {
             unsafe { *ptr }
         }
         for Neon(ptr: *const i16) -> int16x8_t {
-            vld1q_s16(ptr as *const i16)
+            vld1q_s16(ptr)
         }
     }
 }
@@ -542,7 +542,7 @@ impl_op! {
             unsafe { *ptr }
         }
         for Neon(ptr: *const i16) -> int16x8_t {
-            vld1q_s16(ptr as *const i16)
+            vld1q_s16(ptr)
         }
     }
 }
@@ -562,7 +562,7 @@ impl_op! {
             unsafe { *ptr = a }
         }
         for Neon(ptr: *mut i16, a: int16x8_t) {
-            vst1q_s16(ptr as *mut i16, a)
+            vst1q_s16(ptr, a)
         }
     }
 }
@@ -582,7 +582,7 @@ impl_op! {
             unsafe { *ptr = a }
         }
         for Neon(ptr: *mut i16, a: int16x8_t) {
-            vst1q_s16(ptr as *mut i16, a)
+            vst1q_s16(ptr, a)
         }
     }
 }
