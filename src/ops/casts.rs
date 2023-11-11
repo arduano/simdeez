@@ -17,6 +17,9 @@ impl_op! {
         for Neon(a: float32x4_t) -> int8x16_t {
             vreinterpretq_s8_f32(a)
         }
+        for Wasm(a: v128) -> v128 {
+            a
+        }
     }
 }
 
@@ -36,6 +39,9 @@ impl_op! {
         }
         for Neon(a: int8x16_t) -> float32x4_t {
             vreinterpretq_f32_s8(a)
+        }
+        for Wasm(a: v128) -> v128 {
+            a
         }
     }
 }
@@ -57,6 +63,9 @@ impl_op! {
         for Neon(a: float64x2_t) -> int8x16_t {
             vreinterpretq_s8_f64(a)
         }
+        for Wasm(a: v128) -> v128 {
+            a
+        }
     }
 }
 
@@ -77,6 +86,9 @@ impl_op! {
         for Neon(a: int8x16_t) -> float64x2_t {
             vreinterpretq_f64_s8(a)
         }
+        for Wasm(a: v128) -> v128 {
+            a
+        }
     }
 }
 
@@ -95,6 +107,9 @@ impl_op! {
             a as u64
         }
         for Neon(a: int8x16_t) -> int8x16_t {
+            a
+        }
+        for Wasm(a: v128) -> v128 {
             a
         }
     }
@@ -117,6 +132,9 @@ impl_op! {
         for Neon(a: int8x16_t) -> int8x16_t {
             a
         }
+        for Wasm(a: v128) -> v128 {
+            a
+        }
     }
 }
 
@@ -136,6 +154,9 @@ impl_op! {
         }
         for Neon(a: int16x8_t) -> int8x16_t {
             vreinterpretq_s8_s16(a)
+        }
+        for Wasm(a: v128) -> v128 {
+            a
         }
     }
 }
@@ -157,6 +178,9 @@ impl_op! {
         for Neon(a: int8x16_t) -> int16x8_t {
             vreinterpretq_s16_s8(a)
         }
+        for Wasm(a: v128) -> v128 {
+            a
+        }
     }
 }
 
@@ -176,6 +200,9 @@ impl_op! {
         }
         for Neon(a: int32x4_t) -> int8x16_t {
             vreinterpretq_s8_s32(a)
+        }
+        for Wasm(a: v128) -> v128 {
+            a
         }
     }
 }
@@ -197,6 +224,9 @@ impl_op! {
         for Neon(a: int8x16_t) -> int32x4_t {
             vreinterpretq_s32_s8(a)
         }
+        for Wasm(a: v128) -> v128 {
+            a
+        }
     }
 }
 
@@ -217,6 +247,9 @@ impl_op! {
         for Neon(a: int64x2_t) -> int8x16_t {
             vreinterpretq_s8_s64(a)
         }
+        for Wasm(a: v128) -> v128 {
+            a
+        }
     }
 }
 
@@ -236,6 +269,9 @@ impl_op! {
         }
         for Neon(a: int8x16_t) -> int64x2_t {
             vreinterpretq_s64_s8(a)
+        }
+        for Wasm(a: v128) -> v128 {
+            a
         }
     }
 }
