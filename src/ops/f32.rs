@@ -135,7 +135,7 @@ impl_op! {
             c - a * b
         }
         for Neon(a: float32x4_t, b: float32x4_t, c: float32x4_t) -> float32x4_t {
-            vfmaq_f32(c, vnegq_f32(a), b)
+            vfmsq_f32(c, a, b)
         }
     }
 }
