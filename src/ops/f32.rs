@@ -17,6 +17,9 @@ impl_op! {
         for Neon(a: float32x4_t, b: float32x4_t) -> float32x4_t {
             vaddq_f32(a, b)
         }
+        for Wasm(a: v128, b: v128) -> v128 {
+            f32x4_add(a, b)
+        }
     }
 }
 
@@ -36,6 +39,9 @@ impl_op! {
         }
         for Neon(a: float32x4_t, b: float32x4_t) -> float32x4_t {
             vsubq_f32(a, b)
+        }
+        for Wasm(a: v128, b: v128) -> v128 {
+            f32x4_sub(a, b)
         }
     }
 }
@@ -57,6 +63,9 @@ impl_op! {
         for Neon(a: float32x4_t, b: float32x4_t) -> float32x4_t {
             vmulq_f32(a, b)
         }
+        for Wasm(a: v128, b: v128) -> v128 {
+            f32x4_mul(a, b)
+        }
     }
 }
 
@@ -76,6 +85,9 @@ impl_op! {
         }
         for Neon(a: float32x4_t, b: float32x4_t) -> float32x4_t {
             vdivq_f32(a, b)
+        }
+        for Wasm(a: v128, b: v128) -> v128 {
+            f32x4_div(a, b)
         }
     }
 }
@@ -97,6 +109,9 @@ impl_op! {
         for Neon(a: float32x4_t, b: float32x4_t, c: float32x4_t) -> float32x4_t {
             vfmaq_f32(c, a, b)
         }
+        for Wasm(a: v128, b: v128, c: v128) -> v128 {
+            f32x4_add(f32x4_mul(a, b), c)
+        }
     }
 }
 
@@ -117,6 +132,9 @@ impl_op! {
         for Neon(a: float32x4_t, b: float32x4_t, c: float32x4_t) -> float32x4_t {
             vnegq_f32(vfmsq_f32(c, a, b))
         }
+        for Wasm(a: v128, b: v128, c: v128) -> v128 {
+            f32x4_sub(f32x4_mul(a, b), c)
+        }
     }
 }
 
@@ -136,6 +154,9 @@ impl_op! {
         }
         for Neon(a: float32x4_t, b: float32x4_t, c: float32x4_t) -> float32x4_t {
             vfmsq_f32(c, a, b)
+        }
+        for Wasm(a: v128, b: v128, c: v128) -> v128 {
+            f32x4_sub(c, f32x4_mul(a, b))
         }
     }
 }
@@ -161,6 +182,9 @@ impl_op! {
         for Neon(a: float32x4_t, b: float32x4_t, c: float32x4_t) -> float32x4_t {
             vnegq_f32(vfmaq_f32(c, a, b))
         }
+        for Wasm(a: v128, b: v128, c: v128) -> v128 {
+            f32x4_sub(f32x4_neg(f32x4_mul(a, b)), c)
+        }
     }
 }
 
@@ -180,6 +204,9 @@ impl_op! {
         }
         for Neon(a: float32x4_t) -> float32x4_t {
             vsqrtq_f32(a)
+        }
+        for Wasm(a: v128) -> v128 {
+            f32x4_sqrt(a)
         }
     }
 }
@@ -201,6 +228,9 @@ impl_op! {
         for Neon(a: float32x4_t) -> float32x4_t {
             vrecpeq_f32(a)
         }
+        for Wasm(a: v128) -> v128 {
+            f32x4_div(f32x4_splat(1.0), a)
+        }
     }
 }
 
@@ -220,6 +250,9 @@ impl_op! {
         }
         for Neon(a: float32x4_t) -> float32x4_t {
             vrsqrteq_f32(a)
+        }
+        for Wasm(a: v128) -> v128 {
+            f32x4_div(f32x4_splat(1.0), f32x4_sqrt(a))
         }
     }
 }
@@ -241,6 +274,9 @@ impl_op! {
         for Neon(a: float32x4_t, b: float32x4_t) -> float32x4_t {
             vminq_f32(a, b)
         }
+        for Wasm(a: v128, b: v128) -> v128 {
+            f32x4_min(a, b)
+        }
     }
 }
 
@@ -261,6 +297,9 @@ impl_op! {
         for Neon(a: float32x4_t, b: float32x4_t) -> float32x4_t {
             vmaxq_f32(a, b)
         }
+        for Wasm(a: v128, b: v128) -> v128 {
+            f32x4_max(a, b)
+        }
     }
 }
 
@@ -280,6 +319,9 @@ impl_op! {
         }
         for Neon(a: float32x4_t) -> float32x4_t {
             vabsq_f32(a)
+        }
+        for Wasm(a: v128) -> v128 {
+            f32x4_abs(a)
         }
     }
 }
@@ -305,6 +347,9 @@ impl_op! {
         }
         for Neon(a: float32x4_t) -> float32x4_t {
             vrndaq_f32(a)
+        }
+        for Wasm(a: v128) -> v128 {
+            f32x4_nearest(a)
         }
     }
 }
@@ -333,6 +378,9 @@ impl_op! {
         for Neon(a: float32x4_t) -> float32x4_t {
             vrndmq_f32(a)
         }
+        for Wasm(a: v128) -> v128 {
+            f32x4_floor(a)
+        }
     }
 }
 
@@ -360,6 +408,9 @@ impl_op! {
         for Neon(a: float32x4_t) -> float32x4_t {
             vrndpq_f32(a)
         }
+        for Wasm(a: v128) -> v128 {
+            f32x4_ceil(a)
+        }
     }
 }
 
@@ -378,6 +429,9 @@ impl_op! {
             Self::round(a)
         }
         for Neon(a: float32x4_t) -> float32x4_t {
+            Self::round(a)
+        }
+        for Wasm(a: v128) -> v128 {
             Self::round(a)
         }
     }
@@ -400,6 +454,9 @@ impl_op! {
         for Neon(a: float32x4_t) -> float32x4_t {
             Self::floor(a)
         }
+        for Wasm(a: v128) -> v128 {
+            Self::floor(a)
+        }
     }
 }
 
@@ -418,6 +475,9 @@ impl_op! {
             Self::ceil(a)
         }
         for Neon(a: float32x4_t) -> float32x4_t {
+            Self::ceil(a)
+        }
+        for Wasm(a: v128) -> v128 {
             Self::ceil(a)
         }
     }
@@ -444,6 +504,9 @@ impl_op! {
         for Neon(a: float32x4_t, b: float32x4_t) -> float32x4_t {
             vreinterpretq_f32_u32(vceqq_f32(a, b))
         }
+        for Wasm(a: v128, b: v128) -> v128 {
+            f32x4_eq(a, b)
+        }
     }
 }
 
@@ -467,6 +530,9 @@ impl_op! {
         }
         for Neon(a: float32x4_t, b: float32x4_t) -> float32x4_t {
             vreinterpretq_f32_u32(vmvnq_u32(vceqq_f32(a, b)))
+        }
+        for Wasm(a: v128, b: v128) -> v128 {
+            f32x4_ne(a, b)
         }
     }
 }
@@ -492,6 +558,9 @@ impl_op! {
         for Neon(a: float32x4_t, b: float32x4_t) -> float32x4_t {
             vreinterpretq_f32_u32(vcltq_f32(a, b))
         }
+        for Wasm(a: v128, b: v128) -> v128 {
+            f32x4_lt(a, b)
+        }
     }
 }
 
@@ -515,6 +584,9 @@ impl_op! {
         }
         for Neon(a: float32x4_t, b: float32x4_t) -> float32x4_t {
             vreinterpretq_f32_u32(vcleq_f32(a, b))
+        }
+        for Wasm(a: v128, b: v128) -> v128 {
+            f32x4_le(a, b)
         }
     }
 }
@@ -540,6 +612,9 @@ impl_op! {
         for Neon(a: float32x4_t, b: float32x4_t) -> float32x4_t {
             vreinterpretq_f32_u32(vcgtq_f32(a, b))
         }
+        for Wasm(a: v128, b: v128) -> v128 {
+            f32x4_gt(a, b)
+        }
     }
 }
 
@@ -564,6 +639,9 @@ impl_op! {
         for Neon(a: float32x4_t, b: float32x4_t) -> float32x4_t {
             vreinterpretq_f32_u32(vcgeq_f32(a, b))
         }
+        for Wasm(a: v128, b: v128) -> v128 {
+            f32x4_ge(a, b)
+        }
     }
 }
 
@@ -587,6 +665,9 @@ impl_op! {
         }
         for Neon(a: float32x4_t, b: float32x4_t, mask: float32x4_t) -> float32x4_t {
             vbslq_f32(vreinterpretq_u32_f32(mask), b, a)
+        }
+        for Wasm(a: v128, b: v128, mask: v128) -> v128 {
+            v128_or(v128_and(mask, b), v128_andnot(a, mask))
         }
     }
 }
@@ -622,6 +703,13 @@ impl_op! {
             let a = vpaddq_f32(a, a);
             vgetq_lane_f32(a, 0)
         }
+        for Wasm(a: v128) -> f32 {
+            let l0 = f32x4_extract_lane::<0>(a);
+            let l1 = f32x4_extract_lane::<1>(a);
+            let l2 = f32x4_extract_lane::<2>(a);
+            let l3 = f32x4_extract_lane::<3>(a);
+            l0 + l1 + l2 + l3
+        }
     }
 }
 
@@ -644,6 +732,10 @@ impl_op! {
             let a = vrndnq_f32(a);
             vcvtq_s32_f32(a)
         }
+        for Wasm(a: v128) -> v128 {
+            let a = f32x4_nearest(a);
+            i32x4_trunc_sat_f32x4(a)
+        }
     }
 }
 
@@ -663,6 +755,9 @@ impl_op! {
         }
         for Neon(a: float32x4_t) -> int32x4_t {
             vreinterpretq_s32_f32(a)
+        }
+        for Wasm(a: v128) -> v128 {
+            a
         }
     }
 }
@@ -684,6 +779,9 @@ impl_op! {
         for Neon() -> float32x4_t {
             vdupq_n_f32(0.0)
         }
+        for Wasm() -> v128 {
+            f32x4_splat(0.0)
+        }
     }
 }
 
@@ -703,6 +801,9 @@ impl_op! {
         }
         for Neon(val: f32) -> float32x4_t {
             vdupq_n_f32(val)
+        }
+        for Wasm(val: f32) -> v128 {
+            f32x4_splat(val)
         }
     }
 }
@@ -724,6 +825,9 @@ impl_op! {
         for Neon(ptr: *const f32) -> float32x4_t {
             vld1q_f32(ptr)
         }
+        for Wasm(ptr: *const f32) -> v128 {
+            *(ptr as *const v128)
+        }
     }
 }
 
@@ -743,6 +847,9 @@ impl_op! {
         }
         for Neon(ptr: *const f32) -> float32x4_t {
             vld1q_f32(ptr)
+        }
+        for Wasm(ptr: *const f32) -> v128 {
+            *(ptr as *const v128)
         }
     }
 }
@@ -764,6 +871,9 @@ impl_op! {
         for Neon(ptr: *mut f32, a: float32x4_t) {
             vst1q_f32(ptr, a)
         }
+        for Wasm(ptr: *mut f32, a: v128) {
+            *(ptr as *mut v128) = a;
+        }
     }
 }
 
@@ -783,6 +893,9 @@ impl_op! {
         }
         for Neon(ptr: *mut f32, a: float32x4_t) {
             vst1q_f32(ptr, a)
+        }
+        for Wasm(ptr: *mut f32, a: v128) {
+            *(ptr as *mut v128) = a;
         }
     }
 }

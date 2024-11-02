@@ -147,6 +147,14 @@ macro_rules! simd_unsafe_generate_all {
                 __run_simd_invoke_neon::<[<__ $fn_name _dispatch_struct>], fix_tuple_type!(($($typ),*)), $rt>(args_tuple)
             }
 
+            $(#[$meta])*
+            #[inline(always)]
+            #[cfg(target_arch = "wasm32")]
+            $vis unsafe fn [<$fn_name _wasm>] $(<$($lt),+>)?($($arg:$typ,)*) -> $rt {
+                let args_tuple = ($($arg,)*);
+                __run_simd_invoke_wasm::<[<__ $fn_name _dispatch_struct>], fix_tuple_type!(($($typ),*)), $rt>(args_tuple)
+            }
+
             __simd_generate_base!($(#[$meta])* $vis fn $fn_name $(<$($lt),+>)? ($($arg:$typ),* ) -> $rt $body);
         }
     };
@@ -161,6 +169,8 @@ pub trait __SimdRunner<A, R> {
 
 #[inline(always)]
 pub fn __run_simd_runtime_decide<S: __SimdRunner<A, R>, A, R>(args: A) -> R {
+    #![allow(unreachable_code)]
+
     #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
     {
         if is_x86_feature_detected!("avx2") {
@@ -179,6 +189,12 @@ pub fn __run_simd_runtime_decide<S: __SimdRunner<A, R>, A, R>(args: A) -> R {
     #[cfg(target_arch = "aarch64")]
     if is_aarch64_feature_detected!("neon") {
         return unsafe { S::run::<engines::neon::Neon>(args) };
+    }
+
+    #[cfg(target_arch = "wasm32")]
+    {
+        // Note: there's currently no way to detect SIMD support in WebAssembly at runtime
+        return unsafe { S::run::<engines::wasm32::Wasm>(args) };
     }
 
     unsafe { S::run::<engines::scalar::Scalar>(args) }
@@ -212,6 +228,11 @@ pub fn __run_simd_compiletime_select<S: __SimdRunner<A, R>, A, R>(args: A) -> R 
         return unsafe { S::run::<engines::neon::Neon>(args) };
     }
 
+    #[cfg(target_arch = "wasm32")]
+    {
+        return unsafe { S::run::<engines::wasm32::Wasm>(args) };
+    }
+
     return unsafe { S::run::<engines::scalar::Scalar>(args) };
 }
 
@@ -242,6 +263,12 @@ pub unsafe fn __run_simd_invoke_avx2<S: __SimdRunner<A, R>, A, R>(args: A) -> R 
 #[cfg(target_feature = "neon")]
 pub unsafe fn __run_simd_invoke_neon<S: __SimdRunner<A, R>, A, R>(args: A) -> R {
     unsafe { S::run::<engines::neon::Neon>(args) }
+}
+
+#[inline(always)]
+#[cfg(target_arch = "wasm32")]
+pub unsafe fn __run_simd_invoke_wasm<S: __SimdRunner<A, R>, A, R>(args: A) -> R {
+    unsafe { S::run::<engines::wasm32::Wasm>(args) }
 }
 
 #[macro_export]
