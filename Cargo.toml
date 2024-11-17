@@ -20,7 +20,7 @@ sleef = ["sleef-sys"]
 no_std = ["dep:libm"]
 
 [dependencies]
-paste = "1.0.11"
+paste = "1.0.15"
 # To build this, we need nightly, cmake installed, and clang dlls in the clang dll path
 sleef-sys = { version = "0.1.2", optional = true }
 cfg-if = "1.0.0"
