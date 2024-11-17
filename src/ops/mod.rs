@@ -17,28 +17,20 @@ use core::arch::x86::*;
 use core::arch::x86_64::*;
 
 mod i8;
-pub use self::i8::*;
 
 mod i16;
-pub use self::i16::*;
 
 mod i32;
-pub use self::i32::*;
 
 mod i64;
-pub use self::i64::*;
 
 mod f32;
-pub use self::f32::*;
 
 mod f64;
-pub use self::f64::*;
 
 mod bit;
-pub use self::bit::*;
 
 mod casts;
-pub use self::casts::*;
 
 #[allow(non_camel_case_types)]
 pub struct binary;
