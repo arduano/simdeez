@@ -178,6 +178,16 @@ mod engines;
 
 pub use engines::scalar;
 
+#[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+pub use engines::avx2::Avx2;
+#[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+pub use engines::sse2::Sse2;
+#[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+pub use engines::sse41::Sse41;
+
+#[cfg(target_arch = "aarch64")]
+pub use engines::neon::Neon;
+
 /// The abstract SIMD trait which is implemented by Avx2, Sse41, etc
 pub trait Simd: 'static + Sync + Send {
     /// Vector of i8s.  Corresponds to __m128i when used
