@@ -1,18 +1,18 @@
 //! A library that abstracts over SIMD instruction sets, including ones with differing widths.
-//! SIMDeez is designed to allow you to write a function one time and produce scalar, SSE2, SSE41, and AVX2 versions of the function.
+//! SIMDeez is designed to allow you to write a function one time and produce scalar, SSE2, SSE41, AVX2 and Neon versions of the function.
 //! You can either have the version you want selected automatically at runtime, at compiletime, or
 //! select yourself by hand.
 //!
 //! SIMDeez is currently in Beta, if there are intrinsics you need that are not currently implemented, create an issue
 //! and I'll add them. PRs to add more intrinsics are welcome. Currently things are well fleshed out for i32, i64, f32, and f64 types.
 //!
-//! As Rust stabilizes support for Neon and AVX-512 I plan to add those as well.
+//! As Rust stabilizes support for AVX-512 I plan to add those as well.
 //!
 //! Refer to the excellent [Intel Intrinsics Guide](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#) for documentation on these functions.
 //!
 //! # Features
 //!
-//! * SSE2, SSE41, and AVX2 and scalar fallback
+//! * SSE2, SSE41, AVX2, Neon and scalar fallback
 //! * Can be used with compile time or run time selection
 //! * No runtime overhead
 //! * Uses familiar intel intrinsic naming conventions, easy to port.
@@ -134,8 +134,8 @@
 //! * `distance_scalar`  a scalar fallback
 //! * `distance_sse2`    SSE2 version
 //! * `distance_sse41`   SSE41 version
-//! * `distance_avx`     AVX version
 //! * `distance_avx2`    AVX2 version
+//! * `distance_neon`    Neon version
 //! * `distance_runtime_select`  picks the fastest of the above at runtime
 //!
 //! You can use any of these you wish, though typically you would use the runtime_select version
