@@ -641,7 +641,7 @@ impl_op! {
             a.m_round() as i64
         }
         for Neon(a: float64x2_t) -> int64x2_t {
-            let nums_arr = core::mem::transmute::<_, [f64; 2]>(a);
+            let nums_arr = core::mem::transmute::<int64x2_t, [f64; 2]>(a);
             let ceil = [
                 nums_arr[0].m_round() as i64,
                 nums_arr[1].m_round() as i64,

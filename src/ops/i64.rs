@@ -75,8 +75,8 @@ impl_op! {
             a.wrapping_mul(b)
         }
         for Neon(a: int64x2_t, b: int64x2_t) -> int64x2_t {
-            let a_arr = core::mem::transmute::<_, [i64; 2]>(a);
-            let b_arr = core::mem::transmute::<_, [i64; 2]>(b);
+            let a_arr = core::mem::transmute::<int64x2_t, [i64; 2]>(a);
+            let b_arr = core::mem::transmute::<int64x2_t, [i64; 2]>(b);
             let c_arr = [
                 a_arr[0].wrapping_mul(b_arr[0]),
                 a_arr[1].wrapping_mul(b_arr[1]),
