@@ -43,8 +43,8 @@ impl_op! {
 impl_op! {
     fn mul<i64> {
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
-            let a_arr = core::mem::transmute::<_, [i64; 4]>(a);
-            let b_arr = core::mem::transmute::<_, [i64; 4]>(b);
+            let a_arr = core::mem::transmute::<__m256i, [i64; 4]>(a);
+            let b_arr = core::mem::transmute::<__m256i, [i64; 4]>(b);
             let c_arr = [
                 a_arr[0].wrapping_mul(b_arr[0]),
                 a_arr[1].wrapping_mul(b_arr[1]),
@@ -54,8 +54,8 @@ impl_op! {
             core::mem::transmute::<_, __m256i>(c_arr)
         }
         for Sse41(a: __m128i, b: __m128i) -> __m128i {
-            let a_arr = core::mem::transmute::<_, [i64; 2]>(a);
-            let b_arr = core::mem::transmute::<_, [i64; 2]>(b);
+            let a_arr = core::mem::transmute::<__m128i, [i64; 2]>(a);
+            let b_arr = core::mem::transmute::<__m128i, [i64; 2]>(b);
             let c_arr = [
                 a_arr[0].wrapping_mul(b_arr[0]),
                 a_arr[1].wrapping_mul(b_arr[1]),
@@ -63,8 +63,8 @@ impl_op! {
             core::mem::transmute::<_, __m128i>(c_arr)
         }
         for Sse2(a: __m128i, b: __m128i) -> __m128i {
-            let a_arr = core::mem::transmute::<_, [i64; 2]>(a);
-            let b_arr = core::mem::transmute::<_, [i64; 2]>(b);
+            let a_arr = core::mem::transmute::<__m128i, [i64; 2]>(a);
+            let b_arr = core::mem::transmute::<__m128i, [i64; 2]>(b);
             let c_arr = [
                 a_arr[0].wrapping_mul(b_arr[0]),
                 a_arr[1].wrapping_mul(b_arr[1]),
@@ -430,7 +430,7 @@ impl_imm8_op! {
 impl_op! {
     fn cast_f64<i64> {
         for Avx2(a: __m256i) -> __m256d {
-            let arr = core::mem::transmute::<_, [i64; 4]>(a);
+            let arr = core::mem::transmute::<__m256i, [i64; 4]>(a);
             let result = [
                 arr[0] as f64,
                 arr[1] as f64,
@@ -440,7 +440,7 @@ impl_op! {
             core::mem::transmute::<_, __m256d>(result)
         }
         for Sse41(a: __m128i) -> __m128d {
-            let arr = core::mem::transmute::<_, [i64; 2]>(a);
+            let arr = core::mem::transmute::<__m128i, [i64; 2]>(a);
             let result = [
                 arr[0] as f64,
                 arr[1] as f64,
@@ -448,7 +448,7 @@ impl_op! {
             core::mem::transmute::<_, __m128d>(result)
         }
         for Sse2(a: __m128i) -> __m128d {
-            let arr = core::mem::transmute::<_, [i64; 2]>(a);
+            let arr = core::mem::transmute::<__m128i, [i64; 2]>(a);
             let result = [
                 arr[0] as f64,
                 arr[1] as f64,

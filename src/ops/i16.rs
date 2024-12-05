@@ -415,7 +415,7 @@ impl_op! {
                 arr[6] as i32,
                 arr[7] as i32,
             ];
-            (core::mem::transmute(a), core::mem::transmute(b))
+            (core::mem::transmute::<[i32; 4], __m128i>(a), core::mem::transmute::<[i32; 4], __m128i>(b))
         }
         for Scalar(val: i16) -> (i32, i32) {
             (val as i32, 0)
@@ -454,7 +454,7 @@ impl_op! {
                 arr[6] as u16 as u32 as i32,
                 arr[7] as u16 as u32 as i32,
             ];
-            (core::mem::transmute(a), core::mem::transmute(b))
+            (core::mem::transmute::<[i32; 4], __m128i>(a), core::mem::transmute::<[i32; 4], __m128i>(b))
         }
         for Scalar(val: i16) -> (i32, i32) {
             (val as u16 as u32 as i32, 0)
