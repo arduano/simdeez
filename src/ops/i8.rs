@@ -43,24 +43,24 @@ impl_op! {
 impl_op! {
     fn mul<i8> {
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
-            let mut arr1 = core::mem::transmute::<_, [i8; 32]>(a);
-            let arr2 = core::mem::transmute::<_, [i8; 32]>(b);
+            let mut arr1 = core::mem::transmute::<__m256i, [i8; 32]>(a);
+            let arr2 = core::mem::transmute::<__m256i, [i8; 32]>(b);
             for i in 0..32 {
                 arr1[i] = arr1[i].wrapping_mul(arr2[i]);
             }
             core::mem::transmute::<_, _>(arr1)
         }
         for Sse41(a: __m128i, b: __m128i) -> __m128i {
-            let mut arr1 = core::mem::transmute::<_, [i8; 16]>(a);
-            let arr2 = core::mem::transmute::<_, [i8; 16]>(b);
+            let mut arr1 = core::mem::transmute::<__m128i, [i8; 16]>(a);
+            let arr2 = core::mem::transmute::<__m128i, [i8; 16]>(b);
             for i in 0..16 {
                 arr1[i] = arr1[i].wrapping_mul(arr2[i]);
             }
             core::mem::transmute::<_, _>(arr1)
         }
         for Sse2(a: __m128i, b: __m128i) -> __m128i {
-            let mut arr1 = core::mem::transmute::<_, [i8; 16]>(a);
-            let arr2 = core::mem::transmute::<_, [i8; 16]>(b);
+            let mut arr1 = core::mem::transmute::<__m128i, [i8; 16]>(a);
+            let arr2 = core::mem::transmute::<__m128i, [i8; 16]>(b);
             for i in 0..16 {
                 arr1[i] = arr1[i].wrapping_mul(arr2[i]);
             }
@@ -464,7 +464,7 @@ impl_op! {
                 arr[14] as i16,
                 arr[15] as i16,
             ];
-            (core::mem::transmute(a), core::mem::transmute(b))
+            (core::mem::transmute::<[i16; 8], __m128i>(a), core::mem::transmute::<[i16; 8], __m128i>(b))
         }
         for Scalar(val: i8) -> (i16, i16) {
             (val as i16, 0)
@@ -511,7 +511,7 @@ impl_op! {
                 arr[14] as u8 as u16 as i16,
                 arr[15] as u8 as u16 as i16,
             ];
-            (core::mem::transmute(a), core::mem::transmute(b))
+            (core::mem::transmute::<[i16; 8], __m128i>(a), core::mem::transmute::<[i16; 8], __m128i>(b))
         }
         for Scalar(val: i8) -> (i16, i16) {
             (val as u8 as u16 as i16, 0)

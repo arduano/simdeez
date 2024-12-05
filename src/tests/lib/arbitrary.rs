@@ -21,8 +21,8 @@ const IMPORTANT_F32: [f32; 10] = [
     -0.5,
     1.5,
     -1.5,
-    std::f32::MAX,
-    std::f32::MIN,
+    f32::MAX,
+    f32::MIN,
     f32::NAN,
 ];
 
@@ -34,15 +34,15 @@ const IMPORTANT_F64: [f64; 10] = [
     -0.5,
     1.5,
     -1.5,
-    std::f64::MAX,
-    std::f64::MIN,
+    f64::MAX,
+    f64::MIN,
     f64::NAN,
 ];
 
-const IMPORTANT_I8: [i8; 7] = [0, 1, -1, 2, -2, std::i8::MAX, std::i8::MIN];
-const IMPORTANT_I16: [i16; 7] = [0, 1, -1, 2, -2, std::i16::MAX, std::i16::MIN];
-const IMPORTANT_I32: [i32; 7] = [0, 1, -1, 2, -2, std::i32::MAX, std::i32::MIN];
-const IMPORTANT_I64: [i64; 7] = [0, 1, -1, 2, -2, std::i64::MAX, std::i64::MIN];
+const IMPORTANT_I8: [i8; 7] = [0, 1, -1, 2, -2, i8::MAX, i8::MIN];
+const IMPORTANT_I16: [i16; 7] = [0, 1, -1, 2, -2, i16::MAX, i16::MIN];
+const IMPORTANT_I32: [i32; 7] = [0, 1, -1, 2, -2, i32::MAX, i32::MIN];
+const IMPORTANT_I64: [i64; 7] = [0, 1, -1, 2, -2, i64::MAX, i64::MIN];
 
 fn iter_arbitrary_f32(interval: usize) -> impl Iterator<Item = f32> {
     assert!(interval > IMPORTANT_F32.len());
@@ -101,19 +101,19 @@ fn iter_arbitrary_ints<T: SampleUniform + Clone>(
 }
 
 fn iter_arbitrary_i8(interval: usize) -> impl Iterator<Item = i8> {
-    iter_arbitrary_ints(interval, &IMPORTANT_I8, std::i8::MIN..=std::i8::MAX)
+    iter_arbitrary_ints(interval, &IMPORTANT_I8, i8::MIN..=i8::MAX)
 }
 
 fn iter_arbitrary_i16(interval: usize) -> impl Iterator<Item = i16> {
-    iter_arbitrary_ints(interval, &IMPORTANT_I16, std::i16::MIN..=std::i16::MAX)
+    iter_arbitrary_ints(interval, &IMPORTANT_I16, i16::MIN..=i16::MAX)
 }
 
 fn iter_arbitrary_i32(interval: usize) -> impl Iterator<Item = i32> {
-    iter_arbitrary_ints(interval, &IMPORTANT_I32, std::i32::MIN..=std::i32::MAX)
+    iter_arbitrary_ints(interval, &IMPORTANT_I32, i32::MIN..=i32::MAX)
 }
 
 fn iter_arbitrary_i64(interval: usize) -> impl Iterator<Item = i64> {
-    iter_arbitrary_ints(interval, &IMPORTANT_I64, std::i64::MIN..=std::i64::MAX)
+    iter_arbitrary_ints(interval, &IMPORTANT_I64, i64::MIN..=i64::MAX)
 }
 
 fn iter_arbitrary_blendv_i8() -> impl Iterator<Item = i8> {

@@ -54,7 +54,7 @@ impl<'a, S: Simd> NumberParserSimd<'a, S> {
         Self {
             // Transmuting here is safe because we're converting from u8 to i8
             // This is necessary to make loading easier below
-            string: unsafe { core::mem::transmute(string.as_bytes()) },
+            string: unsafe { core::mem::transmute::<&[u8], &[i8]>(string.as_bytes()) },
 
             _simd: std::marker::PhantomData,
         }

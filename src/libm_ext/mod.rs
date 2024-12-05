@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 #[cfg(feature = "no_std")]
 mod no_std;
 
