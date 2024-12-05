@@ -144,10 +144,6 @@
 //! You may also forgo the macros if you know what you are doing, just keep in mind there are lots
 //! of arcane subtleties with inlining and target_features that must be managed. See how the macros
 //! expand for more detail.
-#![cfg_attr(
-    all(target_arch = "wasm32", not(feature = "stable")),
-    feature(core_intrinsics)
-)]
 #![allow(clippy::missing_safety_doc)] // TODO: Work on the safety of functions
 #![cfg_attr(all(feature = "no_std", not(test)), no_std)]
 #[macro_use]

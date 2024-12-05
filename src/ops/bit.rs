@@ -17,6 +17,9 @@ impl_op! {
         for Neon(a: int8x16_t, b: int8x16_t) -> int8x16_t {
             vandq_s8(a, b)
         }
+        for Wasm(a: v128, b: v128) -> v128 {
+            v128_and(a, b)
+        }
     }
 }
 
@@ -37,6 +40,9 @@ impl_op! {
         for Neon(a: int8x16_t, b: int8x16_t) -> int8x16_t {
             vorrq_s8(a, b)
         }
+        for Wasm(a: v128, b: v128) -> v128 {
+            v128_or(a, b)
+        }
     }
 }
 
@@ -56,6 +62,9 @@ impl_op! {
         }
         for Neon(a: int8x16_t, b: int8x16_t) -> int8x16_t {
             veorq_s8(a, b)
+        }
+        for Wasm(a: v128, b: v128) -> v128 {
+            v128_xor(a, b)
         }
     }
 }
@@ -80,6 +89,9 @@ impl_op! {
         for Neon(a: int8x16_t) -> int8x16_t {
             vreinterpretq_s8_u8(vmvnq_u8(vreinterpretq_u8_s8(a)))
         }
+        for Wasm(a: v128) -> v128 {
+            v128_not(a)
+        }
     }
 }
 
@@ -99,6 +111,9 @@ impl_op! {
         }
         for Neon(a: int8x16_t, b: int8x16_t) -> int8x16_t {
             vandq_s8(vreinterpretq_s8_u8(vmvnq_u8(vreinterpretq_u8_s8(a))), b)
+        }
+        for Wasm(a: v128, b: v128) -> v128 {
+            v128_andnot(b, a)
         }
     }
 }

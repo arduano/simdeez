@@ -17,6 +17,9 @@ impl_op! {
         for Neon(a: float64x2_t, b: float64x2_t) -> float64x2_t {
             vaddq_f64(a, b)
         }
+        for Wasm(a: v128, b: v128) -> v128 {
+            f64x2_add(a, b)
+        }
     }
 }
 
@@ -36,6 +39,9 @@ impl_op! {
         }
         for Neon(a: float64x2_t, b: float64x2_t) -> float64x2_t {
             vsubq_f64(a, b)
+        }
+        for Wasm(a: v128, b: v128) -> v128 {
+            f64x2_sub(a, b)
         }
     }
 }
@@ -57,6 +63,9 @@ impl_op! {
         for Neon(a: float64x2_t, b: float64x2_t) -> float64x2_t {
             vmulq_f64(a, b)
         }
+        for Wasm(a: v128, b: v128) -> v128 {
+            f64x2_mul(a, b)
+        }
     }
 }
 
@@ -76,6 +85,9 @@ impl_op! {
         }
         for Neon(a: float64x2_t, b: float64x2_t) -> float64x2_t {
             vdivq_f64(a, b)
+        }
+        for Wasm(a: v128, b: v128) -> v128 {
+            f64x2_div(a, b)
         }
     }
 }
@@ -97,6 +109,9 @@ impl_op! {
         for Neon(a: float64x2_t, b: float64x2_t, c: float64x2_t) -> float64x2_t {
             vmlaq_f64(c, a, b)
         }
+        for Wasm(a: v128, b: v128, c: v128) -> v128 {
+            f64x2_add(f64x2_mul(a, b), c)
+        }
     }
 }
 
@@ -117,6 +132,9 @@ impl_op! {
         for Neon(a: float64x2_t, b: float64x2_t, c: float64x2_t) -> float64x2_t {
             vnegq_f64(vfmsq_f64(c, a, b))
         }
+        for Wasm(a: v128, b: v128, c: v128) -> v128 {
+            f64x2_sub(f64x2_mul(a, b), c)
+        }
     }
 }
 
@@ -136,6 +154,9 @@ impl_op! {
         }
         for Neon(a: float64x2_t, b: float64x2_t, c: float64x2_t) -> float64x2_t {
             vfmsq_f64(c, a, b)
+        }
+        for Wasm(a: v128, b: v128, c: v128) -> v128 {
+            f64x2_sub(c, f64x2_mul(a, b))
         }
     }
 }
@@ -161,6 +182,9 @@ impl_op! {
         for Neon(a: float64x2_t, b: float64x2_t, c: float64x2_t) -> float64x2_t {
             vnegq_f64(vfmaq_f64(c, a, b))
         }
+        for Wasm(a: v128, b: v128, c: v128) -> v128 {
+            f64x2_sub(f64x2_neg(f64x2_mul(a, b)), c)
+        }
     }
 }
 
@@ -180,6 +204,9 @@ impl_op! {
         }
         for Neon(a: float64x2_t) -> float64x2_t {
             vsqrtq_f64(a)
+        }
+        for Wasm(a: v128) -> v128 {
+            f64x2_sqrt(a)
         }
     }
 }
@@ -204,6 +231,9 @@ impl_op! {
         for Neon(a: float64x2_t) -> float64x2_t {
             vrsqrteq_f64(a)
         }
+        for Wasm(a: v128) -> v128 {
+            f64x2_div(f64x2_splat(1.0), f64x2_sqrt(a))
+        }
     }
 }
 
@@ -223,6 +253,9 @@ impl_op! {
         }
         for Neon(a: float64x2_t, b: float64x2_t) -> float64x2_t {
             vminq_f64(a, b)
+        }
+        for Wasm(a: v128, b: v128) -> v128 {
+            f64x2_min(a, b)
         }
     }
 }
@@ -244,6 +277,9 @@ impl_op! {
         for Neon(a: float64x2_t, b: float64x2_t) -> float64x2_t {
             vmaxq_f64(a, b)
         }
+        for Wasm(a: v128, b: v128) -> v128 {
+            f64x2_max(a, b)
+        }
     }
 }
 
@@ -263,6 +299,9 @@ impl_op! {
         }
         for Neon(a: float64x2_t) -> float64x2_t {
             vabsq_f64(a)
+        }
+        for Wasm(a: v128) -> v128 {
+            f64x2_abs(a)
         }
     }
 }
@@ -291,6 +330,9 @@ impl_op! {
         for Neon(a: float64x2_t) -> float64x2_t {
             vrndnq_f64(a)
         }
+        for Wasm(a: v128) -> v128 {
+            f64x2_nearest(a)
+        }
     }
 }
 
@@ -315,6 +357,9 @@ impl_op! {
         }
         for Neon(a: float64x2_t) -> float64x2_t {
             vrndmq_f64(a)
+        }
+        for Wasm(a: v128) -> v128 {
+            f64x2_floor(a)
         }
     }
 }
@@ -341,6 +386,9 @@ impl_op! {
         for Neon(a: float64x2_t) -> float64x2_t {
             vrndpq_f64(a)
         }
+        for Wasm(a: v128) -> v128 {
+            f64x2_ceil(a)
+        }
     }
 }
 
@@ -359,6 +407,9 @@ impl_op! {
             Self::round(a)
         }
         for Neon(a: float64x2_t) -> float64x2_t {
+            Self::round(a)
+        }
+        for Wasm(a: v128) -> v128 {
             Self::round(a)
         }
     }
@@ -381,6 +432,9 @@ impl_op! {
         for Neon(a: float64x2_t) -> float64x2_t {
             Self::floor(a)
         }
+        for Wasm(a: v128) -> v128 {
+            Self::floor(a)
+        }
     }
 }
 
@@ -399,6 +453,9 @@ impl_op! {
             Self::ceil(a)
         }
         for Neon(a: float64x2_t) -> float64x2_t {
+            Self::ceil(a)
+        }
+        for Wasm(a: v128) -> v128 {
             Self::ceil(a)
         }
     }
@@ -425,6 +482,9 @@ impl_op! {
         for Neon(a: float64x2_t, b: float64x2_t) -> float64x2_t {
             vreinterpretq_f64_u64(vceqq_f64(a, b))
         }
+        for Wasm(a: v128, b: v128) -> v128 {
+            f64x2_eq(a, b)
+        }
     }
 }
 
@@ -448,6 +508,9 @@ impl_op! {
         }
         for Neon(a: float64x2_t, b: float64x2_t) -> float64x2_t {
             vreinterpretq_f64_u32(vmvnq_u32(vreinterpretq_u32_u64(vceqq_f64(a, b))))
+        }
+        for Wasm(a: v128, b: v128) -> v128 {
+            f64x2_ne(a, b)
         }
     }
 }
@@ -473,6 +536,9 @@ impl_op! {
         for Neon(a: float64x2_t, b: float64x2_t) -> float64x2_t {
             vreinterpretq_f64_u64(vcltq_f64(a, b))
         }
+        for Wasm(a: v128, b: v128) -> v128 {
+            f64x2_lt(a, b)
+        }
     }
 }
 
@@ -496,6 +562,9 @@ impl_op! {
         }
         for Neon(a: float64x2_t, b: float64x2_t) -> float64x2_t {
             vreinterpretq_f64_u64(vcleq_f64(a, b))
+        }
+        for Wasm(a: v128, b: v128) -> v128 {
+            f64x2_le(a, b)
         }
     }
 }
@@ -521,6 +590,9 @@ impl_op! {
         for Neon(a: float64x2_t, b: float64x2_t) -> float64x2_t {
             vreinterpretq_f64_u64(vcgtq_f64(a, b))
         }
+        for Wasm(a: v128, b: v128) -> v128 {
+            f64x2_gt(a, b)
+        }
     }
 }
 
@@ -545,6 +617,9 @@ impl_op! {
         for Neon(a: float64x2_t, b: float64x2_t) -> float64x2_t {
             vreinterpretq_f64_u64(vcgeq_f64(a, b))
         }
+        for Wasm(a: v128, b: v128) -> v128 {
+            f64x2_ge(a, b)
+        }
     }
 }
 
@@ -568,6 +643,9 @@ impl_op! {
         }
         for Neon(a: float64x2_t, b: float64x2_t, mask: float64x2_t) -> float64x2_t {
             vbslq_f64(vreinterpretq_u64_f64(mask), b, a)
+        }
+        for Wasm(a: v128, b: v128, mask: v128) -> v128 {
+            v128_or(v128_and(mask, b), v128_andnot(a, mask))
         }
     }
 }
@@ -605,6 +683,11 @@ impl_op! {
         for Neon(a: float64x2_t) -> f64 {
             let a = vpaddq_f64(a, a);
             vgetq_lane_f64(a, 0) + vgetq_lane_f64(a, 1)
+        }
+        for Wasm(a: v128) -> f64 {
+            let l0 = f64x2_extract_lane::<0>(a);
+            let l1 = f64x2_extract_lane::<1>(a);
+            l0 + l1
         }
     }
 }
@@ -648,6 +731,14 @@ impl_op! {
             ];
             core::mem::transmute::<_, int64x2_t>(ceil)
         }
+        for Wasm(a: v128) -> v128 {
+            let nums_arr = core::mem::transmute::<_, [f64; 2]>(a);
+            let ceil = [
+                nums_arr[0].m_round() as i64,
+                nums_arr[1].m_round() as i64,
+            ];
+            core::mem::transmute::<_, v128>(ceil)
+        }
     }
 }
 
@@ -667,6 +758,9 @@ impl_op! {
         }
         for Neon(a: float64x2_t) -> int64x2_t {
             vreinterpretq_s64_f64(a)
+        }
+        for Wasm(a: v128) -> v128 {
+            a
         }
     }
 }
@@ -688,6 +782,9 @@ impl_op! {
         for Neon() -> float64x2_t {
             vdupq_n_f64(0.0)
         }
+        for Wasm() -> v128 {
+            f64x2_splat(0.0)
+        }
     }
 }
 
@@ -707,6 +804,9 @@ impl_op! {
         }
         for Neon(val: f64) -> float64x2_t {
             vdupq_n_f64(val)
+        }
+        for Wasm(val: f64) -> v128 {
+            f64x2_splat(val)
         }
     }
 }
@@ -728,6 +828,9 @@ impl_op! {
         for Neon(ptr: *const f64) -> float64x2_t {
             vld1q_f64(ptr)
         }
+        for Wasm(ptr: *const f64) -> v128 {
+            *(ptr as *const v128)
+        }
     }
 }
 
@@ -747,6 +850,9 @@ impl_op! {
         }
         for Neon(ptr: *const f64) -> float64x2_t {
             vld1q_f64(ptr)
+        }
+        for Wasm(ptr: *const f64) -> v128 {
+            *(ptr as *const v128)
         }
     }
 }
@@ -768,6 +874,9 @@ impl_op! {
         for Neon(ptr: *mut f64, a: float64x2_t) {
             vst1q_f64(ptr, a)
         }
+        for Wasm(ptr: *mut f64, a: v128) {
+            *(ptr as *mut v128) = a;
+        }
     }
 }
 
@@ -787,6 +896,9 @@ impl_op! {
         }
         for Neon(ptr: *mut f64, a: float64x2_t) {
             vst1q_f64(ptr, a)
+        }
+        for Wasm(ptr: *mut f64, a: v128) {
+            *(ptr as *mut v128) = a;
         }
     }
 }

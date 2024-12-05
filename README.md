@@ -1,25 +1,24 @@
 A library that abstracts over SIMD instruction sets, including ones with differing widths.
-SIMDeez is designed to allow you to write a function one time and produce SSE2, SSE41, and AVX2 versions of the function.
+SIMDeez is designed to allow you to write a function one time and produce SSE2, SSE41, AVX2, NEON and WebAssembly SIMD versions of the function.
 You can either have the version you want chosen at compile time or automatically at runtime.
 
 Originally developed by @jackmott, however I volunteered to take over ownership.
 
-If there are intrinsics you need that are not currently implemented, create an issue
-and I'll add them. PRs to add more intrinsics are welcome. Currently things are well fleshed out for i32, i64, f32, and f64 types.
+If there are intrinsics you need that are not currently implemented, create an issue and I'll add them. PRs to add more intrinsics are welcome. Currently things are well fleshed out for i32, i64, f32, and f64 types.
 
-As Rust stabilizes support for Neon and AVX-512 I plan to add those as well.
+As Rust stabilizes support for AVX-512 I plan to add those as well.
 
 Refer to the excellent [Intel Intrinsics Guide](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#) for documentation on these functions:
 
 # Features
 
-* SSE2, SSE41, AVX and AVX2, and scalar fallback
+* SSE2, SSE41, AVX and AVX2, NEON, WebAssembly SIMD and scalar fallback
 * Can be used with compile time or run time selection
 * No runtime overhead
 * Uses familiar intel intrinsic naming conventions, easy to port.
   * `_mm_add_ps(a,b)` becomes `add_ps(a,b)`
 * Fills in missing intrinsics in older APIs with fast SIMD workarounds.
-  * ceil, floor, round,blend etc
+  * ceil, floor, round, blend, etc.
 * Can be used by `#[no_std]` projects
 * Operator overloading: `let sum = va + vb` or `s *= s`
 * Extract or set a single lane with the index operator: `let v1 = v[1];`
