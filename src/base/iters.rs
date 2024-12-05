@@ -25,7 +25,7 @@ pub struct SimdArrayIterator<'a, S: SimdBaseIo> {
     index: usize,
 }
 
-impl<'a, S: SimdBaseIo> Iterator for SimdArrayIterator<'a, S> {
+impl<S: SimdBaseIo> Iterator for SimdArrayIterator<'_, S> {
     type Item = S::Scalar;
 
     #[inline(always)]
