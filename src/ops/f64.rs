@@ -612,7 +612,7 @@ impl_op! {
 impl_op! {
     fn cast_i64<f64> {
         for Avx2(a: __m256d) -> __m256i {
-            let nums_arr = core::mem::transmute::<_, [f64; 4]>(a);
+            let nums_arr = core::mem::transmute::<__m256d, [f64; 4]>(a);
             let ceil = [
                 nums_arr[0].m_round() as i64,
                 nums_arr[1].m_round() as i64,
@@ -622,7 +622,7 @@ impl_op! {
             core::mem::transmute::<_, __m256i>(ceil)
         }
         for Sse41(a: __m128d) -> __m128i {
-            let nums_arr = core::mem::transmute::<_, [f64; 2]>(a);
+            let nums_arr = core::mem::transmute::<__m128d, [f64; 2]>(a);
             let ceil = [
                 nums_arr[0].m_round() as i64,
                 nums_arr[1].m_round() as i64,
@@ -630,7 +630,7 @@ impl_op! {
             core::mem::transmute::<_, __m128i>(ceil)
         }
         for Sse2(a: __m128d) -> __m128i {
-            let nums_arr = core::mem::transmute::<_, [f64; 2]>(a);
+            let nums_arr = core::mem::transmute::<__m128d, [f64; 2]>(a);
             let ceil = [
                 nums_arr[0].m_round() as i64,
                 nums_arr[1].m_round() as i64,
