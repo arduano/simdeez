@@ -12,7 +12,7 @@ categories = ["hardware-support", "science", "game-engines"]
 edition = "2018"
 
 [lib]
-doctest = false
+doctest = true
 
 [features]
 default = []
