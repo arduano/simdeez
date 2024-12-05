@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+#![allow(non_snake_case)]
 //! Some traits for using tuples as function arguments. Mostly copied from warp, with minor modifications.
 //! https://github.com/seanmonstar/warp/blob/4e9c4fd6ce238197fd1088061bbc07fa2852cb0f/src/generic.rs
 //!

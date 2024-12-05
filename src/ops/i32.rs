@@ -49,8 +49,8 @@ impl_op! {
             _mm_mullo_epi32(a, b)
         }
         for Sse2(a: __m128i, b: __m128i) -> __m128i {
-            let a_arr = core::mem::transmute::<_, [i32; 4]>(a);
-            let b_arr = core::mem::transmute::<_, [i32; 4]>(b);
+            let a_arr = core::mem::transmute::<__m128i, [i32; 4]>(a);
+            let b_arr = core::mem::transmute::<__m128i, [i32; 4]>(b);
             let c_arr = [
                 a_arr[0].wrapping_mul(b_arr[0]),
                 a_arr[1].wrapping_mul(b_arr[1]),
@@ -450,10 +450,13 @@ impl_op! {
             Ops::<Sse2, i32>::extend_i64(val)
         }
         for Sse2(val: __m128i) -> (__m128i, __m128i) {
-            let arr = core::mem::transmute::<_, [i32; 4]>(val);
+            let arr = core::mem::transmute::<__m128i, [i32; 4]>(val);
             let a = [arr[0] as i64, arr[1] as i64];
             let b = [arr[2] as i64, arr[3] as i64];
-            (core::mem::transmute(a), core::mem::transmute(b))
+            (
+                core::mem::transmute::<[i64; 2], __m128i>(a),
+                core::mem::transmute::<[i64; 2], __m128i>(b)
+            )
         }
         for Scalar(val: i32) -> (i64, i64) {
             (val as i64, 0)
@@ -477,10 +480,10 @@ impl_op! {
             Ops::<Sse2, i32>::unsigned_extend_i64(val)
         }
         for Sse2(val: __m128i) -> (__m128i, __m128i) {
-            let arr = core::mem::transmute::<_, [i32; 4]>(val);
+            let arr = core::mem::transmute::<__m128i, [i32; 4]>(val);
             let a = [arr[0] as u32 as u64 as i64, arr[1] as u32 as u64 as i64];
             let b = [arr[2] as u32 as u64 as i64, arr[3] as u32 as u64 as i64];
-            (core::mem::transmute(a), core::mem::transmute(b))
+            (core::mem::transmute::<[i64; 2], __m128i>(a), core::mem::transmute::<[i64; 2], __m128i>(b))
         }
         for Scalar(val: i32) -> (i64, i64) {
             (val as u32 as u64 as i64, 0)
