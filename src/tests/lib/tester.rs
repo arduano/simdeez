@@ -233,7 +233,7 @@ macro_rules! elementwise_eq_tester_impl {
     };
 
     (@simdkind $simd_ty:ident, $simd_base:ident, $simd_fn:ident, $arg_cnt:ident, $precision:expr) => {
-        //elementwise_eq_tester_impl!(@full Scalar, $simd_ty, $simd_base, $simd_fn, $arg_cnt, $precision);
+        elementwise_eq_tester_impl!(@full Scalar, $simd_ty, $simd_base, $simd_fn, $arg_cnt, $precision);
         elementwise_eq_tester_impl!(@full Avx2, $simd_ty, $simd_base, $simd_fn, $arg_cnt, $precision);
         elementwise_eq_tester_impl!(@full Sse2, $simd_ty, $simd_base, $simd_fn, $arg_cnt, $precision);
         elementwise_eq_tester_impl!(@full Sse41, $simd_ty, $simd_base, $simd_fn, $arg_cnt, $precision);
@@ -311,7 +311,7 @@ macro_rules! bitshift_eq_tester_impl {
     };
 
     (@simdkind $is_const:ident, $simd_ty:ident, $simd_fn:ident) => {
-        //bitshift_eq_tester_impl!(@full $is_const, Scalar, $simd_ty, $simd_fn);
+        bitshift_eq_tester_impl!(@full $is_const, Scalar, $simd_ty, $simd_fn);
         bitshift_eq_tester_impl!(@full $is_const, Avx2, $simd_ty, $simd_fn);
         bitshift_eq_tester_impl!(@full $is_const, Sse2, $simd_ty, $simd_fn);
         bitshift_eq_tester_impl!(@full $is_const, Sse41, $simd_ty, $simd_fn);
@@ -345,7 +345,7 @@ macro_rules! horizontal_add_tester_impl {
     };
 
     (@simdkind $kind:ident, $simd_ty:ident) => {
-        //horizontal_add_tester_impl!(@full $kind, Scalar, $simd_ty);
+        horizontal_add_tester_impl!(@full $kind, Scalar, $simd_ty);
         horizontal_add_tester_impl!(@full $kind, Avx2, $simd_ty);
         horizontal_add_tester_impl!(@full $kind, Sse2, $simd_ty);
         horizontal_add_tester_impl!(@full $kind, Sse41, $simd_ty);
