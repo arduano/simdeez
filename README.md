@@ -132,13 +132,14 @@ fn main() {
     dbg!(distances);
 }
 ```
-This will generate 5 functions for you:
+This will generate the following functions for you:
 * `distance<S:Simd>` the generic version of your function
 * `distance_scalar`  a scalar fallback
 * `distance_sse2`    SSE2 version
 * `distance_sse41`   SSE41 version
 * `distance_avx2`    AVX2 version
 * `distance_neon`    Neon version
+* `distance_wasm`    WebAssembly SIMD version
 * `distance_runtime_select`  // picks the fastest of the above at runtime
 
 You can use any of these you wish, though typically you would use the runtime_select version
