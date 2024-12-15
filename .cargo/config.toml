@@ -10,7 +10,7 @@ rustflags = "-C target-feature=-sse4.1,-avx,-sse3"
 linker = "aarch64-linux-gnu-gcc"
 
 [target.wasm32-wasip1]
-runner = "wasmtime"
+runner = "wasmtime --dir=."
 rustflags = "-C target-feature=+simd128"
 
 [registries.crates-io]
