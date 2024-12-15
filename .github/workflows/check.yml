@@ -125,7 +125,7 @@ jobs:
         with:
           profile: minimal
           toolchain: stable
-          target: wasm32-wasi
+          target: wasm32-wasip1
           override: true
           components: rustfmt, clippy
 
@@ -136,4 +136,4 @@ jobs:
         name: Run tests (release)
         with:
           command: test
-          args: --release --target wasm32-wasi
+          args: --release --target wasm32-wasip1
