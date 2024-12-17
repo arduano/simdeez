@@ -17,6 +17,9 @@ impl_op! {
         for Neon(a: int8x16_t, b: int8x16_t) -> int8x16_t {
             vaddq_s8(a, b)
         }
+        for Wasm(a: v128, b: v128) -> v128 {
+            i8x16_add(a, b)
+        }
     }
 }
 
@@ -36,6 +39,9 @@ impl_op! {
         }
         for Neon(a: int8x16_t, b: int8x16_t) -> int8x16_t {
             vsubq_s8(a, b)
+        }
+        for Wasm(a: v128, b: v128) -> v128 {
+            i8x16_sub(a, b)
         }
     }
 }
@@ -72,6 +78,14 @@ impl_op! {
         for Neon(a: int8x16_t, b: int8x16_t) -> int8x16_t {
             vmulq_s8(a, b)
         }
+        for Wasm(a: v128, b: v128) -> v128 {
+            let mut arr1 = core::mem::transmute::<_, [i8; 16]>(a);
+            let arr2 = core::mem::transmute::<_, [i8; 16]>(b);
+            for i in 0..16 {
+                arr1[i] = arr1[i].wrapping_mul(arr2[i]);
+            }
+            core::mem::transmute::<_, _>(arr1)
+        }
     }
 }
 
@@ -92,6 +106,9 @@ impl_op! {
         }
         for Neon(a: int8x16_t, b: int8x16_t) -> int8x16_t {
             vminq_s8(a, b)
+        }
+        for Wasm(a: v128, b: v128) -> v128 {
+            i8x16_min(a, b)
         }
     }
 }
@@ -114,6 +131,9 @@ impl_op! {
         for Neon(a: int8x16_t, b: int8x16_t) -> int8x16_t {
             vmaxq_s8(a, b)
         }
+        for Wasm(a: v128, b: v128) -> v128 {
+            i8x16_max(a, b)
+        }
     }
 }
 
@@ -134,6 +154,9 @@ impl_op! {
         }
         for Neon(a: int8x16_t) -> int8x16_t {
             vabsq_s8(a)
+        }
+        for Wasm(a: v128) -> v128 {
+            i8x16_abs(a)
         }
     }
 }
@@ -158,6 +181,9 @@ impl_op! {
         }
         for Neon(a: int8x16_t, b: int8x16_t) -> int8x16_t {
             vreinterpretq_s8_u8(vceqq_s8(a, b))
+        }
+        for Wasm(a: v128, b: v128) -> v128 {
+            i8x16_eq(a, b)
         }
     }
 }
@@ -185,6 +211,9 @@ impl_op! {
         }
         for Neon(a: int8x16_t, b: int8x16_t) -> int8x16_t {
             vreinterpretq_s8_u8(vmvnq_u8(vceqq_s8(a, b)))
+        }
+        for Wasm(a: v128, b: v128) -> v128 {
+            i8x16_ne(a, b)
         }
     }
 }
@@ -216,6 +245,9 @@ impl_op! {
         for Neon(a: int8x16_t, b: int8x16_t) -> int8x16_t {
             vreinterpretq_s8_u8(vcltq_s8(a, b))
         }
+        for Wasm(a: v128, b: v128) -> v128 {
+            i8x16_lt(a, b)
+        }
     }
 }
 
@@ -243,6 +275,9 @@ impl_op! {
         for Neon(a: int8x16_t, b: int8x16_t) -> int8x16_t {
             vreinterpretq_s8_u8(vcleq_s8(a, b))
         }
+        for Wasm(a: v128, b: v128) -> v128 {
+            i8x16_le(a, b)
+        }
     }
 }
 
@@ -266,6 +301,9 @@ impl_op! {
         }
         for Neon(a: int8x16_t, b: int8x16_t) -> int8x16_t {
             vreinterpretq_s8_u8(vcgtq_s8(a, b))
+        }
+        for Wasm(a: v128, b: v128) -> v128 {
+            i8x16_gt(a, b)
         }
     }
 }
@@ -297,6 +335,9 @@ impl_op! {
         for Neon(a: int8x16_t, b: int8x16_t) -> int8x16_t {
             vreinterpretq_s8_u8(vcgeq_s8(a, b))
         }
+        for Wasm(a: v128, b: v128) -> v128 {
+            i8x16_ge(a, b)
+        }
     }
 }
 
@@ -320,6 +361,9 @@ impl_op! {
         }
         for Neon(a: int8x16_t, b: int8x16_t, mask: int8x16_t) -> int8x16_t {
             vbslq_s8(vreinterpretq_u8_s8(mask), b, a)
+        }
+        for Wasm(a: v128, b: v128, mask: v128) -> v128 {
+            v128_or(v128_and(mask, b), v128_andnot(a, mask))
         }
     }
 }
@@ -354,6 +398,9 @@ impl_op! {
             let rhs = Self::set1(rhs as i8);
             vshlq_s8(a, rhs)
         }
+        for Wasm(a: v128, b: i32) -> v128 {
+            i8x16_shl(a, b as u32)
+        }
     }
 }
 
@@ -387,6 +434,9 @@ impl_op! {
             let rhs = Self::set1(-rhs as i8);
             vreinterpretq_s8_u8(vshlq_u8(vreinterpretq_u8_s8(a), rhs))
         }
+        for Wasm(a: v128, b: i32) -> v128 {
+            u8x16_shr(a, b as u32)
+        }
     }
 }
 
@@ -407,6 +457,9 @@ impl_imm8_op! {
         for Neon(a: int8x16_t) -> int8x16_t {
             vshlq_n_s8(a, BY)
         }
+        for Wasm(a: v128) -> v128 {
+            Self::shl(a, BY)
+        }
     }
 }
 
@@ -426,6 +479,9 @@ impl_imm8_op! {
         }
         for Neon(a: int8x16_t) -> int8x16_t {
             vreinterpretq_s8_u8(vshrq_n_u8(vreinterpretq_u8_s8(a), BY))
+        }
+        for Wasm(a: v128) -> v128 {
+            Self::shr(a, BY)
         }
     }
 }
@@ -472,6 +528,11 @@ impl_op! {
         for Neon(val: int8x16_t) -> (int16x8_t, int16x8_t) {
             let a = vmovl_s8(vget_low_s8(val));
             let b = vmovl_s8(vget_high_s8(val));
+            (a, b)
+        }
+        for Wasm(val: v128) -> (v128, v128) {
+            let a = i16x8_extend_low_i8x16(val);
+            let b = i16x8_extend_high_i8x16(val);
             (a, b)
         }
     }
@@ -521,6 +582,11 @@ impl_op! {
             let b = vreinterpretq_s16_u16(vmovl_u8(vreinterpret_u8_s8(vget_high_s8(val))));
             (a, b)
         }
+        for Wasm(val: v128) -> (v128, v128) {
+            let a = i16x8_extend_low_u8x16(val);
+            let b = i16x8_extend_high_u8x16(val);
+            (a, b)
+        }
     }
 }
 
@@ -554,6 +620,9 @@ impl_op! {
 
             out as u32
         }
+        for Wasm(val: v128) -> u32 {
+            i8x16_bitmask(val) as u32
+        }
     }
 }
 
@@ -573,6 +642,9 @@ impl_op! {
         }
         for Neon() -> int8x16_t {
             vdupq_n_s8(0)
+        }
+        for Wasm() -> v128 {
+            i8x16_splat(0)
         }
     }
 }
@@ -594,6 +666,9 @@ impl_op! {
         for Neon(val: i8) -> int8x16_t {
             vdupq_n_s8(val)
         }
+        for Wasm(val: i8) -> v128 {
+            i8x16_splat(val)
+        }
     }
 }
 
@@ -613,6 +688,9 @@ impl_op! {
         }
         for Neon(ptr: *const i8) -> int8x16_t {
             vld1q_s8(ptr)
+        }
+        for Wasm(ptr: *const i8) -> v128 {
+            *(ptr as *const v128)
         }
     }
 }
@@ -634,6 +712,9 @@ impl_op! {
         for Neon(ptr: *const i8) -> int8x16_t {
             vld1q_s8(ptr)
         }
+        for Wasm(ptr: *const i8) -> v128 {
+            *(ptr as *const v128)
+        }
     }
 }
 
@@ -654,6 +735,9 @@ impl_op! {
         for Neon(ptr: *mut i8, a: int8x16_t) {
             vst1q_s8(ptr, a)
         }
+        for Wasm(ptr: *mut i8, a: v128) {
+            *(ptr as *mut v128) = a;
+        }
     }
 }
 
@@ -673,6 +757,9 @@ impl_op! {
         }
         for Neon(ptr: *mut i8, a: int8x16_t) {
             vst1q_s8(ptr, a)
+        }
+        for Wasm(ptr: *mut i8, a: v128) {
+            *(ptr as *mut v128) = a;
         }
     }
 }

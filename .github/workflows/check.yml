@@ -108,3 +108,32 @@ jobs:
         with:
           command: test
           args: --release --target aarch64-unknown-linux-gnu
+
+  wasm_tests:
+    name: WebAssembly Tests
+    runs-on: ubuntu-latest
+    env:
+      WASMTIME_BACKTRACE_DETAILS: 1
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup `wasmtime`
+        uses: bytecodealliance/actions/wasmtime/setup@v1
+
+      - uses: actions-rs/toolchain@v1
+        name: Initialize Cargo
+        with:
+          profile: minimal
+          toolchain: stable
+          target: wasm32-wasip1
+          override: true
+          components: rustfmt, clippy
+
+      - uses: Swatinem/rust-cache@v2
+        name: Cargo Cache
+
+      - uses: actions-rs/cargo@v1
+        name: Run tests (release)
+        with:
+          command: test
+          args: --release --target wasm32-wasip1

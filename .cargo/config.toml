@@ -1,12 +1,17 @@
 [build]
 # rustflags = "-C target-cpu=native"
 # target = "aarch64-unknown-linux-gnu"
+# target = "wasm32-wasip1"
 
 [target.'cfg(any(target_arch = "x86", target_arch = "x86_64"))']
 rustflags = "-C target-feature=-sse4.1,-avx,-sse3"
 
 [target.aarch64-unknown-linux-gnu]
 linker = "aarch64-linux-gnu-gcc"
+
+[target.wasm32-wasip1]
+runner = "wasmtime --dir=."
+rustflags = "-C target-feature=+simd128"
 
 [registries.crates-io]
 protocol = "sparse"

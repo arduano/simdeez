@@ -9,3 +9,6 @@ pub mod sse41;
 
 #[cfg(target_arch = "aarch64")]
 pub mod neon;
+
+#[cfg(target_arch = "wasm32")]
+pub mod wasm32;

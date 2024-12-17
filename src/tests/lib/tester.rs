@@ -206,6 +206,10 @@ macro_rules! with_feature_flag {
         #[cfg(target_feature = "neon")]
         $($r)+
     };
+    (Wasm, $($r:tt)+) => {
+        #[cfg(target_feature = "simd128")]
+        $($r)+
+    };
     (Scalar, $($r:tt)+) => {
         $($r)+
     };
@@ -234,6 +238,7 @@ macro_rules! elementwise_eq_tester_impl {
         elementwise_eq_tester_impl!(@full Sse2, $simd_ty, $simd_base, $simd_fn, $arg_cnt, $precision);
         elementwise_eq_tester_impl!(@full Sse41, $simd_ty, $simd_base, $simd_fn, $arg_cnt, $precision);
         elementwise_eq_tester_impl!(@full Neon, $simd_ty, $simd_base, $simd_fn, $arg_cnt, $precision);
+        elementwise_eq_tester_impl!(@full Wasm, $simd_ty, $simd_base, $simd_fn, $arg_cnt, $precision);
     };
 
     (SimdBaseOps, $simd_fn:ident, $arg_cnt:ident, $precision:expr) => {
@@ -311,6 +316,7 @@ macro_rules! bitshift_eq_tester_impl {
         bitshift_eq_tester_impl!(@full $is_const, Sse2, $simd_ty, $simd_fn);
         bitshift_eq_tester_impl!(@full $is_const, Sse41, $simd_ty, $simd_fn);
         bitshift_eq_tester_impl!(@full $is_const, Neon, $simd_ty, $simd_fn);
+        bitshift_eq_tester_impl!(@full $is_const, Wasm, $simd_ty, $simd_fn);
     };
 
     ($is_const:ident $simd_fn:ident) => {
@@ -344,6 +350,7 @@ macro_rules! horizontal_add_tester_impl {
         horizontal_add_tester_impl!(@full $kind, Sse2, $simd_ty);
         horizontal_add_tester_impl!(@full $kind, Sse41, $simd_ty);
         horizontal_add_tester_impl!(@full $kind, Neon, $simd_ty);
+        horizontal_add_tester_impl!(@full $kind, Wasm, $simd_ty);
     };
 
     (signed) => {

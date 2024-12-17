@@ -1,11 +1,10 @@
 A library that abstracts over SIMD instruction sets, including ones with differing widths.
-SIMDeez is designed to allow you to write a function one time and produce SSE2, SSE41, AVX2 and Neon versions of the function.
+SIMDeez is designed to allow you to write a function one time and produce SSE2, SSE41, AVX2, Neon and WebAssembly SIMD versions of the function.
 You can either have the version you want chosen at compile time or automatically at runtime.
 
 Originally developed by @jackmott, however I volunteered to take over ownership.
 
-If there are intrinsics you need that are not currently implemented, create an issue
-and I'll add them. PRs to add more intrinsics are welcome. Currently things are well fleshed out for i32, i64, f32, and f64 types.
+If there are intrinsics you need that are not currently implemented, create an issue and I'll add them. PRs to add more intrinsics are welcome. Currently things are well fleshed out for i32, i64, f32, and f64 types.
 
 As Rust stabilizes support for AVX-512 I plan to add those as well.
 
@@ -13,13 +12,13 @@ Refer to the excellent [Intel Intrinsics Guide](https://software.intel.com/sites
 
 # Features
 
-* SSE2, SSE41, AVX2, Neon and scalar fallback
+* SSE2, SSE41, AVX2, Neon, WebAssembly SIMD and scalar fallback
 * Can be used with compile time or run time selection
 * No runtime overhead
 * Uses familiar intel intrinsic naming conventions, easy to port.
   * `_mm_add_ps(a,b)` becomes `add_ps(a,b)`
 * Fills in missing intrinsics in older APIs with fast SIMD workarounds.
-  * ceil, floor, round,blend etc
+  * ceil, floor, round, blend, etc.
 * Can be used by `#[no_std]` projects
 * Operator overloading: `let sum = va + vb` or `s *= s`
 * Extract or set a single lane with the index operator: `let v1 = v[1];`
@@ -133,13 +132,14 @@ fn main() {
     dbg!(distances);
 }
 ```
-This will generate 5 functions for you:
+This will generate the following functions for you:
 * `distance<S:Simd>` the generic version of your function
 * `distance_scalar`  a scalar fallback
 * `distance_sse2`    SSE2 version
 * `distance_sse41`   SSE41 version
 * `distance_avx2`    AVX2 version
 * `distance_neon`    Neon version
+* `distance_wasm`    WebAssembly SIMD version
 * `distance_runtime_select`  // picks the fastest of the above at runtime
 
 You can use any of these you wish, though typically you would use the runtime_select version

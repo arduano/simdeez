@@ -3,6 +3,8 @@
 #[cfg(target_arch = "aarch64")]
 use crate::engines::neon::Neon;
 use crate::engines::scalar::Scalar;
+#[cfg(target_arch = "wasm32")]
+use crate::engines::wasm32::Wasm;
 #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
 use crate::engines::{avx2::Avx2, sse2::Sse2, sse41::Sse41};
 
@@ -11,6 +13,8 @@ use core::marker::PhantomData;
 
 #[cfg(target_arch = "aarch64")]
 use core::arch::aarch64::*;
+#[cfg(target_arch = "wasm32")]
+use core::arch::wasm32::*;
 #[cfg(target_arch = "x86")]
 use core::arch::x86::*;
 #[cfg(target_arch = "x86_64")]
@@ -58,6 +62,11 @@ macro_rules! with_feature_flag {
         #[target_feature(enable = "neon")]
         $($r)+
     };
+    (Wasm, $($r:tt)+) => {
+        #[cfg(target_arch = "wasm32")]
+        #[target_feature(enable = "simd128")]
+        $($r)+
+    };
     (Scalar, $($r:tt)+) => {
         $($r)+
     };
@@ -79,6 +88,10 @@ macro_rules! with_cfg_flag {
     };
     (Neon, $($r:tt)+) => {
         #[cfg(target_arch = "aarch64")]
+        $($r)+
+    };
+    (Wasm, $($r:tt)+) => {
+        #[cfg(target_arch = "wasm32")]
         $($r)+
     };
     (Scalar, $($r:tt)+) => {
