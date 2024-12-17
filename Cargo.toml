@@ -1,6 +1,6 @@
 [package]
 name = "simdeez"
-version = "2.0.0-dev3"
+version = "2.0.0-dev4"
 authors = ["Jack Mott <jack.mott@gmail.com>", "Arduano"]
 description = "SIMD library to abstract over different instruction sets and widths"
 license = "Apache-2.0/MIT"
