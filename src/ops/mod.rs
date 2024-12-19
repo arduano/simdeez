@@ -44,7 +44,7 @@ pub struct Ops<T, T2>(PhantomData<(T, T2)>);
 macro_rules! with_feature_flag {
     (Avx2, $($r:tt)+) => {
         #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
-        #[target_feature(enable = "avx2")]
+        #[target_feature(enable = "avx2", enable = "fma")]
         $($r)+
     };
     (Sse2, $($r:tt)+) => {
