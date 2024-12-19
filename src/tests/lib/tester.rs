@@ -191,7 +191,7 @@ macro_rules! horizontal_add_tester {
 #[macro_export]
 macro_rules! with_feature_flag {
     (Avx2, $($r:tt)+) => {
-        #[cfg(target_feature = "avx2")]
+        #[cfg(all(target_feature = "avx2", target_feature = "fma"))]
         $($r)+
     };
     (Sse2, $($r:tt)+) => {

@@ -173,7 +173,7 @@ pub fn __run_simd_runtime_decide<S: __SimdRunner<A, R>, A, R>(args: A) -> R {
 
     #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
     {
-        if is_x86_feature_detected!("avx2") {
+        if is_x86_feature_detected!("avx2") && is_x86_feature_detected!("fma") {
             return unsafe { S::run::<engines::avx2::Avx2>(args) };
         }
 
@@ -212,7 +212,7 @@ pub fn __run_simd_compiletime_select<S: __SimdRunner<A, R>, A, R>(args: A) -> R 
 
     #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
     {
-        #[cfg(target_feature = "avx2")]
+        #[cfg(all(target_feature = "avx2", target_feature = "fma"))]
         return unsafe { S::run::<engines::avx2::Avx2>(args) };
 
         #[cfg(target_feature = "sse4.1")]
