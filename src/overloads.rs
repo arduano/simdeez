@@ -376,10 +376,12 @@ macro_rules! define_simd_type {
             }
 
             impl [<SimdTransmute $ty:upper>] for [<$ty:upper x $width>] {
+                #[inline(always)]
                 fn [<try_transmute_ scalar>](&self) -> $underlying {
                     self.0
                 }
 
+                #[inline(always)]
                 fn [<try_transmute_from_ scalar>](val: $underlying) -> Self {
                     Self(val)
                 }
@@ -403,10 +405,12 @@ macro_rules! define_simd_type {
             }
 
             impl [<SimdTransmute $ty:upper>] for [<$ty:upper x $width>] {
+                #[inline(always)]
                 fn [<try_transmute_ $engine:lower>](&self) -> $underlying {
                     self.0
                 }
 
+                #[inline(always)]
                 fn [<try_transmute_from_ $engine:lower>](val: $underlying) -> Self {
                     Self(val)
                 }
@@ -429,10 +433,12 @@ macro_rules! define_simd_type {
             }
 
             impl [<SimdTransmute $ty:upper>] for [<$ty:upper x $width $suffix >] {
+                #[inline(always)]
                 fn [<try_transmute_ $engine:lower>](&self) -> $underlying {
                     self.0
                 }
 
+                #[inline(always)]
                 fn [<try_transmute_from_ $engine:lower>](val: $underlying) -> Self {
                     Self(val)
                 }
