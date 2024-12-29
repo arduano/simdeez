@@ -82,6 +82,10 @@ pub trait SimdInt8: SimdInt<Scalar = i8, HorizontalAddScalar = i64> + SimdTransm
         self.get_mask() != 0
     }
 
+    /// Checks if all elements in the vector are truthy. A value is truthy either if the highest bit is one, or if any bit is one,
+    /// depending on the instruction set being used. Please always make sure at least the highest bit is set to 1.
+    fn is_truthy(self) -> bool;
+
     /// Grabs the index of the last value that matches the given value. If no value matches, returns None.
     /// Index will always be smaller than Self::WIDTH.
     #[inline(always)]

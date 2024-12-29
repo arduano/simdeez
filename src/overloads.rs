@@ -778,6 +778,11 @@ macro_rules! impl_i8_simd_type {
             fn get_mask(self) -> u32 {
                 unsafe { Ops::<$engine, i8>::get_mask(self.0) }
             }
+
+            #[inline(always)]
+            fn is_truthy(self) -> bool {
+                unsafe { Ops::<$engine, i8>::is_truthy(self.0) }
+            }
         }
     };
 }

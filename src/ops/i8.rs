@@ -763,3 +763,28 @@ impl_op! {
         }
     }
 }
+
+impl_op! {
+    fn is_truthy<i8> {
+        for Avx2(a: __m256i) -> bool {
+            let cmp = _mm256_cmpeq_epi8(a, _mm256_setzero_si256());
+            _mm256_testz_si256(cmp, cmp) == 0
+        }
+        for Sse41(a: __m128i) -> bool {
+            let cmp = _mm_cmpeq_epi8(a, _mm_setzero_si128());
+            _mm_testz_si128(cmp, cmp) == 0
+        }
+        for Sse2(a: __m128i) -> bool {
+            _mm_movemask_epi8(_mm_cmpeq_epi8(a, _mm_setzero_si128())) == 0
+        }
+        for Scalar(a: i8) -> bool {
+            a != 0
+        }
+        for Neon(a: int8x16_t) -> bool {
+            vminvq_u8(vreinterpretq_u8_s8(a)) > 0
+        }
+        for Wasm(a: v128) -> bool {
+            i8x16_all_true(a)
+        }
+    }
+}
