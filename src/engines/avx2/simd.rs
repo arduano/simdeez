@@ -15,7 +15,7 @@ impl Simd for Avx2 {
     #[inline]
     fn invoke<R>(f: impl FnOnce() -> R) -> R {
         #[inline]
-        #[target_feature(enable = "avx2")]
+        #[target_feature(enable = "avx2", enable = "fma")]
         unsafe fn inner<R>(f: impl FnOnce() -> R) -> R {
             f()
         }
