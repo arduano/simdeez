@@ -244,12 +244,14 @@ macro_rules! impl_simd_base_overloads {
         impl Index<usize> for $s {
             type Output = <Self as SimdConsts>::Scalar;
 
+            #[inline(always)]
             fn index(&self, index: usize) -> &Self::Output {
                 unsafe { &(*self.transmute_into_array_ref())[index] }
             }
         }
 
         impl IndexMut<usize> for $s {
+            #[inline(always)]
             fn index_mut(&mut self, index: usize) -> &mut Self::Output {
                 unsafe { &mut (*self.transmute_into_array_mut())[index] }
             }
