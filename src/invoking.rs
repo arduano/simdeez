@@ -99,7 +99,7 @@ macro_rules! simd_compiletime_select {
         }
     };
     ($(#[$meta:meta])* $vis:vis fn $fn_name:ident ($($arg:ident:$typ:ty),* $(,)? ) $body:block  ) => {
-        simd_runtime_generate!($(#[$meta])* $vis fn $fn_name ($($arg:$typ),*) -> () $body);
+        simd_compiletime_select!($(#[$meta])* $vis fn $fn_name ($($arg:$typ),*) -> () $body);
     };
 }
 
@@ -107,6 +107,13 @@ macro_rules! simd_compiletime_select {
 macro_rules! simd_unsafe_generate_all {
     ($(#[$meta:meta])* $vis:vis fn $fn_name:ident $(<$($lt:lifetime),+>)? ($($arg:ident:$typ:ty),* $(,)? ) -> $rt:ty $body:block  ) => {
         simdeez_paste_item! {
+            $(#[$meta])*
+            #[inline(always)]
+            $vis fn $fn_name $(<$($lt),+>)?($($arg:$typ,)*) -> $rt {
+                let args_tuple = ($($arg,)*);
+                __run_simd_runtime_decide::<[<__ $fn_name _dispatch_struct>], fix_tuple_type!(($($typ),*)), $rt>(args_tuple)
+            }
+
             $(#[$meta])*
             #[inline(always)]
             #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
@@ -159,7 +166,7 @@ macro_rules! simd_unsafe_generate_all {
         }
     };
     ($(#[$meta:meta])* $vis:vis fn $fn_name:ident ($($arg:ident:$typ:ty),* $(,)? ) $body:block  ) => {
-        simd_runtime_generate!($(#[$meta])* $vis fn $fn_name ($($arg:$typ),*) -> () $body);
+        simd_unsafe_generate_all!($(#[$meta])* $vis fn $fn_name ($($arg:$typ),*) -> () $body);
     };
 }
 
