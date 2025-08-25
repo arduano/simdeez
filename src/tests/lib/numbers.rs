@@ -136,10 +136,13 @@ impl ScalarNumber for f32 {
         match precision {
             EqPrecision::Exact => self == other,
             EqPrecision::Almost { figs } => {
+                let epsilon = 10.0f32.powi(-(figs as i32));
+                if (self - other).abs() < epsilon {
+                    return true;
+                }
                 let bigger = self.max(other);
                 let norm_diff = (self / bigger) - (other / bigger);
-                let epsilon = 10.0f32.powi(-(figs as i32));
-                norm_diff < epsilon
+                norm_diff.abs() < epsilon
             }
         }
     }
@@ -189,10 +192,13 @@ impl ScalarNumber for f64 {
         match precision {
             EqPrecision::Exact => self == other,
             EqPrecision::Almost { figs } => {
+                let epsilon = 10.0f64.powi(-(figs as i32));
+                if (self - other).abs() < epsilon {
+                    return true;
+                }
                 let bigger = self.max(other);
                 let norm_diff = (self / bigger) - (other / bigger);
-                let epsilon = 10.0f64.powi(-(figs as i32));
-                norm_diff < epsilon
+                norm_diff.abs() < epsilon
             }
         }
     }
