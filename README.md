@@ -6,7 +6,7 @@ Originally developed by @jackmott, however I volunteered to take over ownership.
 
 If there are intrinsics you need that are not currently implemented, create an issue and I'll add them. PRs to add more intrinsics are welcome. Currently things are well fleshed out for i32, i64, f32, and f64 types.
 
-As Rust stabilizes support for AVX-512 I plan to add those as well.
+As Rust stabilizes support for AVX-512 I plan to add those as well. However, I currently don't own any hardware that supports AVX-512, so contributions to add and test those would be appreciated.
 
 Refer to the excellent [Intel Intrinsics Guide](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#) for documentation on these functions:
 
@@ -25,9 +25,14 @@ Refer to the excellent [Intel Intrinsics Guide](https://software.intel.com/sites
 * Falls all the way back to scalar code for platforms with no SIMD or unsupported SIMD
 
 # Trig Functions via Sleef-sys
-A number of trigonometric and other common math functions are provided
-in vectorized form via the Sleef-sys crate. This is an optional feature `sleef` that you can enable.
-Doing so currently requires nightly, as well as having CMake and Clang installed.
+
+~~A number of trigonometric and other common math functions are provided~~
+~~in vectorized form via the Sleef-sys crate. This is an optional feature `sleef` that you can enable.~~
+~~Doing so currently requires nightly, as well as having CMake and Clang installed.~~
+
+⚠️ In simdeez V2.0, sleef is temporarily deprecated due to the maintenance complexity involved around it. We are open to contributions, and are undecided on whether we:
+- Resume sleef support via the existing sleef-sys crate
+- Re-implement sleef via simdeez primitives
 
 # Compared to packed_simd
 
