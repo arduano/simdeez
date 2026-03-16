@@ -239,19 +239,13 @@ impl_op! {
 impl_op! {
     fn lt<i64> {
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
-            let gt = _mm256_cmpgt_epi64(a, b);
-            let eq = _mm256_cmpeq_epi64(a, b);
-            _mm256_andnot_si256(_mm256_or_si256(gt, eq), _mm256_set1_epi64x(u64::MAX as i64))
+            _mm256_cmpgt_epi64(b, a)
         }
         for Sse41(a: __m128i, b: __m128i) -> __m128i {
-            let gt = _mm_cmpgt_epi64(a, b);
-            let eq = _mm_cmpeq_epi64(a, b);
-            _mm_andnot_si128(_mm_or_si128(gt, eq), _mm_set1_epi64x(u64::MAX as i64))
+            _mm_cmpgt_epi64(b, a)
         }
         for Sse2(a: __m128i, b: __m128i) -> __m128i {
-            let gt = _mm_cmpgt_epi64(a, b);
-            let eq = _mm_cmpeq_epi64(a, b);
-            _mm_andnot_si128(_mm_or_si128(gt, eq), _mm_set1_epi64x(u64::MAX as i64))
+            _mm_cmpgt_epi64(b, a)
         }
         for Scalar(a: i64, b: i64) -> i64 {
             if a < b {
