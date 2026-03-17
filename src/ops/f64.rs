@@ -684,13 +684,13 @@ impl_op! {
     fn cast_i64<f64> {
         for Avx2(a: __m256d) -> __m256i {
             // Round in SIMD, then extract for i64 conversion (no native cvtpd_epi64 before AVX-512)
-            let rounded = _mm256_round_pd(a, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
+            let rounded = Self::round(a);
             let arr = core::mem::transmute::<__m256d, [f64; 4]>(rounded);
             let result = [arr[0] as i64, arr[1] as i64, arr[2] as i64, arr[3] as i64];
             core::mem::transmute::<_, __m256i>(result)
         }
         for Sse41(a: __m128d) -> __m128i {
-            let rounded = _mm_round_pd(a, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
+            let rounded = Self::round(a);
             let arr = core::mem::transmute::<__m128d, [f64; 2]>(rounded);
             let result = [arr[0] as i64, arr[1] as i64];
             core::mem::transmute::<_, __m128i>(result)
