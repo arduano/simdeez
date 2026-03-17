@@ -363,7 +363,7 @@ impl_op! {
             _mm_round_ps(a, _MM_FROUND_TO_NEG_INF | _MM_FROUND_NO_EXC)
         }
         for Sse2(a: __m128) -> __m128 {
-            let rounded = Ops::<Sse2, f32>::round(a);
+            let rounded = Self::round(a);
             let mask = _mm_cmpgt_ps(rounded, a);
             let one = _mm_and_ps(mask, _mm_set1_ps(1.0));
             _mm_sub_ps(rounded, one)
@@ -389,7 +389,7 @@ impl_op! {
             _mm_round_ps(a, _MM_FROUND_TO_POS_INF | _MM_FROUND_NO_EXC)
         }
         for Sse2(a: __m128) -> __m128 {
-            let rounded = Ops::<Sse2, f32>::round(a);
+            let rounded = Self::round(a);
             let mask = _mm_cmplt_ps(rounded, a);
             let one = _mm_and_ps(mask, _mm_set1_ps(1.0));
             _mm_add_ps(rounded, one)
