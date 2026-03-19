@@ -105,7 +105,7 @@ pub fn horizontal_add_tester<
             sum = sum.unchecked_add(scalar.into());
         }
 
-        let equal = sum.almost_eq(result, EqPrecision::almost(5));
+        let equal = sum.almost_eq(result, EqPrecision::almost(4));
         if !equal {
             return Err(format!("Failed: Expected sum to be {sum}, got {result}",));
         }
@@ -202,6 +202,10 @@ macro_rules! with_feature_flag {
         #[cfg(target_feature = "sse4.1")]
         $($r)+
     };
+    (Avx512, $($r:tt)+) => {
+        #[cfg(all(target_feature = "avx512f", target_feature = "avx512bw", target_feature = "avx512dq"))]
+        $($r)+
+    };
     (Neon, $($r:tt)+) => {
         #[cfg(target_feature = "neon")]
         $($r)+
@@ -234,6 +238,7 @@ macro_rules! elementwise_eq_tester_impl {
 
     (@simdkind $simd_ty:ident, $simd_base:ident, $simd_fn:ident, $arg_cnt:ident, $precision:expr) => {
         elementwise_eq_tester_impl!(@full Scalar, $simd_ty, $simd_base, $simd_fn, $arg_cnt, $precision);
+        elementwise_eq_tester_impl!(@full Avx512, $simd_ty, $simd_base, $simd_fn, $arg_cnt, $precision);
         elementwise_eq_tester_impl!(@full Avx2, $simd_ty, $simd_base, $simd_fn, $arg_cnt, $precision);
         elementwise_eq_tester_impl!(@full Sse2, $simd_ty, $simd_base, $simd_fn, $arg_cnt, $precision);
         elementwise_eq_tester_impl!(@full Sse41, $simd_ty, $simd_base, $simd_fn, $arg_cnt, $precision);
@@ -312,6 +317,7 @@ macro_rules! bitshift_eq_tester_impl {
 
     (@simdkind $is_const:ident, $simd_ty:ident, $simd_fn:ident) => {
         bitshift_eq_tester_impl!(@full $is_const, Scalar, $simd_ty, $simd_fn);
+        bitshift_eq_tester_impl!(@full $is_const, Avx512, $simd_ty, $simd_fn);
         bitshift_eq_tester_impl!(@full $is_const, Avx2, $simd_ty, $simd_fn);
         bitshift_eq_tester_impl!(@full $is_const, Sse2, $simd_ty, $simd_fn);
         bitshift_eq_tester_impl!(@full $is_const, Sse41, $simd_ty, $simd_fn);
@@ -346,6 +352,7 @@ macro_rules! horizontal_add_tester_impl {
 
     (@simdkind $kind:ident, $simd_ty:ident) => {
         horizontal_add_tester_impl!(@full $kind, Scalar, $simd_ty);
+        horizontal_add_tester_impl!(@full $kind, Avx512, $simd_ty);
         horizontal_add_tester_impl!(@full $kind, Avx2, $simd_ty);
         horizontal_add_tester_impl!(@full $kind, Sse2, $simd_ty);
         horizontal_add_tester_impl!(@full $kind, Sse41, $simd_ty);
