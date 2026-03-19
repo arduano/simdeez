@@ -2,6 +2,9 @@ use super::*;
 
 impl_op! {
     fn add<f32> {
+        for Avx512(a: __m512, b: __m512) -> __m512 {
+            _mm512_add_ps(a, b)
+        }
         for Avx2(a: __m256, b: __m256) -> __m256 {
             _mm256_add_ps(a, b)
         }
@@ -25,6 +28,9 @@ impl_op! {
 
 impl_op! {
     fn sub<f32> {
+        for Avx512(a: __m512, b: __m512) -> __m512 {
+            _mm512_sub_ps(a, b)
+        }
         for Avx2(a: __m256, b: __m256) -> __m256 {
             _mm256_sub_ps(a, b)
         }
@@ -48,6 +54,9 @@ impl_op! {
 
 impl_op! {
     fn mul<f32> {
+        for Avx512(a: __m512, b: __m512) -> __m512 {
+            _mm512_mul_ps(a, b)
+        }
         for Avx2(a: __m256, b: __m256) -> __m256 {
             _mm256_mul_ps(a, b)
         }
@@ -71,6 +80,9 @@ impl_op! {
 
 impl_op! {
     fn div<f32> {
+        for Avx512(a: __m512, b: __m512) -> __m512 {
+            _mm512_div_ps(a, b)
+        }
         for Avx2(a: __m256, b: __m256) -> __m256 {
             _mm256_div_ps(a, b)
         }
@@ -94,6 +106,9 @@ impl_op! {
 
 impl_op! {
     fn mul_add<f32> {
+        for Avx512(a: __m512, b: __m512, c: __m512) -> __m512 {
+            _mm512_fmadd_ps(a, b, c)
+        }
         for Avx2(a: __m256, b: __m256, c: __m256) -> __m256 {
             _mm256_fmadd_ps(a, b, c)
         }
@@ -117,6 +132,9 @@ impl_op! {
 
 impl_op! {
     fn mul_sub<f32> {
+        for Avx512(a: __m512, b: __m512, c: __m512) -> __m512 {
+            _mm512_fmsub_ps(a, b, c)
+        }
         for Avx2(a: __m256, b: __m256, c: __m256) -> __m256 {
             _mm256_fmsub_ps(a, b, c)
         }
@@ -140,6 +158,9 @@ impl_op! {
 
 impl_op! {
     fn neg_mul_add<f32> {
+        for Avx512(a: __m512, b: __m512, c: __m512) -> __m512 {
+            _mm512_fnmadd_ps(a, b, c)
+        }
         for Avx2(a: __m256, b: __m256, c: __m256) -> __m256 {
             _mm256_fnmadd_ps(a, b, c)
         }
@@ -163,6 +184,9 @@ impl_op! {
 
 impl_op! {
     fn neg_mul_sub<f32> {
+        for Avx512(a: __m512, b: __m512, c: __m512) -> __m512 {
+            _mm512_fnmsub_ps(a, b, c)
+        }
         for Avx2(a: __m256, b: __m256, c: __m256) -> __m256 {
             _mm256_fnmsub_ps(a, b, c)
         }
@@ -190,6 +214,9 @@ impl_op! {
 
 impl_op! {
     fn sqrt<f32> {
+        for Avx512(a: __m512) -> __m512 {
+            _mm512_sqrt_ps(a)
+        }
         for Avx2(a: __m256) -> __m256 {
             _mm256_sqrt_ps(a)
         }
@@ -213,6 +240,9 @@ impl_op! {
 
 impl_op! {
     fn recip<f32> {
+        for Avx512(a: __m512) -> __m512 {
+            _mm512_rcp14_ps(a)
+        }
         for Avx2(a: __m256) -> __m256 {
             _mm256_rcp_ps(a)
         }
@@ -236,6 +266,9 @@ impl_op! {
 
 impl_op! {
     fn rsqrt<f32> {
+        for Avx512(a: __m512) -> __m512 {
+            _mm512_rsqrt14_ps(a)
+        }
         for Avx2(a: __m256) -> __m256 {
             _mm256_rsqrt_ps(a)
         }
@@ -259,6 +292,9 @@ impl_op! {
 
 impl_op! {
     fn min<f32> {
+        for Avx512(a: __m512, b: __m512) -> __m512 {
+            _mm512_min_ps(a, b)
+        }
         for Avx2(a: __m256, b: __m256) -> __m256 {
             _mm256_min_ps(a, b)
         }
@@ -282,6 +318,9 @@ impl_op! {
 
 impl_op! {
     fn max<f32> {
+        for Avx512(a: __m512, b: __m512) -> __m512 {
+            _mm512_max_ps(a, b)
+        }
         for Avx2(a: __m256, b: __m256) -> __m256 {
             _mm256_max_ps(a, b)
         }
@@ -305,6 +344,9 @@ impl_op! {
 
 impl_op! {
     fn abs<f32> {
+        for Avx512(a: __m512) -> __m512 {
+            _mm512_andnot_ps(_mm512_set1_ps(-0.0), a)
+        }
         for Avx2(a: __m256) -> __m256 {
             _mm256_andnot_ps(_mm256_set1_ps(-0.0), a)
         }
@@ -328,6 +370,9 @@ impl_op! {
 
 impl_op! {
     fn round<f32> {
+        for Avx512(a: __m512) -> __m512 {
+            _mm512_roundscale_ps::<0x08>(a)
+        }
         for Avx2(a: __m256) -> __m256 {
             _mm256_round_ps(a, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC)
         }
@@ -356,6 +401,9 @@ impl_op! {
 
 impl_op! {
     fn floor<f32> {
+        for Avx512(a: __m512) -> __m512 {
+            _mm512_roundscale_ps::<0x09>(a)
+        }
         for Avx2(a: __m256) -> __m256 {
             _mm256_round_ps(a, _MM_FROUND_TO_NEG_INF | _MM_FROUND_NO_EXC)
         }
@@ -386,6 +434,9 @@ impl_op! {
 
 impl_op! {
     fn ceil<f32> {
+        for Avx512(a: __m512) -> __m512 {
+            _mm512_roundscale_ps::<0x0A>(a)
+        }
         for Avx2(a: __m256) -> __m256 {
             _mm256_round_ps(a, _MM_FROUND_TO_POS_INF | _MM_FROUND_NO_EXC)
         }
@@ -416,6 +467,9 @@ impl_op! {
 
 impl_op! {
     fn fast_round<f32> {
+        for Avx512(a: __m512) -> __m512 {
+            Self::round(a)
+        }
         for Avx2(a: __m256) -> __m256 {
             Self::round(a)
         }
@@ -439,6 +493,9 @@ impl_op! {
 
 impl_op! {
     fn fast_floor<f32> {
+        for Avx512(a: __m512) -> __m512 {
+            Self::floor(a)
+        }
         for Avx2(a: __m256) -> __m256 {
             Self::floor(a)
         }
@@ -462,6 +519,9 @@ impl_op! {
 
 impl_op! {
     fn fast_ceil<f32> {
+        for Avx512(a: __m512) -> __m512 {
+            Self::ceil(a)
+        }
         for Avx2(a: __m256) -> __m256 {
             Self::ceil(a)
         }
@@ -485,6 +545,10 @@ impl_op! {
 
 impl_op! {
     fn eq<f32> {
+        for Avx512(a: __m512, b: __m512) -> __m512 {
+            let k = _mm512_cmp_ps_mask::<_CMP_EQ_OQ>(a, b);
+            _mm512_castsi512_ps(_mm512_movm_epi32(k))
+        }
         for Avx2(a: __m256, b: __m256) -> __m256 {
             _mm256_cmp_ps(a, b, _CMP_EQ_OQ)
         }
@@ -512,6 +576,10 @@ impl_op! {
 
 impl_op! {
     fn neq<f32> {
+        for Avx512(a: __m512, b: __m512) -> __m512 {
+            let k = _mm512_cmp_ps_mask::<_CMP_NEQ_OQ>(a, b);
+            _mm512_castsi512_ps(_mm512_movm_epi32(k))
+        }
         for Avx2(a: __m256, b: __m256) -> __m256 {
             _mm256_cmp_ps(a, b, _CMP_NEQ_OQ)
         }
@@ -539,6 +607,10 @@ impl_op! {
 
 impl_op! {
     fn lt<f32> {
+        for Avx512(a: __m512, b: __m512) -> __m512 {
+            let k = _mm512_cmp_ps_mask::<_CMP_LT_OQ>(a, b);
+            _mm512_castsi512_ps(_mm512_movm_epi32(k))
+        }
         for Avx2(a: __m256, b: __m256) -> __m256 {
             _mm256_cmp_ps(a, b, _CMP_LT_OQ)
         }
@@ -566,6 +638,10 @@ impl_op! {
 
 impl_op! {
     fn lte<f32> {
+        for Avx512(a: __m512, b: __m512) -> __m512 {
+            let k = _mm512_cmp_ps_mask::<_CMP_LE_OQ>(a, b);
+            _mm512_castsi512_ps(_mm512_movm_epi32(k))
+        }
         for Avx2(a: __m256, b: __m256) -> __m256 {
             _mm256_cmp_ps(a, b, _CMP_LE_OQ)
         }
@@ -593,6 +669,10 @@ impl_op! {
 
 impl_op! {
     fn gt<f32> {
+        for Avx512(a: __m512, b: __m512) -> __m512 {
+            let k = _mm512_cmp_ps_mask::<_CMP_GT_OQ>(a, b);
+            _mm512_castsi512_ps(_mm512_movm_epi32(k))
+        }
         for Avx2(a: __m256, b: __m256) -> __m256 {
             _mm256_cmp_ps(a, b, _CMP_GT_OQ)
         }
@@ -620,6 +700,10 @@ impl_op! {
 
 impl_op! {
     fn gte<f32> {
+        for Avx512(a: __m512, b: __m512) -> __m512 {
+            let k = _mm512_cmp_ps_mask::<_CMP_GE_OQ>(a, b);
+            _mm512_castsi512_ps(_mm512_movm_epi32(k))
+        }
         for Avx2(a: __m256, b: __m256) -> __m256 {
             _mm256_cmp_ps(a, b, _CMP_GE_OQ)
         }
@@ -647,6 +731,10 @@ impl_op! {
 
 impl_op! {
     fn blendv<f32> {
+        for Avx512(a: __m512, b: __m512, mask: __m512) -> __m512 {
+            let k = _mm512_movepi32_mask(_mm512_castps_si512(mask));
+            _mm512_mask_blend_ps(k, a, b)
+        }
         for Avx2(a: __m256, b: __m256, mask: __m256) -> __m256 {
             _mm256_blendv_ps(a, b, mask)
         }
@@ -674,6 +762,9 @@ impl_op! {
 
 impl_op! {
     fn horizontal_add<f32> {
+        for Avx512(a: __m512) -> f32 {
+            _mm512_reduce_add_ps(a)
+        }
         for Avx2(a: __m256) -> f32 {
             let a = _mm256_hadd_ps(a, a);
             let b = _mm256_hadd_ps(a, a);
@@ -715,6 +806,9 @@ impl_op! {
 
 impl_op! {
     fn cast_i32<f32> {
+        for Avx512(a: __m512) -> __m512i {
+            _mm512_cvtps_epi32(a)
+        }
         for Avx2(a: __m256) -> __m256i {
             _mm256_cvtps_epi32(a)
         }
@@ -741,6 +835,9 @@ impl_op! {
 
 impl_op! {
     fn bitcast_i32<f32> {
+        for Avx512(a: __m512) -> __m512i {
+            _mm512_castps_si512(a)
+        }
         for Avx2(a: __m256) -> __m256i {
             _mm256_castps_si256(a)
         }
@@ -764,6 +861,9 @@ impl_op! {
 
 impl_op! {
     fn zeroes<f32> {
+        for Avx512() -> __m512 {
+            _mm512_setzero_ps()
+        }
         for Avx2() -> __m256 {
             _mm256_setzero_ps()
         }
@@ -787,6 +887,9 @@ impl_op! {
 
 impl_op! {
     fn set1<f32> {
+        for Avx512(val: f32) -> __m512 {
+            _mm512_set1_ps(val)
+        }
         for Avx2(val: f32) -> __m256 {
             _mm256_set1_ps(val)
         }
@@ -810,6 +913,9 @@ impl_op! {
 
 impl_op! {
     fn load_unaligned<f32> {
+        for Avx512(ptr: *const f32) -> __m512 {
+            _mm512_loadu_ps(ptr)
+        }
         for Avx2(ptr: *const f32) -> __m256 {
             _mm256_loadu_ps(ptr)
         }
@@ -833,6 +939,9 @@ impl_op! {
 
 impl_op! {
     fn load_aligned<f32> {
+        for Avx512(ptr: *const f32) -> __m512 {
+            _mm512_load_ps(ptr)
+        }
         for Avx2(ptr: *const f32) -> __m256 {
             _mm256_load_ps(ptr)
         }
@@ -856,6 +965,9 @@ impl_op! {
 
 impl_op! {
     fn store_unaligned<f32> {
+        for Avx512(ptr: *mut f32, a: __m512) {
+            _mm512_storeu_ps(ptr, a)
+        }
         for Avx2(ptr: *mut f32, a: __m256) {
             _mm256_storeu_ps(ptr, a)
         }
@@ -879,6 +991,9 @@ impl_op! {
 
 impl_op! {
     fn store_aligned<f32> {
+        for Avx512(ptr: *mut f32, a: __m512) {
+            _mm512_store_ps(ptr, a)
+        }
         for Avx2(ptr: *mut f32, a: __m256) {
             _mm256_store_ps(ptr, a)
         }
