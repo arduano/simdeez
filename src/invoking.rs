@@ -148,6 +148,14 @@ macro_rules! simd_unsafe_generate_all {
 
             $(#[$meta])*
             #[inline(always)]
+            #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+            $vis unsafe fn [<$fn_name _avx512>] $(<$($lt),+>)?($($arg:$typ,)*) -> $rt {
+                let args_tuple = ($($arg,)*);
+                __run_simd_invoke_avx512::<[<__ $fn_name _dispatch_struct>], fix_tuple_type!(($($typ),*)), $rt>(args_tuple)
+            }
+
+            $(#[$meta])*
+            #[inline(always)]
             #[cfg(target_arch = "aarch64")]
             $vis unsafe fn [<$fn_name _neon>] $(<$($lt),+>)?($($arg:$typ,)*) -> $rt {
                 let args_tuple = ($($arg,)*);
@@ -180,6 +188,10 @@ pub fn __run_simd_runtime_decide<S: __SimdRunner<A, R>, A, R>(args: A) -> R {
 
     #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
     {
+        if is_x86_feature_detected!("avx512f") && is_x86_feature_detected!("avx512bw") && is_x86_feature_detected!("avx512dq") {
+            return unsafe { S::run::<engines::avx512::Avx512>(args) };
+        }
+
         if is_x86_feature_detected!("avx2") && is_x86_feature_detected!("fma") {
             return unsafe { S::run::<engines::avx2::Avx2>(args) };
         }
@@ -219,6 +231,9 @@ pub fn __run_simd_compiletime_select<S: __SimdRunner<A, R>, A, R>(args: A) -> R 
 
     #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
     {
+        #[cfg(all(target_feature = "avx512f", target_feature = "avx512bw", target_feature = "avx512dq"))]
+        return unsafe { S::run::<engines::avx512::Avx512>(args) };
+
         #[cfg(all(target_feature = "avx2", target_feature = "fma"))]
         return unsafe { S::run::<engines::avx2::Avx2>(args) };
 
@@ -264,6 +279,12 @@ pub unsafe fn __run_simd_invoke_sse41<S: __SimdRunner<A, R>, A, R>(args: A) -> R
 #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
 pub unsafe fn __run_simd_invoke_avx2<S: __SimdRunner<A, R>, A, R>(args: A) -> R {
     unsafe { S::run::<engines::avx2::Avx2>(args) }
+}
+
+#[inline(always)]
+#[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+pub unsafe fn __run_simd_invoke_avx512<S: __SimdRunner<A, R>, A, R>(args: A) -> R {
+    unsafe { S::run::<engines::avx512::Avx512>(args) }
 }
 
 #[inline(always)]
