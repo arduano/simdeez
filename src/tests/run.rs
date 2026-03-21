@@ -4,6 +4,8 @@ use crate::elementwise_eq_tester;
 
 use super::*;
 
+#[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+use crate::engines::avx512::Avx512;
 #[cfg(target_arch = "aarch64")]
 use crate::engines::neon::Neon;
 use crate::engines::scalar::*;
@@ -83,7 +85,7 @@ elementwise_eq_tester_impl!(SimdInt32, cast_f32, one_arg, EqPrecision::exact());
 elementwise_eq_tester_impl!(
     SimdFloat64,
     cast_i64,
-    one_arg_rounding_safe,
+    float_to_int_cast_values,
     EqPrecision::exact()
 );
 elementwise_eq_tester_impl!(SimdInt64, cast_f64, one_arg, EqPrecision::exact());

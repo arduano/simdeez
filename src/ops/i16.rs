@@ -2,6 +2,9 @@ use super::*;
 
 impl_op! {
     fn add<i16> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            _mm512_add_epi16(a, b)
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             _mm256_add_epi16(a, b)
         }
@@ -25,6 +28,9 @@ impl_op! {
 
 impl_op! {
     fn sub<i16> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            _mm512_sub_epi16(a, b)
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             _mm256_sub_epi16(a, b)
         }
@@ -48,6 +54,9 @@ impl_op! {
 
 impl_op! {
     fn mul<i16> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            _mm512_mullo_epi16(a, b)
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             _mm256_mullo_epi16(a, b)
         }
@@ -71,6 +80,9 @@ impl_op! {
 
 impl_op! {
     fn min<i16> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            _mm512_min_epi16(a, b)
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             _mm256_min_epi16(a, b)
         }
@@ -94,6 +106,9 @@ impl_op! {
 
 impl_op! {
     fn max<i16> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            _mm512_max_epi16(a, b)
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             _mm256_max_epi16(a, b)
         }
@@ -117,6 +132,9 @@ impl_op! {
 
 impl_op! {
     fn abs<i16> {
+        for Avx512(a: __m512i) -> __m512i {
+            _mm512_abs_epi16(a)
+        }
         for Avx2(a: __m256i) -> __m256i {
             _mm256_abs_epi16(a)
         }
@@ -141,6 +159,9 @@ impl_op! {
 
 impl_op! {
     fn eq<i16> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            _mm512_movm_epi16(_mm512_cmpeq_epi16_mask(a, b))
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             _mm256_cmpeq_epi16(a, b)
         }
@@ -168,6 +189,9 @@ impl_op! {
 
 impl_op! {
     fn neq<i16> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            _mm512_movm_epi16(_mm512_cmpneq_epi16_mask(a, b))
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             let eq = _mm256_cmpeq_epi16(a, b);
             _mm256_xor_si256(eq, _mm256_set1_epi16(u32::MAX as i16))
@@ -198,6 +222,9 @@ impl_op! {
 
 impl_op! {
     fn lt<i16> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            _mm512_movm_epi16(_mm512_cmplt_epi16_mask(a, b))
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             let gt = _mm256_cmpgt_epi16(a, b);
             let eq = _mm256_cmpeq_epi16(a, b);
@@ -231,6 +258,9 @@ impl_op! {
 
 impl_op! {
     fn lte<i16> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            _mm512_movm_epi16(_mm512_cmple_epi16_mask(a, b))
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             let gt = _mm256_cmpgt_epi16(a, b);
             _mm256_xor_si256(gt, _mm256_set1_epi16(u32::MAX as i16))
@@ -261,6 +291,9 @@ impl_op! {
 
 impl_op! {
     fn gt<i16> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            _mm512_movm_epi16(_mm512_cmpgt_epi16_mask(a, b))
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             _mm256_cmpgt_epi16(a, b)
         }
@@ -288,6 +321,9 @@ impl_op! {
 
 impl_op! {
     fn gte<i16> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            _mm512_movm_epi16(_mm512_cmpge_epi16_mask(a, b))
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             let gt = _mm256_cmpgt_epi16(a, b);
             let eq = _mm256_cmpeq_epi16(a, b);
@@ -321,6 +357,10 @@ impl_op! {
 
 impl_op! {
     fn blendv<i16> {
+        for Avx512(a: __m512i, b: __m512i, mask: __m512i) -> __m512i {
+            let k = _mm512_movepi16_mask(mask);
+            _mm512_mask_blend_epi16(k, a, b)
+        }
         for Avx2(a: __m256i, b: __m256i, mask: __m256i) -> __m256i {
             _mm256_blendv_epi8(a, b, mask)
         }
@@ -348,6 +388,9 @@ impl_op! {
 
 impl_op! {
     fn shl<i16> {
+        for Avx512(a: __m512i, rhs: i32) -> __m512i {
+            _mm512_sll_epi16(a, _mm_cvtsi32_si128(rhs))
+        }
         for Avx2(a: __m256i, rhs: i32) -> __m256i {
             _mm256_sll_epi16(a, _mm_cvtsi32_si128(rhs))
         }
@@ -372,6 +415,9 @@ impl_op! {
 
 impl_op! {
     fn shr<i16> {
+        for Avx512(a: __m512i, rhs: i32) -> __m512i {
+            _mm512_srl_epi16(a, _mm_cvtsi32_si128(rhs))
+        }
         for Avx2(a: __m256i, rhs: i32) -> __m256i {
             _mm256_srl_epi16(a, _mm_cvtsi32_si128(rhs))
         }
@@ -396,6 +442,9 @@ impl_op! {
 
 impl_imm8_op! {
     fn shl_const<i16, const BY: i32> {
+        for Avx512(a: __m512i) -> __m512i {
+            _mm512_sll_epi16(a, _mm_cvtsi32_si128(BY))
+        }
         for Avx2(a: __m256i) -> __m256i {
             _mm256_slli_epi16(a, BY)
         }
@@ -419,6 +468,9 @@ impl_imm8_op! {
 
 impl_imm8_op! {
     fn shr_const<i16, const BY: i32> {
+        for Avx512(a: __m512i) -> __m512i {
+            _mm512_srl_epi16(a, _mm_cvtsi32_si128(BY))
+        }
         for Avx2(a: __m256i) -> __m256i {
             _mm256_srli_epi16(a, BY)
         }
@@ -442,6 +494,11 @@ impl_imm8_op! {
 
 impl_op! {
     fn extend_i32<i16> {
+        for Avx512(val: __m512i) -> (__m512i, __m512i) {
+            let a = _mm512_cvtepi16_epi32(_mm512_castsi512_si256(val));
+            let b = _mm512_cvtepi16_epi32(_mm512_extracti64x4_epi64::<1>(val));
+            (a, b)
+        }
         for Avx2(val: __m256i) -> (__m256i, __m256i) {
             let a = _mm256_cvtepi16_epi32(_mm256_extracti128_si256(val, 0));
             let b = _mm256_cvtepi16_epi32(_mm256_extracti128_si256(val, 1));
@@ -486,6 +543,11 @@ impl_op! {
 
 impl_op! {
     fn unsigned_extend_i32<i16> {
+        for Avx512(val: __m512i) -> (__m512i, __m512i) {
+            let a = _mm512_cvtepu16_epi32(_mm512_castsi512_si256(val));
+            let b = _mm512_cvtepu16_epi32(_mm512_extracti64x4_epi64::<1>(val));
+            (a, b)
+        }
         for Avx2(val: __m256i) -> (__m256i, __m256i) {
             let a = _mm256_cvtepu16_epi32(_mm256_extracti128_si256(val, 0));
             let b = _mm256_cvtepu16_epi32(_mm256_extracti128_si256(val, 1));
@@ -530,6 +592,9 @@ impl_op! {
 
 impl_op! {
     fn zeroes<i16> {
+        for Avx512() -> __m512i {
+            _mm512_setzero_si512()
+        }
         for Avx2() -> __m256i {
             _mm256_setzero_si256()
         }
@@ -553,6 +618,9 @@ impl_op! {
 
 impl_op! {
     fn set1<i16> {
+        for Avx512(val: i16) -> __m512i {
+            _mm512_set1_epi16(val)
+        }
         for Avx2(val: i16) -> __m256i {
             _mm256_set1_epi16(val)
         }
@@ -576,6 +644,9 @@ impl_op! {
 
 impl_op! {
     fn load_unaligned<i16> {
+        for Avx512(ptr: *const i16) -> __m512i {
+            _mm512_loadu_si512(ptr as *const __m512i)
+        }
         for Avx2(ptr: *const i16) -> __m256i {
             _mm256_loadu_si256(ptr as *const __m256i)
         }
@@ -599,6 +670,9 @@ impl_op! {
 
 impl_op! {
     fn load_aligned<i16> {
+        for Avx512(ptr: *const i16) -> __m512i {
+            _mm512_load_si512(ptr as *const __m512i)
+        }
         for Avx2(ptr: *const i16) -> __m256i {
             _mm256_load_si256(ptr as *const __m256i)
         }
@@ -622,6 +696,9 @@ impl_op! {
 
 impl_op! {
     fn store_unaligned<i16> {
+        for Avx512(ptr: *mut i16, a: __m512i) {
+            _mm512_storeu_si512(ptr as *mut __m512i, a)
+        }
         for Avx2(ptr: *mut i16, a: __m256i) {
             _mm256_storeu_si256(ptr as *mut __m256i, a)
         }
@@ -645,6 +722,9 @@ impl_op! {
 
 impl_op! {
     fn store_aligned<i16> {
+        for Avx512(ptr: *mut i16, a: __m512i) {
+            _mm512_store_si512(ptr as *mut __m512i, a)
+        }
         for Avx2(ptr: *mut i16, a: __m256i) {
             _mm256_store_si256(ptr as *mut __m256i, a)
         }

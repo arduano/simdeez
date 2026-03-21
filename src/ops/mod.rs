@@ -1,5 +1,7 @@
 #![allow(dead_code)]
 
+#[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+use crate::engines::avx512::Avx512;
 #[cfg(target_arch = "aarch64")]
 use crate::engines::neon::Neon;
 use crate::engines::scalar::Scalar;
@@ -42,6 +44,11 @@ pub struct binary;
 pub struct Ops<T, T2>(PhantomData<(T, T2)>);
 
 macro_rules! with_feature_flag {
+    (Avx512, $($r:tt)+) => {
+        #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+        #[target_feature(enable = "avx512f", enable = "avx512bw", enable = "avx512dq")]
+        $($r)+
+    };
     (Avx2, $($r:tt)+) => {
         #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
         #[target_feature(enable = "avx2", enable = "fma")]
@@ -74,6 +81,10 @@ macro_rules! with_feature_flag {
 use with_feature_flag;
 
 macro_rules! with_cfg_flag {
+    (Avx512, $($r:tt)+) => {
+        #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+        $($r)+
+    };
     (Avx2, $($r:tt)+) => {
         #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
         $($r)+

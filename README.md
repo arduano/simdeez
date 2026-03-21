@@ -1,18 +1,18 @@
 A library that abstracts over SIMD instruction sets, including ones with differing widths.
-SIMDeez is designed to allow you to write a function one time and produce SSE2, SSE41, AVX2, Neon and WebAssembly SIMD versions of the function.
+SIMDeez is designed to allow you to write a function one time and produce SSE2, SSE41, AVX2, AVX-512, Neon and WebAssembly SIMD versions of the function.
 You can either have the version you want chosen at compile time or automatically at runtime.
 
 Originally developed by @jackmott, however I volunteered to take over ownership.
 
 If there are intrinsics you need that are not currently implemented, create an issue and I'll add them. PRs to add more intrinsics are welcome. Currently things are well fleshed out for i32, i64, f32, and f64 types.
 
-As Rust stabilizes support for AVX-512 I plan to add those as well. However, I currently don't own any hardware that supports AVX-512, so contributions to add and test those would be appreciated.
+AVX-512 support is now included for x86/x86_64 targets with `avx512f`, `avx512bw`, and `avx512dq`. Runtime dispatch will select it ahead of AVX2 when those features are available.
 
 Refer to the excellent [Intel Intrinsics Guide](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#) for documentation on these functions:
 
 # Features
 
-* SSE2, SSE41, AVX2, Neon, WebAssembly SIMD and scalar fallback
+* SSE2, SSE41, AVX2, AVX-512, Neon, WebAssembly SIMD and scalar fallback
 * Can be used with compile time or run time selection
 * No runtime overhead
 * Uses familiar intel intrinsic naming conventions, easy to port.
@@ -143,6 +143,7 @@ This will generate the following functions for you:
 * `distance_sse2`    SSE2 version
 * `distance_sse41`   SSE41 version
 * `distance_avx2`    AVX2 version
+* `distance_avx512`  AVX-512 version
 * `distance_neon`    Neon version
 * `distance_wasm`    WebAssembly SIMD version
 * `distance_runtime_select`  // picks the fastest of the above at runtime

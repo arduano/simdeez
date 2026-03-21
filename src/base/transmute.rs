@@ -8,7 +8,7 @@ use core::arch::x86::*;
 use core::arch::x86_64::*;
 
 macro_rules! make_simd_transmute {
-    ($name:ident, $scalar:ident, $sse:ident, $avx:ident, $neon:ident, $wasm:ident) => {
+    ($name:ident, $scalar:ident, $sse:ident, $avx:ident, $avx512:ident, $neon:ident, $wasm:ident) => {
         pub trait $name: Sized {
             /// Tries to transmute the value into its underlying scalar type. Panics if the value is not a scalar.
             fn try_transmute_scalar(&self) -> $scalar {
@@ -56,6 +56,18 @@ macro_rules! make_simd_transmute {
                 panic!("Invalid transmute: tried to transmute non-avx2 into avx2");
             }
 
+            #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+            /// Tries to transmute the value into its underlying Avx512 type. Panics if the value is not a Avx512.
+            fn try_transmute_avx512(&self) -> $avx512 {
+                panic!("Invalid transmute: tried to transmute non-avx512 into avx512");
+            }
+
+            #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+            /// Tries to create the value from its underlying Avx512 type. Panics if the value is not a Avx512.
+            fn try_transmute_from_avx512(_avx512: $avx512) -> Self {
+                panic!("Invalid transmute: tried to transmute non-avx512 into avx512");
+            }
+
             #[cfg(target_arch = "aarch64")]
             /// Tries to transmute the value into its underlying Neon type. Panics if the value is not a Neon.
             fn try_transmute_neon(&self) -> $neon {
@@ -83,9 +95,57 @@ macro_rules! make_simd_transmute {
     };
 }
 
-make_simd_transmute!(SimdTransmuteF32, f32, __m128, __m256, float32x4_t, v128);
-make_simd_transmute!(SimdTransmuteF64, f64, __m128d, __m256d, float64x2_t, v128);
-make_simd_transmute!(SimdTransmuteI8, i8, __m128i, __m256i, int8x16_t, v128);
-make_simd_transmute!(SimdTransmuteI16, i16, __m128i, __m256i, int16x8_t, v128);
-make_simd_transmute!(SimdTransmuteI32, i32, __m128i, __m256i, int32x4_t, v128);
-make_simd_transmute!(SimdTransmuteI64, i64, __m128i, __m256i, int64x2_t, v128);
+make_simd_transmute!(
+    SimdTransmuteF32,
+    f32,
+    __m128,
+    __m256,
+    __m512,
+    float32x4_t,
+    v128
+);
+make_simd_transmute!(
+    SimdTransmuteF64,
+    f64,
+    __m128d,
+    __m256d,
+    __m512d,
+    float64x2_t,
+    v128
+);
+make_simd_transmute!(
+    SimdTransmuteI8,
+    i8,
+    __m128i,
+    __m256i,
+    __m512i,
+    int8x16_t,
+    v128
+);
+make_simd_transmute!(
+    SimdTransmuteI16,
+    i16,
+    __m128i,
+    __m256i,
+    __m512i,
+    int16x8_t,
+    v128
+);
+make_simd_transmute!(
+    SimdTransmuteI32,
+    i32,
+    __m128i,
+    __m256i,
+    __m512i,
+    int32x4_t,
+    v128
+);
+make_simd_transmute!(
+    SimdTransmuteI64,
+    i64,
+    __m128i,
+    __m256i,
+    __m512i,
+    int64x2_t,
+    v128
+);
