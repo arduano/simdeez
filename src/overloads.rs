@@ -753,7 +753,7 @@ macro_rules! impl_simd_float {
 }
 
 macro_rules! impl_i8_simd_type {
-    ($engine:ident, $i8_ty:ident, $i16_ty:ident) => {
+    ($engine:ident, $i8_ty:ident, $i16_ty:ident, $mask_ty:ty) => {
         impl_simd_base!($engine, $i8_ty, i8, |self| {
             self.partial_horizontal_add()
                 .partial_horizontal_add()
@@ -768,6 +768,8 @@ macro_rules! impl_i8_simd_type {
         });
 
         impl SimdInt8 for $i8_ty {
+            type BitMask = $mask_ty;
+
             #[inline(always)]
             fn extend_to_i16(self) -> (<Self::Engine as Simd>::Vi16, <Self::Engine as Simd>::Vi16) {
                 let (a, b) = unsafe { Ops::<$engine, i8>::extend_i16(self.0) };
@@ -783,7 +785,7 @@ macro_rules! impl_i8_simd_type {
             }
 
             #[inline(always)]
-            fn get_mask(self) -> u32 {
+            fn get_mask(self) -> Self::BitMask {
                 unsafe { Ops::<$engine, i8>::get_mask(self.0) }
             }
 

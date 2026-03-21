@@ -8,7 +8,7 @@ pub use self::simd::*;
 
 define_simd_type!(Scalar, i8, 1, i8);
 impl_simd_int_overloads!(I8x1);
-impl_i8_simd_type!(Scalar, I8x1, I16x1);
+impl_i8_simd_type!(Scalar, I8x1, I16x1, u32);
 
 define_simd_type!(Scalar, i16, 1, i16);
 impl_simd_int_overloads!(I16x1);
