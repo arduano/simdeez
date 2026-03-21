@@ -675,8 +675,9 @@ impl_op! {
 
 impl_op! {
     fn get_mask<i8> {
-        for Avx512(val: __m512i) -> u32 {
-            _mm512_movepi8_mask(val) as u32
+        for Avx512(val: __m512i) -> [u32; 2] {
+            let mask = _mm512_movepi8_mask(val);
+            [mask as u32, (mask >> 32) as u32]
         }
         for Avx2(val: __m256i) -> u32 {
             _mm256_movemask_epi8(val) as u32
