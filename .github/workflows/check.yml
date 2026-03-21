@@ -75,6 +75,14 @@ jobs:
           command: test
           args: --release
 
+      # AVX-512 is not available on GitHub's hosted runners, so compile the library and
+      # test harness with the relevant target features enabled to keep that path covered.
+      - name: Compile tests with AVX-512 enabled
+        run: CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUSTFLAGS='-C target-feature=+avx512f,+avx512bw,+avx512dq' cargo test --tests --target x86_64-unknown-linux-gnu --no-run
+
+      - name: Compile library with AVX-512 enabled (release)
+        run: CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUSTFLAGS='-C target-feature=+avx512f,+avx512bw,+avx512dq' cargo test --release --lib --target x86_64-unknown-linux-gnu --no-run
+
   arm_tests:
     name: Arm Neon Tests
     runs-on: ubuntu-latest
