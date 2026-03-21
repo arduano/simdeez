@@ -13,7 +13,7 @@ pub use self::simd::*;
 
 define_simd_type!(Sse41, i8, 16, __m128i, _41);
 impl_simd_int_overloads!(I8x16_41);
-impl_i8_simd_type!(Sse41, I8x16_41, I16x8_41);
+impl_i8_simd_type!(Sse41, I8x16_41, I16x8_41, u32);
 
 define_simd_type!(Sse41, i16, 8, __m128i, _41);
 impl_simd_int_overloads!(I16x8_41);

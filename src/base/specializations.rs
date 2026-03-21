@@ -2,6 +2,161 @@ use super::transmute::*;
 use crate::{Simd, SimdBaseOps};
 use core::ops::*;
 
+pub trait SimdBitMask: Copy {
+    const WORDS: usize;
+
+    fn word(self, index: usize) -> u32;
+
+    #[inline(always)]
+    fn to_u32_lossy(self) -> u32 {
+        self.word(0)
+    }
+
+    #[inline(always)]
+    fn to_u64_lossy(self) -> u64 {
+        let mut out = 0u64;
+        let words = if Self::WORDS < 2 { Self::WORDS } else { 2 };
+        let mut index = 0;
+        while index < words {
+            out |= (self.word(index) as u64) << (index * 32);
+            index += 1;
+        }
+        out
+    }
+
+    #[inline(always)]
+    fn to_u128_lossy(self) -> u128 {
+        let mut out = 0u128;
+        let words = if Self::WORDS < 4 { Self::WORDS } else { 4 };
+        let mut index = 0;
+        while index < words {
+            out |= (self.word(index) as u128) << (index * 32);
+            index += 1;
+        }
+        out
+    }
+
+    #[inline(always)]
+    fn write_to_u32_slice(self, dst: &mut [u32]) -> usize {
+        let words = if Self::WORDS < dst.len() {
+            Self::WORDS
+        } else {
+            dst.len()
+        };
+        let mut index = 0;
+        while index < words {
+            dst[index] = self.word(index);
+            index += 1;
+        }
+        words
+    }
+
+    #[inline(always)]
+    fn valid_bits(index: usize, bit_len: usize) -> u32 {
+        let start = index * 32;
+        if start >= bit_len {
+            return 0;
+        }
+
+        let remaining = bit_len - start;
+        if remaining >= 32 {
+            u32::MAX
+        } else {
+            (1u32 << remaining) - 1
+        }
+    }
+
+    #[inline(always)]
+    fn any_in_mask(self, bit_len: usize) -> bool {
+        for index in 0..Self::WORDS {
+            if (self.word(index) & Self::valid_bits(index, bit_len)) != 0 {
+                return true;
+            }
+        }
+        false
+    }
+
+    #[inline(always)]
+    fn all_in_mask(self, bit_len: usize) -> bool {
+        for index in 0..Self::WORDS {
+            let valid = Self::valid_bits(index, bit_len);
+            if (self.word(index) & valid) != valid {
+                return false;
+            }
+        }
+        true
+    }
+
+    #[inline(always)]
+    fn first_set_in_mask(self, bit_len: usize) -> Option<usize> {
+        for index in 0..Self::WORDS {
+            let word = self.word(index) & Self::valid_bits(index, bit_len);
+            if word != 0 {
+                return Some(index * 32 + word.trailing_zeros() as usize);
+            }
+        }
+        None
+    }
+
+    #[inline(always)]
+    fn first_unset_in_mask(self, bit_len: usize) -> Option<usize> {
+        for index in 0..Self::WORDS {
+            let valid = Self::valid_bits(index, bit_len);
+            let word = (!self.word(index)) & valid;
+            if word != 0 {
+                return Some(index * 32 + word.trailing_zeros() as usize);
+            }
+        }
+        None
+    }
+
+    #[inline(always)]
+    fn last_set_in_mask(self, bit_len: usize) -> Option<usize> {
+        for index in (0..Self::WORDS).rev() {
+            let word = self.word(index) & Self::valid_bits(index, bit_len);
+            if word != 0 {
+                return Some(index * 32 + (31 - word.leading_zeros()) as usize);
+            }
+        }
+        None
+    }
+
+    #[inline(always)]
+    fn last_unset_in_mask(self, bit_len: usize) -> Option<usize> {
+        for index in (0..Self::WORDS).rev() {
+            let valid = Self::valid_bits(index, bit_len);
+            let word = (!self.word(index)) & valid;
+            if word != 0 {
+                return Some(index * 32 + (31 - word.leading_zeros()) as usize);
+            }
+        }
+        None
+    }
+}
+
+impl SimdBitMask for u32 {
+    const WORDS: usize = 1;
+
+    #[inline(always)]
+    fn word(self, index: usize) -> u32 {
+        debug_assert_eq!(index, 0);
+        if index == 0 {
+            self
+        } else {
+            0
+        }
+    }
+}
+
+impl<const N: usize> SimdBitMask for [u32; N] {
+    const WORDS: usize = N;
+
+    #[inline(always)]
+    fn word(self, index: usize) -> u32 {
+        self[index]
+    }
+}
+
 /// Operations shared by 16 and 32 bit int types
 pub trait SimdInt:
     SimdBaseOps + Shl<i32, Output = Self> + ShlAssign<i32> + Shr<i32, Output = Self> + ShrAssign<i32>
@@ -45,6 +200,8 @@ pub trait SimdInt:
 
 /// Operations shared by 8 bit int types
 pub trait SimdInt8: SimdInt<Scalar = i8, HorizontalAddScalar = i64> + SimdTransmuteI8 {
+    type BitMask: SimdBitMask;
+
     /// Splits the vector into two halves, then extends them both to be i16. This is useful for horizontal adding.
     fn extend_to_i16(self) -> (<Self::Engine as Simd>::Vi16, <Self::Engine as Simd>::Vi16);
 
@@ -70,68 +227,52 @@ pub trait SimdInt8: SimdInt<Scalar = i8, HorizontalAddScalar = i64> + SimdTransm
         a + b
     }
 
-    /// Gets the "mask" of a vector, where each bit in the u32 represents whether the value at that location
-    /// is truthy. A value is truthy either if the highest bit is one, or if any bit is one, depending
-    /// on the instruction set being used. Please always make sure at least the highest bit is set to 1.
-    fn get_mask(self) -> u32;
+    /// Gets the lane truthiness mask for the vector.
+    ///
+    /// Use the helper methods on [`SimdBitMask`] (or the default methods below) instead of assuming
+    /// that all lanes fit into a single integer. This keeps the API usable for wider future SIMD backends.
+    fn get_mask(self) -> Self::BitMask;
 
     /// Checks if any element in the vector is truthy. A value is truthy either if the highest bit is one, or if any bit is one,
     /// depending on the instruction set being used. Please always make sure at least the highest bit is set to 1.
     #[inline(always)]
     fn is_any_truthy(self) -> bool {
-        self.get_mask() != 0
+        self.get_mask().any_in_mask(Self::WIDTH)
     }
 
     /// Checks if all elements in the vector are truthy. A value is truthy either if the highest bit is one, or if any bit is one,
     /// depending on the instruction set being used. Please always make sure at least the highest bit is set to 1.
-    fn is_truthy(self) -> bool;
+    #[inline(always)]
+    fn is_truthy(self) -> bool {
+        self.get_mask().all_in_mask(Self::WIDTH)
+    }
 
     /// Grabs the index of the last value that matches the given value. If no value matches, returns None.
     /// Index will always be smaller than Self::WIDTH.
     #[inline(always)]
     fn index_of_last_truthy(self) -> Option<usize> {
-        let leading = self.get_mask().leading_zeros();
-        if leading >= Self::WIDTH as u32 {
-            None
-        } else {
-            Some(leading as usize)
-        }
+        self.get_mask().last_set_in_mask(Self::WIDTH)
     }
 
     /// Grabs the index of the last value that matches the given value. If no value matches, returns None.
     /// Index will always be smaller than Self::WIDTH.
     #[inline(always)]
     fn index_of_last_falsy(self) -> Option<usize> {
-        let leading = self.get_mask().leading_ones();
-        if leading >= Self::WIDTH as u32 {
-            None
-        } else {
-            Some(leading as usize)
-        }
+        self.get_mask().last_unset_in_mask(Self::WIDTH)
     }
 
     /// Grabs the index of the first value that matches the given value. If no value matches, returns None.
     /// Index will always be smaller than Self::WIDTH.
     #[inline(always)]
     fn index_of_first_truthy(self) -> Option<usize> {
-        let trailing = self.get_mask().trailing_zeros();
-        if trailing >= Self::WIDTH as u32 {
-            None
-        } else {
-            Some(trailing as usize)
-        }
+        self.get_mask().first_set_in_mask(Self::WIDTH)
     }
 
     /// Grabs the index of the first value that matches the given value. If no value matches, returns None.
     /// Index will always be smaller than Self::WIDTH.
     #[inline(always)]
     fn index_of_first_falsy(self) -> Option<usize> {
-        let trailing = self.get_mask().trailing_ones();
-        if trailing >= Self::WIDTH as u32 {
-            None
-        } else {
-            Some(trailing as usize)
-        }
+        self.get_mask().first_unset_in_mask(Self::WIDTH)
     }
 
     /// Grabs the index of the first value that matches the given value. If no value matches, returns None.
@@ -346,4 +487,67 @@ pub trait SimdFloat64:
 
     /// Element-wise cast to i64 (rounded, not floored).
     fn cast_i64(self) -> <Self::Engine as Simd>::Vi64;
+}
+
+#[cfg(test)]
+mod tests {
+    use super::SimdBitMask;
+
+    #[test]
+    fn bitmask_helpers_work_for_single_word_masks() {
+        let mask = 0b0010_1000u32;
+        assert!(mask.any_in_mask(6));
+        assert!(!mask.all_in_mask(6));
+        assert_eq!(mask.first_set_in_mask(6), Some(3));
+        assert_eq!(mask.last_set_in_mask(6), Some(5));
+        assert_eq!(mask.first_unset_in_mask(6), Some(0));
+        assert_eq!(mask.last_unset_in_mask(6), Some(4));
+        assert_eq!(mask.to_u32_lossy(), 0b0010_1000);
+        assert_eq!(mask.to_u64_lossy(), 0b0010_1000);
+        assert_eq!(mask.to_u128_lossy(), 0b0010_1000);
+    }
+
+    #[test]
+    fn bitmask_can_be_written_to_word_slices() {
+        let mask = [0x89AB_CDEFu32, 0x0123_4567u32];
+        let mut out = [0u32; 4];
+        let written = mask.write_to_u32_slice(&mut out);
+        assert_eq!(written, 2);
+        assert_eq!(out, [0x89AB_CDEF, 0x0123_4567, 0, 0]);
+    }
+
+    #[test]
+    fn bitmask_lossy_integer_exports_pack_words_in_order() {
+        let mask = [
+            0x89AB_CDEFu32,
+            0x0123_4567u32,
+            0xDEAD_BEEFu32,
+            0xCAFE_BABEu32,
+            0xFFFF_FFFFu32,
+        ];
+        assert_eq!(mask.to_u32_lossy(), 0x89AB_CDEF);
+        assert_eq!(mask.to_u64_lossy(), 0x0123_4567_89AB_CDEFu64);
+        assert_eq!(
+            mask.to_u128_lossy(),
+            0xCAFE_BABE_DEAD_BEEF_0123_4567_89AB_CDEFu128
+        );
+    }
+
+    #[test]
+    fn bitmask_helpers_work_across_multiple_words() {
+        let mask = [0u32, 1u32 << 5];
+        assert!(mask.any_in_mask(64));
+        assert_eq!(mask.first_set_in_mask(64), Some(37));
+        assert_eq!(mask.last_set_in_mask(64), Some(37));
+        assert_eq!(mask.first_unset_in_mask(64), Some(0));
+        assert_eq!(mask.last_unset_in_mask(64), Some(63));
+    }
+
+    #[test]
+    fn bitmask_helpers_ignore_padding_bits_outside_mask() {
+        let mask = [u32::MAX, u32::MAX];
+        assert!(mask.all_in_mask(40));
+        assert_eq!(mask.first_unset_in_mask(40), None);
+        assert_eq!(mask.last_unset_in_mask(40), None);
+    }
 }

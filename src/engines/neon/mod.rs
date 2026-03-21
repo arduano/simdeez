@@ -11,7 +11,7 @@ pub use self::simd::*;
 
 define_simd_type!(Neon, i8, 16, int8x16_t, Neon);
 impl_simd_int_overloads!(I8x16Neon);
-impl_i8_simd_type!(Neon, I8x16Neon, I16x8Neon);
+impl_i8_simd_type!(Neon, I8x16Neon, I16x8Neon, u32);
 
 define_simd_type!(Neon, i16, 8, int16x8_t, Neon);
 impl_simd_int_overloads!(I16x8Neon);
