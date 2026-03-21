@@ -157,10 +157,12 @@ impl ScalarNumber for f32 {
     }
 
     fn is_undefined_behavior_when_casting(self) -> bool {
-        // Anything that's outside the maximum range of an i32 may cause undefined behavior
-        // e.g. resulting in i32::MIN from a large positive float
-        let range = (i32::MIN as f32)..=(i32::MAX as f32);
-        !range.contains(&self)
+        // Float-to-int casts are only defined for values in [-2^31, 2^31).
+        // `i32::MAX as f32` rounds up to 2^31, so an inclusive range check would
+        // incorrectly allow one out-of-range positive value through.
+        let lower = i32::MIN as f32;
+        let upper_exclusive = -(i32::MIN as f32);
+        !(lower..upper_exclusive).contains(&self)
     }
 
     fn unchecked_add(self, other: Self) -> Self {
@@ -213,10 +215,12 @@ impl ScalarNumber for f64 {
     }
 
     fn is_undefined_behavior_when_casting(self) -> bool {
-        // Anything that's outside the maximum range of an i32 may cause undefined behavior
-        // e.g. resulting in i64::MIN from a large positive float
-        let range = (i64::MIN as f64)..=(i64::MAX as f64);
-        !range.contains(&self)
+        // Float-to-int casts are only defined for values in [-2^63, 2^63).
+        // `i64::MAX as f64` rounds up to 2^63, so an inclusive range check would
+        // incorrectly allow one out-of-range positive value through.
+        let lower = i64::MIN as f64;
+        let upper_exclusive = -(i64::MIN as f64);
+        !(lower..upper_exclusive).contains(&self)
     }
 
     fn unchecked_add(self, other: Self) -> Self {
@@ -282,5 +286,26 @@ impl<S: ScalarNumber, T: SimdBase<Scalar = S>> SimdTupleIterable<S> for (T, T, T
             <V as SimdBaseIo>::set1(scalars.1),
             <V as SimdBaseIo>::set1(scalars.2),
         )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::ScalarNumber;
+
+    #[test]
+    fn float_to_i32_cast_filter_excludes_positive_upper_bound() {
+        let upper = -(i32::MIN as f32);
+        assert!(upper.is_undefined_behavior_when_casting());
+        assert!(!f32::from_bits(upper.to_bits() - 1).is_undefined_behavior_when_casting());
+        assert!(!(i32::MIN as f32).is_undefined_behavior_when_casting());
+    }
+
+    #[test]
+    fn float_to_i64_cast_filter_excludes_positive_upper_bound() {
+        let upper = -(i64::MIN as f64);
+        assert!(upper.is_undefined_behavior_when_casting());
+        assert!(!f64::from_bits(upper.to_bits() - 1).is_undefined_behavior_when_casting());
+        assert!(!(i64::MIN as f64).is_undefined_behavior_when_casting());
     }
 }
