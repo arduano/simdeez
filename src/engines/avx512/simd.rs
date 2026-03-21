@@ -35,26 +35,17 @@ impl Simd for Avx512 {
 
     #[inline(always)]
     unsafe fn i32gather_epi32(arr: &[i32], index: Self::Vi32) -> Self::Vi32 {
-        I32x16(_mm512_i32gather_epi32::<4>(
-            index.0,
-            arr.as_ptr() as *const i32,
-        ))
+        I32x16(_mm512_i32gather_epi32::<4>(index.0, arr.as_ptr()))
     }
 
     #[inline(always)]
     unsafe fn i64gather_epi64(arr: &[i64], index: Self::Vi64) -> Self::Vi64 {
-        I64x8(_mm512_i64gather_epi64::<8>(
-            index.0,
-            arr.as_ptr() as *const i64,
-        ))
+        I64x8(_mm512_i64gather_epi64::<8>(index.0, arr.as_ptr()))
     }
 
     #[inline(always)]
     unsafe fn i32gather_ps(arr: &[f32], index: Self::Vi32) -> Self::Vf32 {
-        F32x16(_mm512_i32gather_ps::<4>(
-            index.0,
-            arr.as_ptr() as *const f32,
-        ))
+        F32x16(_mm512_i32gather_ps::<4>(index.0, arr.as_ptr()))
     }
 
     #[inline(always)]
