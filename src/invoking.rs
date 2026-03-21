@@ -188,7 +188,10 @@ pub fn __run_simd_runtime_decide<S: __SimdRunner<A, R>, A, R>(args: A) -> R {
 
     #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
     {
-        if is_x86_feature_detected!("avx512f") && is_x86_feature_detected!("avx512bw") && is_x86_feature_detected!("avx512dq") {
+        if is_x86_feature_detected!("avx512f")
+            && is_x86_feature_detected!("avx512bw")
+            && is_x86_feature_detected!("avx512dq")
+        {
             return unsafe { S::run::<engines::avx512::Avx512>(args) };
         }
 
@@ -231,7 +234,11 @@ pub fn __run_simd_compiletime_select<S: __SimdRunner<A, R>, A, R>(args: A) -> R 
 
     #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
     {
-        #[cfg(all(target_feature = "avx512f", target_feature = "avx512bw", target_feature = "avx512dq"))]
+        #[cfg(all(
+            target_feature = "avx512f",
+            target_feature = "avx512bw",
+            target_feature = "avx512dq"
+        ))]
         return unsafe { S::run::<engines::avx512::Avx512>(args) };
 
         #[cfg(all(target_feature = "avx2", target_feature = "fma"))]

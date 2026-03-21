@@ -1,12 +1,12 @@
 #![allow(dead_code)]
 
+#[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+use crate::engines::avx512::Avx512;
 #[cfg(target_arch = "aarch64")]
 use crate::engines::neon::Neon;
 use crate::engines::scalar::Scalar;
 #[cfg(target_arch = "wasm32")]
 use crate::engines::wasm32::Wasm;
-#[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
-use crate::engines::avx512::Avx512;
 #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
 use crate::engines::{avx2::Avx2, sse2::Sse2, sse41::Sse41};
 

@@ -95,9 +95,57 @@ macro_rules! make_simd_transmute {
     };
 }
 
-make_simd_transmute!(SimdTransmuteF32, f32, __m128, __m256, __m512, float32x4_t, v128);
-make_simd_transmute!(SimdTransmuteF64, f64, __m128d, __m256d, __m512d, float64x2_t, v128);
-make_simd_transmute!(SimdTransmuteI8, i8, __m128i, __m256i, __m512i, int8x16_t, v128);
-make_simd_transmute!(SimdTransmuteI16, i16, __m128i, __m256i, __m512i, int16x8_t, v128);
-make_simd_transmute!(SimdTransmuteI32, i32, __m128i, __m256i, __m512i, int32x4_t, v128);
-make_simd_transmute!(SimdTransmuteI64, i64, __m128i, __m256i, __m512i, int64x2_t, v128);
+make_simd_transmute!(
+    SimdTransmuteF32,
+    f32,
+    __m128,
+    __m256,
+    __m512,
+    float32x4_t,
+    v128
+);
+make_simd_transmute!(
+    SimdTransmuteF64,
+    f64,
+    __m128d,
+    __m256d,
+    __m512d,
+    float64x2_t,
+    v128
+);
+make_simd_transmute!(
+    SimdTransmuteI8,
+    i8,
+    __m128i,
+    __m256i,
+    __m512i,
+    int8x16_t,
+    v128
+);
+make_simd_transmute!(
+    SimdTransmuteI16,
+    i16,
+    __m128i,
+    __m256i,
+    __m512i,
+    int16x8_t,
+    v128
+);
+make_simd_transmute!(
+    SimdTransmuteI32,
+    i32,
+    __m128i,
+    __m256i,
+    __m512i,
+    int32x4_t,
+    v128
+);
+make_simd_transmute!(
+    SimdTransmuteI64,
+    i64,
+    __m128i,
+    __m256i,
+    __m512i,
+    int64x2_t,
+    v128
+);

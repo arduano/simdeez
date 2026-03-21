@@ -4,13 +4,13 @@ use crate::elementwise_eq_tester;
 
 use super::*;
 
+#[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+use crate::engines::avx512::Avx512;
 #[cfg(target_arch = "aarch64")]
 use crate::engines::neon::Neon;
 use crate::engines::scalar::*;
 #[cfg(target_arch = "wasm32")]
 use crate::engines::wasm32::Wasm;
-#[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
-use crate::engines::avx512::Avx512;
 #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
 use crate::engines::{avx2::*, sse2::*, sse41::*};
 
