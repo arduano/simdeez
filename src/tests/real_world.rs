@@ -154,7 +154,7 @@ simd_unsafe_generate_all!(
 
 fn assert_find_first_eq_matches_all_backends(data: &[i8], needle: i8) {
     let expected = reference_find_first_eq_i8(data, needle);
-    assert_eq!(find_first_eq_i8_scalar(data, needle), expected);
+    assert_eq!(find_first_eq_i8(data, needle), expected);
 
     #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
     {
@@ -173,7 +173,7 @@ fn assert_find_first_eq_matches_all_backends(data: &[i8], needle: i8) {
 
 fn assert_byte_checksum_matches_all_backends(data: &[i8]) {
     let expected = reference_byte_checksum_i8(data);
-    assert_eq!(byte_checksum_i8_scalar(data), expected);
+    assert_eq!(byte_checksum_i8(data), expected);
 
     #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
     {
@@ -194,7 +194,7 @@ fn assert_quantize_matches_all_backends(input: &[f32]) {
     let expected = reference_quantize_f32(input);
 
     let mut scalar = vec![0; input.len()];
-    quantize_f32_to_i32_scalar(input, &mut scalar);
+    quantize_f32_to_i32(input, &mut scalar);
     assert_eq!(scalar, expected);
 
     #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
@@ -222,7 +222,7 @@ fn assert_adaptive_select_matches_all_backends(lhs: &[i32], rhs: &[i32]) {
     let expected = reference_adaptive_select_i32(lhs, rhs);
 
     let mut scalar = vec![0; lhs.len()];
-    adaptive_select_i32_scalar(lhs, rhs, &mut scalar);
+    adaptive_select_i32(lhs, rhs, &mut scalar);
     assert_eq!(scalar, expected);
 
     #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
