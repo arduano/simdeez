@@ -1,3 +1,5 @@
+#![allow(unused_parens, dead_code)]
+
 use crate::prelude::*;
 
 fn reference_find_first_eq_i8(data: &[i8], needle: i8) -> Option<usize> {
@@ -36,6 +38,7 @@ fn reference_adaptive_select_i32(lhs: &[i32], rhs: &[i32]) -> Vec<i32> {
 
 simd_unsafe_generate_all!(
     fn find_first_eq_i8(data: &[i8], needle: i8) -> Option<usize> {
+        let mut data = data;
         let mut offset = 0usize;
         let needle = S::Vi8::set1(needle);
 
@@ -61,6 +64,7 @@ simd_unsafe_generate_all!(
 
 simd_unsafe_generate_all!(
     fn byte_checksum_i8(data: &[i8]) -> i64 {
+        let mut data = data;
         let mut sum = 0i64;
 
         while data.len() >= S::Vi8::WIDTH {
