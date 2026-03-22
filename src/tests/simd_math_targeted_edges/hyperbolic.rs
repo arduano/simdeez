@@ -300,3 +300,28 @@ simd_math_targeted_all_backends!(
     f64_hyperbolic_special_values_and_mixed_lanes,
     run_f64_hyperbolic_special_values_and_mixed_lanes
 );
+
+fn run_f64_hyperbolic_signed_zero_semantics<S: Simd>() {
+    let mut lanes = vec![0.0f64; S::Vf64::WIDTH];
+    lanes[0] = -0.0;
+
+    let input = S::Vf64::load_from_slice(&lanes);
+    let sinh = input.sinh_u35();
+    let tanh = input.tanh_u35();
+
+    assert_eq!(sinh[0].to_bits(), (-0.0f64).sinh().to_bits());
+    assert_eq!(tanh[0].to_bits(), (-0.0f64).tanh().to_bits());
+
+    if S::Vf64::WIDTH > 1 {
+        assert_eq!(sinh[1].to_bits(), 0.0f64.sinh().to_bits());
+        assert_eq!(tanh[1].to_bits(), 0.0f64.tanh().to_bits());
+    }
+
+    let cosh = input.cosh_u35();
+    assert_eq!(cosh[0].to_bits(), (-0.0f64).cosh().to_bits());
+}
+
+simd_math_targeted_all_backends!(
+    f64_hyperbolic_signed_zero_semantics,
+    run_f64_hyperbolic_signed_zero_semantics
+);

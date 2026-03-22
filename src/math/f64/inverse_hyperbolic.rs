@@ -1,4 +1,4 @@
-use crate::math::{f64, scalar};
+use crate::math::{f64, map, scalar};
 use crate::{Simd, SimdBaseIo, SimdBaseOps, SimdConsts, SimdFloat64};
 
 type SimdI64<V> = <<V as SimdConsts>::Engine as Simd>::Vi64;
@@ -79,15 +79,7 @@ where
     V: SimdFloat64,
     V::Engine: Simd<Vf64 = V>,
 {
-    let finite_mask = input.cmp_eq(input).bitcast_i64();
-    let in_domain_mask = input.cmp_gte(V::set1(1.0)).bitcast_i64();
-    let fast_mask = finite_mask & in_domain_mask;
-    let exceptional_mask = fast_mask.cmp_eq(SimdI64::<V>::zeroes());
-
-    let root_term = ((input - V::set1(1.0)).sqrt()) * ((input + V::set1(1.0)).sqrt());
-    let fast = f64::ln_u35(input + root_term);
-
-    patch_exceptional_lanes(input, fast, exceptional_mask, scalar::acosh_u35_f64)
+    map::unary_f64(input, scalar::acosh_u35_f64)
 }
 
 #[inline(always)]
@@ -96,19 +88,5 @@ where
     V: SimdFloat64,
     V::Engine: Simd<Vf64 = V>,
 {
-    let finite_mask = input.cmp_eq(input).bitcast_i64();
-    let abs_x = input.abs();
-    let strict_domain_mask = abs_x.cmp_lt(V::set1(1.0)).bitcast_i64();
-    let non_zero_mask = input.cmp_neq(V::zeroes()).bitcast_i64();
-    let stable_range_mask = abs_x.cmp_lte(V::set1(0.99)).bitcast_i64();
-    let away_from_zero_mask = abs_x.cmp_gte(V::set1(0.9)).bitcast_i64();
-    let fast_mask =
-        finite_mask & strict_domain_mask & non_zero_mask & stable_range_mask & away_from_zero_mask;
-    let exceptional_mask = fast_mask.cmp_eq(SimdI64::<V>::zeroes());
-
-    let one = V::set1(1.0);
-    let ratio = (one + input) / (one - input);
-    let fast = f64::ln_u35(ratio) * V::set1(0.5);
-
-    patch_exceptional_lanes(input, fast, exceptional_mask, scalar::atanh_u35_f64)
+    map::unary_f64(input, scalar::atanh_u35_f64)
 }
