@@ -398,6 +398,189 @@ simd_math_targeted_all_backends!(
     run_f32_trig_symmetry_identities
 );
 
+fn run_f32_inverse_trig_near_one<S: Simd>() {
+    let inputs = [
+        f32::from_bits(0x3F7F_FFFE),
+        f32::from_bits(0x3F7F_FFFF),
+        1.0,
+        f32::from_bits(0x3F80_0001),
+        -f32::from_bits(0x3F7F_FFFE),
+        -f32::from_bits(0x3F7F_FFFF),
+        -1.0,
+        -f32::from_bits(0x3F80_0001),
+    ];
+    for chunk in inputs.chunks(S::Vf32::WIDTH) {
+        let v = S::Vf32::load_from_slice(chunk);
+        let asin = v.asin_u35();
+        let acos = v.acos_u35();
+        for (lane, &x) in chunk.iter().enumerate() {
+            assert_f32_contract(
+                "asin_u35",
+                x,
+                asin[lane],
+                x.asin(),
+                contracts::ASIN_U35_F32_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("{e}"));
+            assert_f32_contract(
+                "acos_u35",
+                x,
+                acos[lane],
+                x.acos(),
+                contracts::ACOS_U35_F32_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("{e}"));
+        }
+    }
+}
+
+fn run_f32_atan2_signed_zero_and_quadrants<S: Simd>() {
+    let ys = [0.0f32, -0.0, 1.0, -1.0, 2.0, -2.0, 1.0e-30, -1.0e-30];
+    let xs = [0.0f32, -0.0, 1.0, -1.0, 2.0, -2.0, 1.0e-30, -1.0e-30];
+    let mut y_inputs = Vec::new();
+    let mut x_inputs = Vec::new();
+    for &y in &ys {
+        for &x in &xs {
+            y_inputs.push(y);
+            x_inputs.push(x);
+        }
+    }
+
+    for (ys_chunk, xs_chunk) in y_inputs
+        .chunks(S::Vf32::WIDTH)
+        .zip(x_inputs.chunks(S::Vf32::WIDTH))
+    {
+        let yv = S::Vf32::load_from_slice(ys_chunk);
+        let xv = S::Vf32::load_from_slice(xs_chunk);
+        let out = yv.atan2_u35(xv);
+        for lane in 0..ys_chunk.len() {
+            let y = ys_chunk[lane];
+            let x = xs_chunk[lane];
+            assert_f32_contract(
+                "atan2_u35",
+                y,
+                out[lane],
+                y.atan2(x),
+                contracts::ATAN2_U35_F32_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("atan2_u35({y:?}, {x:?}): {e}"));
+        }
+    }
+}
+
+fn run_f32_hyperbolic_edges<S: Simd>() {
+    let inputs = [
+        -100.0f32, -20.0, -10.0, -1.0, -0.0, 0.0, 1.0, 10.0, 20.0, 100.0,
+    ];
+    for chunk in inputs.chunks(S::Vf32::WIDTH) {
+        let v = S::Vf32::load_from_slice(chunk);
+        let tanh = v.tanh_u35();
+        let acosh = v.acosh_u35();
+        let atanh = v.atanh_u35();
+        for (lane, &x) in chunk.iter().enumerate() {
+            assert_f32_contract(
+                "tanh_u35",
+                x,
+                tanh[lane],
+                x.tanh(),
+                contracts::TANH_U35_F32_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("{e}"));
+            assert_f32_contract(
+                "acosh_u35",
+                x,
+                acosh[lane],
+                x.acosh(),
+                contracts::ACOSH_U35_F32_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("{e}"));
+            assert_f32_contract(
+                "atanh_u35",
+                x,
+                atanh[lane],
+                x.atanh(),
+                contracts::ATANH_U35_F32_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("{e}"));
+        }
+    }
+
+    let near_one = [
+        0.999_999_9f32,
+        -0.999_999_9,
+        1.0 - f32::EPSILON,
+        -1.0 + f32::EPSILON,
+        1.0,
+        -1.0,
+        1.0 + f32::EPSILON,
+    ];
+    for chunk in near_one.chunks(S::Vf32::WIDTH) {
+        let v = S::Vf32::load_from_slice(chunk);
+        let atanh = v.atanh_u35();
+        let acosh = v.acosh_u35();
+        for (lane, &x) in chunk.iter().enumerate() {
+            assert_f32_contract(
+                "atanh_u35",
+                x,
+                atanh[lane],
+                x.atanh(),
+                contracts::ATANH_U35_F32_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("{e}"));
+            assert_f32_contract(
+                "acosh_u35",
+                x,
+                acosh[lane],
+                x.acosh(),
+                contracts::ACOSH_U35_F32_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("{e}"));
+        }
+    }
+}
+
+fn run_f32_hypot_and_fmod_edges<S: Simd>() {
+    let xs = [
+        1.0e38f32,
+        1.0e-38,
+        3.0,
+        -3.0,
+        0.0,
+        -0.0,
+        f32::INFINITY,
+        f32::NAN,
+    ];
+    let ys = [1.0e38f32, 1.0e-38, 2.0, -2.0, -0.0, 0.0, 2.0, 1.5];
+    for (x_chunk, y_chunk) in xs.chunks(S::Vf32::WIDTH).zip(ys.chunks(S::Vf32::WIDTH)) {
+        let xv = S::Vf32::load_from_slice(x_chunk);
+        let yv = S::Vf32::load_from_slice(y_chunk);
+        let h = xv.hypot_u35(yv);
+        let r = xv.fmod(yv);
+        for lane in 0..x_chunk.len() {
+            let x = x_chunk[lane];
+            let y = y_chunk[lane];
+            assert_f32_contract(
+                "hypot_u35",
+                x,
+                h[lane],
+                x.hypot(y),
+                contracts::HYPOT_U35_F32_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("{e}"));
+            assert_f32_contract("fmod", x, r[lane], x % y, 0)
+                .unwrap_or_else(|e| panic!("fmod({x:?},{y:?}) {e}"));
+        }
+    }
+}
+
+simd_math_targeted_all_backends!(f32_inverse_trig_near_one, run_f32_inverse_trig_near_one);
+simd_math_targeted_all_backends!(
+    f32_atan2_signed_zero_and_quadrants,
+    run_f32_atan2_signed_zero_and_quadrants
+);
+simd_math_targeted_all_backends!(f32_hyperbolic_edges, run_f32_hyperbolic_edges);
+simd_math_targeted_all_backends!(f32_hypot_and_fmod_edges, run_f32_hypot_and_fmod_edges);
+
 #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
 #[test]
 fn f32_log2_u35_mixed_exception_lanes_avx2() {

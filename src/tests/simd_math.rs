@@ -228,6 +228,62 @@ fn check_unary_f64<S: Simd>(
     }
 }
 
+fn check_binary_f32<S: Simd>(
+    fn_name: &str,
+    max_ulp: u32,
+    simd_fn: impl Fn(S::Vf32, S::Vf32) -> S::Vf32,
+    scalar_ref: impl Fn(f32, f32) -> f32,
+) {
+    let lhs_values = f32_input_space();
+    let rhs_values = f32_input_space();
+    for (lhs_chunk, rhs_chunk) in lhs_values
+        .chunks(S::Vf32::WIDTH)
+        .zip(rhs_values.chunks(S::Vf32::WIDTH))
+    {
+        let lhs = S::Vf32::load_from_slice(lhs_chunk);
+        let rhs = S::Vf32::load_from_slice(rhs_chunk);
+        let output = simd_fn(lhs, rhs);
+
+        for lane in 0..lhs_chunk.len() {
+            let x = lhs_chunk[lane];
+            let y = rhs_chunk[lane];
+            let actual = output[lane];
+            let expected = scalar_ref(x, y);
+            if let Err(err) = assert_f32_contract(fn_name, x, actual, expected, max_ulp) {
+                panic!("{fn_name}({x:?}, {y:?}) lane {lane}: {err}");
+            }
+        }
+    }
+}
+
+fn check_binary_f64<S: Simd>(
+    fn_name: &str,
+    max_ulp: u64,
+    simd_fn: impl Fn(S::Vf64, S::Vf64) -> S::Vf64,
+    scalar_ref: impl Fn(f64, f64) -> f64,
+) {
+    let lhs_values = f64_input_space();
+    let rhs_values = f64_input_space();
+    for (lhs_chunk, rhs_chunk) in lhs_values
+        .chunks(S::Vf64::WIDTH)
+        .zip(rhs_values.chunks(S::Vf64::WIDTH))
+    {
+        let lhs = S::Vf64::load_from_slice(lhs_chunk);
+        let rhs = S::Vf64::load_from_slice(rhs_chunk);
+        let output = simd_fn(lhs, rhs);
+
+        for lane in 0..lhs_chunk.len() {
+            let x = lhs_chunk[lane];
+            let y = rhs_chunk[lane];
+            let actual = output[lane];
+            let expected = scalar_ref(x, y);
+            if let Err(err) = assert_f64_contract(fn_name, x, actual, expected, max_ulp) {
+                panic!("{fn_name}({x:?}, {y:?}) lane {lane}: {err}");
+            }
+        }
+    }
+}
+
 fn run_f32_log2_u35_contract<S: Simd>() {
     check_unary_f32::<S>(
         "log2_u35",
@@ -354,6 +410,230 @@ fn run_f64_tan_u35_contract<S: Simd>() {
     );
 }
 
+fn run_f32_asin_u35_contract<S: Simd>() {
+    check_unary_f32::<S>(
+        "asin_u35",
+        contracts::ASIN_U35_F32_MAX_ULP,
+        <S::Vf32 as SimdMathF32>::asin_u35,
+        f32::asin,
+    );
+}
+
+fn run_f32_acos_u35_contract<S: Simd>() {
+    check_unary_f32::<S>(
+        "acos_u35",
+        contracts::ACOS_U35_F32_MAX_ULP,
+        <S::Vf32 as SimdMathF32>::acos_u35,
+        f32::acos,
+    );
+}
+
+fn run_f32_atan_u35_contract<S: Simd>() {
+    check_unary_f32::<S>(
+        "atan_u35",
+        contracts::ATAN_U35_F32_MAX_ULP,
+        <S::Vf32 as SimdMathF32>::atan_u35,
+        f32::atan,
+    );
+}
+
+fn run_f32_sinh_u35_contract<S: Simd>() {
+    check_unary_f32::<S>(
+        "sinh_u35",
+        contracts::SINH_U35_F32_MAX_ULP,
+        <S::Vf32 as SimdMathF32>::sinh_u35,
+        f32::sinh,
+    );
+}
+
+fn run_f32_cosh_u35_contract<S: Simd>() {
+    check_unary_f32::<S>(
+        "cosh_u35",
+        contracts::COSH_U35_F32_MAX_ULP,
+        <S::Vf32 as SimdMathF32>::cosh_u35,
+        f32::cosh,
+    );
+}
+
+fn run_f32_tanh_u35_contract<S: Simd>() {
+    check_unary_f32::<S>(
+        "tanh_u35",
+        contracts::TANH_U35_F32_MAX_ULP,
+        <S::Vf32 as SimdMathF32>::tanh_u35,
+        f32::tanh,
+    );
+}
+
+fn run_f32_asinh_u35_contract<S: Simd>() {
+    check_unary_f32::<S>(
+        "asinh_u35",
+        contracts::ASINH_U35_F32_MAX_ULP,
+        <S::Vf32 as SimdMathF32>::asinh_u35,
+        f32::asinh,
+    );
+}
+
+fn run_f32_acosh_u35_contract<S: Simd>() {
+    check_unary_f32::<S>(
+        "acosh_u35",
+        contracts::ACOSH_U35_F32_MAX_ULP,
+        <S::Vf32 as SimdMathF32>::acosh_u35,
+        f32::acosh,
+    );
+}
+
+fn run_f32_atanh_u35_contract<S: Simd>() {
+    check_unary_f32::<S>(
+        "atanh_u35",
+        contracts::ATANH_U35_F32_MAX_ULP,
+        <S::Vf32 as SimdMathF32>::atanh_u35,
+        f32::atanh,
+    );
+}
+
+fn run_f32_log10_u35_contract<S: Simd>() {
+    check_unary_f32::<S>(
+        "log10_u35",
+        contracts::LOG10_U35_F32_MAX_ULP,
+        <S::Vf32 as SimdMathF32>::log10_u35,
+        f32::log10,
+    );
+}
+
+fn run_f32_atan2_u35_contract<S: Simd>() {
+    check_binary_f32::<S>(
+        "atan2_u35",
+        contracts::ATAN2_U35_F32_MAX_ULP,
+        <S::Vf32 as SimdMathF32>::atan2_u35,
+        f32::atan2,
+    );
+}
+
+fn run_f32_hypot_u35_contract<S: Simd>() {
+    check_binary_f32::<S>(
+        "hypot_u35",
+        contracts::HYPOT_U35_F32_MAX_ULP,
+        <S::Vf32 as SimdMathF32>::hypot_u35,
+        f32::hypot,
+    );
+}
+
+fn run_f32_fmod_contract<S: Simd>() {
+    check_binary_f32::<S>("fmod", 0, <S::Vf32 as SimdMathF32>::fmod, |x, y| x % y);
+}
+
+fn run_f64_asin_u35_contract<S: Simd>() {
+    check_unary_f64::<S>(
+        "asin_u35",
+        contracts::ASIN_U35_F64_MAX_ULP,
+        <S::Vf64 as SimdMathF64>::asin_u35,
+        f64::asin,
+    );
+}
+
+fn run_f64_acos_u35_contract<S: Simd>() {
+    check_unary_f64::<S>(
+        "acos_u35",
+        contracts::ACOS_U35_F64_MAX_ULP,
+        <S::Vf64 as SimdMathF64>::acos_u35,
+        f64::acos,
+    );
+}
+
+fn run_f64_atan_u35_contract<S: Simd>() {
+    check_unary_f64::<S>(
+        "atan_u35",
+        contracts::ATAN_U35_F64_MAX_ULP,
+        <S::Vf64 as SimdMathF64>::atan_u35,
+        f64::atan,
+    );
+}
+
+fn run_f64_sinh_u35_contract<S: Simd>() {
+    check_unary_f64::<S>(
+        "sinh_u35",
+        contracts::SINH_U35_F64_MAX_ULP,
+        <S::Vf64 as SimdMathF64>::sinh_u35,
+        f64::sinh,
+    );
+}
+
+fn run_f64_cosh_u35_contract<S: Simd>() {
+    check_unary_f64::<S>(
+        "cosh_u35",
+        contracts::COSH_U35_F64_MAX_ULP,
+        <S::Vf64 as SimdMathF64>::cosh_u35,
+        f64::cosh,
+    );
+}
+
+fn run_f64_tanh_u35_contract<S: Simd>() {
+    check_unary_f64::<S>(
+        "tanh_u35",
+        contracts::TANH_U35_F64_MAX_ULP,
+        <S::Vf64 as SimdMathF64>::tanh_u35,
+        f64::tanh,
+    );
+}
+
+fn run_f64_asinh_u35_contract<S: Simd>() {
+    check_unary_f64::<S>(
+        "asinh_u35",
+        contracts::ASINH_U35_F64_MAX_ULP,
+        <S::Vf64 as SimdMathF64>::asinh_u35,
+        f64::asinh,
+    );
+}
+
+fn run_f64_acosh_u35_contract<S: Simd>() {
+    check_unary_f64::<S>(
+        "acosh_u35",
+        contracts::ACOSH_U35_F64_MAX_ULP,
+        <S::Vf64 as SimdMathF64>::acosh_u35,
+        f64::acosh,
+    );
+}
+
+fn run_f64_atanh_u35_contract<S: Simd>() {
+    check_unary_f64::<S>(
+        "atanh_u35",
+        contracts::ATANH_U35_F64_MAX_ULP,
+        <S::Vf64 as SimdMathF64>::atanh_u35,
+        f64::atanh,
+    );
+}
+
+fn run_f64_log10_u35_contract<S: Simd>() {
+    check_unary_f64::<S>(
+        "log10_u35",
+        contracts::LOG10_U35_F64_MAX_ULP,
+        <S::Vf64 as SimdMathF64>::log10_u35,
+        f64::log10,
+    );
+}
+
+fn run_f64_atan2_u35_contract<S: Simd>() {
+    check_binary_f64::<S>(
+        "atan2_u35",
+        contracts::ATAN2_U35_F64_MAX_ULP,
+        <S::Vf64 as SimdMathF64>::atan2_u35,
+        f64::atan2,
+    );
+}
+
+fn run_f64_hypot_u35_contract<S: Simd>() {
+    check_binary_f64::<S>(
+        "hypot_u35",
+        contracts::HYPOT_U35_F64_MAX_ULP,
+        <S::Vf64 as SimdMathF64>::hypot_u35,
+        f64::hypot,
+    );
+}
+
+fn run_f64_fmod_contract<S: Simd>() {
+    check_binary_f64::<S>("fmod", 0, <S::Vf64 as SimdMathF64>::fmod, |x, y| x % y);
+}
+
 macro_rules! simd_math_backend_test {
     ($name:ident, $simd:ident, $runner:ident) => {
         crate::with_feature_flag!(
@@ -394,3 +674,31 @@ simd_math_all_backends!(f64_exp_u35_contract, run_f64_exp_u35_contract);
 simd_math_all_backends!(f64_sin_u35_contract, run_f64_sin_u35_contract);
 simd_math_all_backends!(f64_cos_u35_contract, run_f64_cos_u35_contract);
 simd_math_all_backends!(f64_tan_u35_contract, run_f64_tan_u35_contract);
+
+simd_math_all_backends!(f32_asin_u35_contract, run_f32_asin_u35_contract);
+simd_math_all_backends!(f32_acos_u35_contract, run_f32_acos_u35_contract);
+simd_math_all_backends!(f32_atan_u35_contract, run_f32_atan_u35_contract);
+simd_math_all_backends!(f32_sinh_u35_contract, run_f32_sinh_u35_contract);
+simd_math_all_backends!(f32_cosh_u35_contract, run_f32_cosh_u35_contract);
+simd_math_all_backends!(f32_tanh_u35_contract, run_f32_tanh_u35_contract);
+simd_math_all_backends!(f32_asinh_u35_contract, run_f32_asinh_u35_contract);
+simd_math_all_backends!(f32_acosh_u35_contract, run_f32_acosh_u35_contract);
+simd_math_all_backends!(f32_atanh_u35_contract, run_f32_atanh_u35_contract);
+simd_math_all_backends!(f32_log10_u35_contract, run_f32_log10_u35_contract);
+simd_math_all_backends!(f32_atan2_u35_contract, run_f32_atan2_u35_contract);
+simd_math_all_backends!(f32_hypot_u35_contract, run_f32_hypot_u35_contract);
+simd_math_all_backends!(f32_fmod_contract, run_f32_fmod_contract);
+
+simd_math_all_backends!(f64_asin_u35_contract, run_f64_asin_u35_contract);
+simd_math_all_backends!(f64_acos_u35_contract, run_f64_acos_u35_contract);
+simd_math_all_backends!(f64_atan_u35_contract, run_f64_atan_u35_contract);
+simd_math_all_backends!(f64_sinh_u35_contract, run_f64_sinh_u35_contract);
+simd_math_all_backends!(f64_cosh_u35_contract, run_f64_cosh_u35_contract);
+simd_math_all_backends!(f64_tanh_u35_contract, run_f64_tanh_u35_contract);
+simd_math_all_backends!(f64_asinh_u35_contract, run_f64_asinh_u35_contract);
+simd_math_all_backends!(f64_acosh_u35_contract, run_f64_acosh_u35_contract);
+simd_math_all_backends!(f64_atanh_u35_contract, run_f64_atanh_u35_contract);
+simd_math_all_backends!(f64_log10_u35_contract, run_f64_log10_u35_contract);
+simd_math_all_backends!(f64_atan2_u35_contract, run_f64_atan2_u35_contract);
+simd_math_all_backends!(f64_hypot_u35_contract, run_f64_hypot_u35_contract);
+simd_math_all_backends!(f64_fmod_contract, run_f64_fmod_contract);

@@ -25,13 +25,17 @@
 //! * Extract or set a single lane with the index operator: `let v1 = v[1];`
 //!
 //! # SIMD math revival status
-//! SIMDeez now provides a native, pure-Rust first math family via extension traits:
-//! `log2_u35`, `exp2_u35`, `ln_u35`, `exp_u35`, `sin_u35`, `cos_u35`, and `tan_u35`.
+//! SIMDeez now provides a native, pure-Rust restored historical SLEEF-backed surface via extension traits:
+//! `log2_u35`, `exp2_u35`, `ln_u35`, `exp_u35`, `sin_u35`, `cos_u35`, `tan_u35`,
+//! `asin_u35`, `acos_u35`, `atan_u35`, `atan2_u35`,
+//! `sinh_u35`, `cosh_u35`, `tanh_u35`, `asinh_u35`, `acosh_u35`, `atanh_u35`,
+//! `log10_u35`, `hypot_u35`, and `fmod`.
 //!
 //! These methods are available through `simdeez::math` and re-exported by `simdeez::prelude`.
 //! The implementation follows a layered blueprint: portable kernels first,
 //! backend-specific overrides where justified (currently a hand-tuned AVX2 `log2_u35`),
-//! and scalar fallback patching for exceptional lanes.
+//! and scalar fallback patching for exceptional lanes. Several newly-restored families
+//! are intentionally correctness-first scalar-reference mappings in this baseline pass.
 //! The historical `sleef` feature remains deprecated and is not the primary implementation path.
 //!
 //! # Compared to stdsimd

@@ -46,3 +46,7 @@ harness = false
 [[bench]]
 name = "simd_math"
 harness = false
+
+[[bench]]
+name = "simd_math_remaining_baseline"
+harness = false
