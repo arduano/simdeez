@@ -24,10 +24,15 @@
 //! * Operator overloading: `let sum = va + vb` or `s *= s`
 //! * Extract or set a single lane with the index operator: `let v1 = v[1];`
 //!
-//! # Trig Functions via Sleef-sys
-//! A number of trigonometric and other common math functions are provided
-//! in vectorized form via the Sleef-sys crate. This is an optional feature `sleef` that you can enable.
-//! Doing so currently requires nightly, as well as having CMake and Clang installed.
+//! # SIMD math revival status
+//! SIMDeez now provides a native, pure-Rust first math family via extension traits:
+//! `log2_u35`, `exp2_u35`, `ln_u35`, and `exp_u35`.
+//!
+//! These methods are available through `simdeez::math` and re-exported by `simdeez::prelude`.
+//! The implementation follows a layered blueprint: portable kernels first,
+//! backend-specific overrides where justified (currently a hand-tuned AVX2 `log2_u35`),
+//! and scalar fallback patching for exceptional lanes.
+//! The historical `sleef` feature remains deprecated and is not the primary implementation path.
 //!
 //! # Compared to stdsimd
 //!
@@ -179,6 +184,9 @@ mod base;
 pub use base::*;
 
 mod libm_ext;
+
+pub mod math;
+pub use math::{SimdMathF32, SimdMathF64};
 
 mod engines;
 

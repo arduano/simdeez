@@ -24,15 +24,54 @@ Refer to the excellent [Intel Intrinsics Guide](https://software.intel.com/sites
 * Extract or set a single lane with the index operator: `let v1 = v[1];`
 * Falls all the way back to scalar code for platforms with no SIMD or unsupported SIMD
 
-# Trig Functions via Sleef-sys
+# SIMD math revival status
 
-~~A number of trigonometric and other common math functions are provided~~
-~~in vectorized form via the Sleef-sys crate. This is an optional feature `sleef` that you can enable.~~
-~~Doing so currently requires nightly, as well as having CMake and Clang installed.~~
+SIMDeez now includes a native, pure-Rust math surface for the first restored SLEEF-style family:
 
-⚠️ In simdeez V2.0, sleef is temporarily deprecated due to the maintenance complexity involved around it. We are open to contributions, and are undecided on whether we:
-- Resume sleef support via the existing sleef-sys crate
-- Re-implement sleef via simdeez primitives
+- `log2_u35`
+- `exp2_u35`
+- `ln_u35`
+- `exp_u35`
+
+These are exposed via extension traits in `simdeez::math` and re-exported in `simdeez::prelude`:
+
+```rust
+use simdeez::prelude::*;
+
+fn apply_math<S: Simd>(x: S::Vf32) -> S::Vf32 {
+    let y = x.log2_u35();
+    y.exp2_u35() + x.ln_u35() + x.exp_u35()
+}
+```
+
+The old `sleef-sys` feature remains historical/deprecated and is **not** the primary implementation path for this revived surface.
+
+### Kernel layering blueprint (v0.1)
+
+The restored `f32` path now demonstrates the intended extension architecture:
+
+1. **Portable SIMD kernels** (`src/math/f32/portable.rs`) implement reduction + polynomial logic with backend-agnostic simdeez primitives.
+2. **Backend override dispatch** (`src/math/f32/mod.rs`) selects architecture-tuned kernels without changing the public `SimdMathF32` API.
+3. **Hand-optimized backend implementation** (`src/math/f32/x86_avx2.rs`) provides a real AVX2/FMA override for `log2_u35`.
+4. **Scalar fallback patching** remains centralized in the portable layer for exceptional lanes, preserving special-value semantics.
+
+To add the next SLEEF-style function, follow the same pattern: start portable, wire dispatch, then add optional backend overrides only where profiling justifies complexity.
+
+### Benchmarking restored math
+
+An in-repo Criterion benchmark target is available for this revived surface:
+
+```bash
+cargo bench --bench simd_math
+```
+
+This benchmark reports per-function throughput for:
+
+- native scalar loop baseline (`f32::{log2, exp2, ln, exp}`)
+- simdeez runtime-selected path
+- forced backend variants (`scalar`, `sse2`, `sse41`, `avx2`, and `avx512` when available on host)
+
+Current expectation: `log2_u35` and `exp2_u35` should show clear speedups on SIMD-capable backends (notably AVX2 on x86 hosts), while `ln_u35`/`exp_u35` remain scalar-reference quality-first baselines. Use these benches to validate both performance and dispatch behavior as new kernels/overrides are added.
 
 # Compared to packed_simd
 

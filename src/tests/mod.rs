@@ -11,4 +11,6 @@ mod i8_truthy_regressions;
 mod integer_edge_contracts;
 mod real_world;
 mod run;
+mod simd_math;
+mod simd_math_targeted_edges;
 mod wasm_unaligned_regressions;

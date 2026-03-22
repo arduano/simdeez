@@ -10,5 +10,6 @@ pub use crate::base::{
     SimdFloat, SimdFloat32, SimdFloat64, SimdInt, SimdInt16, SimdInt32, SimdInt64, SimdInt8,
     SimdIter,
 };
+pub use crate::math::{SimdMathF32, SimdMathF64};
 
 pub use paste::item as simdeez_paste_item;
