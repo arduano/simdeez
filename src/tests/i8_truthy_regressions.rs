@@ -1,3 +1,4 @@
+#[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
 use crate::base::SimdBaseIo;
 use crate::engines::scalar::I8x1;
 #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
