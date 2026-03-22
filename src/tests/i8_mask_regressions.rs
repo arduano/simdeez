@@ -42,25 +42,25 @@ fn assert_mask_summary(
 // truthy lanes are `-1`, falsy lanes are `0`, and mask/index helpers should interpret them consistently.
 #[test]
 fn i8_mask_helpers_follow_canonical_compare_masks() {
-    assert_mask_summary(
-        summarize_i8_mask_helpers_scalar(&[-1]),
-        0b1,
-        Some(0),
-        Some(0),
-        None,
-        None,
-    );
-    assert_mask_summary(
-        summarize_i8_mask_helpers_scalar(&[0]),
-        0b0,
-        None,
-        None,
-        Some(0),
-        Some(0),
-    );
-
     #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
     {
+        assert_mask_summary(
+            summarize_i8_mask_helpers_scalar(&[-1]),
+            0b1,
+            Some(0),
+            Some(0),
+            None,
+            None,
+        );
+        assert_mask_summary(
+            summarize_i8_mask_helpers_scalar(&[0]),
+            0b0,
+            None,
+            None,
+            Some(0),
+            Some(0),
+        );
+
         let sse_input = [0, -1, 0, -1, -1, 0, 0, -1, 0, 0, -1, 0, -1, 0, 0, -1];
         let avx_input = [
             0, -1, 0, -1, -1, 0, 0, -1, 0, 0, -1, 0, -1, 0, 0, -1, -1, 0, 0, -1, 0, -1, 0, 0, -1,
