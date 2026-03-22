@@ -1,20 +1,29 @@
-use crate::math::{map, scalar};
-use crate::{SimdFloat32, SimdFloat64};
+use crate::math::{f32, map, scalar};
+use crate::{Simd, SimdFloat32, SimdFloat64};
 
 pub trait SimdMathF32Hyperbolic: SimdFloat32 {
     #[inline(always)]
-    fn sinh_u35(self) -> Self {
-        map::unary_f32(self, scalar::sinh_u35_f32)
+    fn sinh_u35(self) -> Self
+    where
+        Self::Engine: Simd<Vf32 = Self>,
+    {
+        f32::sinh_u35(self)
     }
 
     #[inline(always)]
-    fn cosh_u35(self) -> Self {
-        map::unary_f32(self, scalar::cosh_u35_f32)
+    fn cosh_u35(self) -> Self
+    where
+        Self::Engine: Simd<Vf32 = Self>,
+    {
+        f32::cosh_u35(self)
     }
 
     #[inline(always)]
-    fn tanh_u35(self) -> Self {
-        map::unary_f32(self, scalar::tanh_u35_f32)
+    fn tanh_u35(self) -> Self
+    where
+        Self::Engine: Simd<Vf32 = Self>,
+    {
+        f32::tanh_u35(self)
     }
 }
 

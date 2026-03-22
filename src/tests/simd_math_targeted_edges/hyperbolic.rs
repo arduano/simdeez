@@ -3,14 +3,32 @@ use crate::math::{SimdMathF32Hyperbolic, SimdMathF32InverseHyperbolic};
 
 fn run_f32_hyperbolic_edges<S: Simd>() {
     let inputs = [
-        -100.0f32, -20.0, -10.0, -1.0, -0.0, 0.0, 1.0, 10.0, 20.0, 100.0,
+        -100.0f32, -40.0, -20.0, -10.0, -1.0, -0.5, -0.0, 0.0, 0.5, 1.0, 10.0, 20.0, 40.0, 100.0,
     ];
     for chunk in inputs.chunks(S::Vf32::WIDTH) {
         let v = S::Vf32::load_from_slice(chunk);
+        let sinh = v.sinh_u35();
+        let cosh = v.cosh_u35();
         let tanh = v.tanh_u35();
         let acosh = v.acosh_u35();
         let atanh = v.atanh_u35();
         for (lane, &x) in chunk.iter().enumerate() {
+            assert_f32_contract(
+                "sinh_u35",
+                x,
+                sinh[lane],
+                x.sinh(),
+                contracts::SINH_U35_F32_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("{e}"));
+            assert_f32_contract(
+                "cosh_u35",
+                x,
+                cosh[lane],
+                x.cosh(),
+                contracts::COSH_U35_F32_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("{e}"));
             assert_f32_contract(
                 "tanh_u35",
                 x,
@@ -72,4 +90,108 @@ fn run_f32_hyperbolic_edges<S: Simd>() {
     }
 }
 
+fn push_boundary_triplet(inputs: &mut Vec<f32>, center: f32) {
+    inputs.push(f32::from_bits(center.to_bits().saturating_sub(1)));
+    inputs.push(center);
+    inputs.push(f32::from_bits(center.to_bits().saturating_add(1)));
+}
+
+fn run_f32_hyperbolic_fast_path_boundaries<S: Simd>() {
+    let mut inputs = Vec::new();
+    for center in [
+        -80.0f32, -40.0, -0.625, -0.5, -0.0, 0.0, 0.5, 0.625, 40.0, 80.0,
+    ] {
+        push_boundary_triplet(&mut inputs, center);
+    }
+
+    check_targeted_unary_f32::<S>(
+        "sinh_u35",
+        &inputs,
+        contracts::SINH_U35_F32_MAX_ULP,
+        |v| v.sinh_u35(),
+        f32::sinh,
+    );
+    check_targeted_unary_f32::<S>(
+        "cosh_u35",
+        &inputs,
+        contracts::COSH_U35_F32_MAX_ULP,
+        |v| v.cosh_u35(),
+        f32::cosh,
+    );
+    check_targeted_unary_f32::<S>(
+        "tanh_u35",
+        &inputs,
+        contracts::TANH_U35_F32_MAX_ULP,
+        |v| v.tanh_u35(),
+        f32::tanh,
+    );
+}
+
+fn run_f32_hyperbolic_special_values_and_mixed_lanes<S: Simd>() {
+    let mut inputs = vec![
+        f32::NAN,
+        f32::from_bits(0x7FC0_1234),
+        f32::NEG_INFINITY,
+        f32::INFINITY,
+        -0.0,
+        0.0,
+        -80.0,
+        80.0,
+        -0.5,
+        0.5,
+        -1.0e-6,
+        1.0e-6,
+        -20.0,
+        20.0,
+        -100.0,
+        100.0,
+    ];
+
+    while !inputs.len().is_multiple_of(S::Vf32::WIDTH) {
+        inputs.push(0.25);
+    }
+
+    for chunk in inputs.chunks(S::Vf32::WIDTH) {
+        let v = S::Vf32::load_from_slice(chunk);
+        let sinh = v.sinh_u35();
+        let cosh = v.cosh_u35();
+        let tanh = v.tanh_u35();
+
+        for (lane, &x) in chunk.iter().enumerate() {
+            assert_f32_contract(
+                "sinh_u35",
+                x,
+                sinh[lane],
+                x.sinh(),
+                contracts::SINH_U35_F32_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("{e}"));
+            assert_f32_contract(
+                "cosh_u35",
+                x,
+                cosh[lane],
+                x.cosh(),
+                contracts::COSH_U35_F32_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("{e}"));
+            assert_f32_contract(
+                "tanh_u35",
+                x,
+                tanh[lane],
+                x.tanh(),
+                contracts::TANH_U35_F32_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("{e}"));
+        }
+    }
+}
+
 simd_math_targeted_all_backends!(f32_hyperbolic_edges, run_f32_hyperbolic_edges);
+simd_math_targeted_all_backends!(
+    f32_hyperbolic_fast_path_boundaries,
+    run_f32_hyperbolic_fast_path_boundaries
+);
+simd_math_targeted_all_backends!(
+    f32_hyperbolic_special_values_and_mixed_lanes,
+    run_f32_hyperbolic_special_values_and_mixed_lanes
+);
