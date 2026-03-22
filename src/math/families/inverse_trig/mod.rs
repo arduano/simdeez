@@ -1,20 +1,31 @@
+mod portable_f32;
+
 use crate::math::{map, scalar};
-use crate::{SimdFloat32, SimdFloat64};
+use crate::{Simd, SimdFloat32, SimdFloat64};
 
 pub trait SimdMathF32InverseTrig: SimdFloat32 {
     #[inline(always)]
-    fn asin_u35(self) -> Self {
-        map::unary_f32(self, scalar::asin_u35_f32)
+    fn asin_u35(self) -> Self
+    where
+        Self::Engine: Simd<Vf32 = Self>,
+    {
+        portable_f32::asin_u35(self)
     }
 
     #[inline(always)]
-    fn acos_u35(self) -> Self {
-        map::unary_f32(self, scalar::acos_u35_f32)
+    fn acos_u35(self) -> Self
+    where
+        Self::Engine: Simd<Vf32 = Self>,
+    {
+        portable_f32::acos_u35(self)
     }
 
     #[inline(always)]
-    fn atan_u35(self) -> Self {
-        map::unary_f32(self, scalar::atan_u35_f32)
+    fn atan_u35(self) -> Self
+    where
+        Self::Engine: Simd<Vf32 = Self>,
+    {
+        portable_f32::atan_u35(self)
     }
 }
 

@@ -31,11 +31,26 @@ pub fn make_exp_inputs(len: usize, seed: u64) -> Vec<f32> {
     (0..len).map(|_| rng.gen_range(-80.0f32..80.0f32)).collect()
 }
 
+pub fn make_unary_inputs(len: usize, seed: u64, range: core::ops::Range<f32>) -> Vec<f32> {
+    let mut rng = ChaCha8Rng::seed_from_u64(seed);
+    (0..len).map(|_| rng.gen_range(range.clone())).collect()
+}
+
 pub fn make_trig_inputs(len: usize, seed: u64) -> Vec<f32> {
     let mut rng = ChaCha8Rng::seed_from_u64(seed);
     (0..len)
         .map(|_| rng.gen_range(-20.0f32 * core::f32::consts::PI..20.0f32 * core::f32::consts::PI))
         .collect()
+}
+
+pub fn make_inverse_trig_inputs(len: usize, seed: u64) -> Vec<f32> {
+    let mut rng = ChaCha8Rng::seed_from_u64(seed);
+    (0..len).map(|_| rng.gen_range(-1.0f32..1.0f32)).collect()
+}
+
+pub fn make_atan_inputs(len: usize, seed: u64) -> Vec<f32> {
+    let mut rng = ChaCha8Rng::seed_from_u64(seed);
+    (0..len).map(|_| rng.gen_range(-64.0f32..64.0f32)).collect()
 }
 
 pub fn make_tan_inputs(len: usize, seed: u64) -> Vec<f32> {

@@ -3,6 +3,7 @@
 //! - `x86_avx2`: optional hand-optimized override(s) for specific functions.
 //! - this module: dispatch glue selecting overrides without changing the public API.
 
+mod hyperbolic;
 mod portable;
 
 #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
@@ -60,6 +61,33 @@ where
     V::Engine: Simd<Vf32 = V>,
 {
     portable::tan_u35(input)
+}
+
+#[inline(always)]
+pub(crate) fn sinh_u35<V>(input: V) -> V
+where
+    V: SimdFloat32,
+    V::Engine: Simd<Vf32 = V>,
+{
+    hyperbolic::sinh_u35(input)
+}
+
+#[inline(always)]
+pub(crate) fn cosh_u35<V>(input: V) -> V
+where
+    V: SimdFloat32,
+    V::Engine: Simd<Vf32 = V>,
+{
+    hyperbolic::cosh_u35(input)
+}
+
+#[inline(always)]
+pub(crate) fn tanh_u35<V>(input: V) -> V
+where
+    V: SimdFloat32,
+    V::Engine: Simd<Vf32 = V>,
+{
+    hyperbolic::tanh_u35(input)
 }
 
 #[inline(always)]

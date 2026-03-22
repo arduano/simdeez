@@ -9,7 +9,9 @@
 //! `ln_u35` / `exp_u35` currently stay on deterministic scalar references.
 //! `sin_u35` / `cos_u35` / `tan_u35` use portable SIMD range reduction with
 //! centralized fallback for non-finite, very-large, and tan-pole-adjacent lanes.
-//! Remaining historical SLEEF surface in this baseline pass is currently
+//! `sinh_u35` / `cosh_u35` / `tanh_u35` now use family-local portable SIMD
+//! kernels with centralized scalar patching for exceptional lanes.
+//! Remaining historical SLEEF surface in this baseline pass is otherwise still
 //! lane-wise scalar mapped for correctness-first portability.
 //!
 //! Structure notes:
