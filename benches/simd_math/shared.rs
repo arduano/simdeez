@@ -43,6 +43,16 @@ pub fn make_trig_inputs(len: usize, seed: u64) -> Vec<f32> {
         .collect()
 }
 
+pub fn make_inverse_trig_inputs(len: usize, seed: u64) -> Vec<f32> {
+    let mut rng = ChaCha8Rng::seed_from_u64(seed);
+    (0..len).map(|_| rng.gen_range(-1.0f32..1.0f32)).collect()
+}
+
+pub fn make_atan_inputs(len: usize, seed: u64) -> Vec<f32> {
+    let mut rng = ChaCha8Rng::seed_from_u64(seed);
+    (0..len).map(|_| rng.gen_range(-64.0f32..64.0f32)).collect()
+}
+
 pub fn make_tan_inputs(len: usize, seed: u64) -> Vec<f32> {
     let mut rng = ChaCha8Rng::seed_from_u64(seed);
     let half_pi = core::f32::consts::FRAC_PI_2;

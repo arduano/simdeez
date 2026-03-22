@@ -6,12 +6,13 @@ pub const SIN_U35_F32_MAX_ULP: u32 = 35;
 pub const COS_U35_F32_MAX_ULP: u32 = 35;
 pub const TAN_U35_F32_MAX_ULP: u32 = 35;
 
+// Portable inverse-trig kernels target the SLEEF-style u35 contract on f32.
+pub const ASIN_U35_F32_MAX_ULP: u32 = 35;
+pub const ACOS_U35_F32_MAX_ULP: u32 = 35;
+pub const ATAN_U35_F32_MAX_ULP: u32 = 35;
+pub const ATAN2_U35_F32_MAX_ULP: u32 = 1;
 // Portable f32 hyperbolic kernels are now honest u35 implementations:
 // bounded SIMD fast paths plus scalar-lane patching for exceptional inputs.
-pub const ASIN_U35_F32_MAX_ULP: u32 = 1;
-pub const ACOS_U35_F32_MAX_ULP: u32 = 1;
-pub const ATAN_U35_F32_MAX_ULP: u32 = 1;
-pub const ATAN2_U35_F32_MAX_ULP: u32 = 1;
 pub const SINH_U35_F32_MAX_ULP: u32 = 35;
 pub const COSH_U35_F32_MAX_ULP: u32 = 35;
 pub const TANH_U35_F32_MAX_ULP: u32 = 35;

@@ -3,6 +3,8 @@ use std::time::Duration;
 
 #[path = "simd_math/hyperbolic.rs"]
 mod hyperbolic;
+#[path = "simd_math/inverse_trig.rs"]
+mod inverse_trig;
 #[path = "simd_math/log_exp.rs"]
 mod log_exp;
 #[path = "simd_math/shared.rs"]
@@ -13,6 +15,7 @@ mod trig;
 fn criterion_benchmark(c: &mut Criterion) {
     log_exp::register(c);
     hyperbolic::register(c);
+    inverse_trig::register(c);
     trig::register(c);
 }
 
