@@ -26,15 +26,15 @@ Refer to the excellent [Intel Intrinsics Guide](https://software.intel.com/sites
 
 # SIMD math revival status
 
-SIMDeez now includes a native, pure-Rust math surface for the first restored SLEEF-style family:
+SIMDeez now includes a native, pure-Rust math surface for the restored historical SLEEF-backed families:
 
-- `log2_u35`
-- `exp2_u35`
-- `ln_u35`
-- `exp_u35`
-- `sin_u35`
-- `cos_u35`
-- `tan_u35`
+- `log2_u35`, `exp2_u35`, `ln_u35`, `exp_u35`
+- `sin_u35`, `cos_u35`, `tan_u35`
+- `asin_u35`, `acos_u35`, `atan_u35`, `atan2_u35`
+- `sinh_u35`, `cosh_u35`, `tanh_u35`
+- `asinh_u35`, `acosh_u35`, `atanh_u35`
+- `log10_u35`, `hypot_u35`
+- `fmod` (named without `u35` to reflect remainder semantics rather than an explicit ULP contract tier)
 
 These are exposed via extension traits in `simdeez::math` and re-exported in `simdeez::prelude`:
 
@@ -66,6 +66,7 @@ An in-repo Criterion benchmark target is available for this revived surface:
 
 ```bash
 cargo bench --bench simd_math
+cargo bench --bench simd_math_remaining_baseline
 ```
 
 This benchmark reports per-function throughput for:
