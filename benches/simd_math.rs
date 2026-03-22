@@ -1,6 +1,8 @@
 use criterion::{criterion_group, criterion_main, Criterion};
 use std::time::Duration;
 
+#[path = "simd_math/inverse_trig.rs"]
+mod inverse_trig;
 #[path = "simd_math/log_exp.rs"]
 mod log_exp;
 #[path = "simd_math/shared.rs"]
@@ -9,6 +11,7 @@ mod shared;
 mod trig;
 
 fn criterion_benchmark(c: &mut Criterion) {
+    inverse_trig::register(c);
     log_exp::register(c);
     trig::register(c);
 }
