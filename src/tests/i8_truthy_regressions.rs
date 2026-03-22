@@ -4,6 +4,7 @@ use crate::engines::scalar::I8x1;
 use crate::engines::{avx2::I8x32, sse2::I8x16, sse41::I8x16_41};
 use crate::prelude::*;
 
+#[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
 fn assert_truthy_contract<V>(all_truthy_mask: V, mixed_mask: V, all_zero: V)
 where
     V: SimdInt8 + SimdBaseIo<Scalar = i8> + core::fmt::Debug,
