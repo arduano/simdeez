@@ -232,7 +232,7 @@ fn run_f32_log2_u35_contract<S: Simd>() {
     check_unary_f32::<S>(
         "log2_u35",
         contracts::LOG2_U35_F32_MAX_ULP,
-        |v| <S::Vf32 as SimdMathF32>::log2_u35(v),
+        <S::Vf32 as SimdMathF32>::log2_u35,
         f32::log2,
     );
 }
@@ -241,7 +241,7 @@ fn run_f32_exp2_u35_contract<S: Simd>() {
     check_unary_f32::<S>(
         "exp2_u35",
         contracts::EXP2_U35_F32_MAX_ULP,
-        |v| <S::Vf32 as SimdMathF32>::exp2_u35(v),
+        <S::Vf32 as SimdMathF32>::exp2_u35,
         f32::exp2,
     );
 }
@@ -249,8 +249,8 @@ fn run_f32_exp2_u35_contract<S: Simd>() {
 fn run_f32_ln_u35_contract<S: Simd>() {
     check_unary_f32::<S>(
         "ln_u35",
-        64,
-        |v| <S::Vf32 as SimdMathF32>::ln_u35(v),
+        contracts::LN_U35_F32_MAX_ULP,
+        <S::Vf32 as SimdMathF32>::ln_u35,
         f32::ln,
     );
 }
@@ -258,8 +258,8 @@ fn run_f32_ln_u35_contract<S: Simd>() {
 fn run_f32_exp_u35_contract<S: Simd>() {
     check_unary_f32::<S>(
         "exp_u35",
-        64,
-        |v| <S::Vf32 as SimdMathF32>::exp_u35(v),
+        contracts::EXP_U35_F32_MAX_ULP,
+        <S::Vf32 as SimdMathF32>::exp_u35,
         f32::exp,
     );
 }
@@ -268,7 +268,7 @@ fn run_f64_log2_u35_contract<S: Simd>() {
     check_unary_f64::<S>(
         "log2_u35",
         contracts::LOG2_U35_F64_MAX_ULP,
-        |v| <S::Vf64 as SimdMathF64>::log2_u35(v),
+        <S::Vf64 as SimdMathF64>::log2_u35,
         f64::log2,
     );
 }
@@ -277,8 +277,26 @@ fn run_f64_exp2_u35_contract<S: Simd>() {
     check_unary_f64::<S>(
         "exp2_u35",
         contracts::EXP2_U35_F64_MAX_ULP,
-        |v| <S::Vf64 as SimdMathF64>::exp2_u35(v),
+        <S::Vf64 as SimdMathF64>::exp2_u35,
         f64::exp2,
+    );
+}
+
+fn run_f64_ln_u35_contract<S: Simd>() {
+    check_unary_f64::<S>(
+        "ln_u35",
+        contracts::LN_U35_F64_MAX_ULP,
+        <S::Vf64 as SimdMathF64>::ln_u35,
+        f64::ln,
+    );
+}
+
+fn run_f64_exp_u35_contract<S: Simd>() {
+    check_unary_f64::<S>(
+        "exp_u35",
+        contracts::EXP_U35_F64_MAX_ULP,
+        <S::Vf64 as SimdMathF64>::exp_u35,
+        f64::exp,
     );
 }
 
@@ -314,3 +332,5 @@ simd_math_all_backends!(f32_ln_u35_contract, run_f32_ln_u35_contract);
 simd_math_all_backends!(f32_exp_u35_contract, run_f32_exp_u35_contract);
 simd_math_all_backends!(f64_log2_u35_contract, run_f64_log2_u35_contract);
 simd_math_all_backends!(f64_exp2_u35_contract, run_f64_exp2_u35_contract);
+simd_math_all_backends!(f64_ln_u35_contract, run_f64_ln_u35_contract);
+simd_math_all_backends!(f64_exp_u35_contract, run_f64_exp_u35_contract);

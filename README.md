@@ -24,15 +24,27 @@ Refer to the excellent [Intel Intrinsics Guide](https://software.intel.com/sites
 * Extract or set a single lane with the index operator: `let v1 = v[1];`
 * Falls all the way back to scalar code for platforms with no SIMD or unsupported SIMD
 
-# Trig Functions via Sleef-sys
+# SIMD math revival status
 
-~~A number of trigonometric and other common math functions are provided~~
-~~in vectorized form via the Sleef-sys crate. This is an optional feature `sleef` that you can enable.~~
-~~Doing so currently requires nightly, as well as having CMake and Clang installed.~~
+SIMDeez now includes a native, pure-Rust math surface for the first restored SLEEF-style family:
 
-⚠️ In simdeez V2.0, sleef is temporarily deprecated due to the maintenance complexity involved around it. We are open to contributions, and are undecided on whether we:
-- Resume sleef support via the existing sleef-sys crate
-- Re-implement sleef via simdeez primitives
+- `log2_u35`
+- `exp2_u35`
+- `ln_u35` (composed from `log2_u35`)
+- `exp_u35` (composed from `exp2_u35`)
+
+These are exposed via extension traits in `simdeez::math` and re-exported in `simdeez::prelude`:
+
+```rust
+use simdeez::prelude::*;
+
+fn apply_math<S: Simd>(x: S::Vf32) -> S::Vf32 {
+    let y = x.log2_u35();
+    y.exp2_u35() + x.ln_u35() + x.exp_u35()
+}
+```
+
+The old `sleef-sys` feature remains historical/deprecated and is **not** the primary implementation path for this revived surface.
 
 # Compared to packed_simd
 

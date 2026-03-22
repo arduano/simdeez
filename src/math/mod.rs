@@ -25,6 +25,18 @@ pub mod contracts {
 
     /// Maximum ULP error target for the f64 `exp2_u35` kernel family.
     pub const EXP2_U35_F64_MAX_ULP: u64 = 35;
+
+    /// Maximum ULP error target for f32 `ln_u35`.
+    pub const LN_U35_F32_MAX_ULP: u32 = 1;
+
+    /// Maximum ULP error target for f32 `exp_u35`.
+    pub const EXP_U35_F32_MAX_ULP: u32 = 1;
+
+    /// Maximum ULP error target for f64 `ln_u35`.
+    pub const LN_U35_F64_MAX_ULP: u64 = 1;
+
+    /// Maximum ULP error target for f64 `exp_u35`.
+    pub const EXP_U35_F64_MAX_ULP: u64 = 1;
 }
 
 #[inline(always)]
@@ -78,16 +90,16 @@ pub trait SimdMathF32: SimdFloat32 {
         map_unary_f32(self, scalar::exp2_u35_f32)
     }
 
-    /// `ln(x)` composed from `log2_u35`.
+    /// `ln(x)` with target `u35`-tier contract.
     #[inline(always)]
     fn ln_u35(self) -> Self {
-        self.log2_u35() * Self::from_f64(core::f64::consts::LN_2)
+        map_unary_f32(self, scalar::ln_u35_f32)
     }
 
-    /// `exp(x)` composed from `exp2_u35`.
+    /// `exp(x)` with target `u35`-tier contract.
     #[inline(always)]
     fn exp_u35(self) -> Self {
-        (self * Self::from_f64(core::f64::consts::LOG2_E)).exp2_u35()
+        map_unary_f32(self, scalar::exp_u35_f32)
     }
 }
 
@@ -107,16 +119,16 @@ pub trait SimdMathF64: SimdFloat64 {
         map_unary_f64(self, scalar::exp2_u35_f64)
     }
 
-    /// `ln(x)` composed from `log2_u35`.
+    /// `ln(x)` with target `u35`-tier contract.
     #[inline(always)]
     fn ln_u35(self) -> Self {
-        self.log2_u35() * Self::from_f64(core::f64::consts::LN_2)
+        map_unary_f64(self, scalar::ln_u35_f64)
     }
 
-    /// `exp(x)` composed from `exp2_u35`.
+    /// `exp(x)` with target `u35`-tier contract.
     #[inline(always)]
     fn exp_u35(self) -> Self {
-        (self * Self::from_f64(core::f64::consts::LOG2_E)).exp2_u35()
+        map_unary_f64(self, scalar::exp_u35_f64)
     }
 }
 
