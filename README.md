@@ -46,6 +46,22 @@ fn apply_math<S: Simd>(x: S::Vf32) -> S::Vf32 {
 
 The old `sleef-sys` feature remains historical/deprecated and is **not** the primary implementation path for this revived surface.
 
+### Benchmarking restored math
+
+An in-repo Criterion benchmark target is available for this revived surface:
+
+```bash
+cargo bench --bench simd_math
+```
+
+This benchmark reports per-function throughput for:
+
+- native scalar loop baseline (`f32::{log2, exp2, ln, exp}`)
+- simdeez runtime-selected path
+- forced backend variants (`scalar`, `sse2`, `sse41`, `avx2`, and `avx512` when available on host)
+
+Current expectation: because the implementation is still lane-wise scalar mapping, results are typically parity or slower than native scalar loops. This benchmark is intended to establish trustworthy measurements before vector-kernel optimization work.
+
 # Compared to packed_simd
 
 * SIMDeez can abstract over differing simd widths. packed_simd does not

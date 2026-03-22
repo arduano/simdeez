@@ -42,3 +42,7 @@ features = ["plotters", "cargo_bench_support"]
 [[bench]]
 name = "numparse"
 harness = false
+
+[[bench]]
+name = "simd_math"
+harness = false
