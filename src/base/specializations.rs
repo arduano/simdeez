@@ -231,17 +231,23 @@ pub trait SimdInt8: SimdInt<Scalar = i8, HorizontalAddScalar = i64> + SimdTransm
     ///
     /// Use the helper methods on [`SimdBitMask`] (or the default methods below) instead of assuming
     /// that all lanes fit into a single integer. This keeps the API usable for wider future SIMD backends.
+    ///
+    /// Portably, these mask helpers are intended for **canonical compare masks**: each truthy lane should
+    /// be all bits set (`-1`) and each falsy lane should be zero. Compare operations in simdeez already
+    /// produce masks in that form.
     fn get_mask(self) -> Self::BitMask;
 
     /// Checks if any element in the vector is truthy. A value is truthy either if the highest bit is one, or if any bit is one,
-    /// depending on the instruction set being used. Please always make sure at least the highest bit is set to 1.
+    /// depending on the instruction set being used. For portable behavior, prefer canonical compare masks where truthy lanes
+    /// are `-1` and falsy lanes are `0`.
     #[inline(always)]
     fn is_any_truthy(self) -> bool {
         self.get_mask().any_in_mask(Self::WIDTH)
     }
 
     /// Checks if all elements in the vector are truthy. A value is truthy either if the highest bit is one, or if any bit is one,
-    /// depending on the instruction set being used. Please always make sure at least the highest bit is set to 1.
+    /// depending on the instruction set being used. For portable behavior, prefer canonical compare masks where truthy lanes
+    /// are `-1` and falsy lanes are `0`.
     #[inline(always)]
     fn is_truthy(self) -> bool {
         self.get_mask().all_in_mask(Self::WIDTH)
