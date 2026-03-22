@@ -12,8 +12,8 @@ use crate::engines::wasm32::Wasm;
 #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
 use crate::engines::{avx2::Avx2, sse2::Sse2, sse41::Sse41};
 
+use crate::math::SimdMathF32Core;
 use crate::math::{contracts, SimdMathF32, SimdMathF64};
-use crate::math::{SimdMathF32Core, SimdMathF64Core};
 use crate::{Simd, SimdBaseIo, SimdConsts};
 
 fn assert_f32_contract(
@@ -139,58 +139,6 @@ fn check_targeted_unary_f32<S: Simd>(
             }
         }
     }
-}
-
-fn assert_f64_contract(
-    fn_name: &str,
-    input: f64,
-    actual: f64,
-    expected: f64,
-    max_ulp: u64,
-) -> Result<(), String> {
-    if expected.is_nan() {
-        if actual.is_nan() {
-            return Ok(());
-        }
-        return Err(format!("{fn_name}({input:?}) expected NaN, got {actual:?}"));
-    }
-
-    if expected.is_infinite() {
-        if actual.to_bits() == expected.to_bits() {
-            return Ok(());
-        }
-        return Err(format!(
-            "{fn_name}({input:?}) expected {:?}, got {:?}",
-            expected, actual
-        ));
-    }
-
-    if expected == 0.0 {
-        if actual.to_bits() == expected.to_bits() {
-            return Ok(());
-        }
-        return Err(format!(
-            "{fn_name}({input:?}) expected signed zero bits {:016x}, got {:016x}",
-            expected.to_bits(),
-            actual.to_bits()
-        ));
-    }
-
-    if actual.is_nan() || actual.is_infinite() {
-        return Err(format!(
-            "{fn_name}({input:?}) expected finite {expected:?}, got {actual:?}"
-        ));
-    }
-
-    let ulp = ulp_distance_f64(actual, expected)
-        .ok_or_else(|| format!("{fn_name}({input:?}) failed to compute f64 ULP distance"))?;
-    if ulp > max_ulp {
-        return Err(format!(
-            "{fn_name}({input:?}) ULP distance {ulp} exceeds max {max_ulp} (actual={actual:?}, expected={expected:?})"
-        ));
-    }
-
-    Ok(())
 }
 
 fn check_targeted_unary_f64<S: Simd>(
