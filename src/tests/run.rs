@@ -26,8 +26,8 @@ elementwise_eq_tester_impl!(SimdBaseOps, bit_xor, two_arg, EqPrecision::exact())
 elementwise_eq_tester_impl!(SimdBaseOps, bit_not, one_arg, EqPrecision::exact());
 elementwise_eq_tester_impl!(SimdBaseOps, and_not, two_arg, EqPrecision::exact());
 
-// Abs breaks on minimum integer values as they dont have a corrisponding maximum, causing undefined behavior.
-elementwise_eq_tester_impl!(SimdBaseOps, abs, one_arg_abs_filtered, EqPrecision::exact());
+// Abs for signed integers uses wrapping semantics so MIN stays MIN.
+elementwise_eq_tester_impl!(SimdBaseOps, abs, one_arg, EqPrecision::exact());
 
 elementwise_eq_tester_impl!(SimdBaseOps, cmp_eq, two_arg, EqPrecision::exact());
 elementwise_eq_tester_impl!(SimdBaseOps, cmp_lt, two_arg, EqPrecision::exact());

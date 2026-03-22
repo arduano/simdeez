@@ -261,12 +261,6 @@ impl<N: ScalarNumber, I: Iterator<Item = N>, I2: Iterator<Item = N>>
         .take(1680 * S::WIDTH)
     }
 
-    /// Same as one_arg, except filtering out invalid inputs for abs functions
-    pub fn one_arg_abs_filtered<S: SimdBase<Scalar = N>>(self) -> impl Iterator<Item = (S,)> {
-        let iter = iter_as_simd((self.any)(1000).filter(|v| !v.is_minimum_int()));
-        iter.map(|v| (v,)).take(1000 * S::WIDTH)
-    }
-
     /// Same as one_arg, except without values that can cause undefined behavior when rounding
     pub fn one_arg_rounding_safe<S: SimdBase<Scalar = N>>(self) -> impl Iterator<Item = (S,)> {
         let iter =

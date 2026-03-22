@@ -21,10 +21,6 @@ pub trait ScalarNumber: PartialEq + Copy + core::fmt::Display {
         self == other
     }
 
-    fn is_minimum_int(&self) -> bool {
-        false
-    }
-
     fn is_float_nan(&self) -> bool {
         false
     }
@@ -48,10 +44,6 @@ pub trait IntScalarNumber: ScalarNumber {
 }
 
 impl ScalarNumber for i8 {
-    fn is_minimum_int(&self) -> bool {
-        *self == i8::MIN
-    }
-
     fn unchecked_add(self, other: Self) -> Self {
         self.wrapping_add(other)
     }
@@ -64,10 +56,6 @@ impl IntScalarNumber for i8 {
 }
 
 impl ScalarNumber for i16 {
-    fn is_minimum_int(&self) -> bool {
-        *self == i16::MIN
-    }
-
     fn unchecked_add(self, other: Self) -> Self {
         self.wrapping_add(other)
     }
@@ -80,10 +68,6 @@ impl IntScalarNumber for i16 {
 }
 
 impl ScalarNumber for i32 {
-    fn is_minimum_int(&self) -> bool {
-        *self == i32::MIN
-    }
-
     fn unchecked_add(self, other: Self) -> Self {
         self.wrapping_add(other)
     }
@@ -96,10 +80,6 @@ impl IntScalarNumber for i32 {
 }
 
 impl ScalarNumber for i64 {
-    fn is_minimum_int(&self) -> bool {
-        *self == i64::MIN
-    }
-
     fn unchecked_add(self, other: Self) -> Self {
         self.wrapping_add(other)
     }

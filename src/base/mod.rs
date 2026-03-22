@@ -86,7 +86,10 @@ pub trait SimdBaseOps:
     /// Binary not operation for a vector
     fn bit_not(self) -> Self;
 
-    /// Element-wise absolute value
+    /// Element-wise absolute value.
+    ///
+    /// For signed integer vectors this uses wrapping semantics, matching SIMD hardware
+    /// behavior: `abs(MIN)` returns `MIN`.
     fn abs(self) -> Self;
 
     /// Binary and not between two vectors `self & (!rhs)`
