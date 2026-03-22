@@ -5,3 +5,4 @@ mod float_neq_regressions;
 mod i64_regressions;
 mod real_world;
 mod run;
+mod wasm_unaligned_regressions;
