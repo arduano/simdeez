@@ -108,7 +108,12 @@ impl_op! {
             vmulq_s8(a, b)
         }
         for Wasm(a: v128, b: v128) -> v128 {
-            i8x16_mul(a, b)
+            let mut arr1 = core::mem::transmute::<_, [i8; 16]>(a);
+            let arr2 = core::mem::transmute::<_, [i8; 16]>(b);
+            for i in 0..16 {
+                arr1[i] = arr1[i].wrapping_mul(arr2[i]);
+            }
+            core::mem::transmute::<_, _>(arr1)
         }
     }
 }
