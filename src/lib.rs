@@ -29,6 +29,9 @@
 //! `log2_u35`, `exp2_u35`, `ln_u35`, and `exp_u35`.
 //!
 //! These methods are available through `simdeez::math` and re-exported by `simdeez::prelude`.
+//! The implementation follows a layered blueprint: portable kernels first,
+//! backend-specific overrides where justified (currently a hand-tuned AVX2 `log2_u35`),
+//! and scalar fallback patching for exceptional lanes.
 //! The historical `sleef` feature remains deprecated and is not the primary implementation path.
 //!
 //! # Compared to stdsimd

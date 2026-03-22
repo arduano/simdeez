@@ -30,8 +30,8 @@ SIMDeez now includes a native, pure-Rust math surface for the first restored SLE
 
 - `log2_u35`
 - `exp2_u35`
-- `ln_u35` (composed from `log2_u35`)
-- `exp_u35` (composed from `exp2_u35`)
+- `ln_u35`
+- `exp_u35`
 
 These are exposed via extension traits in `simdeez::math` and re-exported in `simdeez::prelude`:
 
@@ -45,6 +45,17 @@ fn apply_math<S: Simd>(x: S::Vf32) -> S::Vf32 {
 ```
 
 The old `sleef-sys` feature remains historical/deprecated and is **not** the primary implementation path for this revived surface.
+
+### Kernel layering blueprint (v0.1)
+
+The restored `f32` path now demonstrates the intended extension architecture:
+
+1. **Portable SIMD kernels** (`src/math/f32/portable.rs`) implement reduction + polynomial logic with backend-agnostic simdeez primitives.
+2. **Backend override dispatch** (`src/math/f32/mod.rs`) selects architecture-tuned kernels without changing the public `SimdMathF32` API.
+3. **Hand-optimized backend implementation** (`src/math/f32/x86_avx2.rs`) provides a real AVX2/FMA override for `log2_u35`.
+4. **Scalar fallback patching** remains centralized in the portable layer for exceptional lanes, preserving special-value semantics.
+
+To add the next SLEEF-style function, follow the same pattern: start portable, wire dispatch, then add optional backend overrides only where profiling justifies complexity.
 
 ### Benchmarking restored math
 
@@ -60,7 +71,7 @@ This benchmark reports per-function throughput for:
 - simdeez runtime-selected path
 - forced backend variants (`scalar`, `sse2`, `sse41`, `avx2`, and `avx512` when available on host)
 
-Current expectation: because the implementation is still lane-wise scalar mapping, results are typically parity or slower than native scalar loops. This benchmark is intended to establish trustworthy measurements before vector-kernel optimization work.
+Current expectation: `log2_u35` and `exp2_u35` should show clear speedups on SIMD-capable backends (notably AVX2 on x86 hosts), while `ln_u35`/`exp_u35` remain scalar-reference quality-first baselines. Use these benches to validate both performance and dispatch behavior as new kernels/overrides are added.
 
 # Compared to packed_simd
 

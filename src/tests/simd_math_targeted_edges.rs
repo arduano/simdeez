@@ -1,0 +1,261 @@
+#![allow(unused_imports)]
+
+use super::*;
+
+#[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+use crate::engines::avx512::Avx512;
+#[cfg(target_arch = "aarch64")]
+use crate::engines::neon::Neon;
+use crate::engines::scalar::Scalar;
+#[cfg(target_arch = "wasm32")]
+use crate::engines::wasm32::Wasm;
+#[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+use crate::engines::{avx2::Avx2, sse2::Sse2, sse41::Sse41};
+
+use crate::math::{contracts, SimdMathF32};
+use crate::{Simd, SimdBaseIo, SimdConsts};
+
+fn assert_f32_contract(
+    fn_name: &str,
+    input: f32,
+    actual: f32,
+    expected: f32,
+    max_ulp: u32,
+) -> Result<(), String> {
+    if expected.is_nan() {
+        if actual.is_nan() {
+            return Ok(());
+        }
+        return Err(format!("{fn_name}({input:?}) expected NaN, got {actual:?}"));
+    }
+
+    if expected.is_infinite() {
+        if actual.to_bits() == expected.to_bits() {
+            return Ok(());
+        }
+        return Err(format!(
+            "{fn_name}({input:?}) expected {:?}, got {:?}",
+            expected, actual
+        ));
+    }
+
+    if expected == 0.0 {
+        if actual.to_bits() == expected.to_bits() {
+            return Ok(());
+        }
+        return Err(format!(
+            "{fn_name}({input:?}) expected signed zero bits {:08x}, got {:08x}",
+            expected.to_bits(),
+            actual.to_bits()
+        ));
+    }
+
+    if actual.is_nan() || actual.is_infinite() {
+        return Err(format!(
+            "{fn_name}({input:?}) expected finite {expected:?}, got {actual:?}"
+        ));
+    }
+
+    let ulp = ulp_distance_f32(actual, expected)
+        .ok_or_else(|| format!("{fn_name}({input:?}) failed to compute f32 ULP distance"))?;
+    if ulp > max_ulp {
+        return Err(format!(
+            "{fn_name}({input:?}) ULP distance {ulp} exceeds max {max_ulp} (actual={actual:?}, expected={expected:?})"
+        ));
+    }
+
+    Ok(())
+}
+
+fn check_targeted_unary_f32<S: Simd>(
+    fn_name: &str,
+    inputs: &[f32],
+    max_ulp: u32,
+    simd_fn: impl Fn(S::Vf32) -> S::Vf32,
+    scalar_ref: impl Fn(f32) -> f32,
+) {
+    for chunk in inputs.chunks(S::Vf32::WIDTH) {
+        let input = S::Vf32::load_from_slice(chunk);
+        let output = simd_fn(input);
+
+        for (lane, &x) in chunk.iter().enumerate() {
+            let actual = output[lane];
+            let expected = scalar_ref(x);
+            if let Err(err) = assert_f32_contract(fn_name, x, actual, expected, max_ulp) {
+                panic!("{err}");
+            }
+        }
+    }
+}
+
+fn run_f32_log2_u35_reduction_boundaries<S: Simd>() {
+    let mut inputs = vec![
+        f32::from_bits(0x3EFFFFFE),
+        f32::from_bits(0x3EFFFFFF),
+        f32::from_bits(0x3F000000),
+        f32::from_bits(0x3F000001),
+        f32::from_bits(0x3F7FFFFF),
+        f32::from_bits(0x3F800000),
+        f32::from_bits(0x3F800001),
+        f32::from_bits(0x3FFFFFFF),
+        f32::from_bits(0x40000000),
+        f32::from_bits(0x40000001),
+    ];
+
+    for &scale in &[0.5f32, 1.0, 2.0, 8.0] {
+        let pivot = core::f32::consts::FRAC_1_SQRT_2 * scale;
+        inputs.push(f32::from_bits(pivot.to_bits() - 1));
+        inputs.push(pivot);
+        inputs.push(f32::from_bits(pivot.to_bits() + 1));
+    }
+
+    check_targeted_unary_f32::<S>(
+        "log2_u35",
+        &inputs,
+        contracts::LOG2_U35_F32_MAX_ULP,
+        <S::Vf32 as SimdMathF32>::log2_u35,
+        f32::log2,
+    );
+}
+
+fn run_f32_exp2_u35_fast_domain_boundaries<S: Simd>() {
+    let mut inputs = vec![
+        -126.0001,
+        -126.0,
+        -125.9999,
+        -1.0001,
+        -1.0,
+        -0.9999,
+        -0.0001,
+        -0.0,
+        0.0,
+        0.0001,
+        0.9999,
+        1.0,
+        1.0001,
+        125.9999,
+        126.0,
+        126.0001,
+        f32::NEG_INFINITY,
+        f32::INFINITY,
+        f32::NAN,
+    ];
+
+    for k in -4..=4 {
+        let center = k as f32;
+        inputs.push(center - 1.0 / 1024.0);
+        inputs.push(center);
+        inputs.push(center + 1.0 / 1024.0);
+    }
+
+    check_targeted_unary_f32::<S>(
+        "exp2_u35",
+        &inputs,
+        contracts::EXP2_U35_F32_MAX_ULP,
+        <S::Vf32 as SimdMathF32>::exp2_u35,
+        f32::exp2,
+    );
+}
+
+#[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+fn run_log2_u35_vector_apply_avx2(input: &[f32], output: &mut [f32]) {
+    assert_eq!(input.len(), output.len());
+
+    Avx2::invoke(|| {
+        let mut in_rest = input;
+        let mut out_rest = output;
+
+        while in_rest.len() >= <Avx2 as Simd>::Vf32::WIDTH {
+            let v = <Avx2 as Simd>::Vf32::load_from_slice(in_rest);
+            v.log2_u35().copy_to_slice(out_rest);
+
+            in_rest = &in_rest[<Avx2 as Simd>::Vf32::WIDTH..];
+            out_rest = &mut out_rest[<Avx2 as Simd>::Vf32::WIDTH..];
+        }
+
+        for (&x, out) in in_rest.iter().zip(out_rest.iter_mut()) {
+            *out = x.log2();
+        }
+    });
+}
+
+macro_rules! simd_math_backend_targeted_test {
+    ($name:ident, $simd:ident, $runner:ident) => {
+        crate::with_feature_flag!(
+            $simd,
+            paste::item! {
+                #[test]
+                fn [<$name _ $simd:lower>]() {
+                    $runner::<$simd>();
+                }
+            }
+        );
+    };
+}
+
+macro_rules! simd_math_targeted_all_backends {
+    ($name:ident, $runner:ident) => {
+        simd_math_backend_targeted_test!($name, Scalar, $runner);
+        simd_math_backend_targeted_test!($name, Avx512, $runner);
+        simd_math_backend_targeted_test!($name, Avx2, $runner);
+        simd_math_backend_targeted_test!($name, Sse2, $runner);
+        simd_math_backend_targeted_test!($name, Sse41, $runner);
+        simd_math_backend_targeted_test!($name, Neon, $runner);
+        simd_math_backend_targeted_test!($name, Wasm, $runner);
+    };
+}
+
+simd_math_targeted_all_backends!(
+    f32_log2_u35_reduction_boundaries,
+    run_f32_log2_u35_reduction_boundaries
+);
+simd_math_targeted_all_backends!(
+    f32_exp2_u35_fast_domain_boundaries,
+    run_f32_exp2_u35_fast_domain_boundaries
+);
+
+#[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+#[test]
+fn f32_log2_u35_mixed_exception_lanes_avx2() {
+    let has_avx2 = std::is_x86_feature_detected!("avx2");
+    let has_fma = std::is_x86_feature_detected!("fma");
+    if !(has_avx2 && has_fma) {
+        eprintln!("[test] skipped avx2/fma mixed-lane log2_u35 test: CPU lacks avx2/fma");
+        return;
+    }
+
+    let input = vec![
+        1.0,
+        2.0,
+        -1.0,
+        0.0,
+        -0.0,
+        f32::from_bits(1),
+        f32::INFINITY,
+        f32::NAN,
+        0.75,
+        1.5,
+        3.0,
+        64.0,
+        1024.0,
+        0.25,
+        f32::from_bits(0x7FC0_1234),
+        f32::from_bits(0x0000_0100),
+    ];
+
+    let mut output = vec![0.0f32; input.len()];
+    run_log2_u35_vector_apply_avx2(&input, &mut output);
+
+    for (&x, &actual) in input.iter().zip(output.iter()) {
+        let expected = x.log2();
+        if let Err(err) = assert_f32_contract(
+            "log2_u35",
+            x,
+            actual,
+            expected,
+            contracts::LOG2_U35_F32_MAX_ULP,
+        ) {
+            panic!("{err}");
+        }
+    }
+}

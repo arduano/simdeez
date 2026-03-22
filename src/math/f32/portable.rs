@@ -1,12 +1,12 @@
 use crate::math::scalar;
 use crate::{Simd, SimdBaseIo, SimdBaseOps, SimdConsts, SimdFloat32, SimdInt, SimdInt32};
 
-type SimdI32<V> = <<V as SimdConsts>::Engine as Simd>::Vi32;
+pub(super) type SimdI32<V> = <<V as SimdConsts>::Engine as Simd>::Vi32;
 
-const F32_EXPONENT_MASK: i32 = 0x7F80_0000u32 as i32;
-const F32_MANTISSA_MASK: i32 = 0x007F_FFFF;
-const F32_LOG_NORM_MANTISSA: i32 = 0x3F00_0000;
-const F32_EXPONENT_BIAS_ADJUST: i32 = 126;
+pub(super) const F32_EXPONENT_MASK: i32 = 0x7F80_0000u32 as i32;
+pub(super) const F32_MANTISSA_MASK: i32 = 0x007F_FFFF;
+pub(super) const F32_LOG_NORM_MANTISSA: i32 = 0x3F00_0000;
+pub(super) const F32_EXPONENT_BIAS_ADJUST: i32 = 126;
 
 #[inline(always)]
 fn any_lane_nonzero<V>(mask: SimdI32<V>) -> bool
@@ -27,7 +27,26 @@ where
 }
 
 #[inline(always)]
-fn patch_exceptional_lanes<V>(
+pub(super) fn log2_exceptional_mask<V>(input: V) -> SimdI32<V>
+where
+    V: SimdFloat32,
+    V::Engine: Simd<Vf32 = V>,
+{
+    let bits = input.bitcast_i32();
+    let exponent_bits = bits & F32_EXPONENT_MASK;
+
+    let non_positive = input
+        .cmp_gt(V::zeroes())
+        .bitcast_i32()
+        .cmp_eq(SimdI32::<V>::zeroes());
+    let subnormal_or_zero = exponent_bits.cmp_eq(SimdI32::<V>::zeroes());
+    let inf_or_nan = exponent_bits.cmp_eq(SimdI32::<V>::set1(F32_EXPONENT_MASK));
+
+    non_positive | subnormal_or_zero | inf_or_nan
+}
+
+#[inline(always)]
+pub(super) fn patch_exceptional_lanes<V>(
     input: V,
     output: V,
     exceptional_mask: SimdI32<V>,
@@ -52,12 +71,12 @@ where
             }
         }
 
-        V::load_from_array(output_lanes)
+        V::load_from_ptr_unaligned(&output_lanes as *const V::ArrayRepresentation as *const f32)
     }
 }
 
 #[inline(always)]
-pub(crate) fn log2_u35<V>(input: V) -> V
+pub(super) fn log2_u35<V>(input: V) -> V
 where
     V: SimdFloat32,
     V::Engine: Simd<Vf32 = V>,
@@ -66,13 +85,7 @@ where
     let exponent_bits = bits & F32_EXPONENT_MASK;
     let mantissa_bits = bits & F32_MANTISSA_MASK;
 
-    let non_positive = input
-        .cmp_gt(V::zeroes())
-        .bitcast_i32()
-        .cmp_eq(SimdI32::<V>::zeroes());
-    let subnormal_or_zero = exponent_bits.cmp_eq(SimdI32::<V>::zeroes());
-    let inf_or_nan = exponent_bits.cmp_eq(SimdI32::<V>::set1(F32_EXPONENT_MASK));
-    let exceptional_mask = non_positive | subnormal_or_zero | inf_or_nan;
+    let exceptional_mask = log2_exceptional_mask(input);
 
     let exponent = (exponent_bits.shr(23) - F32_EXPONENT_BIAS_ADJUST).cast_f32();
     let normalized_mantissa = (mantissa_bits | F32_LOG_NORM_MANTISSA).bitcast_f32();
@@ -112,7 +125,7 @@ where
 }
 
 #[inline(always)]
-pub(crate) fn exp2_u35<V>(input: V) -> V
+pub(super) fn exp2_u35<V>(input: V) -> V
 where
     V: SimdFloat32,
     V::Engine: Simd<Vf32 = V>,

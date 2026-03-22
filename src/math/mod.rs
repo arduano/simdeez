@@ -3,11 +3,12 @@
 //! Strategy C baseline: keep semantics in-tree and backend-agnostic by expressing
 //! vector math over existing simdeez vector types.
 //!
-//! `f32` `log2_u35` / `exp2_u35` are implemented with native SIMD reduction and
-//! polynomial kernels, with scalar-lane fallback only for exceptional lanes.
+//! `f32` `log2_u35` / `exp2_u35` flow through a layered kernel stack:
+//! portable SIMD kernels first, optional backend overrides where available,
+//! and scalar-lane fallback for exceptional semantics.
 //! `ln_u35` / `exp_u35` currently stay on deterministic scalar references.
 
-mod f32_kernels;
+mod f32;
 mod scalar;
 
 use crate::{Simd, SimdFloat32, SimdFloat64};
@@ -46,7 +47,7 @@ fn map_unary_f32<V: SimdFloat32>(input: V, f: impl Fn(f32) -> f32) -> V {
         for i in 0..V::WIDTH {
             lanes[i] = f(lanes[i]);
         }
-        V::load_from_array(lanes)
+        V::load_from_ptr_unaligned(&lanes as *const V::ArrayRepresentation as *const f32)
     }
 }
 
@@ -57,13 +58,15 @@ fn map_unary_f64<V: SimdFloat64>(input: V, f: impl Fn(f64) -> f64) -> V {
         for i in 0..V::WIDTH {
             lanes[i] = f(lanes[i]);
         }
-        V::load_from_array(lanes)
+        V::load_from_ptr_unaligned(&lanes as *const V::ArrayRepresentation as *const f64)
     }
 }
 
 /// SIMD math extension trait for `f32` vector types.
 ///
 /// `log2_u35`/`exp2_u35` use SIMD-native reduction/polynomial kernels.
+/// `log2_u35` additionally demonstrates backend override dispatch with a
+/// hand-tuned AVX2/FMA implementation.
 /// `ln_u35`/`exp_u35` currently use deterministic lane-wise scalar references.
 pub trait SimdMathF32: SimdFloat32 {
     /// `log2(x)` with target `u35`-tier contract.
@@ -75,7 +78,7 @@ pub trait SimdMathF32: SimdFloat32 {
     where
         Self::Engine: Simd<Vf32 = Self>,
     {
-        f32_kernels::log2_u35(self)
+        f32::log2_u35(self)
     }
 
     /// `exp2(x)` with target `u35`-tier contract.
@@ -87,7 +90,7 @@ pub trait SimdMathF32: SimdFloat32 {
     where
         Self::Engine: Simd<Vf32 = Self>,
     {
-        f32_kernels::exp2_u35(self)
+        f32::exp2_u35(self)
     }
 
     /// `ln(x)` with target `u35`-tier contract.
