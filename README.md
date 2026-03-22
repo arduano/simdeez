@@ -32,6 +32,9 @@ SIMDeez now includes a native, pure-Rust math surface for the first restored SLE
 - `exp2_u35`
 - `ln_u35`
 - `exp_u35`
+- `sin_u35`
+- `cos_u35`
+- `tan_u35`
 
 These are exposed via extension traits in `simdeez::math` and re-exported in `simdeez::prelude`:
 
@@ -40,7 +43,7 @@ use simdeez::prelude::*;
 
 fn apply_math<S: Simd>(x: S::Vf32) -> S::Vf32 {
     let y = x.log2_u35();
-    y.exp2_u35() + x.ln_u35() + x.exp_u35()
+    y.exp2_u35() + x.ln_u35() + x.exp_u35() + x.sin_u35() + x.cos_u35() + x.tan_u35()
 }
 ```
 
@@ -67,11 +70,11 @@ cargo bench --bench simd_math
 
 This benchmark reports per-function throughput for:
 
-- native scalar loop baseline (`f32::{log2, exp2, ln, exp}`)
+- native scalar loop baseline (`f32::{log2, exp2, ln, exp, sin, cos, tan}`)
 - simdeez runtime-selected path
 - forced backend variants (`scalar`, `sse2`, `sse41`, `avx2`, and `avx512` when available on host)
 
-Current expectation: `log2_u35` and `exp2_u35` should show clear speedups on SIMD-capable backends (notably AVX2 on x86 hosts), while `ln_u35`/`exp_u35` remain scalar-reference quality-first baselines. Use these benches to validate both performance and dispatch behavior as new kernels/overrides are added.
+Current expectation: `log2_u35` and `exp2_u35` should show clear speedups on SIMD-capable backends (notably AVX2 on x86 hosts), `sin_u35`/`cos_u35`/`tan_u35` should now also show meaningful SIMD wins on realistic finite ranges, while `ln_u35`/`exp_u35` remain scalar-reference quality-first baselines. Use these benches to validate both performance and dispatch behavior as new kernels/overrides are added.
 
 # Compared to packed_simd
 

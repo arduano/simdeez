@@ -26,7 +26,7 @@
 //!
 //! # SIMD math revival status
 //! SIMDeez now provides a native, pure-Rust first math family via extension traits:
-//! `log2_u35`, `exp2_u35`, `ln_u35`, and `exp_u35`.
+//! `log2_u35`, `exp2_u35`, `ln_u35`, `exp_u35`, `sin_u35`, `cos_u35`, and `tan_u35`.
 //!
 //! These methods are available through `simdeez::math` and re-exported by `simdeez::prelude`.
 //! The implementation follows a layered blueprint: portable kernels first,

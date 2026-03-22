@@ -214,6 +214,190 @@ simd_math_targeted_all_backends!(
     run_f32_exp2_u35_fast_domain_boundaries
 );
 
+fn run_f32_trig_pi_boundaries<S: Simd>() {
+    let mut inputs = vec![
+        0.0,
+        -0.0,
+        core::f32::consts::PI,
+        -core::f32::consts::PI,
+        core::f32::consts::FRAC_PI_2,
+        -core::f32::consts::FRAC_PI_2,
+        core::f32::consts::FRAC_PI_4,
+        -core::f32::consts::FRAC_PI_4,
+    ];
+
+    for k in -8..=8 {
+        let base = (k as f32) * core::f32::consts::FRAC_PI_2;
+        inputs.push(f32::from_bits(base.to_bits().saturating_sub(1)));
+        inputs.push(base);
+        inputs.push(f32::from_bits(base.to_bits().saturating_add(1)));
+    }
+
+    check_targeted_unary_f32::<S>(
+        "sin_u35",
+        &inputs,
+        contracts::SIN_U35_F32_MAX_ULP,
+        <S::Vf32 as SimdMathF32>::sin_u35,
+        f32::sin,
+    );
+    check_targeted_unary_f32::<S>(
+        "cos_u35",
+        &inputs,
+        contracts::COS_U35_F32_MAX_ULP,
+        <S::Vf32 as SimdMathF32>::cos_u35,
+        f32::cos,
+    );
+}
+
+fn run_f32_tan_pole_neighborhoods<S: Simd>() {
+    let mut inputs = vec![
+        -100.0,
+        -10.0,
+        -1.0,
+        -0.0,
+        0.0,
+        1.0,
+        10.0,
+        100.0,
+        f32::NAN,
+        f32::INFINITY,
+        f32::NEG_INFINITY,
+    ];
+
+    for k in -12..=12 {
+        let pole = (k as f32 + 0.5) * core::f32::consts::PI;
+        for delta in [1.0e-2, 1.0e-4, 1.0e-6] {
+            inputs.push(pole - delta);
+            inputs.push(pole + delta);
+        }
+    }
+
+    check_targeted_unary_f32::<S>(
+        "tan_u35",
+        &inputs,
+        contracts::TAN_U35_F32_MAX_ULP,
+        <S::Vf32 as SimdMathF32>::tan_u35,
+        f32::tan,
+    );
+}
+
+fn run_f32_trig_large_and_mixed_lanes<S: Simd>() {
+    let inputs = vec![
+        0.25,
+        -0.5,
+        123.456,
+        -2048.0,
+        8192.0,
+        -8192.0,
+        16384.0,
+        -16384.0,
+        f32::from_bits(1),
+        -f32::from_bits(1),
+        f32::NAN,
+        f32::INFINITY,
+        f32::NEG_INFINITY,
+        core::f32::consts::PI * 0.5 - 1.0e-4,
+        core::f32::consts::PI * 0.5 + 1.0e-4,
+        -core::f32::consts::PI * 0.5 + 1.0e-4,
+    ];
+
+    check_targeted_unary_f32::<S>(
+        "sin_u35",
+        &inputs,
+        contracts::SIN_U35_F32_MAX_ULP,
+        <S::Vf32 as SimdMathF32>::sin_u35,
+        f32::sin,
+    );
+    check_targeted_unary_f32::<S>(
+        "cos_u35",
+        &inputs,
+        contracts::COS_U35_F32_MAX_ULP,
+        <S::Vf32 as SimdMathF32>::cos_u35,
+        f32::cos,
+    );
+    check_targeted_unary_f32::<S>(
+        "tan_u35",
+        &inputs,
+        contracts::TAN_U35_F32_MAX_ULP,
+        <S::Vf32 as SimdMathF32>::tan_u35,
+        f32::tan,
+    );
+}
+
+simd_math_targeted_all_backends!(f32_trig_pi_boundaries, run_f32_trig_pi_boundaries);
+simd_math_targeted_all_backends!(f32_tan_pole_neighborhoods, run_f32_tan_pole_neighborhoods);
+simd_math_targeted_all_backends!(
+    f32_trig_large_and_mixed_lanes,
+    run_f32_trig_large_and_mixed_lanes
+);
+
+fn run_f32_trig_symmetry_identities<S: Simd>() {
+    let inputs = [
+        -3.0f32,
+        -1.0,
+        -0.5,
+        -0.0,
+        0.0,
+        0.5,
+        1.0,
+        3.0,
+        core::f32::consts::FRAC_PI_3,
+        -core::f32::consts::FRAC_PI_3,
+    ];
+
+    for chunk in inputs.chunks(S::Vf32::WIDTH) {
+        let x = S::Vf32::load_from_slice(chunk);
+        let sx = x.sin_u35();
+        let cx = x.cos_u35();
+        let tx = x.tan_u35();
+
+        let neg_x = -x;
+        let sneg = neg_x.sin_u35();
+        let cneg = neg_x.cos_u35();
+        let tneg = neg_x.tan_u35();
+
+        for lane in 0..chunk.len() {
+            if chunk[lane] == 0.0 {
+                continue;
+            }
+
+            let sin_expected = -sx[lane];
+            let cos_expected = cx[lane];
+            let tan_expected = -tx[lane];
+
+            assert_f32_contract(
+                "sin parity",
+                chunk[lane],
+                sneg[lane],
+                sin_expected,
+                contracts::SIN_U35_F32_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("{e}"));
+            assert_f32_contract(
+                "cos parity",
+                chunk[lane],
+                cneg[lane],
+                cos_expected,
+                contracts::COS_U35_F32_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("{e}"));
+            assert_f32_contract(
+                "tan parity",
+                chunk[lane],
+                tneg[lane],
+                tan_expected,
+                contracts::TAN_U35_F32_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("{e}"));
+        }
+    }
+}
+
+simd_math_targeted_all_backends!(
+    f32_trig_symmetry_identities,
+    run_f32_trig_symmetry_identities
+);
+
 #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
 #[test]
 fn f32_log2_u35_mixed_exception_lanes_avx2() {

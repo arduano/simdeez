@@ -156,3 +156,100 @@ where
 
     patch_exceptional_lanes(input, fast, exceptional_mask, scalar::exp2_u35_f32)
 }
+
+#[inline(always)]
+fn trig_exceptional_mask<V>(input: V) -> SimdI32<V>
+where
+    V: SimdFloat32,
+    V::Engine: Simd<Vf32 = V>,
+{
+    let finite_mask = input.cmp_eq(input).bitcast_i32();
+    let within_fast_range = input.abs().cmp_lte(V::set1(8192.0)).bitcast_i32();
+    let non_zero_mask = input.cmp_neq(V::zeroes()).bitcast_i32();
+    let fast_mask = finite_mask & within_fast_range & non_zero_mask;
+    fast_mask.cmp_eq(SimdI32::<V>::zeroes())
+}
+
+#[inline(always)]
+fn sin_cos_fast<V>(input: V) -> (V, V)
+where
+    V: SimdFloat32,
+    V::Engine: Simd<Vf32 = V>,
+{
+    let two_over_pi = V::set1(core::f32::consts::FRAC_2_PI);
+    let n = (input * two_over_pi).round().cast_i32();
+
+    let n_f = n.cast_f32();
+    let r = ((input - n_f * V::set1(1.570_312_5)) - n_f * V::set1(4.837_513e-4))
+        - n_f * V::set1(7.549_789_4e-8);
+    let r2 = r * r;
+
+    let sin_poly = (((V::set1(-2.388_985_9e-8) * r2 + V::set1(2.752_556_2e-6)) * r2
+        + V::set1(-1.984_127e-4))
+        * r2
+        + V::set1(8.333_331e-3))
+        * r2
+        + V::set1(-1.666_666_7e-1);
+    let sin_r = ((sin_poly * r2) * r) + r;
+
+    let cos_poly = (((V::set1(-2.605_161_5e-7) * r2 + V::set1(2.476_049_5e-5)) * r2
+        + V::set1(-1.388_837_8e-3))
+        * r2
+        + V::set1(4.166_664_6e-2))
+        * r2
+        + V::set1(-5e-1);
+    let cos_r = (cos_poly * r2) + V::set1(1.0);
+
+    let q = n & SimdI32::<V>::set1(3);
+    let q0 = q.cmp_eq(SimdI32::<V>::zeroes()).bitcast_f32();
+    let q1 = q.cmp_eq(SimdI32::<V>::set1(1)).bitcast_f32();
+    let q2 = q.cmp_eq(SimdI32::<V>::set1(2)).bitcast_f32();
+
+    let mut sin_out = q0.blendv(V::zeroes(), sin_r);
+    sin_out = q1.blendv(sin_out, cos_r);
+    sin_out = q2.blendv(sin_out, -sin_r);
+    sin_out = (q0 | q1 | q2).cmp_eq(V::zeroes()).blendv(sin_out, -cos_r);
+
+    let mut cos_out = q0.blendv(V::zeroes(), cos_r);
+    cos_out = q1.blendv(cos_out, -sin_r);
+    cos_out = q2.blendv(cos_out, -cos_r);
+    cos_out = (q0 | q1 | q2).cmp_eq(V::zeroes()).blendv(cos_out, sin_r);
+
+    (sin_out, cos_out)
+}
+
+#[inline(always)]
+pub(super) fn sin_u35<V>(input: V) -> V
+where
+    V: SimdFloat32,
+    V::Engine: Simd<Vf32 = V>,
+{
+    let exceptional_mask = trig_exceptional_mask(input);
+    let (sin_fast, _) = sin_cos_fast(input);
+    patch_exceptional_lanes(input, sin_fast, exceptional_mask, scalar::sin_u35_f32)
+}
+
+#[inline(always)]
+pub(super) fn cos_u35<V>(input: V) -> V
+where
+    V: SimdFloat32,
+    V::Engine: Simd<Vf32 = V>,
+{
+    let exceptional_mask = trig_exceptional_mask(input);
+    let (_, cos_fast) = sin_cos_fast(input);
+    patch_exceptional_lanes(input, cos_fast, exceptional_mask, scalar::cos_u35_f32)
+}
+
+#[inline(always)]
+pub(super) fn tan_u35<V>(input: V) -> V
+where
+    V: SimdFloat32,
+    V::Engine: Simd<Vf32 = V>,
+{
+    let base_exceptional = trig_exceptional_mask(input);
+    let (sin_fast, cos_fast) = sin_cos_fast(input);
+    let dangerous = cos_fast.abs().cmp_lt(V::set1(1.0e-4)).bitcast_i32();
+    let exceptional_mask = base_exceptional | dangerous;
+    let fast = sin_fast / cos_fast;
+    patch_exceptional_lanes(input, fast, exceptional_mask, scalar::tan_u35_f32)
+}

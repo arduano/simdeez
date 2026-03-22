@@ -39,3 +39,33 @@ pub fn ln_u35_f64(x: f64) -> f64 {
 pub fn exp_u35_f64(x: f64) -> f64 {
     x.m_exp()
 }
+
+#[inline(always)]
+pub fn sin_u35_f32(x: f32) -> f32 {
+    x.m_sin()
+}
+
+#[inline(always)]
+pub fn cos_u35_f32(x: f32) -> f32 {
+    x.m_cos()
+}
+
+#[inline(always)]
+pub fn tan_u35_f32(x: f32) -> f32 {
+    x.m_tan()
+}
+
+#[inline(always)]
+pub fn sin_u35_f64(x: f64) -> f64 {
+    x.m_sin()
+}
+
+#[inline(always)]
+pub fn cos_u35_f64(x: f64) -> f64 {
+    x.m_cos()
+}
+
+#[inline(always)]
+pub fn tan_u35_f64(x: f64) -> f64 {
+    x.m_tan()
+}
