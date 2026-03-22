@@ -932,7 +932,7 @@ impl_op! {
             vld1q_f32(ptr)
         }
         for Wasm(ptr: *const f32) -> v128 {
-            *(ptr as *const v128)
+            unsafe { v128_load(ptr as *const v128) }
         }
     }
 }
@@ -984,7 +984,7 @@ impl_op! {
             vst1q_f32(ptr, a)
         }
         for Wasm(ptr: *mut f32, a: v128) {
-            *(ptr as *mut v128) = a;
+            unsafe { v128_store(ptr as *mut v128, a) }
         }
     }
 }
