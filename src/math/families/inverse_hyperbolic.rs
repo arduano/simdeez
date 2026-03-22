@@ -31,17 +31,26 @@ impl<T: SimdFloat32> SimdMathF32InverseHyperbolic for T {}
 
 pub trait SimdMathF64InverseHyperbolic: SimdFloat64 {
     #[inline(always)]
-    fn asinh_u35(self) -> Self {
+    fn asinh_u35(self) -> Self
+    where
+        Self::Engine: Simd<Vf64 = Self>,
+    {
         f64::asinh_u35(self)
     }
 
     #[inline(always)]
-    fn acosh_u35(self) -> Self {
+    fn acosh_u35(self) -> Self
+    where
+        Self::Engine: Simd<Vf64 = Self>,
+    {
         f64::acosh_u35(self)
     }
 
     #[inline(always)]
-    fn atanh_u35(self) -> Self {
+    fn atanh_u35(self) -> Self
+    where
+        Self::Engine: Simd<Vf64 = Self>,
+    {
         f64::atanh_u35(self)
     }
 }

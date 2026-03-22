@@ -7,6 +7,7 @@ type SimdI64<V> = <<V as SimdConsts>::Engine as Simd>::Vi64;
 fn any_lane_nonzero<V>(mask: SimdI64<V>) -> bool
 where
     V: SimdFloat64,
+    V::Engine: Simd<Vf64 = V>,
 {
     unsafe {
         let lanes = mask.as_array();
@@ -29,6 +30,7 @@ fn patch_exceptional_lanes<V>(
 ) -> V
 where
     V: SimdFloat64,
+    V::Engine: Simd<Vf64 = V>,
 {
     if !any_lane_nonzero::<V>(exceptional_mask) {
         return output;
@@ -53,6 +55,7 @@ where
 pub(crate) fn asinh_u35<V>(input: V) -> V
 where
     V: SimdFloat64,
+    V::Engine: Simd<Vf64 = V>,
 {
     let finite_mask = input.cmp_eq(input).bitcast_i64();
     let abs_x = input.abs();
@@ -74,6 +77,7 @@ where
 pub(crate) fn acosh_u35<V>(input: V) -> V
 where
     V: SimdFloat64,
+    V::Engine: Simd<Vf64 = V>,
 {
     let finite_mask = input.cmp_eq(input).bitcast_i64();
     let in_domain_mask = input.cmp_gte(V::set1(1.0)).bitcast_i64();
@@ -90,6 +94,7 @@ where
 pub(crate) fn atanh_u35<V>(input: V) -> V
 where
     V: SimdFloat64,
+    V::Engine: Simd<Vf64 = V>,
 {
     let finite_mask = input.cmp_eq(input).bitcast_i64();
     let abs_x = input.abs();
