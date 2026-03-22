@@ -1,6 +1,6 @@
 mod portable_f32;
 
-use crate::math::{map, scalar};
+use crate::math::{f64, map, scalar};
 use crate::{Simd, SimdFloat32, SimdFloat64};
 
 pub trait SimdMathF32BinaryMisc: SimdFloat32 {
@@ -40,23 +40,23 @@ impl<T: SimdFloat32> SimdMathF32BinaryMisc for T {}
 pub trait SimdMathF64BinaryMisc: SimdFloat64 {
     #[inline(always)]
     fn log10_u35(self) -> Self {
-        map::unary_f64(self, scalar::log10_u35_f64)
+        f64::log10_u35(self)
     }
 
     #[inline(always)]
     fn atan2_u35(self, x: Self) -> Self {
-        map::binary_f64(self, x, scalar::atan2_u35_f64)
+        f64::atan2_u35(self, x)
     }
 
     #[inline(always)]
     fn hypot_u35(self, y: Self) -> Self {
-        map::binary_f64(self, y, scalar::hypot_u35_f64)
+        f64::hypot_u35(self, y)
     }
 
     /// Floating-point remainder with C/libm `fmod` semantics (sign follows dividend).
     #[inline(always)]
     fn fmod(self, y: Self) -> Self {
-        map::binary_f64(self, y, scalar::fmod_f64)
+        f64::fmod(self, y)
     }
 }
 

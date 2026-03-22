@@ -1,4 +1,4 @@
-use crate::math::{f32, map, scalar};
+use crate::math::{f32, f64, map, scalar};
 use crate::{Simd, SimdFloat32, SimdFloat64};
 
 pub trait SimdMathF32Core: SimdFloat32 {
@@ -58,37 +58,37 @@ impl<T: SimdFloat32> SimdMathF32Core for T {}
 pub trait SimdMathF64Core: SimdFloat64 {
     #[inline(always)]
     fn log2_u35(self) -> Self {
-        map::unary_f64(self, scalar::log2_u35_f64)
+        f64::log2_u35(self)
     }
 
     #[inline(always)]
     fn exp2_u35(self) -> Self {
-        map::unary_f64(self, scalar::exp2_u35_f64)
+        f64::exp2_u35(self)
     }
 
     #[inline(always)]
     fn ln_u35(self) -> Self {
-        map::unary_f64(self, scalar::ln_u35_f64)
+        f64::ln_u35(self)
     }
 
     #[inline(always)]
     fn exp_u35(self) -> Self {
-        map::unary_f64(self, scalar::exp_u35_f64)
+        f64::exp_u35(self)
     }
 
     #[inline(always)]
     fn sin_u35(self) -> Self {
-        map::unary_f64(self, scalar::sin_u35_f64)
+        f64::sin_u35(self)
     }
 
     #[inline(always)]
     fn cos_u35(self) -> Self {
-        map::unary_f64(self, scalar::cos_u35_f64)
+        f64::cos_u35(self)
     }
 
     #[inline(always)]
     fn tan_u35(self) -> Self {
-        map::unary_f64(self, scalar::tan_u35_f64)
+        f64::tan_u35(self)
     }
 }
 

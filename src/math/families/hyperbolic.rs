@@ -1,4 +1,4 @@
-use crate::math::{f32, map, scalar};
+use crate::math::{f32, f64};
 use crate::{Simd, SimdFloat32, SimdFloat64};
 
 pub trait SimdMathF32Hyperbolic: SimdFloat32 {
@@ -32,17 +32,17 @@ impl<T: SimdFloat32> SimdMathF32Hyperbolic for T {}
 pub trait SimdMathF64Hyperbolic: SimdFloat64 {
     #[inline(always)]
     fn sinh_u35(self) -> Self {
-        map::unary_f64(self, scalar::sinh_u35_f64)
+        f64::sinh_u35(self)
     }
 
     #[inline(always)]
     fn cosh_u35(self) -> Self {
-        map::unary_f64(self, scalar::cosh_u35_f64)
+        f64::cosh_u35(self)
     }
 
     #[inline(always)]
     fn tanh_u35(self) -> Self {
-        map::unary_f64(self, scalar::tanh_u35_f64)
+        f64::tanh_u35(self)
     }
 }
 
