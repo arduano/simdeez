@@ -55,36 +55,51 @@ impl_op! {
 impl_op! {
     fn mul<i8> {
         for Avx512(a: __m512i, b: __m512i) -> __m512i {
-            let mut arr1 = core::mem::transmute::<__m512i, [i8; 64]>(a);
-            let arr2 = core::mem::transmute::<__m512i, [i8; 64]>(b);
-            for i in 0..64 {
-                arr1[i] = arr1[i].wrapping_mul(arr2[i]);
-            }
-            core::mem::transmute::<_, _>(arr1)
+            // x86 has no native epi8 multiply. Compute per-byte wrapping products by multiplying
+            // widened even/odd bytes independently in epi16 lanes, then packing their low bytes back.
+            let low_byte_mask = _mm512_set1_epi16(0x00FF);
+
+            let even_products = _mm512_mullo_epi16(a, b);
+            let even_bytes = _mm512_and_si512(even_products, low_byte_mask);
+
+            let odd_a = _mm512_srli_epi16(a, 8);
+            let odd_b = _mm512_srli_epi16(b, 8);
+            let odd_products = _mm512_mullo_epi16(odd_a, odd_b);
+            let odd_bytes_shifted = _mm512_slli_epi16(odd_products, 8);
+            let odd_bytes = _mm512_andnot_si512(low_byte_mask, odd_bytes_shifted);
+
+            _mm512_or_si512(even_bytes, odd_bytes)
         }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
-            let mut arr1 = core::mem::transmute::<__m256i, [i8; 32]>(a);
-            let arr2 = core::mem::transmute::<__m256i, [i8; 32]>(b);
-            for i in 0..32 {
-                arr1[i] = arr1[i].wrapping_mul(arr2[i]);
-            }
-            core::mem::transmute::<_, _>(arr1)
+            let low_byte_mask = _mm256_set1_epi16(0x00FF);
+
+            let even_products = _mm256_mullo_epi16(a, b);
+            let even_bytes = _mm256_and_si256(even_products, low_byte_mask);
+
+            let odd_a = _mm256_srli_epi16(a, 8);
+            let odd_b = _mm256_srli_epi16(b, 8);
+            let odd_products = _mm256_mullo_epi16(odd_a, odd_b);
+            let odd_bytes_shifted = _mm256_slli_epi16(odd_products, 8);
+            let odd_bytes = _mm256_andnot_si256(low_byte_mask, odd_bytes_shifted);
+
+            _mm256_or_si256(even_bytes, odd_bytes)
         }
         for Sse41(a: __m128i, b: __m128i) -> __m128i {
-            let mut arr1 = core::mem::transmute::<__m128i, [i8; 16]>(a);
-            let arr2 = core::mem::transmute::<__m128i, [i8; 16]>(b);
-            for i in 0..16 {
-                arr1[i] = arr1[i].wrapping_mul(arr2[i]);
-            }
-            core::mem::transmute::<_, _>(arr1)
+            Ops::<Sse2, i8>::mul(a, b)
         }
         for Sse2(a: __m128i, b: __m128i) -> __m128i {
-            let mut arr1 = core::mem::transmute::<__m128i, [i8; 16]>(a);
-            let arr2 = core::mem::transmute::<__m128i, [i8; 16]>(b);
-            for i in 0..16 {
-                arr1[i] = arr1[i].wrapping_mul(arr2[i]);
-            }
-            core::mem::transmute::<_, _>(arr1)
+            let low_byte_mask = _mm_set1_epi16(0x00FF);
+
+            let even_products = _mm_mullo_epi16(a, b);
+            let even_bytes = _mm_and_si128(even_products, low_byte_mask);
+
+            let odd_a = _mm_srli_epi16(a, 8);
+            let odd_b = _mm_srli_epi16(b, 8);
+            let odd_products = _mm_mullo_epi16(odd_a, odd_b);
+            let odd_bytes_shifted = _mm_slli_epi16(odd_products, 8);
+            let odd_bytes = _mm_andnot_si128(low_byte_mask, odd_bytes_shifted);
+
+            _mm_or_si128(even_bytes, odd_bytes)
         }
         for Scalar(a: i8, b: i8) -> i8 {
             a.wrapping_mul(b)
@@ -93,12 +108,7 @@ impl_op! {
             vmulq_s8(a, b)
         }
         for Wasm(a: v128, b: v128) -> v128 {
-            let mut arr1 = core::mem::transmute::<_, [i8; 16]>(a);
-            let arr2 = core::mem::transmute::<_, [i8; 16]>(b);
-            for i in 0..16 {
-                arr1[i] = arr1[i].wrapping_mul(arr2[i]);
-            }
-            core::mem::transmute::<_, _>(arr1)
+            i8x16_mul(a, b)
         }
     }
 }
