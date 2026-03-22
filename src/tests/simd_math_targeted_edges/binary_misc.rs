@@ -276,3 +276,132 @@ simd_math_targeted_all_backends!(
     f64_log10_domain_and_mixed_lanes,
     run_f64_log10_domain_and_mixed_lanes
 );
+
+fn run_f64_binary_misc_adversarial_lanes<S: Simd>() {
+    // log10_u35: adversarial around denormals and exact powers of ten.
+    let log10_inputs = [
+        f64::MIN_POSITIVE,
+        f64::from_bits(1),
+        f64::from_bits(2),
+        1.0e-320,
+        9.999_999_999_999_999e-101,
+        1.0e-100,
+        10.0,
+        1.0e100,
+        0.0,
+        -0.0,
+        -1.0,
+        f64::INFINITY,
+        f64::NAN,
+    ];
+    for chunk in log10_inputs.chunks(S::Vf64::WIDTH) {
+        let xv = S::Vf64::load_from_slice(chunk);
+        let out = xv.log10_u35();
+        for lane in 0..chunk.len() {
+            let x = chunk[lane];
+            assert_f64_contract(
+                "log10_u35",
+                x,
+                out[lane],
+                x.log10(),
+                contracts::LOG10_U35_F64_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("adversarial log10_u35({x:?}) {e}"));
+        }
+    }
+
+    // atan2_u35: signed-zero and near-axis quadrant behavior.
+    let atan2_cases = [
+        (0.0, -0.0),
+        (-0.0, -0.0),
+        (0.0, 0.0),
+        (-0.0, 0.0),
+        (f64::MIN_POSITIVE, -f64::MIN_POSITIVE),
+        (-f64::MIN_POSITIVE, -f64::MIN_POSITIVE),
+        (1.0e-300, -1.0),
+        (-1.0e-300, -1.0),
+        (1.0, -1.0e-300),
+        (-1.0, -1.0e-300),
+        (f64::INFINITY, -f64::INFINITY),
+        (f64::NEG_INFINITY, -f64::INFINITY),
+        (f64::NAN, 1.0),
+        (1.0, f64::NAN),
+    ];
+    for chunk in atan2_cases.chunks(S::Vf64::WIDTH) {
+        let mut ys = vec![0.0f64; chunk.len()];
+        let mut xs = vec![0.0f64; chunk.len()];
+        for (idx, (y, x)) in chunk.iter().copied().enumerate() {
+            ys[idx] = y;
+            xs[idx] = x;
+        }
+
+        let yv = S::Vf64::load_from_slice(&ys);
+        let xv = S::Vf64::load_from_slice(&xs);
+        let out = yv.atan2_u35(xv);
+        for lane in 0..chunk.len() {
+            let y = ys[lane];
+            let x = xs[lane];
+            assert_f64_contract(
+                "atan2_u35",
+                y,
+                out[lane],
+                y.atan2(x),
+                contracts::ATAN2_U35_F64_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("adversarial atan2_u35({y:?}, {x:?}) {e}"));
+        }
+    }
+
+    // hypot_u35 + fmod: scale extremes and quotient-threshold stress.
+    let binary_cases = [
+        (f64::MAX, f64::MIN_POSITIVE),
+        (f64::MIN_POSITIVE, f64::MAX),
+        (1.0e308, 1.0e-308),
+        (1.0e-308, 1.0e308),
+        (-1.0e308, 1.0e-308),
+        (9.007_199_254_740_992e15, 1.25),
+        (-9.007_199_254_740_992e15, 1.25),
+        (9.007_199_254_740_993e15, 1.25),
+        (-9.007_199_254_740_993e15, 1.25),
+        (0.0, 3.0),
+        (-0.0, 3.0),
+        (f64::INFINITY, 2.0),
+        (2.0, 0.0),
+        (f64::NAN, 2.0),
+        (2.0, f64::NAN),
+    ];
+
+    for chunk in binary_cases.chunks(S::Vf64::WIDTH) {
+        let mut xs = vec![0.0f64; chunk.len()];
+        let mut ys = vec![0.0f64; chunk.len()];
+        for (idx, (x, y)) in chunk.iter().copied().enumerate() {
+            xs[idx] = x;
+            ys[idx] = y;
+        }
+
+        let xv = S::Vf64::load_from_slice(&xs);
+        let yv = S::Vf64::load_from_slice(&ys);
+        let h = xv.hypot_u35(yv);
+        let r = xv.fmod(yv);
+
+        for lane in 0..chunk.len() {
+            let x = xs[lane];
+            let y = ys[lane];
+            assert_f64_contract(
+                "hypot_u35",
+                x,
+                h[lane],
+                x.hypot(y),
+                contracts::HYPOT_U35_F64_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("adversarial hypot_u35({x:?}, {y:?}) {e}"));
+            assert_f64_contract("fmod", x, r[lane], x % y, 0)
+                .unwrap_or_else(|e| panic!("adversarial fmod({x:?}, {y:?}) {e}"));
+        }
+    }
+}
+
+simd_math_targeted_all_backends!(
+    f64_binary_misc_adversarial_lanes,
+    run_f64_binary_misc_adversarial_lanes
+);
