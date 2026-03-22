@@ -1,5 +1,5 @@
 use super::*;
-use crate::math::SimdMathF32Core;
+use crate::math::{SimdMathF32Core, SimdMathF64Core};
 
 fn run_f32_log2_u35_reduction_boundaries<S: Simd>() {
     let mut inputs = vec![
@@ -256,6 +256,132 @@ simd_math_targeted_all_backends!(
     f32_trig_symmetry_identities,
     run_f32_trig_symmetry_identities
 );
+
+fn run_f64_log_exp_boundary_lanes<S: Simd>() {
+    let inputs_log = vec![
+        f64::from_bits(1),
+        f64::MIN_POSITIVE,
+        0.5,
+        std::f64::consts::FRAC_1_SQRT_2,
+        1.0,
+        2.0,
+        1024.0,
+        f64::INFINITY,
+        f64::NAN,
+        -1.0,
+        0.0,
+        -0.0,
+    ];
+
+    check_targeted_unary_f64::<S>(
+        "log2_u35",
+        &inputs_log,
+        contracts::LOG2_U35_F64_MAX_ULP,
+        |v| v.log2_u35(),
+        f64::log2,
+    );
+    check_targeted_unary_f64::<S>(
+        "ln_u35",
+        &inputs_log,
+        contracts::LN_U35_F64_MAX_ULP,
+        |v| v.ln_u35(),
+        f64::ln,
+    );
+
+    let inputs_exp = vec![
+        -1022.0,
+        -1021.75,
+        -10.0,
+        -1.0,
+        -0.0,
+        0.0,
+        1.0,
+        10.0,
+        1022.0,
+        1023.0,
+        1023.25,
+        f64::INFINITY,
+        f64::NEG_INFINITY,
+        f64::NAN,
+    ];
+
+    check_targeted_unary_f64::<S>(
+        "exp2_u35",
+        &inputs_exp,
+        contracts::EXP2_U35_F64_MAX_ULP,
+        |v| v.exp2_u35(),
+        f64::exp2,
+    );
+    check_targeted_unary_f64::<S>(
+        "exp_u35",
+        &inputs_exp,
+        contracts::EXP_U35_F64_MAX_ULP,
+        |v| v.exp_u35(),
+        f64::exp,
+    );
+}
+
+fn run_f64_trig_pi_boundaries<S: Simd>() {
+    let mut inputs = vec![
+        -0.0,
+        0.0,
+        std::f64::consts::PI,
+        -std::f64::consts::PI,
+        std::f64::consts::FRAC_PI_2,
+        -std::f64::consts::FRAC_PI_2,
+        std::f64::consts::FRAC_PI_4,
+        -std::f64::consts::FRAC_PI_4,
+        f64::NAN,
+        f64::INFINITY,
+        f64::NEG_INFINITY,
+    ];
+
+    for k in -12..=12 {
+        let base = (k as f64) * std::f64::consts::FRAC_PI_2;
+        inputs.push(f64::from_bits(base.to_bits().saturating_sub(1)));
+        inputs.push(base);
+        inputs.push(f64::from_bits(base.to_bits().saturating_add(1)));
+    }
+
+    check_targeted_unary_f64::<S>(
+        "sin_u35",
+        &inputs,
+        contracts::SIN_U35_F64_MAX_ULP,
+        |v| v.sin_u35(),
+        f64::sin,
+    );
+    check_targeted_unary_f64::<S>(
+        "cos_u35",
+        &inputs,
+        contracts::COS_U35_F64_MAX_ULP,
+        |v| v.cos_u35(),
+        f64::cos,
+    );
+}
+
+fn run_f64_tan_pole_neighborhoods<S: Simd>() {
+    let mut inputs = vec![-1.0, -0.0, 0.0, 1.0, 10.0, -10.0, f64::NAN, f64::INFINITY];
+
+    for k in -16..=16 {
+        let pole = (k as f64 + 0.5) * std::f64::consts::PI;
+        for delta in [1.0e-4, 1.0e-6, 1.0e-8] {
+            inputs.push(pole - delta);
+            inputs.push(pole + delta);
+        }
+    }
+
+    check_targeted_unary_f64::<S>(
+        "tan_u35",
+        &inputs,
+        contracts::TAN_U35_F64_MAX_ULP,
+        |v| v.tan_u35(),
+        f64::tan,
+    );
+}
+
+simd_math_targeted_all_backends!(f64_log_exp_boundary_lanes, run_f64_log_exp_boundary_lanes);
+simd_math_targeted_all_backends!(f64_trig_pi_boundaries, run_f64_trig_pi_boundaries);
+simd_math_targeted_all_backends!(f64_tan_pole_neighborhoods, run_f64_tan_pole_neighborhoods);
 
 #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
 #[test]

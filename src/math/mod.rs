@@ -17,8 +17,8 @@
 //! Structure notes:
 //! - `families/` owns public extension traits grouped by math family.
 //! - `scalar/` owns scalar fallback helpers using the same family boundaries.
-//! - `f64/` mirrors the family split for future backend work while preserving
-//!   the current scalar-mapped behavior.
+//! - `f64/` mirrors the family split; core u35 kernels now have portable SIMD
+//!   fast paths with scalar-lane patching for exceptional inputs.
 //! - `contracts.rs` and `map.rs` stay stable so follow-up optimization PRs can
 //!   target a single family file with minimal overlap.
 

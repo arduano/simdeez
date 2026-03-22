@@ -1,5 +1,5 @@
 use super::*;
-use crate::math::{SimdMathF32Hyperbolic, SimdMathF32InverseHyperbolic};
+use crate::math::{SimdMathF32Hyperbolic, SimdMathF32InverseHyperbolic, SimdMathF64Hyperbolic};
 
 fn run_f32_hyperbolic_edges<S: Simd>() {
     let inputs = [
@@ -194,4 +194,134 @@ simd_math_targeted_all_backends!(
 simd_math_targeted_all_backends!(
     f32_hyperbolic_special_values_and_mixed_lanes,
     run_f32_hyperbolic_special_values_and_mixed_lanes
+);
+
+fn push_boundary_triplet_f64(inputs: &mut Vec<f64>, center: f64) {
+    inputs.push(f64::from_bits(center.to_bits().saturating_sub(1)));
+    inputs.push(center);
+    inputs.push(f64::from_bits(center.to_bits().saturating_add(1)));
+}
+
+fn run_f64_hyperbolic_fast_path_boundaries<S: Simd>() {
+    let mut inputs = Vec::new();
+    for center in [
+        -30.0f64, -20.0, -0.625, -0.5, -0.0, 0.0, 0.5, 0.625, 20.0, 30.0,
+    ] {
+        push_boundary_triplet_f64(&mut inputs, center);
+    }
+
+    check_targeted_unary_f64::<S>(
+        "sinh_u35",
+        &inputs,
+        contracts::SINH_U35_F64_MAX_ULP,
+        |v| v.sinh_u35(),
+        f64::sinh,
+    );
+    check_targeted_unary_f64::<S>(
+        "cosh_u35",
+        &inputs,
+        contracts::COSH_U35_F64_MAX_ULP,
+        |v| v.cosh_u35(),
+        f64::cosh,
+    );
+    check_targeted_unary_f64::<S>(
+        "tanh_u35",
+        &inputs,
+        contracts::TANH_U35_F64_MAX_ULP,
+        |v| v.tanh_u35(),
+        f64::tanh,
+    );
+}
+
+fn run_f64_hyperbolic_special_values_and_mixed_lanes<S: Simd>() {
+    let mut inputs = vec![
+        f64::NAN,
+        f64::from_bits(0x7FF8_0000_0000_1234),
+        f64::NEG_INFINITY,
+        f64::INFINITY,
+        -0.0,
+        0.0,
+        -20.0,
+        20.0,
+        -0.5,
+        0.5,
+        -1.0e-12,
+        1.0e-12,
+        -5.0,
+        5.0,
+        -100.0,
+        100.0,
+    ];
+
+    while !inputs.len().is_multiple_of(S::Vf64::WIDTH) {
+        inputs.push(0.25);
+    }
+
+    for chunk in inputs.chunks(S::Vf64::WIDTH) {
+        let v = S::Vf64::load_from_slice(chunk);
+        let sinh = v.sinh_u35();
+        let cosh = v.cosh_u35();
+        let tanh = v.tanh_u35();
+
+        for (lane, &x) in chunk.iter().enumerate() {
+            assert_f64_contract(
+                "sinh_u35",
+                x,
+                sinh[lane],
+                x.sinh(),
+                contracts::SINH_U35_F64_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("{e}"));
+            assert_f64_contract(
+                "cosh_u35",
+                x,
+                cosh[lane],
+                x.cosh(),
+                contracts::COSH_U35_F64_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("{e}"));
+            assert_f64_contract(
+                "tanh_u35",
+                x,
+                tanh[lane],
+                x.tanh(),
+                contracts::TANH_U35_F64_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("{e}"));
+        }
+    }
+}
+
+simd_math_targeted_all_backends!(
+    f64_hyperbolic_fast_path_boundaries,
+    run_f64_hyperbolic_fast_path_boundaries
+);
+simd_math_targeted_all_backends!(
+    f64_hyperbolic_special_values_and_mixed_lanes,
+    run_f64_hyperbolic_special_values_and_mixed_lanes
+);
+
+fn run_f64_hyperbolic_signed_zero_semantics<S: Simd>() {
+    let mut lanes = vec![0.0f64; S::Vf64::WIDTH];
+    lanes[0] = -0.0;
+
+    let input = S::Vf64::load_from_slice(&lanes);
+    let sinh = input.sinh_u35();
+    let tanh = input.tanh_u35();
+
+    assert_eq!(sinh[0].to_bits(), (-0.0f64).sinh().to_bits());
+    assert_eq!(tanh[0].to_bits(), (-0.0f64).tanh().to_bits());
+
+    if S::Vf64::WIDTH > 1 {
+        assert_eq!(sinh[1].to_bits(), 0.0f64.sinh().to_bits());
+        assert_eq!(tanh[1].to_bits(), 0.0f64.tanh().to_bits());
+    }
+
+    let cosh = input.cosh_u35();
+    assert_eq!(cosh[0].to_bits(), (-0.0f64).cosh().to_bits());
+}
+
+simd_math_targeted_all_backends!(
+    f64_hyperbolic_signed_zero_semantics,
+    run_f64_hyperbolic_signed_zero_semantics
 );

@@ -57,37 +57,58 @@ impl<T: SimdFloat32> SimdMathF32Core for T {}
 
 pub trait SimdMathF64Core: SimdFloat64 {
     #[inline(always)]
-    fn log2_u35(self) -> Self {
+    fn log2_u35(self) -> Self
+    where
+        Self::Engine: Simd<Vf64 = Self>,
+    {
         f64::log2_u35(self)
     }
 
     #[inline(always)]
-    fn exp2_u35(self) -> Self {
+    fn exp2_u35(self) -> Self
+    where
+        Self::Engine: Simd<Vf64 = Self>,
+    {
         f64::exp2_u35(self)
     }
 
     #[inline(always)]
-    fn ln_u35(self) -> Self {
+    fn ln_u35(self) -> Self
+    where
+        Self::Engine: Simd<Vf64 = Self>,
+    {
         f64::ln_u35(self)
     }
 
     #[inline(always)]
-    fn exp_u35(self) -> Self {
+    fn exp_u35(self) -> Self
+    where
+        Self::Engine: Simd<Vf64 = Self>,
+    {
         f64::exp_u35(self)
     }
 
     #[inline(always)]
-    fn sin_u35(self) -> Self {
+    fn sin_u35(self) -> Self
+    where
+        Self::Engine: Simd<Vf64 = Self>,
+    {
         f64::sin_u35(self)
     }
 
     #[inline(always)]
-    fn cos_u35(self) -> Self {
+    fn cos_u35(self) -> Self
+    where
+        Self::Engine: Simd<Vf64 = Self>,
+    {
         f64::cos_u35(self)
     }
 
     #[inline(always)]
-    fn tan_u35(self) -> Self {
+    fn tan_u35(self) -> Self
+    where
+        Self::Engine: Simd<Vf64 = Self>,
+    {
         f64::tan_u35(self)
     }
 }
