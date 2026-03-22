@@ -32,9 +32,11 @@ pub const SIN_U35_F64_MAX_ULP: u64 = 35;
 pub const COS_U35_F64_MAX_ULP: u64 = 35;
 pub const TAN_U35_F64_MAX_ULP: u64 = 35;
 
-pub const ASIN_U35_F64_MAX_ULP: u64 = 1;
-pub const ACOS_U35_F64_MAX_ULP: u64 = 1;
-pub const ATAN_U35_F64_MAX_ULP: u64 = 1;
+// Portable f64 inverse-trig kernels now use the family-local SIMD implementation
+// rather than scalar lane mapping, so they carry the honest u35 contract.
+pub const ASIN_U35_F64_MAX_ULP: u64 = 35;
+pub const ACOS_U35_F64_MAX_ULP: u64 = 35;
+pub const ATAN_U35_F64_MAX_ULP: u64 = 35;
 pub const ATAN2_U35_F64_MAX_ULP: u64 = 1;
 pub const SINH_U35_F64_MAX_ULP: u64 = 1;
 pub const COSH_U35_F64_MAX_ULP: u64 = 1;

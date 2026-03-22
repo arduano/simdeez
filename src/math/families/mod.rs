@@ -2,7 +2,7 @@ mod binary_misc;
 mod core;
 mod hyperbolic;
 mod inverse_hyperbolic;
-mod inverse_trig;
+pub(crate) mod inverse_trig;
 
 use crate::{SimdFloat32, SimdFloat64};
 

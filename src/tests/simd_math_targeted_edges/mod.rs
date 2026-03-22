@@ -68,6 +68,58 @@ fn assert_f32_contract(
     Ok(())
 }
 
+fn assert_f64_contract(
+    fn_name: &str,
+    input: f64,
+    actual: f64,
+    expected: f64,
+    max_ulp: u64,
+) -> Result<(), String> {
+    if expected.is_nan() {
+        if actual.is_nan() {
+            return Ok(());
+        }
+        return Err(format!("{fn_name}({input:?}) expected NaN, got {actual:?}"));
+    }
+
+    if expected.is_infinite() {
+        if actual.to_bits() == expected.to_bits() {
+            return Ok(());
+        }
+        return Err(format!(
+            "{fn_name}({input:?}) expected {:?}, got {:?}",
+            expected, actual
+        ));
+    }
+
+    if expected == 0.0 {
+        if actual.to_bits() == expected.to_bits() {
+            return Ok(());
+        }
+        return Err(format!(
+            "{fn_name}({input:?}) expected signed zero bits {:016x}, got {:016x}",
+            expected.to_bits(),
+            actual.to_bits()
+        ));
+    }
+
+    if actual.is_nan() || actual.is_infinite() {
+        return Err(format!(
+            "{fn_name}({input:?}) expected finite {expected:?}, got {actual:?}"
+        ));
+    }
+
+    let ulp = ulp_distance_f64(actual, expected)
+        .ok_or_else(|| format!("{fn_name}({input:?}) failed to compute f64 ULP distance"))?;
+    if ulp > max_ulp {
+        return Err(format!(
+            "{fn_name}({input:?}) ULP distance {ulp} exceeds max {max_ulp} (actual={actual:?}, expected={expected:?})"
+        ));
+    }
+
+    Ok(())
+}
+
 fn check_targeted_unary_f32<S: Simd>(
     fn_name: &str,
     inputs: &[f32],
