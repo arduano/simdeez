@@ -7,6 +7,8 @@
 //! portable SIMD kernels first, optional backend overrides where available,
 //! and scalar-lane fallback for exceptional semantics.
 //! `ln_u35` / `exp_u35` currently stay on deterministic scalar references.
+//! `sin_u35` / `cos_u35` / `tan_u35` use portable SIMD range reduction with
+//! centralized fallback for non-finite, very-large, and tan-pole-adjacent lanes.
 
 mod f32;
 mod scalar;
@@ -38,6 +40,24 @@ pub mod contracts {
 
     /// Maximum ULP error target for f64 `exp_u35`.
     pub const EXP_U35_F64_MAX_ULP: u64 = 1;
+
+    /// Maximum ULP error target for f32 `sin_u35`.
+    pub const SIN_U35_F32_MAX_ULP: u32 = 35;
+
+    /// Maximum ULP error target for f32 `cos_u35`.
+    pub const COS_U35_F32_MAX_ULP: u32 = 35;
+
+    /// Maximum ULP error target for f32 `tan_u35`.
+    pub const TAN_U35_F32_MAX_ULP: u32 = 35;
+
+    /// Maximum ULP error target for f64 `sin_u35`.
+    pub const SIN_U35_F64_MAX_ULP: u64 = 1;
+
+    /// Maximum ULP error target for f64 `cos_u35`.
+    pub const COS_U35_F64_MAX_ULP: u64 = 1;
+
+    /// Maximum ULP error target for f64 `tan_u35`.
+    pub const TAN_U35_F64_MAX_ULP: u64 = 1;
 }
 
 #[inline(always)]
@@ -104,6 +124,36 @@ pub trait SimdMathF32: SimdFloat32 {
     fn exp_u35(self) -> Self {
         map_unary_f32(self, scalar::exp_u35_f32)
     }
+
+    /// `sin(x)` with target `u35`-tier contract.
+    #[inline(always)]
+    fn sin_u35(self) -> Self
+    where
+        Self::Engine: Simd<Vf32 = Self>,
+    {
+        f32::sin_u35(self)
+    }
+
+    /// `cos(x)` with target `u35`-tier contract.
+    #[inline(always)]
+    fn cos_u35(self) -> Self
+    where
+        Self::Engine: Simd<Vf32 = Self>,
+    {
+        f32::cos_u35(self)
+    }
+
+    /// `tan(x)` with target `u35`-tier contract.
+    ///
+    /// Uses the shared SIMD sin/cos reduction path for common lanes and
+    /// patches potentially dangerous pole-adjacent lanes with scalar fallback.
+    #[inline(always)]
+    fn tan_u35(self) -> Self
+    where
+        Self::Engine: Simd<Vf32 = Self>,
+    {
+        f32::tan_u35(self)
+    }
 }
 
 impl<T: SimdFloat32> SimdMathF32 for T {}
@@ -132,6 +182,24 @@ pub trait SimdMathF64: SimdFloat64 {
     #[inline(always)]
     fn exp_u35(self) -> Self {
         map_unary_f64(self, scalar::exp_u35_f64)
+    }
+
+    /// `sin(x)` with target `u35`-tier contract.
+    #[inline(always)]
+    fn sin_u35(self) -> Self {
+        map_unary_f64(self, scalar::sin_u35_f64)
+    }
+
+    /// `cos(x)` with target `u35`-tier contract.
+    #[inline(always)]
+    fn cos_u35(self) -> Self {
+        map_unary_f64(self, scalar::cos_u35_f64)
+    }
+
+    /// `tan(x)` with target `u35`-tier contract.
+    #[inline(always)]
+    fn tan_u35(self) -> Self {
+        map_unary_f64(self, scalar::tan_u35_f64)
     }
 }
 
