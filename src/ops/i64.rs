@@ -1,5 +1,41 @@
 use super::*;
 
+#[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+#[inline(always)]
+unsafe fn sse_i64_hi32_splat(v: __m128i) -> __m128i {
+    _mm_shuffle_epi32(v, 0b11_11_01_01)
+}
+
+#[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+#[inline(always)]
+unsafe fn sse_i64_lo32_splat(v: __m128i) -> __m128i {
+    _mm_shuffle_epi32(v, 0b10_10_00_00)
+}
+
+#[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+#[inline(always)]
+unsafe fn sse_cmpeq_epi64_compat(a: __m128i, b: __m128i) -> __m128i {
+    let hi_eq = _mm_cmpeq_epi32(sse_i64_hi32_splat(a), sse_i64_hi32_splat(b));
+    let lo_eq = _mm_cmpeq_epi32(sse_i64_lo32_splat(a), sse_i64_lo32_splat(b));
+    _mm_and_si128(hi_eq, lo_eq)
+}
+
+#[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+#[inline(always)]
+unsafe fn sse_cmpgt_epi64_compat(a: __m128i, b: __m128i) -> __m128i {
+    let hi_a = sse_i64_hi32_splat(a);
+    let hi_b = sse_i64_hi32_splat(b);
+    let hi_gt = _mm_cmpgt_epi32(hi_a, hi_b);
+    let hi_eq = _mm_cmpeq_epi32(hi_a, hi_b);
+
+    let sign_bit = _mm_set1_epi32(i32::MIN);
+    let lo_a = _mm_xor_si128(sse_i64_lo32_splat(a), sign_bit);
+    let lo_b = _mm_xor_si128(sse_i64_lo32_splat(b), sign_bit);
+    let lo_gt = _mm_cmpgt_epi32(lo_a, lo_b);
+
+    _mm_or_si128(hi_gt, _mm_and_si128(hi_eq, lo_gt))
+}
+
 impl_op! {
     fn add<i64> {
         for Avx512(a: __m512i, b: __m512i) -> __m512i {
@@ -114,11 +150,11 @@ impl_op! {
             _mm256_or_si256(_mm256_and_si256(mask, b), _mm256_andnot_si256(mask, a))
         }
         for Sse41(a: __m128i, b: __m128i) -> __m128i {
-            let mask = _mm_cmpgt_epi64(a, b);
+            let mask = sse_cmpgt_epi64_compat(a, b);
             _mm_or_si128(_mm_and_si128(mask, b), _mm_andnot_si128(mask, a))
         }
         for Sse2(a: __m128i, b: __m128i) -> __m128i {
-            let mask = _mm_cmpgt_epi64(a, b);
+            let mask = sse_cmpgt_epi64_compat(a, b);
             _mm_or_si128(_mm_and_si128(mask, b), _mm_andnot_si128(mask, a))
         }
         for Scalar(a: i64, b: i64) -> i64 {
@@ -146,11 +182,11 @@ impl_op! {
             _mm256_or_si256(_mm256_and_si256(mask, a), _mm256_andnot_si256(mask, b))
         }
         for Sse41(a: __m128i, b: __m128i) -> __m128i {
-            let mask = _mm_cmpgt_epi64(a, b);
+            let mask = sse_cmpgt_epi64_compat(a, b);
             _mm_or_si128(_mm_and_si128(mask, a), _mm_andnot_si128(mask, b))
         }
         for Sse2(a: __m128i, b: __m128i) -> __m128i {
-            let mask = _mm_cmpgt_epi64(a, b);
+            let mask = sse_cmpgt_epi64_compat(a, b);
             _mm_or_si128(_mm_and_si128(mask, a), _mm_andnot_si128(mask, b))
         }
         for Scalar(a: i64, b: i64) -> i64 {
@@ -178,11 +214,11 @@ impl_op! {
             _mm256_sub_epi64(_mm256_xor_si256(a, mask), mask)
         }
         for Sse41(a: __m128i) -> __m128i {
-            let mask = _mm_cmpgt_epi64(_mm_setzero_si128(), a);
+            let mask = sse_cmpgt_epi64_compat(_mm_setzero_si128(), a);
             _mm_sub_epi64(_mm_xor_si128(a, mask), mask)
         }
         for Sse2(a: __m128i) -> __m128i {
-            let mask = _mm_cmpgt_epi64(_mm_setzero_si128(), a);
+            let mask = sse_cmpgt_epi64_compat(_mm_setzero_si128(), a);
             _mm_sub_epi64(_mm_xor_si128(a, mask), mask)
         }
         for Scalar(a: i64) -> i64 {
@@ -207,10 +243,10 @@ impl_op! {
             _mm256_cmpeq_epi64(a, b)
         }
         for Sse41(a: __m128i, b: __m128i) -> __m128i {
-            _mm_cmpeq_epi64(a, b)
+            sse_cmpeq_epi64_compat(a, b)
         }
         for Sse2(a: __m128i, b: __m128i) -> __m128i {
-            _mm_cmpeq_epi64(a, b)
+            sse_cmpeq_epi64_compat(a, b)
         }
         for Scalar(a: i64, b: i64) -> i64 {
             if a == b {
@@ -239,11 +275,11 @@ impl_op! {
             _mm256_xor_si256(eq, _mm256_set1_epi64x(u64::MAX as i64))
         }
         for Sse41(a: __m128i, b: __m128i) -> __m128i {
-            let eq = _mm_cmpeq_epi64(a, b);
+            let eq = sse_cmpeq_epi64_compat(a, b);
             _mm_xor_si128(eq, _mm_set1_epi64x(u64::MAX as i64))
         }
         for Sse2(a: __m128i, b: __m128i) -> __m128i {
-            let eq = _mm_cmpeq_epi64(a, b);
+            let eq = sse_cmpeq_epi64_compat(a, b);
             _mm_xor_si128(eq, _mm_set1_epi64x(u64::MAX as i64))
         }
         for Scalar(a: i64, b: i64) -> i64 {
@@ -274,13 +310,13 @@ impl_op! {
             _mm256_andnot_si256(_mm256_or_si256(gt, eq), _mm256_set1_epi64x(u64::MAX as i64))
         }
         for Sse41(a: __m128i, b: __m128i) -> __m128i {
-            let gt = _mm_cmpgt_epi64(a, b);
-            let eq = _mm_cmpeq_epi64(a, b);
+            let gt = sse_cmpgt_epi64_compat(a, b);
+            let eq = sse_cmpeq_epi64_compat(a, b);
             _mm_andnot_si128(_mm_or_si128(gt, eq), _mm_set1_epi64x(u64::MAX as i64))
         }
         for Sse2(a: __m128i, b: __m128i) -> __m128i {
-            let gt = _mm_cmpgt_epi64(a, b);
-            let eq = _mm_cmpeq_epi64(a, b);
+            let gt = sse_cmpgt_epi64_compat(a, b);
+            let eq = sse_cmpeq_epi64_compat(a, b);
             _mm_andnot_si128(_mm_or_si128(gt, eq), _mm_set1_epi64x(u64::MAX as i64))
         }
         for Scalar(a: i64, b: i64) -> i64 {
@@ -310,11 +346,11 @@ impl_op! {
             _mm256_xor_si256(gt, _mm256_set1_epi64x(u64::MAX as i64))
         }
         for Sse41(a: __m128i, b: __m128i) -> __m128i {
-            let gt = _mm_cmpgt_epi64(a, b);
+            let gt = sse_cmpgt_epi64_compat(a, b);
             _mm_xor_si128(gt, _mm_set1_epi64x(u64::MAX as i64))
         }
         for Sse2(a: __m128i, b: __m128i) -> __m128i {
-            let gt = _mm_cmpgt_epi64(a, b);
+            let gt = sse_cmpgt_epi64_compat(a, b);
             _mm_xor_si128(gt, _mm_set1_epi64x(u64::MAX as i64))
         }
         for Scalar(a: i64, b: i64) -> i64 {
@@ -343,10 +379,10 @@ impl_op! {
             _mm256_cmpgt_epi64(a, b)
         }
         for Sse41(a: __m128i, b: __m128i) -> __m128i {
-            _mm_cmpgt_epi64(a, b)
+            sse_cmpgt_epi64_compat(a, b)
         }
         for Sse2(a: __m128i, b: __m128i) -> __m128i {
-            _mm_cmpgt_epi64(a, b)
+            sse_cmpgt_epi64_compat(a, b)
         }
         for Scalar(a: i64, b: i64) -> i64 {
             if a > b {
@@ -376,13 +412,13 @@ impl_op! {
             _mm256_or_si256(gt, eq)
         }
         for Sse41(a: __m128i, b: __m128i) -> __m128i {
-            let gt = _mm_cmpgt_epi64(a, b);
-            let eq = _mm_cmpeq_epi64(a, b);
+            let gt = sse_cmpgt_epi64_compat(a, b);
+            let eq = sse_cmpeq_epi64_compat(a, b);
             _mm_or_si128(gt, eq)
         }
         for Sse2(a: __m128i, b: __m128i) -> __m128i {
-            let gt = _mm_cmpgt_epi64(a, b);
-            let eq = _mm_cmpeq_epi64(a, b);
+            let gt = sse_cmpgt_epi64_compat(a, b);
+            let eq = sse_cmpeq_epi64_compat(a, b);
             _mm_or_si128(gt, eq)
         }
         for Scalar(a: i64, b: i64) -> i64 {
