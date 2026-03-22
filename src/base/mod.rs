@@ -126,9 +126,23 @@ pub trait SimdBaseOps:
     fn cmp_gte(self, rhs: Self) -> Self;
 
     /// Element-wise maximum between two vectors.
+    ///
+    /// For floating-point vectors this follows backend SIMD `max` instruction behavior,
+    /// not Rust's scalar `f32::max`/`f64::max` contract.
+    ///
+    /// - ordered, non-equal inputs: returns the mathematically larger lane
+    /// - unordered (`NaN`) or equal-tie (`+0.0` vs `-0.0`) inputs: backend dependent
+    ///   (e.g. x86-style backends select `rhs`, while others may propagate `NaN`)
     fn max(self, rhs: Self) -> Self;
 
     /// Element-wise minimum between two vectors.
+    ///
+    /// For floating-point vectors this follows backend SIMD `min` instruction behavior,
+    /// not Rust's scalar `f32::min`/`f64::min` contract.
+    ///
+    /// - ordered, non-equal inputs: returns the mathematically smaller lane
+    /// - unordered (`NaN`) or equal-tie (`+0.0` vs `-0.0`) inputs: backend dependent
+    ///   (e.g. x86-style backends select `rhs`, while others may propagate `NaN`)
     fn min(self, rhs: Self) -> Self;
 
     /// Add every number in the vector together

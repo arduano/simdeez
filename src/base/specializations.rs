@@ -422,7 +422,11 @@ pub trait SimdFloat:
     /// Element-wise square root
     fn sqrt(self) -> Self;
 
-    /// Element-wise approximate inverse square root
+    /// Element-wise approximate inverse square root.
+    ///
+    /// Accuracy and edge-case handling are backend dependent, especially for non-positive,
+    /// subnormal, infinite, and NaN inputs. Only finite positive lanes are guaranteed to
+    /// produce a meaningful approximation of `1.0 / sqrt(x)`.
     fn rsqrt(self) -> Self;
 
     fn from_f64(value: f64) -> Self;

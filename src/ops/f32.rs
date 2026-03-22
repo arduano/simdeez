@@ -1,5 +1,23 @@
 use super::*;
 
+#[inline(always)]
+fn scalar_simd_min(a: f32, b: f32) -> f32 {
+    if a < b {
+        a
+    } else {
+        b
+    }
+}
+
+#[inline(always)]
+fn scalar_simd_max(a: f32, b: f32) -> f32 {
+    if a > b {
+        a
+    } else {
+        b
+    }
+}
+
 impl_op! {
     fn add<f32> {
         for Avx512(a: __m512, b: __m512) -> __m512 {
@@ -305,7 +323,7 @@ impl_op! {
             _mm_min_ps(a, b)
         }
         for Scalar(a: f32, b: f32) -> f32 {
-            a.min(b)
+            scalar_simd_min(a, b)
         }
         for Neon(a: float32x4_t, b: float32x4_t) -> float32x4_t {
             vminq_f32(a, b)
@@ -331,7 +349,7 @@ impl_op! {
             _mm_max_ps(a, b)
         }
         for Scalar(a: f32, b: f32) -> f32 {
-            a.max(b)
+            scalar_simd_max(a, b)
         }
         for Neon(a: float32x4_t, b: float32x4_t) -> float32x4_t {
             vmaxq_f32(a, b)
