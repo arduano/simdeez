@@ -837,7 +837,7 @@ impl_op! {
             _mm_cvtps_epi32(a)
         }
         for Scalar(a: f32) -> i32 {
-            a.m_round() as i32
+            a.m_round_ties_even() as i32
         }
         for Neon(a: float32x4_t) -> int32x4_t {
             // Because other intrinsics round instead of flooring, we round here first.
