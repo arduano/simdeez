@@ -1,5 +1,23 @@
 use super::*;
 
+#[inline(always)]
+fn scalar_simd_min(a: f64, b: f64) -> f64 {
+    if a < b {
+        a
+    } else {
+        b
+    }
+}
+
+#[inline(always)]
+fn scalar_simd_max(a: f64, b: f64) -> f64 {
+    if a > b {
+        a
+    } else {
+        b
+    }
+}
+
 impl_op! {
     fn add<f64> {
         for Avx512(a: __m512d, b: __m512d) -> __m512d {
@@ -282,7 +300,7 @@ impl_op! {
             _mm_min_pd(a, b)
         }
         for Scalar(a: f64, b: f64) -> f64 {
-            a.min(b)
+            scalar_simd_min(a, b)
         }
         for Neon(a: float64x2_t, b: float64x2_t) -> float64x2_t {
             vminq_f64(a, b)
@@ -308,7 +326,7 @@ impl_op! {
             _mm_max_pd(a, b)
         }
         for Scalar(a: f64, b: f64) -> f64 {
-            a.max(b)
+            scalar_simd_max(a, b)
         }
         for Neon(a: float64x2_t, b: float64x2_t) -> float64x2_t {
             vmaxq_f64(a, b)
