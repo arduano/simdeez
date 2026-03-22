@@ -17,11 +17,14 @@
 //! Structure notes:
 //! - `families/` owns public extension traits grouped by math family.
 //! - `scalar/` owns scalar fallback helpers using the same family boundaries.
+//! - `f64/` mirrors the family split for future backend work while preserving
+//!   the current scalar-mapped behavior.
 //! - `contracts.rs` and `map.rs` stay stable so follow-up optimization PRs can
 //!   target a single family file with minimal overlap.
 
 pub mod contracts;
 mod f32;
+mod f64;
 mod families;
 mod map;
 mod scalar;
