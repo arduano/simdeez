@@ -37,15 +37,7 @@ elementwise_eq_tester_impl!(SimdBaseOps, cmp_gte, two_arg, EqPrecision::exact())
 
 elementwise_eq_tester_impl!(SimdBaseOps, blendv, iter_blendv_ags, EqPrecision::exact());
 
-// We filter out NaN numbers for neq because under some hardware implementations (including Avx2)
-// it appears that `NaN != [number]` is false. Technically that's invalid according to the floatin point
-// spec, but it seems like a hardware thing that we cant avoid.
-elementwise_eq_tester_impl!(
-    SimdBaseOps,
-    cmp_neq,
-    two_arg_nan_filtered,
-    EqPrecision::exact()
-);
+elementwise_eq_tester_impl!(SimdBaseOps, cmp_neq, two_arg, EqPrecision::exact());
 
 elementwise_eq_tester_impl!(SimdBaseOps, max, two_arg_nan_filtered, EqPrecision::exact());
 elementwise_eq_tester_impl!(SimdBaseOps, min, two_arg_nan_filtered, EqPrecision::exact());
