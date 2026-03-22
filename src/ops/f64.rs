@@ -552,11 +552,11 @@ impl_op! {
 impl_op! {
     fn neq<f64> {
         for Avx512(a: __m512d, b: __m512d) -> __m512d {
-            let k = _mm512_cmp_pd_mask::<_CMP_NEQ_OQ>(a, b);
+            let k = _mm512_cmp_pd_mask::<_CMP_NEQ_UQ>(a, b);
             _mm512_castsi512_pd(_mm512_movm_epi64(k))
         }
         for Avx2(a: __m256d, b: __m256d) -> __m256d {
-            _mm256_cmp_pd(a, b, _CMP_NEQ_OQ)
+            _mm256_cmp_pd(a, b, _CMP_NEQ_UQ)
         }
         for Sse41(a: __m128d, b: __m128d) -> __m128d {
             _mm_cmpneq_pd(a, b)
