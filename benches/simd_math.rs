@@ -1,6 +1,8 @@
 use criterion::{criterion_group, criterion_main, Criterion, Throughput};
 use rand::{Rng, SeedableRng};
 use rand_chacha::ChaCha8Rng;
+#[cfg(not(any(target_arch = "x86_64", target_arch = "x86")))]
+use simdeez::scalar::Scalar;
 use simdeez::{prelude::*, simd_unsafe_generate_all};
 use std::{hint::black_box, time::Duration};
 
@@ -144,6 +146,30 @@ simd_unsafe_generate_all!(
         simdeez_exp_sum_impl::<S>(input)
     }
 );
+
+#[cfg(not(any(target_arch = "x86_64", target_arch = "x86")))]
+#[inline(never)]
+fn simdeez_log2_sum_scalar(input: &[f32]) -> f32 {
+    simdeez_log2_sum_impl::<Scalar>(input)
+}
+
+#[cfg(not(any(target_arch = "x86_64", target_arch = "x86")))]
+#[inline(never)]
+fn simdeez_exp2_sum_scalar(input: &[f32]) -> f32 {
+    simdeez_exp2_sum_impl::<Scalar>(input)
+}
+
+#[cfg(not(any(target_arch = "x86_64", target_arch = "x86")))]
+#[inline(never)]
+fn simdeez_ln_sum_scalar(input: &[f32]) -> f32 {
+    simdeez_ln_sum_impl::<Scalar>(input)
+}
+
+#[cfg(not(any(target_arch = "x86_64", target_arch = "x86")))]
+#[inline(never)]
+fn simdeez_exp_sum_scalar(input: &[f32]) -> f32 {
+    simdeez_exp_sum_impl::<Scalar>(input)
+}
 
 struct BenchTargets {
     scalar_native: fn(&[f32]) -> f32,
