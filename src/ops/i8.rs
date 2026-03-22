@@ -873,15 +873,15 @@ impl_op! {
     fn is_truthy<i8> {
         for Avx512(a: __m512i) -> bool {
             let cmp = _mm512_cmpeq_epi8_mask(a, _mm512_setzero_si512());
-            cmp != u64::MAX
+            cmp == 0
         }
         for Avx2(a: __m256i) -> bool {
             let cmp = _mm256_cmpeq_epi8(a, _mm256_setzero_si256());
-            _mm256_testz_si256(cmp, cmp) == 0
+            _mm256_testz_si256(cmp, cmp) != 0
         }
         for Sse41(a: __m128i) -> bool {
             let cmp = _mm_cmpeq_epi8(a, _mm_setzero_si128());
-            _mm_testz_si128(cmp, cmp) == 0
+            _mm_testz_si128(cmp, cmp) != 0
         }
         for Sse2(a: __m128i) -> bool {
             _mm_movemask_epi8(_mm_cmpeq_epi8(a, _mm_setzero_si128())) == 0
