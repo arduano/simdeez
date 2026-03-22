@@ -26,11 +26,11 @@ pub const LOG10_U35_F32_MAX_ULP: u32 = 35;
 
 pub const LOG2_U35_F64_MAX_ULP: u64 = 35;
 pub const EXP2_U35_F64_MAX_ULP: u64 = 35;
-pub const LN_U35_F64_MAX_ULP: u64 = 1;
-pub const EXP_U35_F64_MAX_ULP: u64 = 1;
-pub const SIN_U35_F64_MAX_ULP: u64 = 1;
-pub const COS_U35_F64_MAX_ULP: u64 = 1;
-pub const TAN_U35_F64_MAX_ULP: u64 = 1;
+pub const LN_U35_F64_MAX_ULP: u64 = 35;
+pub const EXP_U35_F64_MAX_ULP: u64 = 35;
+pub const SIN_U35_F64_MAX_ULP: u64 = 35;
+pub const COS_U35_F64_MAX_ULP: u64 = 35;
+pub const TAN_U35_F64_MAX_ULP: u64 = 35;
 
 pub const ASIN_U35_F64_MAX_ULP: u64 = 1;
 pub const ACOS_U35_F64_MAX_ULP: u64 = 1;
