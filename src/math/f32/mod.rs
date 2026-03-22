@@ -62,6 +62,33 @@ where
     portable::tan_u35(input)
 }
 
+#[inline(always)]
+pub(crate) fn asinh_u35<V>(input: V) -> V
+where
+    V: SimdFloat32,
+    V::Engine: Simd<Vf32 = V>,
+{
+    portable::asinh_u35(input)
+}
+
+#[inline(always)]
+pub(crate) fn acosh_u35<V>(input: V) -> V
+where
+    V: SimdFloat32,
+    V::Engine: Simd<Vf32 = V>,
+{
+    portable::acosh_u35(input)
+}
+
+#[inline(always)]
+pub(crate) fn atanh_u35<V>(input: V) -> V
+where
+    V: SimdFloat32,
+    V::Engine: Simd<Vf32 = V>,
+{
+    portable::atanh_u35(input)
+}
+
 #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
 #[inline(always)]
 fn is_avx2_engine<E: Simd>() -> bool {

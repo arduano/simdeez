@@ -253,3 +253,65 @@ where
     let fast = sin_fast / cos_fast;
     patch_exceptional_lanes(input, fast, exceptional_mask, scalar::tan_u35_f32)
 }
+
+#[inline(always)]
+pub(super) fn asinh_u35<V>(input: V) -> V
+where
+    V: SimdFloat32,
+    V::Engine: Simd<Vf32 = V>,
+{
+    let finite_mask = input.cmp_eq(input).bitcast_i32();
+    let abs_x = input.abs();
+    let tiny_mask = abs_x.cmp_lt(V::set1(0.05)).bitcast_i32();
+    let large_mask = abs_x.cmp_gt(V::set1(1.0e19)).bitcast_i32();
+    let zero_mask = input.cmp_eq(V::zeroes()).bitcast_i32();
+    let exceptional_mask =
+        finite_mask.cmp_eq(SimdI32::<V>::zeroes()) | tiny_mask | large_mask | zero_mask;
+
+    let radicand = (abs_x * abs_x) + V::set1(1.0);
+    let magnitude = log2_u35(abs_x + radicand.sqrt()) * V::set1(core::f32::consts::LN_2);
+    let negative_mask = input.cmp_lt(V::zeroes());
+    let fast = negative_mask.blendv(magnitude, -magnitude);
+
+    patch_exceptional_lanes(input, fast, exceptional_mask, scalar::asinh_u35_f32)
+}
+
+#[inline(always)]
+pub(super) fn acosh_u35<V>(input: V) -> V
+where
+    V: SimdFloat32,
+    V::Engine: Simd<Vf32 = V>,
+{
+    let finite_mask = input.cmp_eq(input).bitcast_i32();
+    let in_domain_mask = input.cmp_gte(V::set1(1.0)).bitcast_i32();
+    let fast_mask = finite_mask & in_domain_mask;
+    let exceptional_mask = fast_mask.cmp_eq(SimdI32::<V>::zeroes());
+
+    let root_term = ((input - V::set1(1.0)).sqrt()) * ((input + V::set1(1.0)).sqrt());
+    let fast = log2_u35(input + root_term) * V::set1(core::f32::consts::LN_2);
+
+    patch_exceptional_lanes(input, fast, exceptional_mask, scalar::acosh_u35_f32)
+}
+
+#[inline(always)]
+pub(super) fn atanh_u35<V>(input: V) -> V
+where
+    V: SimdFloat32,
+    V::Engine: Simd<Vf32 = V>,
+{
+    let finite_mask = input.cmp_eq(input).bitcast_i32();
+    let abs_x = input.abs();
+    let strict_domain_mask = abs_x.cmp_lt(V::set1(1.0)).bitcast_i32();
+    let non_zero_mask = input.cmp_neq(V::zeroes()).bitcast_i32();
+    let stable_range_mask = abs_x.cmp_lte(V::set1(0.75)).bitcast_i32();
+    let away_from_zero_mask = abs_x.cmp_gte(V::set1(0.05)).bitcast_i32();
+    let fast_mask =
+        finite_mask & strict_domain_mask & non_zero_mask & stable_range_mask & away_from_zero_mask;
+    let exceptional_mask = fast_mask.cmp_eq(SimdI32::<V>::zeroes());
+
+    let one = V::set1(1.0);
+    let ratio = (one + input) / (one - input);
+    let fast = log2_u35(ratio) * V::set1(0.5 * core::f32::consts::LN_2);
+
+    patch_exceptional_lanes(input, fast, exceptional_mask, scalar::atanh_u35_f32)
+}

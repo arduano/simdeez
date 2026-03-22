@@ -140,4 +140,5 @@ macro_rules! simd_math_targeted_all_backends {
 mod binary_misc;
 mod core;
 mod hyperbolic;
+mod inverse_hyperbolic;
 mod inverse_trig;
