@@ -18,7 +18,8 @@ pub const ASINH_U35_F32_MAX_ULP: u32 = 1;
 pub const ACOSH_U35_F32_MAX_ULP: u32 = 1;
 pub const ATANH_U35_F32_MAX_ULP: u32 = 1;
 pub const HYPOT_U35_F32_MAX_ULP: u32 = 1;
-pub const LOG10_U35_F32_MAX_ULP: u32 = 1;
+// f32 log10 now rides the portable log2_u35 kernel and inherits its relaxed envelope.
+pub const LOG10_U35_F32_MAX_ULP: u32 = 35;
 
 pub const LOG2_U35_F64_MAX_ULP: u64 = 35;
 pub const EXP2_U35_F64_MAX_ULP: u64 = 35;
