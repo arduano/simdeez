@@ -1,16 +1,16 @@
 //! Portable SIMD math scaffolding for SLEEF-style transcendental families.
 //!
 //! Strategy C baseline: keep semantics in-tree and backend-agnostic by expressing
-//! vector math over existing simdeez vector types. This first milestone restores
-//! working `log2`/`exp2` families (plus composed `ln`/`exp`) with explicit contract
-//! constants and deterministic per-lane scalar oracle behavior.
+//! vector math over existing simdeez vector types.
 //!
-//! Follow-up work can replace scalar-lane kernels with tighter fully vectorized
-//! approximations while preserving these contracts.
+//! `f32` `log2_u35` / `exp2_u35` are implemented with native SIMD reduction and
+//! polynomial kernels, with scalar-lane fallback only for exceptional lanes.
+//! `ln_u35` / `exp_u35` currently stay on deterministic scalar references.
 
+mod f32_kernels;
 mod scalar;
 
-use crate::{SimdFloat32, SimdFloat64};
+use crate::{Simd, SimdFloat32, SimdFloat64};
 
 /// Accuracy contracts for currently restored math families.
 pub mod contracts {
@@ -63,31 +63,31 @@ fn map_unary_f64<V: SimdFloat64>(input: V, f: impl Fn(f64) -> f64) -> V {
 
 /// SIMD math extension trait for `f32` vector types.
 ///
-/// Current implementation uses deterministic lane-wise scalar kernels while
-/// preserving SIMD API shape and contracts.
+/// `log2_u35`/`exp2_u35` use SIMD-native reduction/polynomial kernels.
+/// `ln_u35`/`exp_u35` currently use deterministic lane-wise scalar references.
 pub trait SimdMathF32: SimdFloat32 {
     /// `log2(x)` with target `u35`-tier contract.
     ///
-    /// Special-case semantics match IEEE scalar `log2`:
-    /// - `x == +0.0` or `x == -0.0` => `-inf`
-    /// - `x < 0.0` => `NaN`
-    /// - `x == +inf` => `+inf`
-    /// - `x == NaN` => `NaN`
+    /// Uses a SIMD-native mantissa/exponent reduction + polynomial kernel for
+    /// positive normal inputs, with scalar fallback for exceptional lanes.
     #[inline(always)]
-    fn log2_u35(self) -> Self {
-        map_unary_f32(self, scalar::log2_u35_f32)
+    fn log2_u35(self) -> Self
+    where
+        Self::Engine: Simd<Vf32 = Self>,
+    {
+        f32_kernels::log2_u35(self)
     }
 
     /// `exp2(x)` with target `u35`-tier contract.
     ///
-    /// Special-case semantics match IEEE scalar `exp2`:
-    /// - `x == +inf` => `+inf`
-    /// - `x == -inf` => `+0.0`
-    /// - `x == NaN` => `NaN`
-    /// - finite overflow/underflow follow scalar backend behavior.
+    /// Uses a SIMD-native floor/reduction + polynomial kernel in the finite
+    /// in-range domain, with scalar fallback for exceptional lanes.
     #[inline(always)]
-    fn exp2_u35(self) -> Self {
-        map_unary_f32(self, scalar::exp2_u35_f32)
+    fn exp2_u35(self) -> Self
+    where
+        Self::Engine: Simd<Vf32 = Self>,
+    {
+        f32_kernels::exp2_u35(self)
     }
 
     /// `ln(x)` with target `u35`-tier contract.
