@@ -71,19 +71,29 @@ fn float_cast_i32_ties_to_even_across_backends() {
     #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
     {
         if std::arch::is_x86_feature_detected!("sse2") {
-            assert_eq!(run_f32(&values, |values, out| unsafe {
-                cast_f32_to_i32_sse2(values, out)
-            }), expected);
+            assert_eq!(
+                run_f32(&values, |values, out| unsafe {
+                    cast_f32_to_i32_sse2(values, out)
+                }),
+                expected
+            );
         }
         if std::arch::is_x86_feature_detected!("sse4.1") {
-            assert_eq!(run_f32(&values, |values, out| unsafe {
-                cast_f32_to_i32_sse41(values, out)
-            }), expected);
+            assert_eq!(
+                run_f32(&values, |values, out| unsafe {
+                    cast_f32_to_i32_sse41(values, out)
+                }),
+                expected
+            );
         }
-        if std::arch::is_x86_feature_detected!("avx2") && std::arch::is_x86_feature_detected!("fma") {
-            assert_eq!(run_f32(&values, |values, out| unsafe {
-                cast_f32_to_i32_avx2(values, out)
-            }), expected);
+        if std::arch::is_x86_feature_detected!("avx2") && std::arch::is_x86_feature_detected!("fma")
+        {
+            assert_eq!(
+                run_f32(&values, |values, out| unsafe {
+                    cast_f32_to_i32_avx2(values, out)
+                }),
+                expected
+            );
         }
     }
 }
@@ -103,19 +113,29 @@ fn float_cast_i64_ties_to_even_across_backends() {
     #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
     {
         if std::arch::is_x86_feature_detected!("sse2") {
-            assert_eq!(run_f64(&values, |values, out| unsafe {
-                cast_f64_to_i64_sse2(values, out)
-            }), expected);
+            assert_eq!(
+                run_f64(&values, |values, out| unsafe {
+                    cast_f64_to_i64_sse2(values, out)
+                }),
+                expected
+            );
         }
         if std::arch::is_x86_feature_detected!("sse4.1") {
-            assert_eq!(run_f64(&values, |values, out| unsafe {
-                cast_f64_to_i64_sse41(values, out)
-            }), expected);
+            assert_eq!(
+                run_f64(&values, |values, out| unsafe {
+                    cast_f64_to_i64_sse41(values, out)
+                }),
+                expected
+            );
         }
-        if std::arch::is_x86_feature_detected!("avx2") && std::arch::is_x86_feature_detected!("fma") {
-            assert_eq!(run_f64(&values, |values, out| unsafe {
-                cast_f64_to_i64_avx2(values, out)
-            }), expected);
+        if std::arch::is_x86_feature_detected!("avx2") && std::arch::is_x86_feature_detected!("fma")
+        {
+            assert_eq!(
+                run_f64(&values, |values, out| unsafe {
+                    cast_f64_to_i64_avx2(values, out)
+                }),
+                expected
+            );
         }
     }
 }
