@@ -21,6 +21,11 @@ impl FloatExt for f32 {
     }
 
     #[inline]
+    fn m_round_ties_even(self) -> Self {
+        rintf(self)
+    }
+
+    #[inline]
     fn m_trunc(self) -> Self {
         truncf(self)
     }
@@ -187,6 +192,11 @@ impl FloatExt for f64 {
     #[inline]
     fn m_round(self) -> Self {
         round(self)
+    }
+
+    #[inline]
+    fn m_round_ties_even(self) -> Self {
+        rint(self)
     }
 
     #[inline]

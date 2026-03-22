@@ -446,8 +446,9 @@ pub trait SimdFloat32:
     /// This function is only used for compilation and does not generate any instructions, thus it has zero latency.
     fn bitcast_i32(self) -> <Self::Engine as Simd>::Vi32;
 
-    /// Element-wise cast to i32 (rounded, not floored). Note, this may cause undefined behavior when casting from
-    /// numbers outside the range of i32. E.g. a very large positive float may become i32::MIN.
+    /// Element-wise cast to i32 (rounded to nearest, ties to even; not floored).
+    /// Note, this may cause undefined behavior when casting from numbers outside the range of i32.
+    /// E.g. a very large positive float may become i32::MIN.
     fn cast_i32(self) -> <Self::Engine as Simd>::Vi32;
 
     /// Element-wise fast reciprocal (1.0 / x)
@@ -501,7 +502,7 @@ pub trait SimdFloat64:
     /// This function is only used for compilation and does not generate any instructions, thus it has zero latency.
     fn bitcast_i64(self) -> <Self::Engine as Simd>::Vi64;
 
-    /// Element-wise cast to i64 (rounded, not floored).
+    /// Element-wise cast to i64 (rounded to nearest, ties to even; not floored).
     fn cast_i64(self) -> <Self::Engine as Simd>::Vi64;
 }
 

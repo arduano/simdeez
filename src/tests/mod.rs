@@ -1,6 +1,7 @@
 mod lib;
 use lib::*;
 
+mod float_cast_tie_regressions;
 mod float_edge_contract_regressions;
 mod float_neq_regressions;
 mod i64_regressions;
