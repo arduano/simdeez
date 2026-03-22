@@ -31,6 +31,11 @@ pub fn make_exp_inputs(len: usize, seed: u64) -> Vec<f32> {
     (0..len).map(|_| rng.gen_range(-80.0f32..80.0f32)).collect()
 }
 
+pub fn make_unary_inputs(len: usize, seed: u64, range: core::ops::Range<f32>) -> Vec<f32> {
+    let mut rng = ChaCha8Rng::seed_from_u64(seed);
+    (0..len).map(|_| rng.gen_range(range.clone())).collect()
+}
+
 pub fn make_trig_inputs(len: usize, seed: u64) -> Vec<f32> {
     let mut rng = ChaCha8Rng::seed_from_u64(seed);
     (0..len)

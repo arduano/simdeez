@@ -3,8 +3,6 @@ use std::time::Duration;
 
 #[path = "simd_math_remaining_baseline/binary_misc.rs"]
 mod binary_misc;
-#[path = "simd_math_remaining_baseline/hyperbolic.rs"]
-mod hyperbolic;
 #[path = "simd_math_remaining_baseline/inverse_hyperbolic.rs"]
 mod inverse_hyperbolic;
 #[path = "simd_math_remaining_baseline/inverse_trig.rs"]
@@ -14,7 +12,6 @@ mod shared;
 
 fn criterion_benchmark(c: &mut Criterion) {
     inverse_trig::register(c);
-    hyperbolic::register(c);
     inverse_hyperbolic::register(c);
     binary_misc::register(c);
 }
