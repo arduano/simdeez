@@ -1,5 +1,10 @@
 use super::*;
 
+#[inline(always)]
+fn wrapping_shift_count(rhs: i32) -> i32 {
+    rhs & 15
+}
+
 impl_op! {
     fn add<i16> {
         for Avx512(a: __m512i, b: __m512i) -> __m512i {
@@ -146,7 +151,7 @@ impl_op! {
             _mm_sub_epi16(_mm_xor_si128(a, mask), mask)
         }
         for Scalar(a: i16) -> i16 {
-            a.abs()
+            a.wrapping_abs()
         }
         for Neon(a: int16x8_t) -> int16x8_t {
             vabsq_s16(a)
@@ -389,26 +394,26 @@ impl_op! {
 impl_op! {
     fn shl<i16> {
         for Avx512(a: __m512i, rhs: i32) -> __m512i {
-            _mm512_sll_epi16(a, _mm_cvtsi32_si128(rhs))
+            _mm512_sll_epi16(a, _mm_cvtsi32_si128(wrapping_shift_count(rhs)))
         }
         for Avx2(a: __m256i, rhs: i32) -> __m256i {
-            _mm256_sll_epi16(a, _mm_cvtsi32_si128(rhs))
+            _mm256_sll_epi16(a, _mm_cvtsi32_si128(wrapping_shift_count(rhs)))
         }
         for Sse41(a: __m128i, rhs: i32) -> __m128i {
-            _mm_sll_epi16(a, _mm_cvtsi32_si128(rhs))
+            _mm_sll_epi16(a, _mm_cvtsi32_si128(wrapping_shift_count(rhs)))
         }
         for Sse2(a: __m128i, rhs: i32) -> __m128i {
-            _mm_sll_epi16(a, _mm_cvtsi32_si128(rhs))
+            _mm_sll_epi16(a, _mm_cvtsi32_si128(wrapping_shift_count(rhs)))
         }
         for Scalar(a: i16, rhs: i32) -> i16 {
-            a << rhs
+            a.wrapping_shl(wrapping_shift_count(rhs) as u32)
         }
         for Neon(a: int16x8_t, rhs: i32) -> int16x8_t {
-            let rhs = Self::set1(rhs as i16);
+            let rhs = Self::set1(wrapping_shift_count(rhs) as i16);
             vshlq_s16(a, rhs)
         }
         for Wasm(a: v128, rhs: i32) -> v128 {
-            i16x8_shl(a, rhs as u32)
+            i16x8_shl(a, wrapping_shift_count(rhs) as u32)
         }
     }
 }
@@ -416,26 +421,26 @@ impl_op! {
 impl_op! {
     fn shr<i16> {
         for Avx512(a: __m512i, rhs: i32) -> __m512i {
-            _mm512_srl_epi16(a, _mm_cvtsi32_si128(rhs))
+            _mm512_srl_epi16(a, _mm_cvtsi32_si128(wrapping_shift_count(rhs)))
         }
         for Avx2(a: __m256i, rhs: i32) -> __m256i {
-            _mm256_srl_epi16(a, _mm_cvtsi32_si128(rhs))
+            _mm256_srl_epi16(a, _mm_cvtsi32_si128(wrapping_shift_count(rhs)))
         }
         for Sse41(a: __m128i, rhs: i32) -> __m128i {
-            _mm_srl_epi16(a, _mm_cvtsi32_si128(rhs))
+            _mm_srl_epi16(a, _mm_cvtsi32_si128(wrapping_shift_count(rhs)))
         }
         for Sse2(a: __m128i, rhs: i32) -> __m128i {
-            _mm_srl_epi16(a, _mm_cvtsi32_si128(rhs))
+            _mm_srl_epi16(a, _mm_cvtsi32_si128(wrapping_shift_count(rhs)))
         }
         for Scalar(a: i16, rhs: i32) -> i16 {
-            ((a as u16) >> rhs) as i16
+            ((a as u16).wrapping_shr(wrapping_shift_count(rhs) as u32)) as i16
         }
         for Neon(a: int16x8_t, rhs: i32) -> int16x8_t {
-            let rhs = Self::set1(-rhs as i16);
+            let rhs = Self::set1(-wrapping_shift_count(rhs) as i16);
             vreinterpretq_s16_u16(vshlq_u16(vreinterpretq_u16_s16(a), rhs))
         }
         for Wasm(a: v128, rhs: i32) -> v128 {
-            u16x8_shr(a, rhs as u32)
+            u16x8_shr(a, wrapping_shift_count(rhs) as u32)
         }
     }
 }

@@ -1,5 +1,10 @@
 use super::*;
 
+#[inline(always)]
+fn wrapping_shift_count(rhs: i32) -> i32 {
+    rhs & 7
+}
+
 impl_op! {
     fn add<i8> {
         for Avx512(a: __m512i, b: __m512i) -> __m512i {
@@ -173,7 +178,7 @@ impl_op! {
             _mm_sub_epi8(_mm_xor_si128(a, mask), mask)
         }
         for Scalar(a: i8) -> i8 {
-            a.abs()
+            a.wrapping_abs()
         }
         for Neon(a: int8x16_t) -> int8x16_t {
             vabsq_s8(a)
@@ -422,6 +427,7 @@ impl_op! {
 impl_op! {
     fn shl<i8> {
         for Avx512(a: __m512i, rhs: i32) -> __m512i {
+            let rhs = wrapping_shift_count(rhs);
             let rhs2 = _mm_cvtsi32_si128(rhs);
             let shifted_i16 = _mm512_sll_epi16(a, rhs2);
 
@@ -430,6 +436,7 @@ impl_op! {
             _mm512_andnot_si512(mask, shifted_i16)
         }
         for Avx2(a: __m256i, rhs: i32) -> __m256i {
+            let rhs = wrapping_shift_count(rhs);
             // Do 16 bit shifts, then mask out the bits that are shifted in.
             let rhs2 = _mm_cvtsi32_si128(rhs);
             let shifted_i16 = _mm256_sll_epi16(a, rhs2);
@@ -442,6 +449,7 @@ impl_op! {
             Ops::<Sse2, i8>::shl(a, rhs)
         }
         for Sse2(a: __m128i, rhs: i32) -> __m128i {
+            let rhs = wrapping_shift_count(rhs);
             // Do 16 bit shifts, then mask out the bits that are shifted in.
             let rhs2 = _mm_cvtsi32_si128(rhs);
             let shifted_i16 = _mm_sll_epi16(a, rhs2);
@@ -451,14 +459,14 @@ impl_op! {
             _mm_andnot_si128(mask, shifted_i16)
         }
         for Scalar(a: i8, rhs: i32) -> i8 {
-            a << rhs
+            a.wrapping_shl(wrapping_shift_count(rhs) as u32)
         }
         for Neon(a: int8x16_t, rhs: i32) -> int8x16_t {
-            let rhs = Self::set1(rhs as i8);
+            let rhs = Self::set1(wrapping_shift_count(rhs) as i8);
             vshlq_s8(a, rhs)
         }
         for Wasm(a: v128, b: i32) -> v128 {
-            i8x16_shl(a, b as u32)
+            i8x16_shl(a, wrapping_shift_count(b) as u32)
         }
     }
 }
@@ -466,6 +474,7 @@ impl_op! {
 impl_op! {
     fn shr<i8> {
         for Avx512(a: __m512i, rhs: i32) -> __m512i {
+            let rhs = wrapping_shift_count(rhs);
             let rhs2 = _mm_cvtsi32_si128(rhs);
             let shifted_i16 = _mm512_srl_epi16(a, rhs2);
 
@@ -474,6 +483,7 @@ impl_op! {
             _mm512_andnot_si512(mask, shifted_i16)
         }
         for Avx2(a: __m256i, rhs: i32) -> __m256i {
+            let rhs = wrapping_shift_count(rhs);
             // Do 16 bit shifts, then mask out the bits that are shifted in.
             let rhs2 = _mm_cvtsi32_si128(rhs);
             let shifted_i16 = _mm256_srl_epi16(a, rhs2);
@@ -486,6 +496,7 @@ impl_op! {
             Ops::<Sse2, i8>::shr(a, rhs)
         }
         for Sse2(a: __m128i, rhs: i32) -> __m128i {
+            let rhs = wrapping_shift_count(rhs);
             // Do 16 bit shifts, then mask out the bits that are shifted in.
             let rhs2 = _mm_cvtsi32_si128(rhs);
             let shifted_i16 = _mm_srl_epi16(a, rhs2);
@@ -495,14 +506,14 @@ impl_op! {
             _mm_andnot_si128(mask, shifted_i16)
         }
         for Scalar(a: i8, rhs: i32) -> i8 {
-            ((a as u8) >> rhs) as i8
+            ((a as u8).wrapping_shr(wrapping_shift_count(rhs) as u32)) as i8
         }
         for Neon(a: int8x16_t, rhs: i32) -> int8x16_t {
-            let rhs = Self::set1(-rhs as i8);
+            let rhs = Self::set1(-wrapping_shift_count(rhs) as i8);
             vreinterpretq_s8_u8(vshlq_u8(vreinterpretq_u8_s8(a), rhs))
         }
         for Wasm(a: v128, b: i32) -> v128 {
-            u8x16_shr(a, b as u32)
+            u8x16_shr(a, wrapping_shift_count(b) as u32)
         }
     }
 }

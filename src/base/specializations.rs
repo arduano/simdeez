@@ -163,11 +163,17 @@ pub trait SimdInt:
 {
     /// Shift each value left by n bits.
     ///
+    /// Shift counts use wrapping semantics (`rhs mod lane_bit_width`) so behavior is
+    /// defined for negative and out-of-range counts across all backends.
+    ///
     /// For 64 bits, this operations is missing in most implementations
     /// and is emulated here under SSE2, SSE4.1, and AVX2.
     fn shl(self, rhs: i32) -> Self;
 
     /// Shift each value right by n bits.
+    ///
+    /// Shift counts use wrapping semantics (`rhs mod lane_bit_width`) so behavior is
+    /// defined for negative and out-of-range counts across all backends.
     ///
     /// For 64 bits, this operations is missing in most implementations
     /// and is emulated here under SSE2, SSE4.1, and AVX2.
