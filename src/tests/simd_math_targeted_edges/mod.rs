@@ -12,8 +12,8 @@ use crate::engines::wasm32::Wasm;
 #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
 use crate::engines::{avx2::Avx2, sse2::Sse2, sse41::Sse41};
 
-use crate::math::SimdMathF32Core;
-use crate::math::{contracts, SimdMathF32};
+use crate::math::{contracts, SimdMathF32, SimdMathF64};
+use crate::math::{SimdMathF32Core, SimdMathF64Core};
 use crate::{Simd, SimdBaseIo, SimdConsts};
 
 fn assert_f32_contract(
