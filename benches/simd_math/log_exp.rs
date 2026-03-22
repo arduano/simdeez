@@ -1,5 +1,7 @@
 use criterion::Criterion;
 use simdeez::math::SimdMathF32Core;
+#[cfg(not(any(target_arch = "x86_64", target_arch = "x86")))]
+use simdeez::scalar::Scalar;
 use simdeez::{prelude::*, simd_unsafe_generate_all};
 
 use crate::shared::{self, BenchTargets, INPUT_LEN};
@@ -51,25 +53,25 @@ simd_unsafe_generate_all!(
 #[cfg(not(any(target_arch = "x86_64", target_arch = "x86")))]
 #[inline(never)]
 fn simdeez_log2_sum_scalar(input: &[f32]) -> f32 {
-    shared::force_scalar_sum(input, |v| v.log2_u35())
+    shared::force_scalar_sum(input, |v: <Scalar as Simd>::Vf32| v.log2_u35())
 }
 
 #[cfg(not(any(target_arch = "x86_64", target_arch = "x86")))]
 #[inline(never)]
 fn simdeez_exp2_sum_scalar(input: &[f32]) -> f32 {
-    shared::force_scalar_sum(input, |v| v.exp2_u35())
+    shared::force_scalar_sum(input, |v: <Scalar as Simd>::Vf32| v.exp2_u35())
 }
 
 #[cfg(not(any(target_arch = "x86_64", target_arch = "x86")))]
 #[inline(never)]
 fn simdeez_ln_sum_scalar(input: &[f32]) -> f32 {
-    shared::force_scalar_sum(input, |v| v.ln_u35())
+    shared::force_scalar_sum(input, |v: <Scalar as Simd>::Vf32| v.ln_u35())
 }
 
 #[cfg(not(any(target_arch = "x86_64", target_arch = "x86")))]
 #[inline(never)]
 fn simdeez_exp_sum_scalar(input: &[f32]) -> f32 {
-    shared::force_scalar_sum(input, |v| v.exp_u35())
+    shared::force_scalar_sum(input, |v: <Scalar as Simd>::Vf32| v.exp_u35())
 }
 
 pub fn register(c: &mut Criterion) {

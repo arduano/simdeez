@@ -132,8 +132,11 @@ pub fn bench_variants(c: &mut Criterion, group_name: &str, input: &[f32], target
 }
 
 #[cfg(not(any(target_arch = "x86_64", target_arch = "x86")))]
+type ScalarVf32 = <Scalar as Simd>::Vf32;
+
+#[cfg(not(any(target_arch = "x86_64", target_arch = "x86")))]
 #[inline(never)]
-pub fn force_scalar_sum(input: &[f32], op: impl Fn(Scalar::Vf32) -> Scalar::Vf32) -> f32 {
+pub fn force_scalar_sum(input: &[f32], op: impl Fn(ScalarVf32) -> ScalarVf32) -> f32 {
     simdeez_sum_impl::<Scalar>(input, op)
 }
 
