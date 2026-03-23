@@ -1,6 +1,14 @@
 use crate::math::{map, scalar};
 use crate::SimdFloat64;
 
+// DECISION(2026-03-23): KEEP_SCALAR_REFERENCE
+// Function(s): f64 sinh_u35 / cosh_u35 / tanh_u35
+// Why scalar:
+// - local benches do not justify a portable SIMD default for this family on the current host
+// - keeping the family split still preserves test and ownership structure for a later retry
+// Revisit when:
+// - a cheaper f64 exp/log backbone or a dedicated hyperbolic kernel lands
+
 #[inline(always)]
 pub(crate) fn sinh_u35<V>(input: V) -> V
 where

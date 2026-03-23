@@ -1,6 +1,22 @@
 use crate::math::{f64, map, scalar};
 use crate::{Simd, SimdBaseIo, SimdBaseOps, SimdConsts, SimdFloat64};
 
+// DECISION(2026-03-23): KEEP_MIXED
+// Function(s): f64 asinh_u35
+// Why kept:
+// - local benches show the current hybrid path materially ahead of native scalar
+// - the fast path still depends on scalar-reference ln_u35, so this is not a full SIMD keep
+// Revisit when:
+// - f64 ln_u35 stops being scalar-reference or asinh gets its own cheaper core
+
+// DECISION(2026-03-23): KEEP_SCALAR_REFERENCE
+// Function(s): f64 acosh_u35 / atanh_u35
+// Why scalar:
+// - local runtime-selected results do not beat native scalar on this host
+// - scalar-reference keeps semantics honest without adding more f64 complexity today
+// Revisit when:
+// - a stronger f64 inverse-hyperbolic kernel family exists
+
 type SimdI64<V> = <<V as SimdConsts>::Engine as Simd>::Vi64;
 
 #[inline(always)]

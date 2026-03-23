@@ -1,7 +1,10 @@
 //! f64 SIMD math dispatch layering:
 //! - family-local modules own the public internal routing points for each math family.
-//! - current implementations remain scalar-mapped through `map` + `scalar`.
-//! - follow-up optimization PRs can replace one family module at a time.
+//! - current decisions are intentionally mixed:
+//!   scalar-reference for core/trig and hyperbolic defaults,
+//!   portable SIMD for inverse trig and several binary-misc kernels,
+//!   and hybrid paths where scalar sub-ops still underpin the fast path.
+//! - follow-up optimization work can still replace one family module at a time.
 
 mod binary_misc;
 mod core;

@@ -1,6 +1,14 @@
 use crate::math::{f32, f64, map, scalar};
 use crate::{Simd, SimdFloat32, SimdFloat64};
 
+// DECISION(2026-03-23): KEEP_SCALAR_REFERENCE
+// Function(s): f32 ln_u35 / exp_u35
+// Why scalar:
+// - local benches keep the current runtime-selected path below native scalar
+// - retaining the family entry points still preserves structure for later retries
+// Revisit when:
+// - a better shared f32 log/exp kernel exists
+
 pub trait SimdMathF32Core: SimdFloat32 {
     #[inline(always)]
     fn log2_u35(self) -> Self

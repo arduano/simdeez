@@ -1,6 +1,14 @@
 use crate::math::scalar;
 use crate::{Simd, SimdBaseIo, SimdBaseOps, SimdConsts, SimdFloat64, SimdInt64};
 
+// DECISION(2026-03-23): KEEP_SIMD_PORTABLE
+// Function(s): f64 asin_u35 / acos_u35 / atan_u35
+// Why kept:
+// - local runtime-selected throughput stays well above native scalar for all three functions
+// - the current targeted tests cover near-one fallback boundaries and atan reduction thresholds
+// Revisit when:
+// - the fallback boundaries or rational approximations change materially
+
 type SimdI64<V> = <<V as SimdConsts>::Engine as Simd>::Vi64;
 
 const F64_EXPONENT_MASK: i64 = 0x7FF0_0000_0000_0000u64 as i64;

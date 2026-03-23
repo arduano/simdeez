@@ -1,6 +1,14 @@
 use crate::math::{f32, scalar};
 use crate::{Simd, SimdBaseIo, SimdBaseOps, SimdFloat32, SimdInt32};
 
+// DECISION(2026-03-23): KEEP_SIMD_PORTABLE
+// Function(s): f32 log10_u35 / atan2_u35 / hypot_u35
+// Why kept:
+// - local benches show each of these kernels materially ahead of native scalar
+// - targeted edge tests already cover domain, signed-zero, and scale-stress behavior
+// Revisit when:
+// - the shared log2/atan primitives or exceptional-lane rules change materially
+
 type SimdI32<V> = <<V as crate::SimdConsts>::Engine as Simd>::Vi32;
 
 #[inline(always)]

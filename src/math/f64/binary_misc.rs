@@ -1,6 +1,22 @@
 use crate::math::{f64, scalar};
 use crate::{Simd, SimdBaseIo, SimdBaseOps, SimdConsts, SimdFloat64, SimdInt64};
 
+// DECISION(2026-03-23): KEEP_MIXED
+// Function(s): f64 log10_u35
+// Why kept:
+// - local runtime-selected performance is clearly better than native scalar
+// - the current implementation still rides scalar-reference log2_u35 underneath
+// Revisit when:
+// - f64 log2_u35 gets a new keep/revert outcome
+
+// DECISION(2026-03-23): KEEP_SIMD_PORTABLE
+// Function(s): f64 atan2_u35 / hypot_u35 / fmod
+// Why kept:
+// - all three are strong local wins over native scalar, especially hypot and fmod
+// - targeted adversarial tests already cover signed-zero, scale, and exceptional-lane behavior
+// Revisit when:
+// - backend-specific behavior diverges or the scalar contracts change materially
+
 type SimdI64<V> = <<V as SimdConsts>::Engine as Simd>::Vi64;
 
 const F64_SIGN_MASK: i64 = i64::MIN;
