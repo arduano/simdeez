@@ -7,7 +7,7 @@ license = "Apache-2.0/MIT"
 documentation = "https://docs.rs/simdeez/"
 readme = "README.md"
 keywords = ["SIMD", "avx2", "sse", "performance", "no_std"]
-repository = "https://github.com/jackmott/simdeez"
+repository = "https://github.com/arduano/simdeez"
 categories = ["hardware-support", "science", "game-engines"]
 edition = "2021"
 

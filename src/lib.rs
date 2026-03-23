@@ -1,5 +1,5 @@
 //! A library that abstracts over SIMD instruction sets, including ones with differing widths.
-//! SIMDeez is designed to allow you to write a function one time and produce scalar, SSE2, SSE41, AVX2, AVX-512 and Neon versions of the function.
+//! SIMDeez is designed to allow you to write a function one time and produce scalar, SSE2, SSE41, AVX2, AVX-512, Neon, and WebAssembly SIMD versions of the function.
 //! You can either have the version you want selected automatically at runtime, at compiletime, or
 //! select yourself by hand.
 //!
@@ -13,7 +13,7 @@
 //!
 //! # Features
 //!
-//! * SSE2, SSE41, AVX2, AVX-512, Neon and scalar fallback
+//! * SSE2, SSE41, AVX2, AVX-512, Neon, WebAssembly SIMD, and scalar fallback
 //! * Can be used with compile time or run time selection
 //! * No runtime overhead
 //! * Uses familiar intel intrinsic naming conventions, easy to port.
@@ -34,8 +34,9 @@
 //! These methods are available through `simdeez::math` and re-exported by `simdeez::prelude`.
 //! The implementation follows a layered blueprint: portable kernels first,
 //! backend-specific overrides where justified (currently a hand-tuned AVX2 `log2_u35`),
-//! and scalar fallback patching for exceptional lanes. Several newly-restored families
-//! are intentionally correctness-first scalar-reference mappings in this baseline pass.
+//! and scalar fallback patching for exceptional lanes. The stabilized map is intentionally mixed:
+//! most `f32` families and the revived `f64` log/exp, inverse-trig, and binary-misc families
+//! keep SIMD defaults, while the known losing holdouts remain explicit scalar-reference mappings.
 //! The historical `sleef` feature remains deprecated and is not the primary implementation path.
 //!
 //! # Compared to stdsimd
@@ -48,7 +49,7 @@
 //! * SIMDeez can be used with runtime selection, Faster cannot.
 //! * SIMDeez has faster fallbacks for some functions
 //! * SIMDeez does not currently work with iterators, Faster does.
-//! * SIMDeez uses more idiomatic intrinsic syntax while Faster uses more idomatic Rust syntax
+//! * SIMDeez uses more idiomatic intrinsic syntax while Faster uses more idiomatic Rust syntax
 //! * SIMDeez can be used by `#[no_std]` projects
 //! * SIMDeez builds on stable rust now, Faster does not.
 //!
@@ -139,7 +140,7 @@
 //!}
 //! ```
 //!
-//! This will generate 5 functions for you:
+//! This will generate the following functions for you:
 //! * `distance<S:Simd>` the generic version of your function
 //! * `distance_scalar`  a scalar fallback
 //! * `distance_sse2`    SSE2 version
@@ -157,7 +158,7 @@
 //! produce 2 active functions via the `cfg` attribute feature:
 //!
 //! * `distance<S:Simd>`      the generic version of your function
-//! * `distance_compiletime`  the fastest instruction set availble for the given compile time
+//! * `distance_compiletime`  the fastest instruction set available for the given compile time
 //!   feature set
 //!
 //! You may also forgo the macros if you know what you are doing, just keep in mind there are lots
