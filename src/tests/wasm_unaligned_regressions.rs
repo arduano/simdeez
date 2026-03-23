@@ -10,8 +10,6 @@ macro_rules! wasm_unaligned_roundtrip_test {
         fn $name() {
             let input: [$scalar_ty; <$vec_ty as SimdConsts>::WIDTH] = [$($value),+];
             let mut expected_bytes = [0u8; 16];
-            let mut bytes = vec![0u8; 16 + 3];
-            let offset = 1usize;
 
             unsafe {
                 core::ptr::copy_nonoverlapping(
@@ -19,36 +17,42 @@ macro_rules! wasm_unaligned_roundtrip_test {
                     expected_bytes.as_mut_ptr(),
                     16,
                 );
-                core::ptr::copy_nonoverlapping(
-                    input.as_ptr() as *const u8,
-                    bytes.as_mut_ptr().add(offset),
-                    16,
-                );
+                for offset in 1usize..16 {
+                    let mut bytes = vec![0xA5u8; 16 + offset + 16];
+                    core::ptr::copy_nonoverlapping(
+                        input.as_ptr() as *const u8,
+                        bytes.as_mut_ptr().add(offset),
+                        16,
+                    );
 
-                let loaded = <$vec_ty as SimdBaseIo>::load_from_ptr_unaligned(
-                    bytes.as_ptr().add(offset) as *const $scalar_ty,
-                );
-                let loaded_array = loaded.as_array();
-                let mut loaded_bytes = [0u8; 16];
-                core::ptr::copy_nonoverlapping(
-                    loaded_array.as_ptr() as *const u8,
-                    loaded_bytes.as_mut_ptr(),
-                    16,
-                );
-                assert_eq!(loaded_bytes, expected_bytes);
+                    let loaded = <$vec_ty as SimdBaseIo>::load_from_ptr_unaligned(
+                        bytes.as_ptr().add(offset) as *const $scalar_ty,
+                    );
+                    let loaded_array = loaded.as_array();
+                    let mut loaded_bytes = [0u8; 16];
+                    core::ptr::copy_nonoverlapping(
+                        loaded_array.as_ptr() as *const u8,
+                        loaded_bytes.as_mut_ptr(),
+                        16,
+                    );
+                    assert_eq!(loaded_bytes, expected_bytes);
+                    assert!(bytes[..offset].iter().all(|&byte| byte == 0xA5));
+                    assert!(bytes[offset + 16..].iter().all(|&byte| byte == 0xA5));
 
-                let output = <$vec_ty as SimdBaseIo>::load_from_array(input);
-                let mut dest = vec![0u8; 16 + 5];
-                let store_offset = 3usize;
-                output.copy_to_ptr_unaligned(dest.as_mut_ptr().add(store_offset) as *mut $scalar_ty);
+                    let output = <$vec_ty as SimdBaseIo>::load_from_array(input);
+                    let mut dest = vec![0x5Au8; 16 + offset + 16];
+                    output.copy_to_ptr_unaligned(dest.as_mut_ptr().add(offset) as *mut $scalar_ty);
 
-                let mut roundtrip_bytes = [0u8; 16];
-                core::ptr::copy_nonoverlapping(
-                    dest.as_ptr().add(store_offset),
-                    roundtrip_bytes.as_mut_ptr(),
-                    16,
-                );
-                assert_eq!(roundtrip_bytes, expected_bytes);
+                    let mut roundtrip_bytes = [0u8; 16];
+                    core::ptr::copy_nonoverlapping(
+                        dest.as_ptr().add(offset),
+                        roundtrip_bytes.as_mut_ptr(),
+                        16,
+                    );
+                    assert_eq!(roundtrip_bytes, expected_bytes);
+                    assert!(dest[..offset].iter().all(|&byte| byte == 0x5A));
+                    assert!(dest[offset + 16..].iter().all(|&byte| byte == 0x5A));
+                }
             }
         }
     };

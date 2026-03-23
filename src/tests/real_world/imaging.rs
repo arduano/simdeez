@@ -189,3 +189,29 @@ fn real_world_normalize_luma_f32_matches_reference() {
     assert_normalize_luma_matches_all_backends(&input[..19]);
     assert_normalize_luma_matches_all_backends(&input);
 }
+
+#[test]
+fn real_world_quantize_f32_to_i32_threshold_boundaries_match_reference() {
+    let input = vec![
+        -0.125, -0.071_428, 0.0, 0.071_428, 0.499_999, 0.5, 0.500_001, 145.642_84, 145.642_85,
+        145.642_86, 400.0,
+    ];
+    assert_quantize_matches_all_backends(&input);
+}
+
+#[test]
+fn real_world_normalize_luma_f32_threshold_boundaries_match_reference() {
+    let threshold_input = 16.0 + 219.0 * 0.62;
+    let input = vec![
+        15.999,
+        16.0,
+        16.001,
+        threshold_input - 0.001,
+        threshold_input,
+        threshold_input + 0.001,
+        234.999,
+        235.0,
+        235.001,
+    ];
+    assert_normalize_luma_matches_all_backends(&input);
+}

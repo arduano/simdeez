@@ -120,3 +120,33 @@ fn real_world_adaptive_select_i32_matches_reference() {
     assert_adaptive_select_matches_all_backends(&lhs[..19], &rhs[..19]);
     assert_adaptive_select_matches_all_backends(&lhs, &rhs);
 }
+
+#[test]
+fn real_world_adaptive_select_i32_threshold_and_clamp_boundaries_match_reference() {
+    let lhs = vec![
+        i32::MIN + 2048,
+        i32::MIN + 1025,
+        -4096,
+        -4090,
+        -1,
+        0,
+        4089,
+        4090,
+        i32::MAX - 1025,
+        i32::MAX - 2048,
+    ];
+    let rhs = vec![
+        i32::MIN + 1024,
+        i32::MIN + 1,
+        -3072,
+        -3065,
+        1023,
+        1025,
+        3065,
+        3066,
+        i32::MAX - 1,
+        i32::MAX - 1024,
+    ];
+
+    assert_adaptive_select_matches_all_backends(&lhs, &rhs);
+}
