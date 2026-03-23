@@ -13,7 +13,8 @@
 //! kernels with centralized scalar patching for exceptional lanes.
 //! The stabilized `f64` map is intentionally mixed:
 //! portable SIMD for the revived core log/exp family, inverse trig, and several binary-misc kernels,
-//! scalar-reference for the current losing trig and hyperbolic families,
+//! scalar-reference for the current losing trig family plus selected `f64` holdouts such as `cosh_u35`
+//! and `atanh_u35`,
 //! and hybrid keep decisions where SIMD structure still relies on scalar sub-ops.
 //!
 //! Structure notes:

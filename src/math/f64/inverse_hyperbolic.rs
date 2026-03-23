@@ -9,13 +9,14 @@ use crate::{Simd, SimdBaseIo, SimdBaseOps, SimdConsts, SimdFloat64};
 // Revisit when:
 // - asinh gets its own cheaper core or can safely absorb the relaxed portable ln_u35 error budget
 
-// DECISION(2026-03-23): KEEP_SCALAR_REFERENCE
+// DECISION(2026-03-23): KEEP_MIXED
 // Function(s): f64 acosh_u35 / atanh_u35
-// Why scalar:
-// - local runtime-selected results do not beat native scalar on this host
-// - scalar-reference keeps semantics honest without adding more f64 complexity today
+// Why kept:
+// - acosh_u35 now passes the strict contract and beats native scalar on local runtime-selected benches
+// - atanh_u35's retry never held the strict 1-ULP contract without collapsing the fast band too far,
+//   so it remains scalar-reference on this host
 // Revisit when:
-// - a stronger f64 inverse-hyperbolic kernel family exists
+// - atanh_u35 gets a tighter portable kernel or cleaner cross-host evidence appears
 
 type SimdI64<V> = <<V as SimdConsts>::Engine as Simd>::Vi64;
 
@@ -95,7 +96,16 @@ where
     V: SimdFloat64,
     V::Engine: Simd<Vf64 = V>,
 {
-    map::unary_f64(input, scalar::acosh_u35_f64)
+    let finite_mask = input.cmp_eq(input).bitcast_i64();
+    let in_domain_mask = input.cmp_gte(V::set1(1.0)).bitcast_i64();
+    let away_from_one_mask = input.cmp_gte(V::set1(1.5)).bitcast_i64();
+    let fast_mask = finite_mask & in_domain_mask & away_from_one_mask;
+    let exceptional_mask = fast_mask.cmp_eq(SimdI64::<V>::zeroes());
+
+    let root_term = ((input - V::set1(1.0)).sqrt()) * ((input + V::set1(1.0)).sqrt());
+    let fast = f64::ln_u35(input + root_term);
+
+    patch_exceptional_lanes(input, fast, exceptional_mask, scalar::acosh_u35_f64)
 }
 
 #[inline(always)]
