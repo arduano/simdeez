@@ -128,6 +128,125 @@ fn run_f32_log10_domain_and_mixed_lanes<S: Simd>() {
     }
 }
 
+fn run_f32_binary_misc_adversarial_lanes<S: Simd>() {
+    let log10_inputs = [
+        f32::from_bits(1),
+        f32::from_bits(2),
+        f32::MIN_POSITIVE,
+        9.999_999e-11,
+        1.0e-10,
+        10.0,
+        1000.0,
+        0.0,
+        -0.0,
+        -1.0,
+        f32::INFINITY,
+        f32::NAN,
+    ];
+    for chunk in log10_inputs.chunks(S::Vf32::WIDTH) {
+        let xv = S::Vf32::load_from_slice(chunk);
+        let out = xv.log10_u35();
+        for lane in 0..chunk.len() {
+            let x = chunk[lane];
+            assert_f32_contract(
+                "log10_u35",
+                x,
+                out[lane],
+                x.log10(),
+                contracts::LOG10_U35_F32_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("adversarial log10_u35({x:?}) {e}"));
+        }
+    }
+
+    let atan2_cases = [
+        (0.0f32, -0.0f32),
+        (-0.0, -0.0),
+        (0.0, 0.0),
+        (-0.0, 0.0),
+        (f32::from_bits(1), -f32::from_bits(1)),
+        (-f32::from_bits(1), -f32::from_bits(1)),
+        (1.0e-30, -1.0),
+        (-1.0e-30, -1.0),
+        (1.0, -1.0e-30),
+        (-1.0, -1.0e-30),
+        (f32::INFINITY, -f32::INFINITY),
+        (f32::NEG_INFINITY, -f32::INFINITY),
+        (f32::NAN, 1.0),
+        (1.0, f32::NAN),
+    ];
+    for chunk in atan2_cases.chunks(S::Vf32::WIDTH) {
+        let mut ys = vec![0.0f32; chunk.len()];
+        let mut xs = vec![0.0f32; chunk.len()];
+        for (idx, (y, x)) in chunk.iter().copied().enumerate() {
+            ys[idx] = y;
+            xs[idx] = x;
+        }
+
+        let yv = S::Vf32::load_from_slice(&ys);
+        let xv = S::Vf32::load_from_slice(&xs);
+        let out = yv.atan2_u35(xv);
+        for lane in 0..chunk.len() {
+            let y = ys[lane];
+            let x = xs[lane];
+            assert_f32_contract(
+                "atan2_u35",
+                y,
+                out[lane],
+                y.atan2(x),
+                contracts::ATAN2_U35_F32_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("adversarial atan2_u35({y:?}, {x:?}) {e}"));
+        }
+    }
+
+    let binary_cases = [
+        (f32::MAX, f32::MIN_POSITIVE),
+        (f32::MIN_POSITIVE, f32::MAX),
+        (1.0e38, 1.0e-38),
+        (1.0e-38, 1.0e38),
+        (-1.0e38, 1.0e-38),
+        (6.0, 3.0),
+        (6.0, -3.0),
+        (-6.0, 3.0),
+        (-6.0, -3.0),
+        (0.0, 3.0),
+        (-0.0, 3.0),
+        (f32::INFINITY, 2.0),
+        (2.0, 0.0),
+        (f32::NAN, 2.0),
+        (2.0, f32::NAN),
+    ];
+
+    for chunk in binary_cases.chunks(S::Vf32::WIDTH) {
+        let mut xs = vec![0.0f32; chunk.len()];
+        let mut ys = vec![0.0f32; chunk.len()];
+        for (idx, (x, y)) in chunk.iter().copied().enumerate() {
+            xs[idx] = x;
+            ys[idx] = y;
+        }
+
+        let xv = S::Vf32::load_from_slice(&xs);
+        let yv = S::Vf32::load_from_slice(&ys);
+        let h = xv.hypot_u35(yv);
+        let r = xv.fmod(yv);
+        for lane in 0..chunk.len() {
+            let x = xs[lane];
+            let y = ys[lane];
+            assert_f32_contract(
+                "hypot_u35",
+                x,
+                h[lane],
+                x.hypot(y),
+                contracts::HYPOT_U35_F32_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("adversarial hypot_u35({x:?}, {y:?}) {e}"));
+            assert_f32_contract("fmod", x, r[lane], x % y, 0)
+                .unwrap_or_else(|e| panic!("adversarial fmod({x:?}, {y:?}) {e}"));
+        }
+    }
+}
+
 simd_math_targeted_all_backends!(
     f32_atan2_signed_zero_and_quadrants,
     run_f32_atan2_signed_zero_and_quadrants
@@ -136,6 +255,10 @@ simd_math_targeted_all_backends!(f32_hypot_and_fmod_edges, run_f32_hypot_and_fmo
 simd_math_targeted_all_backends!(
     f32_log10_domain_and_mixed_lanes,
     run_f32_log10_domain_and_mixed_lanes
+);
+simd_math_targeted_all_backends!(
+    f32_binary_misc_adversarial_lanes,
+    run_f32_binary_misc_adversarial_lanes
 );
 
 fn run_f64_atan2_signed_zero_and_quadrants<S: Simd>() {
@@ -278,7 +401,6 @@ simd_math_targeted_all_backends!(
 );
 
 fn run_f64_binary_misc_adversarial_lanes<S: Simd>() {
-    // log10_u35: adversarial around denormals and exact powers of ten.
     let log10_inputs = [
         f64::MIN_POSITIVE,
         f64::from_bits(1),
@@ -310,7 +432,6 @@ fn run_f64_binary_misc_adversarial_lanes<S: Simd>() {
         }
     }
 
-    // atan2_u35: signed-zero and near-axis quadrant behavior.
     let atan2_cases = [
         (0.0, -0.0),
         (-0.0, -0.0),
@@ -352,7 +473,6 @@ fn run_f64_binary_misc_adversarial_lanes<S: Simd>() {
         }
     }
 
-    // hypot_u35 + fmod: scale extremes and quotient-threshold stress.
     let binary_cases = [
         (f64::MAX, f64::MIN_POSITIVE),
         (f64::MIN_POSITIVE, f64::MAX),
@@ -401,7 +521,70 @@ fn run_f64_binary_misc_adversarial_lanes<S: Simd>() {
     }
 }
 
+fn run_f64_fmod_zero_and_guard_boundaries<S: Simd>() {
+    let exact_zero_cases = [
+        (6.0f64, 3.0f64),
+        (6.0, -3.0),
+        (-6.0, 3.0),
+        (-6.0, -3.0),
+        (0.0, 3.0),
+        (-0.0, 3.0),
+    ];
+    for chunk in exact_zero_cases.chunks(S::Vf64::WIDTH) {
+        let mut xs = vec![0.0f64; chunk.len()];
+        let mut ys = vec![0.0f64; chunk.len()];
+        for (idx, (x, y)) in chunk.iter().copied().enumerate() {
+            xs[idx] = x;
+            ys[idx] = y;
+        }
+
+        let xv = S::Vf64::load_from_slice(&xs);
+        let yv = S::Vf64::load_from_slice(&ys);
+        let out = xv.fmod(yv);
+        for lane in 0..chunk.len() {
+            let x = xs[lane];
+            let y = ys[lane];
+            assert_f64_contract("fmod", x, out[lane], x % y, 0)
+                .unwrap_or_else(|e| panic!("zero-sign fmod({x:?}, {y:?}) {e}"));
+        }
+    }
+
+    let q = 4_503_599_627_370_496.0f64;
+    let guard_cases = [
+        ((q - 1.0) * 2.0, 2.0),
+        (q * 2.0, 2.0),
+        ((q + 1.0) * 2.0, 2.0),
+        (-((q - 1.0) * 2.0), 2.0),
+        (-(q * 2.0), 2.0),
+        (-((q + 1.0) * 2.0), 2.0),
+        ((q - 1.0) * -2.0, -2.0),
+        ((q + 1.0) * -2.0, -2.0),
+    ];
+    for chunk in guard_cases.chunks(S::Vf64::WIDTH) {
+        let mut xs = vec![0.0f64; chunk.len()];
+        let mut ys = vec![0.0f64; chunk.len()];
+        for (idx, (x, y)) in chunk.iter().copied().enumerate() {
+            xs[idx] = x;
+            ys[idx] = y;
+        }
+
+        let xv = S::Vf64::load_from_slice(&xs);
+        let yv = S::Vf64::load_from_slice(&ys);
+        let out = xv.fmod(yv);
+        for lane in 0..chunk.len() {
+            let x = xs[lane];
+            let y = ys[lane];
+            assert_f64_contract("fmod", x, out[lane], x % y, 0)
+                .unwrap_or_else(|e| panic!("guard-boundary fmod({x:?}, {y:?}) {e}"));
+        }
+    }
+}
+
 simd_math_targeted_all_backends!(
     f64_binary_misc_adversarial_lanes,
     run_f64_binary_misc_adversarial_lanes
+);
+simd_math_targeted_all_backends!(
+    f64_fmod_zero_and_guard_boundaries,
+    run_f64_fmod_zero_and_guard_boundaries
 );

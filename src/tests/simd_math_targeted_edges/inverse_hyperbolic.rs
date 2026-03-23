@@ -1,6 +1,18 @@
 use super::*;
 use crate::math::{SimdMathF32InverseHyperbolic, SimdMathF64InverseHyperbolic};
 
+fn push_boundary_triplet_f32(inputs: &mut Vec<f32>, center: f32) {
+    inputs.push(f32::from_bits(center.to_bits().saturating_sub(1)));
+    inputs.push(center);
+    inputs.push(f32::from_bits(center.to_bits().saturating_add(1)));
+}
+
+fn push_boundary_triplet_f64(inputs: &mut Vec<f64>, center: f64) {
+    inputs.push(f64::from_bits(center.to_bits().saturating_sub(1)));
+    inputs.push(center);
+    inputs.push(f64::from_bits(center.to_bits().saturating_add(1)));
+}
+
 fn run_f32_inverse_hyperbolic_domain_edges<S: Simd>() {
     let acosh_inputs = [
         0.0f32,
@@ -134,6 +146,108 @@ simd_math_targeted_all_backends!(
 simd_math_targeted_all_backends!(
     f32_inverse_hyperbolic_mixed_lanes,
     run_f32_inverse_hyperbolic_mixed_lanes
+);
+
+fn run_f32_inverse_hyperbolic_threshold_boundaries<S: Simd>() {
+    let mut asinh_inputs = Vec::new();
+    let mut atanh_inputs = Vec::new();
+
+    for center in [-1.0e19f32, -0.05, -0.0, 0.0, 0.05, 1.0e19] {
+        push_boundary_triplet_f32(&mut asinh_inputs, center);
+    }
+    for center in [-0.75f32, -0.05, -0.0, 0.0, 0.05, 0.75] {
+        push_boundary_triplet_f32(&mut atanh_inputs, center);
+    }
+
+    check_targeted_unary_f32::<S>(
+        "asinh_u35",
+        &asinh_inputs,
+        contracts::ASINH_U35_F32_MAX_ULP,
+        |v| v.asinh_u35(),
+        f32::asinh,
+    );
+    check_targeted_unary_f32::<S>(
+        "atanh_u35",
+        &atanh_inputs,
+        contracts::ATANH_U35_F32_MAX_ULP,
+        |v| v.atanh_u35(),
+        f32::atanh,
+    );
+}
+
+simd_math_targeted_all_backends!(
+    f32_inverse_hyperbolic_threshold_boundaries,
+    run_f32_inverse_hyperbolic_threshold_boundaries
+);
+
+fn run_f32_inverse_hyperbolic_signed_zero_semantics<S: Simd>() {
+    let mut lanes = vec![0.0f32; S::Vf32::WIDTH];
+    lanes[0] = -0.0;
+
+    let input = S::Vf32::load_from_slice(&lanes);
+    let asinh = input.asinh_u35();
+    let atanh = input.atanh_u35();
+
+    assert_eq!(asinh[0].to_bits(), (-0.0f32).asinh().to_bits());
+    assert_eq!(atanh[0].to_bits(), (-0.0f32).atanh().to_bits());
+
+    if S::Vf32::WIDTH > 1 {
+        assert_eq!(asinh[1].to_bits(), 0.0f32.asinh().to_bits());
+        assert_eq!(atanh[1].to_bits(), 0.0f32.atanh().to_bits());
+    }
+
+    let ones = S::Vf32::set1(1.0);
+    let acosh = ones.acosh_u35();
+    assert_eq!(acosh[0].to_bits(), 1.0f32.acosh().to_bits());
+}
+
+fn run_f32_inverse_hyperbolic_boundary_triplets<S: Simd>() {
+    let acosh_center = 1.0f32;
+    let acosh_inputs = [
+        f32::from_bits(acosh_center.to_bits() - 2),
+        f32::from_bits(acosh_center.to_bits() - 1),
+        acosh_center,
+        f32::from_bits(acosh_center.to_bits() + 1),
+        f32::from_bits(acosh_center.to_bits() + 2),
+    ];
+    check_targeted_unary_f32::<S>(
+        "acosh_u35",
+        &acosh_inputs,
+        contracts::ACOSH_U35_F32_MAX_ULP,
+        |v| v.acosh_u35(),
+        f32::acosh,
+    );
+
+    let plus_one = 1.0f32;
+    let minus_one = -1.0f32;
+    let atanh_inputs = [
+        f32::from_bits(minus_one.to_bits() - 2),
+        f32::from_bits(minus_one.to_bits() - 1),
+        minus_one,
+        f32::from_bits(minus_one.to_bits() + 1),
+        f32::from_bits(minus_one.to_bits() + 2),
+        f32::from_bits(plus_one.to_bits() - 2),
+        f32::from_bits(plus_one.to_bits() - 1),
+        plus_one,
+        f32::from_bits(plus_one.to_bits() + 1),
+        f32::from_bits(plus_one.to_bits() + 2),
+    ];
+    check_targeted_unary_f32::<S>(
+        "atanh_u35",
+        &atanh_inputs,
+        contracts::ATANH_U35_F32_MAX_ULP,
+        |v| v.atanh_u35(),
+        f32::atanh,
+    );
+}
+
+simd_math_targeted_all_backends!(
+    f32_inverse_hyperbolic_signed_zero_semantics,
+    run_f32_inverse_hyperbolic_signed_zero_semantics
+);
+simd_math_targeted_all_backends!(
+    f32_inverse_hyperbolic_boundary_triplets,
+    run_f32_inverse_hyperbolic_boundary_triplets
 );
 
 fn run_f64_inverse_hyperbolic_domain_edges<S: Simd>() {
@@ -271,6 +385,38 @@ simd_math_targeted_all_backends!(
     run_f64_inverse_hyperbolic_mixed_lanes
 );
 
+fn run_f64_inverse_hyperbolic_threshold_boundaries<S: Simd>() {
+    let mut asinh_inputs = Vec::new();
+    let mut acosh_inputs = Vec::new();
+
+    for center in [-1.0e150f64, -1.0, -0.0, 0.0, 1.0, 1.0e150] {
+        push_boundary_triplet_f64(&mut asinh_inputs, center);
+    }
+    for center in [1.0f64, 1.5] {
+        push_boundary_triplet_f64(&mut acosh_inputs, center);
+    }
+
+    check_targeted_unary_f64::<S>(
+        "asinh_u35",
+        &asinh_inputs,
+        contracts::ASINH_U35_F64_MAX_ULP,
+        |v| v.asinh_u35(),
+        f64::asinh,
+    );
+    check_targeted_unary_f64::<S>(
+        "acosh_u35",
+        &acosh_inputs,
+        contracts::ACOSH_U35_F64_MAX_ULP,
+        |v| v.acosh_u35(),
+        f64::acosh,
+    );
+}
+
+simd_math_targeted_all_backends!(
+    f64_inverse_hyperbolic_threshold_boundaries,
+    run_f64_inverse_hyperbolic_threshold_boundaries
+);
+
 fn run_f64_inverse_hyperbolic_signed_zero_semantics<S: Simd>() {
     let mut lanes = vec![0.0f64; S::Vf64::WIDTH];
     lanes[0] = -0.0;
@@ -295,4 +441,49 @@ fn run_f64_inverse_hyperbolic_signed_zero_semantics<S: Simd>() {
 simd_math_targeted_all_backends!(
     f64_inverse_hyperbolic_signed_zero_semantics,
     run_f64_inverse_hyperbolic_signed_zero_semantics
+);
+
+fn run_f64_inverse_hyperbolic_boundary_triplets<S: Simd>() {
+    let acosh_center = 1.0f64;
+    let acosh_inputs = [
+        f64::from_bits(acosh_center.to_bits() - 2),
+        f64::from_bits(acosh_center.to_bits() - 1),
+        acosh_center,
+        f64::from_bits(acosh_center.to_bits() + 1),
+        f64::from_bits(acosh_center.to_bits() + 2),
+    ];
+    check_targeted_unary_f64::<S>(
+        "acosh_u35",
+        &acosh_inputs,
+        contracts::ACOSH_U35_F64_MAX_ULP,
+        |v| v.acosh_u35(),
+        f64::acosh,
+    );
+
+    let plus_one = 1.0f64;
+    let minus_one = -1.0f64;
+    let atanh_inputs = [
+        f64::from_bits(minus_one.to_bits() - 2),
+        f64::from_bits(minus_one.to_bits() - 1),
+        minus_one,
+        f64::from_bits(minus_one.to_bits() + 1),
+        f64::from_bits(minus_one.to_bits() + 2),
+        f64::from_bits(plus_one.to_bits() - 2),
+        f64::from_bits(plus_one.to_bits() - 1),
+        plus_one,
+        f64::from_bits(plus_one.to_bits() + 1),
+        f64::from_bits(plus_one.to_bits() + 2),
+    ];
+    check_targeted_unary_f64::<S>(
+        "atanh_u35",
+        &atanh_inputs,
+        contracts::ATANH_U35_F64_MAX_ULP,
+        |v| v.atanh_u35(),
+        f64::atanh,
+    );
+}
+
+simd_math_targeted_all_backends!(
+    f64_inverse_hyperbolic_boundary_triplets,
+    run_f64_inverse_hyperbolic_boundary_triplets
 );

@@ -196,6 +196,31 @@ simd_math_targeted_all_backends!(
     run_f32_hyperbolic_special_values_and_mixed_lanes
 );
 
+fn run_f32_hyperbolic_signed_zero_semantics<S: Simd>() {
+    let mut lanes = vec![0.0f32; S::Vf32::WIDTH];
+    lanes[0] = -0.0;
+
+    let input = S::Vf32::load_from_slice(&lanes);
+    let sinh = input.sinh_u35();
+    let tanh = input.tanh_u35();
+
+    assert_eq!(sinh[0].to_bits(), (-0.0f32).sinh().to_bits());
+    assert_eq!(tanh[0].to_bits(), (-0.0f32).tanh().to_bits());
+
+    if S::Vf32::WIDTH > 1 {
+        assert_eq!(sinh[1].to_bits(), 0.0f32.sinh().to_bits());
+        assert_eq!(tanh[1].to_bits(), 0.0f32.tanh().to_bits());
+    }
+
+    let cosh = input.cosh_u35();
+    assert_eq!(cosh[0].to_bits(), (-0.0f32).cosh().to_bits());
+}
+
+simd_math_targeted_all_backends!(
+    f32_hyperbolic_signed_zero_semantics,
+    run_f32_hyperbolic_signed_zero_semantics
+);
+
 fn push_boundary_triplet_f64(inputs: &mut Vec<f64>, center: f64) {
     inputs.push(f64::from_bits(center.to_bits().saturating_sub(1)));
     inputs.push(center);
@@ -292,6 +317,46 @@ fn run_f64_hyperbolic_special_values_and_mixed_lanes<S: Simd>() {
     }
 }
 
+fn run_f64_hyperbolic_edges<S: Simd>() {
+    let inputs = [
+        -100.0f64, -40.0, -20.0, -10.0, -1.0, -0.5, -0.0, 0.0, 0.5, 1.0, 10.0, 20.0, 40.0, 100.0,
+    ];
+    for chunk in inputs.chunks(S::Vf64::WIDTH) {
+        let v = S::Vf64::load_from_slice(chunk);
+        let sinh = v.sinh_u35();
+        let cosh = v.cosh_u35();
+        let tanh = v.tanh_u35();
+
+        for (lane, &x) in chunk.iter().enumerate() {
+            assert_f64_contract(
+                "sinh_u35",
+                x,
+                sinh[lane],
+                x.sinh(),
+                contracts::SINH_U35_F64_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("{e}"));
+            assert_f64_contract(
+                "cosh_u35",
+                x,
+                cosh[lane],
+                x.cosh(),
+                contracts::COSH_U35_F64_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("{e}"));
+            assert_f64_contract(
+                "tanh_u35",
+                x,
+                tanh[lane],
+                x.tanh(),
+                contracts::TANH_U35_F64_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("{e}"));
+        }
+    }
+}
+
+simd_math_targeted_all_backends!(f64_hyperbolic_edges, run_f64_hyperbolic_edges);
 simd_math_targeted_all_backends!(
     f64_hyperbolic_fast_path_boundaries,
     run_f64_hyperbolic_fast_path_boundaries
@@ -299,6 +364,48 @@ simd_math_targeted_all_backends!(
 simd_math_targeted_all_backends!(
     f64_hyperbolic_special_values_and_mixed_lanes,
     run_f64_hyperbolic_special_values_and_mixed_lanes
+);
+
+fn run_f64_hyperbolic_scalar_patch_cutover<S: Simd>() {
+    let mut inputs = Vec::new();
+    for center in [-1.0f64, 1.0] {
+        push_boundary_triplet_f64(&mut inputs, center);
+    }
+    inputs.extend_from_slice(&[-20.0, -1.0e-12, -0.0, 0.0, 1.0e-12, 20.0]);
+
+    while !inputs.len().is_multiple_of(S::Vf64::WIDTH) {
+        inputs.push(0.25);
+    }
+
+    for chunk in inputs.chunks(S::Vf64::WIDTH) {
+        let v = S::Vf64::load_from_slice(chunk);
+        let sinh = v.sinh_u35();
+        let tanh = v.tanh_u35();
+
+        for (lane, &x) in chunk.iter().enumerate() {
+            assert_f64_contract(
+                "sinh_u35",
+                x,
+                sinh[lane],
+                x.sinh(),
+                contracts::SINH_U35_F64_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("scalar-patch sinh_u35({x:?}) {e}"));
+            assert_f64_contract(
+                "tanh_u35",
+                x,
+                tanh[lane],
+                x.tanh(),
+                contracts::TANH_U35_F64_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("scalar-patch tanh_u35({x:?}) {e}"));
+        }
+    }
+}
+
+simd_math_targeted_all_backends!(
+    f64_hyperbolic_scalar_patch_cutover,
+    run_f64_hyperbolic_scalar_patch_cutover
 );
 
 fn run_f64_hyperbolic_signed_zero_semantics<S: Simd>() {
