@@ -1,13 +1,13 @@
 use crate::math::{f64, scalar};
 use crate::{Simd, SimdBaseIo, SimdBaseOps, SimdConsts, SimdFloat64, SimdInt64};
 
-// DECISION(2026-03-23): KEEP_MIXED
+// DECISION(2026-03-23): KEEP_SIMD_PORTABLE
 // Function(s): f64 log10_u35
 // Why kept:
 // - local runtime-selected performance is clearly better than native scalar
-// - the current implementation still rides scalar-reference log2_u35 underneath
+// - the current implementation now rides the kept portable f64 log2_u35 core
 // Revisit when:
-// - f64 log2_u35 gets a new keep/revert outcome
+// - f64 core log2_u35 changes materially or non-x86 evidence disagrees sharply
 
 // DECISION(2026-03-23): KEEP_SIMD_PORTABLE
 // Function(s): f64 atan2_u35 / hypot_u35 / fmod
