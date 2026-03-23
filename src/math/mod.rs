@@ -12,8 +12,8 @@
 //! `sinh_u35` / `cosh_u35` / `tanh_u35` now use family-local portable SIMD
 //! kernels with centralized scalar patching for exceptional lanes.
 //! The stabilized `f64` map is intentionally mixed:
-//! scalar-reference for the current losing core/trig and hyperbolic families,
-//! portable SIMD for inverse trig and several binary-misc kernels,
+//! portable SIMD for the revived core log/exp family, inverse trig, and several binary-misc kernels,
+//! scalar-reference for the current losing trig and hyperbolic families,
 //! and hybrid keep decisions where SIMD structure still relies on scalar sub-ops.
 //!
 //! Structure notes:

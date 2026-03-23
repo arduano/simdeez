@@ -258,7 +258,7 @@ simd_math_targeted_all_backends!(
 );
 
 fn run_f64_log_exp_boundary_lanes<S: Simd>() {
-    let inputs_log = vec![
+    let mut inputs_log = vec![
         f64::from_bits(1),
         f64::MIN_POSITIVE,
         0.5,
@@ -272,6 +272,13 @@ fn run_f64_log_exp_boundary_lanes<S: Simd>() {
         0.0,
         -0.0,
     ];
+
+    for &scale in &[0.5f64, 1.0, 2.0, 8.0, 1024.0] {
+        let pivot = std::f64::consts::FRAC_1_SQRT_2 * scale;
+        inputs_log.push(f64::from_bits(pivot.to_bits() - 1));
+        inputs_log.push(pivot);
+        inputs_log.push(f64::from_bits(pivot.to_bits() + 1));
+    }
 
     check_targeted_unary_f64::<S>(
         "log2_u35",
@@ -288,7 +295,7 @@ fn run_f64_log_exp_boundary_lanes<S: Simd>() {
         f64::ln,
     );
 
-    let inputs_exp = vec![
+    let mut inputs_exp = vec![
         -1022.0,
         -1021.75,
         -10.0,
@@ -304,6 +311,21 @@ fn run_f64_log_exp_boundary_lanes<S: Simd>() {
         f64::NEG_INFINITY,
         f64::NAN,
     ];
+
+    for k in -4..=4 {
+        let center = k as f64;
+        inputs_exp.push(center - 1.0 / 4096.0);
+        inputs_exp.push(center);
+        inputs_exp.push(center + 1.0 / 4096.0);
+    }
+
+    for &center in &[
+        -1022.0f64, -1021.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1022.0, 1023.0,
+    ] {
+        inputs_exp.push(f64::from_bits(center.to_bits().saturating_sub(1)));
+        inputs_exp.push(center);
+        inputs_exp.push(f64::from_bits(center.to_bits().saturating_add(1)));
+    }
 
     check_targeted_unary_f64::<S>(
         "exp2_u35",

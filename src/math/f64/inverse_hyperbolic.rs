@@ -5,9 +5,9 @@ use crate::{Simd, SimdBaseIo, SimdBaseOps, SimdConsts, SimdFloat64};
 // Function(s): f64 asinh_u35
 // Why kept:
 // - local benches show the current hybrid path materially ahead of native scalar
-// - the fast path still depends on scalar-reference ln_u35, so this is not a full SIMD keep
+// - the fast path still uses an explicit scalar-lane ln step to preserve the stricter 1-ULP contract
 // Revisit when:
-// - f64 ln_u35 stops being scalar-reference or asinh gets its own cheaper core
+// - asinh gets its own cheaper core or can safely absorb the relaxed portable ln_u35 error budget
 
 // DECISION(2026-03-23): KEEP_SCALAR_REFERENCE
 // Function(s): f64 acosh_u35 / atanh_u35
@@ -82,7 +82,7 @@ where
         finite_mask.cmp_eq(SimdI64::<V>::zeroes()) | tiny_mask | large_mask | zero_mask;
 
     let radicand = (abs_x * abs_x) + V::set1(1.0);
-    let magnitude = f64::ln_u35(abs_x + radicand.sqrt());
+    let magnitude = map::unary_f64(abs_x + radicand.sqrt(), scalar::ln_u35_f64);
     let negative_mask = input.cmp_lt(V::zeroes());
     let fast = negative_mask.blendv(magnitude, -magnitude);
 
