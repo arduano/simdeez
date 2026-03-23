@@ -134,6 +134,51 @@ fn run_f32_inverse_trig_identity<S: Simd>() {
     }
 }
 
+fn run_f32_inverse_trig_tiny_inputs<S: Simd>() {
+    let inputs = [
+        -f32::MIN_POSITIVE,
+        -f32::from_bits(1),
+        -0.0,
+        0.0,
+        f32::from_bits(1),
+        f32::MIN_POSITIVE,
+    ];
+
+    for chunk in inputs.chunks(S::Vf32::WIDTH) {
+        let v = S::Vf32::load_from_slice(chunk);
+        let asin = v.asin_u35();
+        let acos = v.acos_u35();
+        let atan = v.atan_u35();
+
+        for (lane, &x) in chunk.iter().enumerate() {
+            assert_f32_contract(
+                "asin_u35 tiny",
+                x,
+                asin[lane],
+                x.asin(),
+                contracts::ASIN_U35_F32_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("{e}"));
+            assert_f32_contract(
+                "acos_u35 tiny",
+                x,
+                acos[lane],
+                x.acos(),
+                contracts::ACOS_U35_F32_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("{e}"));
+            assert_f32_contract(
+                "atan_u35 tiny",
+                x,
+                atan[lane],
+                x.atan(),
+                contracts::ATAN_U35_F32_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("{e}"));
+        }
+    }
+}
+
 simd_math_targeted_all_backends!(f32_inverse_trig_near_one, run_f32_inverse_trig_near_one);
 simd_math_targeted_all_backends!(
     f32_inverse_trig_special_lanes,
@@ -141,6 +186,100 @@ simd_math_targeted_all_backends!(
 );
 simd_math_targeted_all_backends!(f32_inverse_trig_symmetry, run_f32_inverse_trig_symmetry);
 simd_math_targeted_all_backends!(f32_inverse_trig_identity, run_f32_inverse_trig_identity);
+simd_math_targeted_all_backends!(
+    f32_inverse_trig_tiny_inputs,
+    run_f32_inverse_trig_tiny_inputs
+);
+
+const TAN_PI_8_F32: f32 = 0.414_213_57;
+const TAN_3PI_8_F32: f32 = 2.414_213_7;
+
+fn run_f32_inverse_trig_fallback_boundary<S: Simd>() {
+    // Boundary used by portable_f32 fallback patching for asin/acos near |x|≈1.
+    let boundary = f32::from_bits(0x3F7F_F000);
+    let inputs = [
+        f32::from_bits(boundary.to_bits() - 2),
+        f32::from_bits(boundary.to_bits() - 1),
+        boundary,
+        f32::from_bits(boundary.to_bits() + 1),
+        f32::from_bits(boundary.to_bits() + 2),
+        -f32::from_bits(boundary.to_bits() - 2),
+        -f32::from_bits(boundary.to_bits() - 1),
+        -boundary,
+        -f32::from_bits(boundary.to_bits() + 1),
+        -f32::from_bits(boundary.to_bits() + 2),
+    ];
+
+    for chunk in inputs.chunks(S::Vf32::WIDTH) {
+        let v = S::Vf32::load_from_slice(chunk);
+        let asin = v.asin_u35();
+        let acos = v.acos_u35();
+
+        for (lane, &x) in chunk.iter().enumerate() {
+            assert_f32_contract(
+                "asin_u35 boundary",
+                x,
+                asin[lane],
+                x.asin(),
+                contracts::ASIN_U35_F32_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("{e}"));
+            assert_f32_contract(
+                "acos_u35 boundary",
+                x,
+                acos[lane],
+                x.acos(),
+                contracts::ACOS_U35_F32_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("{e}"));
+        }
+    }
+}
+
+fn run_f32_atan_reduction_threshold_neighbors<S: Simd>() {
+    let t1 = TAN_PI_8_F32;
+    let t2 = TAN_3PI_8_F32;
+    let inputs = [
+        f32::from_bits(t1.to_bits() - 2),
+        f32::from_bits(t1.to_bits() - 1),
+        t1,
+        f32::from_bits(t1.to_bits() + 1),
+        f32::from_bits(t1.to_bits() + 2),
+        f32::from_bits(t2.to_bits() - 2),
+        f32::from_bits(t2.to_bits() - 1),
+        t2,
+        f32::from_bits(t2.to_bits() + 1),
+        f32::from_bits(t2.to_bits() + 2),
+    ];
+
+    for chunk in inputs.chunks(S::Vf32::WIDTH) {
+        let v = S::Vf32::load_from_slice(chunk);
+        let atan = v.atan_u35();
+        let atan_neg = (-v).atan_u35();
+
+        for (lane, &x) in chunk.iter().enumerate() {
+            assert_f32_contract(
+                "atan_u35 threshold",
+                x,
+                atan[lane],
+                x.atan(),
+                contracts::ATAN_U35_F32_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("{e}"));
+            assert_f32_contract("atan_u35 threshold odd", -x, atan_neg[lane], -atan[lane], 2)
+                .unwrap_or_else(|e| panic!("{e}"));
+        }
+    }
+}
+
+simd_math_targeted_all_backends!(
+    f32_inverse_trig_fallback_boundary,
+    run_f32_inverse_trig_fallback_boundary
+);
+simd_math_targeted_all_backends!(
+    f32_atan_reduction_threshold_neighbors,
+    run_f32_atan_reduction_threshold_neighbors
+);
 
 fn run_f64_inverse_trig_near_one<S: Simd>() {
     let inputs = [
@@ -277,6 +416,51 @@ fn run_f64_inverse_trig_identity<S: Simd>() {
     }
 }
 
+fn run_f64_inverse_trig_tiny_inputs<S: Simd>() {
+    let inputs = [
+        -f64::MIN_POSITIVE,
+        -f64::from_bits(1),
+        -0.0,
+        0.0,
+        f64::from_bits(1),
+        f64::MIN_POSITIVE,
+    ];
+
+    for chunk in inputs.chunks(S::Vf64::WIDTH) {
+        let v = S::Vf64::load_from_slice(chunk);
+        let asin = v.asin_u35();
+        let acos = v.acos_u35();
+        let atan = v.atan_u35();
+
+        for (lane, &x) in chunk.iter().enumerate() {
+            assert_f64_contract(
+                "asin_u35 tiny",
+                x,
+                asin[lane],
+                x.asin(),
+                contracts::ASIN_U35_F64_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("{e}"));
+            assert_f64_contract(
+                "acos_u35 tiny",
+                x,
+                acos[lane],
+                x.acos(),
+                contracts::ACOS_U35_F64_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("{e}"));
+            assert_f64_contract(
+                "atan_u35 tiny",
+                x,
+                atan[lane],
+                x.atan(),
+                contracts::ATAN_U35_F64_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("{e}"));
+        }
+    }
+}
+
 const TAN_PI_8_F64: f64 = 0.414_213_562_373_095_03;
 const TAN_3PI_8_F64: f64 = 2.414_213_562_373_095;
 
@@ -366,6 +550,10 @@ simd_math_targeted_all_backends!(
 );
 simd_math_targeted_all_backends!(f64_inverse_trig_symmetry, run_f64_inverse_trig_symmetry);
 simd_math_targeted_all_backends!(f64_inverse_trig_identity, run_f64_inverse_trig_identity);
+simd_math_targeted_all_backends!(
+    f64_inverse_trig_tiny_inputs,
+    run_f64_inverse_trig_tiny_inputs
+);
 simd_math_targeted_all_backends!(
     f64_inverse_trig_fallback_boundary,
     run_f64_inverse_trig_fallback_boundary

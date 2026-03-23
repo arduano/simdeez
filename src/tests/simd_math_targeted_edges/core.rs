@@ -180,6 +180,44 @@ fn run_f32_trig_large_and_mixed_lanes<S: Simd>() {
     );
 }
 
+fn run_f32_trig_fast_range_boundaries<S: Simd>() {
+    let edge = 8192.0f32;
+    let inputs = vec![
+        f32::from_bits(edge.to_bits().saturating_sub(2)),
+        f32::from_bits(edge.to_bits().saturating_sub(1)),
+        edge,
+        f32::from_bits(edge.to_bits().saturating_add(1)),
+        f32::from_bits(edge.to_bits().saturating_add(2)),
+        -f32::from_bits(edge.to_bits().saturating_sub(2)),
+        -f32::from_bits(edge.to_bits().saturating_sub(1)),
+        -edge,
+        -f32::from_bits(edge.to_bits().saturating_add(1)),
+        -f32::from_bits(edge.to_bits().saturating_add(2)),
+    ];
+
+    check_targeted_unary_f32::<S>(
+        "sin_u35",
+        &inputs,
+        contracts::SIN_U35_F32_MAX_ULP,
+        |v| v.sin_u35(),
+        f32::sin,
+    );
+    check_targeted_unary_f32::<S>(
+        "cos_u35",
+        &inputs,
+        contracts::COS_U35_F32_MAX_ULP,
+        |v| v.cos_u35(),
+        f32::cos,
+    );
+    check_targeted_unary_f32::<S>(
+        "tan_u35",
+        &inputs,
+        contracts::TAN_U35_F32_MAX_ULP,
+        |v| v.tan_u35(),
+        f32::tan,
+    );
+}
+
 fn run_f32_trig_symmetry_identities<S: Simd>() {
     let inputs = [
         -3.0f32,
@@ -253,9 +291,121 @@ simd_math_targeted_all_backends!(
     run_f32_trig_large_and_mixed_lanes
 );
 simd_math_targeted_all_backends!(
+    f32_trig_fast_range_boundaries,
+    run_f32_trig_fast_range_boundaries
+);
+simd_math_targeted_all_backends!(
     f32_trig_symmetry_identities,
     run_f32_trig_symmetry_identities
 );
+
+fn run_f32_log_exp_boundary_lanes<S: Simd>() {
+    let mut inputs_log = vec![
+        f32::from_bits(1),
+        f32::MIN_POSITIVE,
+        0.5,
+        std::f32::consts::FRAC_1_SQRT_2,
+        1.0,
+        2.0,
+        128.0,
+        f32::INFINITY,
+        f32::NAN,
+        -1.0,
+        0.0,
+        -0.0,
+    ];
+
+    for &scale in &[0.5f32, 1.0, 2.0, 8.0, 128.0] {
+        let pivot = std::f32::consts::FRAC_1_SQRT_2 * scale;
+        inputs_log.push(f32::from_bits(pivot.to_bits().saturating_sub(1)));
+        inputs_log.push(pivot);
+        inputs_log.push(f32::from_bits(pivot.to_bits().saturating_add(1)));
+    }
+
+    check_targeted_unary_f32::<S>(
+        "log2_u35",
+        &inputs_log,
+        contracts::LOG2_U35_F32_MAX_ULP,
+        |v| v.log2_u35(),
+        f32::log2,
+    );
+    check_targeted_unary_f32::<S>(
+        "ln_u35",
+        &inputs_log,
+        contracts::LN_U35_F32_MAX_ULP,
+        |v| v.ln_u35(),
+        f32::ln,
+    );
+
+    let mut inputs_exp = vec![
+        -126.0f32,
+        -125.5,
+        -10.0,
+        -1.0,
+        -0.0,
+        0.0,
+        1.0,
+        10.0,
+        126.0,
+        127.0,
+        127.25,
+        f32::INFINITY,
+        f32::NEG_INFINITY,
+        f32::NAN,
+    ];
+
+    for k in -4..=4 {
+        let center = k as f32;
+        inputs_exp.push(center - 1.0 / 1024.0);
+        inputs_exp.push(center);
+        inputs_exp.push(center + 1.0 / 1024.0);
+    }
+
+    for &center in &[-126.0f32, -125.5, -1.0, -0.5, 0.0, 0.5, 1.0, 126.0, 127.0] {
+        inputs_exp.push(f32::from_bits(center.to_bits().saturating_sub(1)));
+        inputs_exp.push(center);
+        inputs_exp.push(f32::from_bits(center.to_bits().saturating_add(1)));
+    }
+
+    check_targeted_unary_f32::<S>(
+        "exp2_u35",
+        &inputs_exp,
+        contracts::EXP2_U35_F32_MAX_ULP,
+        |v| v.exp2_u35(),
+        f32::exp2,
+    );
+
+    let mut inputs_exp_e = vec![
+        -104.0f32,
+        -103.98,
+        -1.0,
+        -0.0,
+        0.0,
+        1.0,
+        88.0,
+        88.7,
+        89.0,
+        f32::INFINITY,
+        f32::NEG_INFINITY,
+        f32::NAN,
+    ];
+
+    for &center in &[-104.0f32, -103.97, -1.0, 0.0, 1.0, 88.5, 88.7] {
+        inputs_exp_e.push(f32::from_bits(center.to_bits().saturating_sub(1)));
+        inputs_exp_e.push(center);
+        inputs_exp_e.push(f32::from_bits(center.to_bits().saturating_add(1)));
+    }
+
+    check_targeted_unary_f32::<S>(
+        "exp_u35",
+        &inputs_exp_e,
+        contracts::EXP_U35_F32_MAX_ULP,
+        |v| v.exp_u35(),
+        f32::exp,
+    );
+}
+
+simd_math_targeted_all_backends!(f32_log_exp_boundary_lanes, run_f32_log_exp_boundary_lanes);
 
 fn run_f64_log_exp_boundary_lanes<S: Simd>() {
     let mut inputs_log = vec![
@@ -343,6 +493,42 @@ fn run_f64_log_exp_boundary_lanes<S: Simd>() {
     );
 }
 
+fn run_f64_exp_fast_mask_boundaries<S: Simd>() {
+    let mut inputs_exp2 = vec![f64::NEG_INFINITY, f64::INFINITY, f64::NAN];
+    for &center in &[-1022.0f64, 1023.0] {
+        inputs_exp2.push(f64::from_bits(center.to_bits() - 2));
+        inputs_exp2.push(f64::from_bits(center.to_bits() - 1));
+        inputs_exp2.push(center);
+        inputs_exp2.push(f64::from_bits(center.to_bits() + 1));
+        inputs_exp2.push(f64::from_bits(center.to_bits() + 2));
+    }
+
+    check_targeted_unary_f64::<S>(
+        "exp2_u35 fast-mask boundary",
+        &inputs_exp2,
+        contracts::EXP2_U35_F64_MAX_ULP,
+        |v| v.exp2_u35(),
+        f64::exp2,
+    );
+
+    let mut inputs_exp = vec![f64::NEG_INFINITY, f64::INFINITY, f64::NAN];
+    for &center in &[-708.0f64, 709.0] {
+        inputs_exp.push(f64::from_bits(center.to_bits() - 2));
+        inputs_exp.push(f64::from_bits(center.to_bits() - 1));
+        inputs_exp.push(center);
+        inputs_exp.push(f64::from_bits(center.to_bits() + 1));
+        inputs_exp.push(f64::from_bits(center.to_bits() + 2));
+    }
+
+    check_targeted_unary_f64::<S>(
+        "exp_u35 fast-mask boundary",
+        &inputs_exp,
+        contracts::EXP_U35_F64_MAX_ULP,
+        |v| v.exp_u35(),
+        f64::exp,
+    );
+}
+
 fn run_f64_trig_pi_boundaries<S: Simd>() {
     let mut inputs = vec![
         -0.0,
@@ -402,8 +588,122 @@ fn run_f64_tan_pole_neighborhoods<S: Simd>() {
 }
 
 simd_math_targeted_all_backends!(f64_log_exp_boundary_lanes, run_f64_log_exp_boundary_lanes);
+simd_math_targeted_all_backends!(
+    f64_exp_fast_mask_boundaries,
+    run_f64_exp_fast_mask_boundaries
+);
 simd_math_targeted_all_backends!(f64_trig_pi_boundaries, run_f64_trig_pi_boundaries);
 simd_math_targeted_all_backends!(f64_tan_pole_neighborhoods, run_f64_tan_pole_neighborhoods);
+
+fn run_f64_trig_large_and_mixed_lanes<S: Simd>() {
+    let inputs = vec![
+        0.25,
+        -0.5,
+        123.456_789,
+        -2048.0,
+        8192.0,
+        -8192.0,
+        1.0e6,
+        -1.0e6,
+        f64::from_bits(1),
+        -f64::from_bits(1),
+        f64::NAN,
+        f64::INFINITY,
+        f64::NEG_INFINITY,
+        std::f64::consts::PI * 0.5 - 1.0e-12,
+        std::f64::consts::PI * 0.5 + 1.0e-12,
+        -std::f64::consts::PI * 0.5 + 1.0e-12,
+    ];
+
+    check_targeted_unary_f64::<S>(
+        "sin_u35",
+        &inputs,
+        contracts::SIN_U35_F64_MAX_ULP,
+        |v| v.sin_u35(),
+        f64::sin,
+    );
+    check_targeted_unary_f64::<S>(
+        "cos_u35",
+        &inputs,
+        contracts::COS_U35_F64_MAX_ULP,
+        |v| v.cos_u35(),
+        f64::cos,
+    );
+    check_targeted_unary_f64::<S>(
+        "tan_u35",
+        &inputs,
+        contracts::TAN_U35_F64_MAX_ULP,
+        |v| v.tan_u35(),
+        f64::tan,
+    );
+}
+
+fn run_f64_trig_symmetry_identities<S: Simd>() {
+    let inputs = [
+        -3.0f64,
+        -1.0,
+        -0.5,
+        -0.0,
+        0.0,
+        0.5,
+        1.0,
+        3.0,
+        std::f64::consts::FRAC_PI_3,
+        -std::f64::consts::FRAC_PI_3,
+    ];
+
+    for chunk in inputs.chunks(S::Vf64::WIDTH) {
+        let x = S::Vf64::load_from_slice(chunk);
+        let sx = x.sin_u35();
+        let cx = x.cos_u35();
+        let tx = x.tan_u35();
+
+        let neg_x = -x;
+        let sneg = neg_x.sin_u35();
+        let cneg = neg_x.cos_u35();
+        let tneg = neg_x.tan_u35();
+
+        for lane in 0..chunk.len() {
+            if chunk[lane] == 0.0 {
+                continue;
+            }
+
+            assert_f64_contract(
+                "sin parity",
+                chunk[lane],
+                sneg[lane],
+                -sx[lane],
+                contracts::SIN_U35_F64_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("{e}"));
+            assert_f64_contract(
+                "cos parity",
+                chunk[lane],
+                cneg[lane],
+                cx[lane],
+                contracts::COS_U35_F64_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("{e}"));
+            assert_f64_contract(
+                "tan parity",
+                chunk[lane],
+                tneg[lane],
+                -tx[lane],
+                contracts::TAN_U35_F64_MAX_ULP,
+            )
+            .unwrap_or_else(|e| panic!("{e}"));
+        }
+    }
+}
+
+simd_math_targeted_all_backends!(
+    f64_trig_large_and_mixed_lanes,
+    run_f64_trig_large_and_mixed_lanes
+);
+simd_math_targeted_all_backends!(
+    f64_trig_symmetry_identities,
+    run_f64_trig_symmetry_identities
+);
 
 #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
 #[test]
