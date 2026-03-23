@@ -2,7 +2,7 @@ A library that abstracts over SIMD instruction sets, including ones with differi
 SIMDeez is designed to allow you to write a function one time and produce SSE2, SSE41, AVX2, AVX-512, Neon and WebAssembly SIMD versions of the function.
 You can either have the version you want chosen at compile time or automatically at runtime.
 
-Originally developed by @jackmott, however I volunteered to take over ownership.
+Originally developed by @jackmott. Active maintenance and releases now happen from this repository.
 
 If there are intrinsics you need that are not currently implemented, create an issue and I'll add them. PRs to add more intrinsics are welcome. Currently things are well fleshed out for i32, i64, f32, and f64 types.
 
@@ -26,17 +26,19 @@ Refer to the excellent [Intel Intrinsics Guide](https://software.intel.com/sites
 
 # SIMD math revival status
 
-SIMDeez now includes a native, pure-Rust math surface for the restored historical SLEEF-backed families:
+SIMDeez includes a native, pure-Rust math surface for the restored historical SLEEF-style families exposed through `simdeez::math` and re-exported in `simdeez::prelude`.
 
-- `log2_u35`, `exp2_u35`, `ln_u35`, `exp_u35`
-- `sin_u35`, `cos_u35`, `tan_u35`
-- `asin_u35`, `acos_u35`, `atan_u35`, `atan2_u35`
-- `sinh_u35`, `cosh_u35`, `tanh_u35`
-- `asinh_u35`, `acosh_u35`, `atanh_u35`
-- `log10_u35`, `hypot_u35`
-- `fmod` (named without `u35` to reflect remainder semantics rather than an explicit ULP contract tier)
+Covered families include:
+- core log/exp: `log2_u35`, `exp2_u35`, `ln_u35`, `exp_u35`
+- trig and inverse trig: `sin_u35`, `cos_u35`, `tan_u35`, `asin_u35`, `acos_u35`, `atan_u35`, `atan2_u35`
+- hyperbolic and inverse hyperbolic: `sinh_u35`, `cosh_u35`, `tanh_u35`, `asinh_u35`, `acosh_u35`, `atanh_u35`
+- binary misc: `log10_u35`, `hypot_u35`, `fmod`
 
-These are exposed via extension traits in `simdeez::math` and re-exported in `simdeez::prelude`:
+The old `sleef-sys` feature remains historical/deprecated and is not the primary implementation path.
+
+For implementation notes, current keep/revert shape, and benchmark guidance, see [SLEEF.md](SLEEF.md).
+
+Example:
 
 ```rust
 use simdeez::prelude::*;
@@ -46,36 +48,6 @@ fn apply_math<S: Simd>(x: S::Vf32) -> S::Vf32 {
     y.exp2_u35() + x.ln_u35() + x.exp_u35() + x.sin_u35() + x.cos_u35() + x.tan_u35()
 }
 ```
-
-The old `sleef-sys` feature remains historical/deprecated and is **not** the primary implementation path for this revived surface.
-
-### Kernel layering blueprint (v0.1)
-
-The restored `f32` path now demonstrates the intended extension architecture:
-
-1. **Portable SIMD kernels** (`src/math/f32/portable.rs`) implement reduction + polynomial logic with backend-agnostic simdeez primitives.
-2. **Backend override dispatch** (`src/math/f32/mod.rs`) selects architecture-tuned kernels without changing the public `SimdMathF32` API.
-3. **Hand-optimized backend implementation** (`src/math/f32/x86_avx2.rs`) provides a real AVX2/FMA override for `log2_u35`.
-4. **Scalar fallback patching** remains centralized in the portable layer for exceptional lanes, preserving special-value semantics.
-
-To add the next SLEEF-style function, follow the same pattern: start portable, wire dispatch, then add optional backend overrides only where profiling justifies complexity.
-
-### Benchmarking restored math
-
-An in-repo Criterion benchmark target is available for this revived surface:
-
-```bash
-cargo bench --bench simd_math
-cargo bench --bench simd_math_remaining_baseline
-```
-
-This benchmark reports per-function throughput for:
-
-- native scalar loop baseline (`f32::{log2, exp2, ln, exp, sin, cos, tan}`)
-- simdeez runtime-selected path
-- forced backend variants (`scalar`, `sse2`, `sse41`, `avx2`, and `avx512` when available on host)
-
-Current expectation: `log2_u35` and `exp2_u35` should show clear speedups on SIMD-capable backends (notably AVX2 on x86 hosts), `sin_u35`/`cos_u35`/`tan_u35` should now also show meaningful SIMD wins on realistic finite ranges, while `ln_u35`/`exp_u35` remain scalar-reference quality-first baselines. Use these benches to validate both performance and dispatch behavior as new kernels/overrides are added.
 
 # Compared to packed_simd
 
@@ -87,7 +59,7 @@ Current expectation: `log2_u35` and `exp2_u35` should show clear speedups on SIM
 * SIMDeez can be used with runtime selection, Faster cannot.
 * SIMDeez has faster fallbacks for some functions
 * SIMDeez does not currently work with iterators, Faster does.
-* SIMDeez uses more idiomatic intrinsic syntax while Faster uses more idomatic Rust syntax
+* SIMDeez uses more idiomatic intrinsic syntax while Faster uses more idiomatic Rust syntax
 * SIMDeez builds on stable rust now, Faster does not.
 
 All of the above could change! Faster seems to generally have the same
