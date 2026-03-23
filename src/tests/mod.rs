@@ -4,6 +4,7 @@ use lib::*;
 mod float_cast_tie_regressions;
 mod float_edge_contract_regressions;
 mod float_neq_regressions;
+mod float_special_value_regressions;
 mod i64_regressions;
 mod i8_mask_regressions;
 mod i8_mul_regressions;

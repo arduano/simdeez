@@ -288,4 +288,26 @@ mod tests {
         assert!(!f64::from_bits(upper.to_bits() - 1).is_undefined_behavior_when_casting());
         assert!(!(i64::MIN as f64).is_undefined_behavior_when_casting());
     }
+
+    #[test]
+    fn float_to_int_cast_filters_reject_non_finite_values() {
+        for value in [f32::NAN, f32::INFINITY, f32::NEG_INFINITY] {
+            assert!(value.is_undefined_behavior_when_casting());
+        }
+
+        for value in [f64::NAN, f64::INFINITY, f64::NEG_INFINITY] {
+            assert!(value.is_undefined_behavior_when_casting());
+        }
+    }
+
+    #[test]
+    fn float_to_int_cast_filters_keep_signed_zero_and_subnormals_defined() {
+        for value in [0.0f32, -0.0, f32::MIN_POSITIVE, f32::from_bits(1)] {
+            assert!(!value.is_undefined_behavior_when_casting());
+        }
+
+        for value in [0.0f64, -0.0, f64::MIN_POSITIVE, f64::from_bits(1)] {
+            assert!(!value.is_undefined_behavior_when_casting());
+        }
+    }
 }

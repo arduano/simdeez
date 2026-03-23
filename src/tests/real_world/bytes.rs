@@ -130,6 +130,24 @@ fn real_world_find_first_eq_i8_matches_reference() {
     }
 }
 
+#[test]
+fn real_world_find_first_eq_i8_respects_chunk_and_tail_boundaries() {
+    for len in [15usize, 16, 17, 31, 32, 33] {
+        let mut data = (0..len)
+            .map(|i| (i as i8).wrapping_mul(11).wrapping_sub(73))
+            .collect::<Vec<_>>();
+        let needle = 101i8;
+
+        assert_find_first_eq_matches_all_backends(&data, needle);
+
+        for &index in &[0usize, len / 2, len - 1] {
+            data.fill(needle.wrapping_sub(1));
+            data[index] = needle;
+            assert_find_first_eq_matches_all_backends(&data, needle);
+        }
+    }
+}
+
 // This mirrors byte-oriented checksums used in packet capture, texture uploads, and log shipping
 // where unsigned accumulation has to stay correct across chunked SIMD reductions and scalar tails.
 #[test]
@@ -143,4 +161,20 @@ fn real_world_byte_checksum_i8_matches_reference() {
     assert_byte_checksum_matches_all_backends(&data[..15]);
     assert_byte_checksum_matches_all_backends(&data[..63]);
     assert_byte_checksum_matches_all_backends(&data);
+}
+
+#[test]
+fn real_world_byte_checksum_i8_respects_chunk_and_tail_boundaries() {
+    let data = (0..65)
+        .map(|i| match i % 4 {
+            0 => i8::MIN,
+            1 => i8::MAX,
+            2 => -1,
+            _ => 1,
+        })
+        .collect::<Vec<_>>();
+
+    for &len in &[15usize, 16, 17, 31, 32, 33, data.len()] {
+        assert_byte_checksum_matches_all_backends(&data[..len]);
+    }
 }

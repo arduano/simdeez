@@ -260,3 +260,20 @@ fn real_world_window_energy_f32_matches_reference() {
     assert_window_energy_matches_all_backends(&input[..29]);
     assert_window_energy_matches_all_backends(&input);
 }
+
+#[test]
+fn real_world_noise_gate_f32_threshold_boundaries_match_reference() {
+    let input = vec![
+        -0.120_001, -0.12, -0.119_999, -0.020_001, -0.02, -0.019_999, 0.019_999, 0.02, 0.020_001,
+        0.119_999, 0.12, 0.120_001,
+    ];
+    assert_noise_gate_matches_all_backends(&input);
+}
+
+#[test]
+fn real_world_crossfade_f32_clamp_boundaries_match_reference() {
+    let lhs = vec![-1.0, -0.5, 0.25, 0.75, 1.0, 1.5];
+    let rhs = vec![1.0, 0.5, -0.25, -0.75, -1.0, -1.5];
+    let weights = vec![-1.0e-6, 0.0, 0.5, 1.0, 1.0 + 1.0e-6, 2.0];
+    assert_crossfade_matches_all_backends(&lhs, &rhs, &weights);
+}
