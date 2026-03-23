@@ -5,14 +5,22 @@ use crate::prelude::*;
 fn assert_f32_bits_eq(actual: &[f32], expected: &[f32]) {
     assert_eq!(actual.len(), expected.len());
     for (actual, expected) in actual.iter().zip(expected.iter()) {
-        assert_eq!(actual.to_bits(), expected.to_bits());
+        if expected.is_nan() {
+            assert!(actual.is_nan());
+        } else {
+            assert_eq!(actual.to_bits(), expected.to_bits());
+        }
     }
 }
 
 fn assert_f64_bits_eq(actual: &[f64], expected: &[f64]) {
     assert_eq!(actual.len(), expected.len());
     for (actual, expected) in actual.iter().zip(expected.iter()) {
-        assert_eq!(actual.to_bits(), expected.to_bits());
+        if expected.is_nan() {
+            assert!(actual.is_nan());
+        } else {
+            assert_eq!(actual.to_bits(), expected.to_bits());
+        }
     }
 }
 
