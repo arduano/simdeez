@@ -2,7 +2,7 @@ A library that abstracts over SIMD instruction sets, including ones with differi
 SIMDeez is designed to allow you to write a function one time and produce SSE2, SSE41, AVX2, AVX-512, Neon and WebAssembly SIMD versions of the function.
 You can either have the version you want chosen at compile time or automatically at runtime.
 
-Originally developed by @jackmott, however I volunteered to take over ownership.
+Originally developed by @jackmott. Active maintenance and releases now happen from this repository.
 
 If there are intrinsics you need that are not currently implemented, create an issue and I'll add them. PRs to add more intrinsics are welcome. Currently things are well fleshed out for i32, i64, f32, and f64 types.
 
@@ -75,7 +75,7 @@ This benchmark reports per-function throughput for:
 - simdeez runtime-selected path
 - forced backend variants (`scalar`, `sse2`, `sse41`, `avx2`, and `avx512` when available on host)
 
-Current expectation: `log2_u35` and `exp2_u35` should show clear speedups on SIMD-capable backends (notably AVX2 on x86 hosts), `sin_u35`/`cos_u35`/`tan_u35` should now also show meaningful SIMD wins on realistic finite ranges, while `ln_u35`/`exp_u35` remain scalar-reference quality-first baselines. Use these benches to validate both performance and dispatch behavior as new kernels/overrides are added.
+Current expectation: `log2_u35` and `exp2_u35` should show clear speedups on SIMD-capable backends, the revived `f64` log/exp and much of the inverse-trig and hyperbolic surface should remain worthwhile on the runtime-selected path, and the documented scalar-reference holdouts should continue to prefer correctness-first defaults until new evidence justifies another rescue pass. Use these benches to validate both performance and dispatch behavior as kernels and overrides evolve.
 
 # Compared to packed_simd
 
@@ -87,7 +87,7 @@ Current expectation: `log2_u35` and `exp2_u35` should show clear speedups on SIM
 * SIMDeez can be used with runtime selection, Faster cannot.
 * SIMDeez has faster fallbacks for some functions
 * SIMDeez does not currently work with iterators, Faster does.
-* SIMDeez uses more idiomatic intrinsic syntax while Faster uses more idomatic Rust syntax
+* SIMDeez uses more idiomatic intrinsic syntax while Faster uses more idiomatic Rust syntax
 * SIMDeez builds on stable rust now, Faster does not.
 
 All of the above could change! Faster seems to generally have the same
