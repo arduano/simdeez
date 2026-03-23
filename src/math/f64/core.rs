@@ -9,7 +9,6 @@ const F64_LOG_NORM_MANTISSA: i64 = 0x3FE0_0000_0000_0000u64 as i64;
 const F64_EXPONENT_BIAS_ADJUST: i64 = 1022;
 const F64_EXP_LN2_HI: f64 = 6.931_471_803_691_238e-1;
 const F64_EXP_LN2_LO: f64 = 1.908_214_929_270_587_7e-10;
-
 // DECISION(2026-03-23): KEEP_SIMD_PORTABLE
 // Function(s): f64 log2_u35 / exp2_u35 / ln_u35 / exp_u35
 // Why kept:
@@ -21,8 +20,12 @@ const F64_EXP_LN2_LO: f64 = 1.908_214_929_270_587_7e-10;
 // DECISION(2026-03-23): KEEP_SCALAR_REFERENCE
 // Function(s): f64 sin_u35 / cos_u35 / tan_u35
 // Why scalar:
-// - the previous portable trig fast path still lagged native scalar on this host
-// - the implementation was reverted to scalar-reference while preserving family ownership
+// - the final retry of the old portable trig kernel failed the u35 contract around pi boundaries,
+//   tan-pole neighborhoods, and moderate finite lanes before it could justify a speed keep
+// - the refreshed scalar-reference recheck still leaves runtime-selected throughput behind native
+//   scalar on this host (`sin`: about 17.03 ms vs 15.97 ms, `cos`: about 16.58 ms vs 15.75 ms,
+//   `tan`: about 20.85 ms vs 20.19 ms)
+// - native scalar still remains the honest default while family ownership stays localized here
 // Revisit when:
 // - a stronger range-reduction strategy or cheaper trig kernel appears
 

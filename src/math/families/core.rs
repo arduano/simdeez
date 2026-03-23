@@ -4,8 +4,10 @@ use crate::{Simd, SimdFloat32, SimdFloat64};
 // DECISION(2026-03-23): KEEP_SCALAR_REFERENCE
 // Function(s): f32 ln_u35 / exp_u35
 // Why scalar:
-// - local benches keep the current runtime-selected path below native scalar
-// - retaining the family entry points still preserves structure for later retries
+// - the final combined-wave recheck still keeps runtime-selected ln_u35 and exp_u35 below native scalar
+//   on this host (`ln`: about 2.72 ms vs 2.46 ms, `exp`: about 2.34 ms vs 2.11 ms)
+// - these contracts are stricter than the relaxed portable f32 log2_u35 / exp2_u35 pieces they would
+//   naturally compose from, so there is no cheap honest rescue today
 // Revisit when:
 // - a better shared f32 log/exp kernel exists
 
