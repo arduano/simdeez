@@ -6,7 +6,10 @@ use crate::{Simd, SimdFloat32, SimdFloat64};
 // DECISION(2026-03-23): KEEP_SCALAR_REFERENCE
 // Function(s): f32 fmod
 // Why scalar:
-// - local benches still favor native scalar and there is no convincing portable SIMD default yet
+// - the final combined-wave recheck still leaves runtime-selected fmod behind native scalar on this
+//   host (about 8.10 ms vs 7.62 ms)
+// - there is still no convincing portable SIMD default that beats scalar without adding quotient-range
+//   complexity
 // - the public trait entry point stays stable while the honest implementation remains scalar-reference
 // Revisit when:
 // - quotient-range handling becomes cheap enough for a worthwhile portable kernel
