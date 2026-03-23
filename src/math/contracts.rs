@@ -6,7 +6,7 @@ pub const SIN_U35_F32_MAX_ULP: u32 = 35;
 pub const COS_U35_F32_MAX_ULP: u32 = 35;
 pub const TAN_U35_F32_MAX_ULP: u32 = 35;
 
-// Portable inverse-trig kernels target the SLEEF-style u35 contract on f32.
+// Portable inverse-trig kernels target the u35 contract on f32.
 pub const ASIN_U35_F32_MAX_ULP: u32 = 35;
 pub const ACOS_U35_F32_MAX_ULP: u32 = 35;
 pub const ATAN_U35_F32_MAX_ULP: u32 = 35;

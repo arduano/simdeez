@@ -1,4 +1,4 @@
-//! Portable SIMD math scaffolding for SLEEF-style transcendental families.
+//! Portable SIMD math scaffolding for the in-tree transcendental families.
 //!
 //! Strategy C baseline: keep semantics in-tree and backend-agnostic by expressing
 //! vector math over existing simdeez vector types.

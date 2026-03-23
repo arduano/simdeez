@@ -453,45 +453,6 @@ pub trait SimdFloat32:
 
     /// Element-wise fast reciprocal (1.0 / x)
     fn fast_inverse(self) -> Self;
-
-    cfg_if::cfg_if! {
-        if #[cfg(feature = "sleef")] {
-            fn sin(a: Self::Vf32) -> Self::Vf32;
-            fn fast_sin(a: Self::Vf32) -> Self::Vf32;
-            fn cos(a: Self::Vf32) -> Self::Vf32;
-            fn fast_cos(a: Self::Vf32) -> Self::Vf32;
-            fn asin(a: Self::Vf32) -> Self::Vf32;
-            fn fast_asin(a: Self::Vf32) -> Self::Vf32;
-            fn acos(a: Self::Vf32) -> Self::Vf32;
-            fn fast_acos(a: Self::Vf32) -> Self::Vf32;
-            fn tan(a: Self::Vf32) -> Self::Vf32;
-            fn fast_tan(a: Self::Vf32) -> Self::Vf32;
-            fn atan(a: Self::Vf32) -> Self::Vf32;
-            fn fast_atan(a: Self::Vf32) -> Self::Vf32;
-
-            //hyperbolic
-            fn sinh(a: Self::Vf32) -> Self::Vf32;
-            fn fast_sinh(a: Self::Vf32) -> Self::Vf32;
-            fn cosh(a: Self::Vf32) -> Self::Vf32;
-            fn fast_cosh(a: Self::Vf32) -> Self::Vf32;
-            fn asinh(a: Self::Vf32) -> Self::Vf32;
-            fn acosh(a: Self::Vf32) -> Self::Vf32;
-            fn tanh(a: Self::Vf32) -> Self::Vf32;
-            fn fast_tanh(a: Self::Vf32) -> Self::Vf32;
-            fn atanh(a: Self::Vf32) -> Self::Vf32;
-
-            fn atan2(a: Self::Vf32,b: Self::Vf32) -> Self::Vf32;
-            fn fast_atan2(a: Self::Vf32,b: Self::Vf32) -> Self::Vf32;
-            fn ln(a: Self::Vf32) -> Self::Vf32;
-            fn fast_ln(a: Self::Vf32) -> Self::Vf32;
-            fn log2(a: Self::Vf32) -> Self::Vf32;
-            fn log10(a: Self::Vf32) -> Self::Vf32;
-            fn hypot(a: Self::Vf32,b: Self::Vf32) -> Self::Vf32;
-            fn fast_hypot(a: Self::Vf32,b: Self::Vf32) -> Self::Vf32;
-
-            fn fmod(a: Self::Vf32, b: Self::Vf32) -> Self::Vf32;
-        }
-    }
 }
 
 /// Operations shared by 64 bit float types

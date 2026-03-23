@@ -24,9 +24,9 @@ Refer to the excellent [Intel Intrinsics Guide](https://software.intel.com/sites
 * Extract or set a single lane with the index operator: `let v1 = v[1];`
 * Falls all the way back to scalar code for platforms with no SIMD or unsupported SIMD
 
-# SIMD math revival status
+# SIMD math
 
-SIMDeez includes a native, pure-Rust math surface for the restored historical SLEEF-style families exposed through `simdeez::math` and re-exported in `simdeez::prelude`.
+SIMDeez includes a native, pure-Rust SIMD math surface exposed through `simdeez::math` and re-exported in `simdeez::prelude`.
 
 Covered families include:
 - core log/exp: `log2_u35`, `exp2_u35`, `ln_u35`, `exp_u35`
@@ -34,9 +34,7 @@ Covered families include:
 - hyperbolic and inverse hyperbolic: `sinh_u35`, `cosh_u35`, `tanh_u35`, `asinh_u35`, `acosh_u35`, `atanh_u35`
 - binary misc: `log10_u35`, `hypot_u35`, `fmod`
 
-The old `sleef-sys` feature remains historical/deprecated and is not the primary implementation path.
-
-For implementation notes, current keep/revert shape, and benchmark guidance, see [SLEEF.md](SLEEF.md).
+For implementation notes and benchmark guidance, see [SIMD_MATH.md](SIMD_MATH.md).
 
 Example:
 

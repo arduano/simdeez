@@ -24,8 +24,8 @@
 //! * Operator overloading: `let sum = va + vb` or `s *= s`
 //! * Extract or set a single lane with the index operator: `let v1 = v[1];`
 //!
-//! # SIMD math revival status
-//! SIMDeez now provides a native, pure-Rust restored historical SLEEF-backed surface via extension traits:
+//! # SIMD math
+//! SIMDeez now provides a native, pure-Rust SIMD math surface via extension traits:
 //! `log2_u35`, `exp2_u35`, `ln_u35`, `exp_u35`, `sin_u35`, `cos_u35`, `tan_u35`,
 //! `asin_u35`, `acos_u35`, `atan_u35`, `atan2_u35`,
 //! `sinh_u35`, `cosh_u35`, `tanh_u35`, `asinh_u35`, `acosh_u35`, `atanh_u35`,
@@ -37,7 +37,6 @@
 //! and scalar fallback patching for exceptional lanes. The stabilized map is intentionally mixed:
 //! most `f32` families and the revived `f64` log/exp, inverse-trig, and binary-misc families
 //! keep SIMD defaults, while the known losing holdouts remain explicit scalar-reference mappings.
-//! The historical `sleef` feature remains deprecated and is not the primary implementation path.
 //!
 //! # Compared to stdsimd
 //!
@@ -1298,44 +1297,5 @@ pub trait Simd: 'static + Sync + Send {
     )]
     unsafe fn shuffle_epi32<const IMM8: i32>(_a: Self::Vi32) -> Self::Vi32 {
         panic!("Deprecated")
-    }
-
-    cfg_if::cfg_if! {
-        if #[cfg(feature = "sleef")] {
-            unsafe fn sin_ps(a: Self::Vf32) -> Self::Vf32;
-            unsafe fn fast_sin_ps(a: Self::Vf32) -> Self::Vf32;
-            unsafe fn cos_ps(a: Self::Vf32) -> Self::Vf32;
-            unsafe fn fast_cos_ps(a: Self::Vf32) -> Self::Vf32;
-            unsafe fn asin_ps(a: Self::Vf32) -> Self::Vf32;
-            unsafe fn fast_asin_ps(a: Self::Vf32) -> Self::Vf32;
-            unsafe fn acos_ps(a: Self::Vf32) -> Self::Vf32;
-            unsafe fn fast_acos_ps(a: Self::Vf32) -> Self::Vf32;
-            unsafe fn tan_ps(a: Self::Vf32) -> Self::Vf32;
-            unsafe fn fast_tan_ps(a: Self::Vf32) -> Self::Vf32;
-            unsafe fn atan_ps(a: Self::Vf32) -> Self::Vf32;
-            unsafe fn fast_atan_ps(a: Self::Vf32) -> Self::Vf32;
-
-            //hyperbolic
-            unsafe fn sinh_ps(a: Self::Vf32) -> Self::Vf32;
-            unsafe fn fast_sinh_ps(a: Self::Vf32) -> Self::Vf32;
-            unsafe fn cosh_ps(a: Self::Vf32) -> Self::Vf32;
-            unsafe fn fast_cosh_ps(a: Self::Vf32) -> Self::Vf32;
-            unsafe fn asinh_ps(a: Self::Vf32) -> Self::Vf32;
-            unsafe fn acosh_ps(a: Self::Vf32) -> Self::Vf32;
-            unsafe fn tanh_ps(a: Self::Vf32) -> Self::Vf32;
-            unsafe fn fast_tanh_ps(a: Self::Vf32) -> Self::Vf32;
-            unsafe fn atanh_ps(a: Self::Vf32) -> Self::Vf32;
-
-            unsafe fn atan2_ps(a: Self::Vf32,b: Self::Vf32) -> Self::Vf32;
-            unsafe fn fast_atan2_ps(a: Self::Vf32,b: Self::Vf32) -> Self::Vf32;
-            unsafe fn ln_ps(a:Self::Vf32) -> Self::Vf32;
-            unsafe fn fast_ln_ps(a:Self::Vf32) -> Self::Vf32;
-            unsafe fn log2_ps(a:Self::Vf32) -> Self::Vf32;
-            unsafe fn log10_ps(a:Self::Vf32) -> Self::Vf32;
-            unsafe fn hypot_ps(a:Self::Vf32,b:Self::Vf32) -> Self::Vf32;
-            unsafe fn fast_hypot_ps(a:Self::Vf32,b:Self::Vf32) -> Self::Vf32;
-
-            unsafe fn fmod_ps(a:Self::Vf32,b:Self::Vf32) -> Self::Vf32;
-        }
     }
 }
