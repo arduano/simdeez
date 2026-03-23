@@ -1,6 +1,6 @@
 //! f32 SIMD math kernel layering:
 //! - `portable`: backend-agnostic reduction/polynomial kernels + scalar lane patching.
-//! - `x86_avx2`: optional hand-optimized override(s) for specific functions.
+//! - `x86_avx2`: the only currently justified backend override (`log2_u35`).
 //! - this module: dispatch glue selecting overrides without changing the public API.
 
 mod hyperbolic;
@@ -10,6 +10,14 @@ mod portable;
 mod x86_avx2;
 
 use crate::{Simd, SimdFloat32};
+
+// DECISION(2026-03-23): KEEP_SIMD_OVERRIDE
+// Function(s): f32 log2_u35 dispatch
+// Why kept:
+// - local benches show the AVX2 path materially ahead of native scalar and forced scalar
+// - the portable fallback also stays worthwhile on non-AVX2 backends
+// Revisit when:
+// - the portable log2 kernel or the AVX2 override changes materially
 
 #[inline(always)]
 pub(crate) fn log2_u35<V>(input: V) -> V

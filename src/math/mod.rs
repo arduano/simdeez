@@ -11,16 +11,24 @@
 //! centralized fallback for non-finite, very-large, and tan-pole-adjacent lanes.
 //! `sinh_u35` / `cosh_u35` / `tanh_u35` now use family-local portable SIMD
 //! kernels with centralized scalar patching for exceptional lanes.
-//! Remaining historical SLEEF surface in this baseline pass is otherwise still
-//! lane-wise scalar mapped for correctness-first portability.
+//! The stabilized `f64` map is intentionally mixed:
+//! scalar-reference for the current losing core/trig and hyperbolic families,
+//! portable SIMD for inverse trig and several binary-misc kernels,
+//! and hybrid keep decisions where SIMD structure still relies on scalar sub-ops.
 //!
 //! Structure notes:
 //! - `families/` owns public extension traits grouped by math family.
 //! - `scalar/` owns scalar fallback helpers using the same family boundaries.
-//! - `f64/` mirrors the family split; core u35 kernels now have portable SIMD
-//!   fast paths with scalar-lane patching for exceptional inputs.
+//! - `f64/` mirrors the family split so future rescue-or-revert work can stay localized.
 //! - `contracts.rs` and `map.rs` stay stable so follow-up optimization PRs can
 //!   target a single family file with minimal overlap.
+//!
+//! Decision vocabulary used by the math audit ledger:
+//! - `KEEP_SIMD_PORTABLE`: portable SIMD stays enabled by default.
+//! - `KEEP_SIMD_OVERRIDE`: portable SIMD stays enabled and a backend override stays justified.
+//! - `KEEP_SCALAR_REFERENCE`: the honest default remains lane-wise scalar reference.
+//! - `KEEP_MIXED`: keep a hybrid path that combines vector structure with scalar sub-ops or patching.
+//! - `RESEARCH_NEEDED`: current evidence is not strong enough for a cleaner keep/revert call.
 
 pub mod contracts;
 mod f32;

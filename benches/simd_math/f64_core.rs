@@ -1,73 +1,8 @@
-use criterion::{Criterion, Throughput};
-use rand::{Rng, SeedableRng};
-use rand_chacha::ChaCha8Rng;
+use crate::shared::{self, BenchTargetsF64, INPUT_LEN};
+use criterion::Criterion;
 use simdeez::math::SimdMathF64Core;
+use simdeez::scalar::Scalar;
 use simdeez::{prelude::*, simd_unsafe_generate_all};
-use std::hint::black_box;
-
-const INPUT_LEN: usize = 1 << 20;
-
-fn make_positive_log_inputs(seed: u64) -> Vec<f64> {
-    let mut rng = ChaCha8Rng::seed_from_u64(seed);
-    (0..INPUT_LEN)
-        .map(|_| {
-            let log2x = rng.gen_range(-40.0f64..40.0f64);
-            let mantissa = rng.gen_range(1.0f64..2.0f64);
-            mantissa * log2x.exp2()
-        })
-        .collect()
-}
-
-fn make_exp2_inputs(seed: u64) -> Vec<f64> {
-    let mut rng = ChaCha8Rng::seed_from_u64(seed);
-    (0..INPUT_LEN)
-        .map(|_| rng.gen_range(-1000.0f64..1000.0f64))
-        .collect()
-}
-
-fn make_exp_inputs(seed: u64) -> Vec<f64> {
-    let mut rng = ChaCha8Rng::seed_from_u64(seed);
-    (0..INPUT_LEN)
-        .map(|_| rng.gen_range(-700.0f64..700.0f64))
-        .collect()
-}
-
-fn make_trig_inputs(seed: u64) -> Vec<f64> {
-    let mut rng = ChaCha8Rng::seed_from_u64(seed);
-    (0..INPUT_LEN)
-        .map(|_| rng.gen_range(-100.0f64 * core::f64::consts::PI..100.0f64 * core::f64::consts::PI))
-        .collect()
-}
-
-fn make_tan_inputs(seed: u64) -> Vec<f64> {
-    let mut rng = ChaCha8Rng::seed_from_u64(seed);
-    (0..INPUT_LEN)
-        .map(|_| {
-            let mut x =
-                rng.gen_range(-100.0f64 * core::f64::consts::PI..100.0f64 * core::f64::consts::PI);
-            let k = (x / core::f64::consts::PI).round();
-            let nearest_pole = (k + 0.5) * core::f64::consts::PI;
-            if (x - nearest_pole).abs() < 1.0e-8 {
-                x += if x >= 0.0 { 2.5e-8 } else { -2.5e-8 };
-            }
-            x
-        })
-        .collect()
-}
-
-#[inline(always)]
-fn simdeez_sum_impl<S: Simd>(input: &[f64], op: impl Fn(S::Vf64) -> S::Vf64) -> f64 {
-    let mut sum = 0.0f64;
-    let mut i = 0;
-
-    while i + S::Vf64::WIDTH <= input.len() {
-        let v = S::Vf64::load_from_slice(&input[i..]);
-        sum += op(v).horizontal_add();
-        i += S::Vf64::WIDTH;
-    }
-
-    sum
-}
 
 #[inline(never)]
 fn scalar_log2_sum(input: &[f64]) -> f64 {
@@ -100,112 +35,206 @@ fn scalar_tan_sum(input: &[f64]) -> f64 {
 
 simd_unsafe_generate_all!(
     fn simdeez_log2_sum(input: &[f64]) -> f64 {
-        simdeez_sum_impl::<S>(input, |v| v.log2_u35())
+        shared::simdeez_sum_impl_f64::<S>(input, |v| v.log2_u35())
     }
 );
 simd_unsafe_generate_all!(
     fn simdeez_exp2_sum(input: &[f64]) -> f64 {
-        simdeez_sum_impl::<S>(input, |v| v.exp2_u35())
+        shared::simdeez_sum_impl_f64::<S>(input, |v| v.exp2_u35())
     }
 );
 simd_unsafe_generate_all!(
     fn simdeez_ln_sum(input: &[f64]) -> f64 {
-        simdeez_sum_impl::<S>(input, |v| v.ln_u35())
+        shared::simdeez_sum_impl_f64::<S>(input, |v| v.ln_u35())
     }
 );
 simd_unsafe_generate_all!(
     fn simdeez_exp_sum(input: &[f64]) -> f64 {
-        simdeez_sum_impl::<S>(input, |v| v.exp_u35())
+        shared::simdeez_sum_impl_f64::<S>(input, |v| v.exp_u35())
     }
 );
 simd_unsafe_generate_all!(
     fn simdeez_sin_sum(input: &[f64]) -> f64 {
-        simdeez_sum_impl::<S>(input, |v| v.sin_u35())
+        shared::simdeez_sum_impl_f64::<S>(input, |v| v.sin_u35())
     }
 );
 simd_unsafe_generate_all!(
     fn simdeez_cos_sum(input: &[f64]) -> f64 {
-        simdeez_sum_impl::<S>(input, |v| v.cos_u35())
+        shared::simdeez_sum_impl_f64::<S>(input, |v| v.cos_u35())
     }
 );
 simd_unsafe_generate_all!(
     fn simdeez_tan_sum(input: &[f64]) -> f64 {
-        simdeez_sum_impl::<S>(input, |v| v.tan_u35())
+        shared::simdeez_sum_impl_f64::<S>(input, |v| v.tan_u35())
     }
 );
 
-fn bench_pair(
-    c: &mut Criterion,
-    name: &str,
-    input: &[f64],
-    scalar: fn(&[f64]) -> f64,
-    simd: fn(&[f64]) -> f64,
-) {
-    let mut group = c.benchmark_group(name);
-    group.throughput(Throughput::Elements(input.len() as u64));
-    group.bench_function("scalar-native", |b| {
-        b.iter(|| black_box(scalar(black_box(input))))
-    });
-    group.bench_function("simdeez-runtime", |b| {
-        b.iter(|| black_box(simd(black_box(input))))
-    });
-    group.finish();
+#[inline(never)]
+fn forced_scalar_log2_sum(input: &[f64]) -> f64 {
+    shared::force_scalar_sum_f64(input, |v: <Scalar as Simd>::Vf64| v.log2_u35())
+}
+
+#[inline(never)]
+fn forced_scalar_exp2_sum(input: &[f64]) -> f64 {
+    shared::force_scalar_sum_f64(input, |v: <Scalar as Simd>::Vf64| v.exp2_u35())
+}
+
+#[inline(never)]
+fn forced_scalar_ln_sum(input: &[f64]) -> f64 {
+    shared::force_scalar_sum_f64(input, |v: <Scalar as Simd>::Vf64| v.ln_u35())
+}
+
+#[inline(never)]
+fn forced_scalar_exp_sum(input: &[f64]) -> f64 {
+    shared::force_scalar_sum_f64(input, |v: <Scalar as Simd>::Vf64| v.exp_u35())
+}
+
+#[inline(never)]
+fn forced_scalar_sin_sum(input: &[f64]) -> f64 {
+    shared::force_scalar_sum_f64(input, |v: <Scalar as Simd>::Vf64| v.sin_u35())
+}
+
+#[inline(never)]
+fn forced_scalar_cos_sum(input: &[f64]) -> f64 {
+    shared::force_scalar_sum_f64(input, |v: <Scalar as Simd>::Vf64| v.cos_u35())
+}
+
+#[inline(never)]
+fn forced_scalar_tan_sum(input: &[f64]) -> f64 {
+    shared::force_scalar_sum_f64(input, |v: <Scalar as Simd>::Vf64| v.tan_u35())
 }
 
 pub fn register(c: &mut Criterion) {
-    let log_inputs = make_positive_log_inputs(0xF640_1001);
-    let exp2_inputs = make_exp2_inputs(0xF640_1002);
-    let exp_inputs = make_exp_inputs(0xF640_1003);
-    let trig_inputs = make_trig_inputs(0xF640_1004);
-    let tan_inputs = make_tan_inputs(0xF640_1005);
+    let log_inputs = shared::make_positive_log_inputs_f64(INPUT_LEN, 0xF640_1001);
+    let exp2_inputs = shared::make_exp2_inputs_f64(INPUT_LEN, 0xF640_1002);
+    let exp_inputs = shared::make_exp_inputs_f64(INPUT_LEN, 0xF640_1003);
+    let trig_inputs = shared::make_trig_inputs_f64(INPUT_LEN, 0xF640_1004);
+    let tan_inputs = shared::make_tan_inputs_f64(INPUT_LEN, 0xF640_1005);
 
-    bench_pair(
+    shared::bench_variants_f64(
         c,
         "simd_math/f64/log2_u35",
         &log_inputs,
-        scalar_log2_sum,
-        simdeez_log2_sum,
+        BenchTargetsF64 {
+            scalar_native: scalar_log2_sum,
+            simdeez_runtime: simdeez_log2_sum,
+            simdeez_scalar: forced_scalar_log2_sum,
+            #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+            simdeez_sse2: simdeez_log2_sum_sse2,
+            #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+            simdeez_sse41: simdeez_log2_sum_sse41,
+            #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+            simdeez_avx2: simdeez_log2_sum_avx2,
+            #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+            simdeez_avx512: simdeez_log2_sum_avx512,
+        },
     );
-    bench_pair(
+    shared::bench_variants_f64(
         c,
         "simd_math/f64/exp2_u35",
         &exp2_inputs,
-        scalar_exp2_sum,
-        simdeez_exp2_sum,
+        BenchTargetsF64 {
+            scalar_native: scalar_exp2_sum,
+            simdeez_runtime: simdeez_exp2_sum,
+            simdeez_scalar: forced_scalar_exp2_sum,
+            #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+            simdeez_sse2: simdeez_exp2_sum_sse2,
+            #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+            simdeez_sse41: simdeez_exp2_sum_sse41,
+            #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+            simdeez_avx2: simdeez_exp2_sum_avx2,
+            #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+            simdeez_avx512: simdeez_exp2_sum_avx512,
+        },
     );
-    bench_pair(
+    shared::bench_variants_f64(
         c,
         "simd_math/f64/ln_u35",
         &log_inputs,
-        scalar_ln_sum,
-        simdeez_ln_sum,
+        BenchTargetsF64 {
+            scalar_native: scalar_ln_sum,
+            simdeez_runtime: simdeez_ln_sum,
+            simdeez_scalar: forced_scalar_ln_sum,
+            #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+            simdeez_sse2: simdeez_ln_sum_sse2,
+            #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+            simdeez_sse41: simdeez_ln_sum_sse41,
+            #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+            simdeez_avx2: simdeez_ln_sum_avx2,
+            #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+            simdeez_avx512: simdeez_ln_sum_avx512,
+        },
     );
-    bench_pair(
+    shared::bench_variants_f64(
         c,
         "simd_math/f64/exp_u35",
         &exp_inputs,
-        scalar_exp_sum,
-        simdeez_exp_sum,
+        BenchTargetsF64 {
+            scalar_native: scalar_exp_sum,
+            simdeez_runtime: simdeez_exp_sum,
+            simdeez_scalar: forced_scalar_exp_sum,
+            #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+            simdeez_sse2: simdeez_exp_sum_sse2,
+            #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+            simdeez_sse41: simdeez_exp_sum_sse41,
+            #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+            simdeez_avx2: simdeez_exp_sum_avx2,
+            #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+            simdeez_avx512: simdeez_exp_sum_avx512,
+        },
     );
-    bench_pair(
+    shared::bench_variants_f64(
         c,
         "simd_math/f64/sin_u35",
         &trig_inputs,
-        scalar_sin_sum,
-        simdeez_sin_sum,
+        BenchTargetsF64 {
+            scalar_native: scalar_sin_sum,
+            simdeez_runtime: simdeez_sin_sum,
+            simdeez_scalar: forced_scalar_sin_sum,
+            #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+            simdeez_sse2: simdeez_sin_sum_sse2,
+            #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+            simdeez_sse41: simdeez_sin_sum_sse41,
+            #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+            simdeez_avx2: simdeez_sin_sum_avx2,
+            #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+            simdeez_avx512: simdeez_sin_sum_avx512,
+        },
     );
-    bench_pair(
+    shared::bench_variants_f64(
         c,
         "simd_math/f64/cos_u35",
         &trig_inputs,
-        scalar_cos_sum,
-        simdeez_cos_sum,
+        BenchTargetsF64 {
+            scalar_native: scalar_cos_sum,
+            simdeez_runtime: simdeez_cos_sum,
+            simdeez_scalar: forced_scalar_cos_sum,
+            #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+            simdeez_sse2: simdeez_cos_sum_sse2,
+            #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+            simdeez_sse41: simdeez_cos_sum_sse41,
+            #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+            simdeez_avx2: simdeez_cos_sum_avx2,
+            #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+            simdeez_avx512: simdeez_cos_sum_avx512,
+        },
     );
-    bench_pair(
+    shared::bench_variants_f64(
         c,
         "simd_math/f64/tan_u35",
         &tan_inputs,
-        scalar_tan_sum,
-        simdeez_tan_sum,
+        BenchTargetsF64 {
+            scalar_native: scalar_tan_sum,
+            simdeez_runtime: simdeez_tan_sum,
+            simdeez_scalar: forced_scalar_tan_sum,
+            #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+            simdeez_sse2: simdeez_tan_sum_sse2,
+            #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+            simdeez_sse41: simdeez_tan_sum_sse41,
+            #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+            simdeez_avx2: simdeez_tan_sum_avx2,
+            #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+            simdeez_avx512: simdeez_tan_sum_avx512,
+        },
     );
 }

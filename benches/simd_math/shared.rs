@@ -18,6 +18,17 @@ pub fn make_positive_log_inputs(len: usize, seed: u64) -> Vec<f32> {
         .collect()
 }
 
+pub fn make_positive_log_inputs_f64(len: usize, seed: u64) -> Vec<f64> {
+    let mut rng = ChaCha8Rng::seed_from_u64(seed);
+    (0..len)
+        .map(|_| {
+            let log2x = rng.gen_range(-40.0f64..40.0f64);
+            let mantissa = rng.gen_range(1.0f64..2.0f64);
+            mantissa * log2x.exp2()
+        })
+        .collect()
+}
+
 pub fn make_exp2_inputs(len: usize, seed: u64) -> Vec<f32> {
     let mut rng = ChaCha8Rng::seed_from_u64(seed);
     (0..len)
@@ -25,9 +36,23 @@ pub fn make_exp2_inputs(len: usize, seed: u64) -> Vec<f32> {
         .collect()
 }
 
+pub fn make_exp2_inputs_f64(len: usize, seed: u64) -> Vec<f64> {
+    let mut rng = ChaCha8Rng::seed_from_u64(seed);
+    (0..len)
+        .map(|_| rng.gen_range(-1000.0f64..1000.0f64))
+        .collect()
+}
+
 pub fn make_exp_inputs(len: usize, seed: u64) -> Vec<f32> {
     let mut rng = ChaCha8Rng::seed_from_u64(seed);
     (0..len).map(|_| rng.gen_range(-80.0f32..80.0f32)).collect()
+}
+
+pub fn make_exp_inputs_f64(len: usize, seed: u64) -> Vec<f64> {
+    let mut rng = ChaCha8Rng::seed_from_u64(seed);
+    (0..len)
+        .map(|_| rng.gen_range(-700.0f64..700.0f64))
+        .collect()
 }
 
 pub fn make_unary_inputs(len: usize, seed: u64, range: core::ops::Range<f32>) -> Vec<f32> {
@@ -39,6 +64,13 @@ pub fn make_trig_inputs(len: usize, seed: u64) -> Vec<f32> {
     let mut rng = ChaCha8Rng::seed_from_u64(seed);
     (0..len)
         .map(|_| rng.gen_range(-20.0f32 * core::f32::consts::PI..20.0f32 * core::f32::consts::PI))
+        .collect()
+}
+
+pub fn make_trig_inputs_f64(len: usize, seed: u64) -> Vec<f64> {
+    let mut rng = ChaCha8Rng::seed_from_u64(seed);
+    (0..len)
+        .map(|_| rng.gen_range(-100.0f64 * core::f64::consts::PI..100.0f64 * core::f64::consts::PI))
         .collect()
 }
 
@@ -76,6 +108,22 @@ pub fn make_tan_inputs(len: usize, seed: u64) -> Vec<f32> {
             }
             if x == half_pi || x == -half_pi {
                 x += 2.5e-3;
+            }
+            x
+        })
+        .collect()
+}
+
+pub fn make_tan_inputs_f64(len: usize, seed: u64) -> Vec<f64> {
+    let mut rng = ChaCha8Rng::seed_from_u64(seed);
+    (0..len)
+        .map(|_| {
+            let mut x =
+                rng.gen_range(-100.0f64 * core::f64::consts::PI..100.0f64 * core::f64::consts::PI);
+            let k = (x / core::f64::consts::PI).round();
+            let nearest_pole = (k + 0.5) * core::f64::consts::PI;
+            if (x - nearest_pole).abs() < 1.0e-8 {
+                x += if x >= 0.0 { 2.5e-8 } else { -2.5e-8 };
             }
             x
         })

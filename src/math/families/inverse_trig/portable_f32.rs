@@ -1,6 +1,14 @@
 use crate::math::scalar;
 use crate::{Simd, SimdBaseIo, SimdBaseOps, SimdConsts, SimdFloat32, SimdInt32};
 
+// DECISION(2026-03-23): KEEP_SIMD_PORTABLE
+// Function(s): f32 asin_u35 / acos_u35 / atan_u35
+// Why kept:
+// - these remain some of the strongest portable SIMD wins in local benchmarks
+// - targeted near-edge and symmetry tests match the current reduction thresholds
+// Revisit when:
+// - the approximation family or fallback boundaries move materially
+
 type SimdI32<V> = <<V as SimdConsts>::Engine as Simd>::Vi32;
 
 const F32_EXPONENT_MASK: i32 = 0x7F80_0000u32 as i32;

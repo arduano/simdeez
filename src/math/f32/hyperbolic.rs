@@ -9,6 +9,14 @@ const SINH_COSH_FAST_ABS_MAX: f32 = 40.0;
 const TANH_SMALL_ABS: f32 = 0.625;
 const TANH_FAST_ABS_MAX: f32 = 40.0;
 
+// DECISION(2026-03-23): KEEP_SIMD_PORTABLE
+// Function(s): f32 sinh_u35 / cosh_u35 / tanh_u35
+// Why kept:
+// - local benches show large wins over native scalar across runtime-selected and AVX2 paths
+// - the family already centralizes exceptional-lane scalar patching cleanly
+// Revisit when:
+// - the exp/log backbone or fast-range cutovers change materially
+
 #[inline(always)]
 fn any_lane_nonzero<V>(mask: SimdI32<V>) -> bool
 where

@@ -3,6 +3,14 @@ mod portable_f32;
 use crate::math::{f64, map, scalar};
 use crate::{Simd, SimdFloat32, SimdFloat64};
 
+// DECISION(2026-03-23): KEEP_SCALAR_REFERENCE
+// Function(s): f32 fmod
+// Why scalar:
+// - local benches still favor native scalar and there is no convincing portable SIMD default yet
+// - the public trait entry point stays stable while the honest implementation remains scalar-reference
+// Revisit when:
+// - quotient-range handling becomes cheap enough for a worthwhile portable kernel
+
 pub trait SimdMathF32BinaryMisc: SimdFloat32 {
     #[inline(always)]
     fn log10_u35(self) -> Self

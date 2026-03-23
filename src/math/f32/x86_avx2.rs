@@ -7,6 +7,14 @@ use crate::math::f32::portable;
 use crate::math::scalar;
 use crate::{Simd, SimdFloat32};
 
+// DECISION(2026-03-23): KEEP_SIMD_OVERRIDE
+// Function(s): f32 log2_u35 AVX2 override
+// Why kept:
+// - the AVX2 path is the fastest local benchmark variant for the restored log2 kernel
+// - exceptional semantics still route through the shared portable scalar patching
+// Revisit when:
+// - the portable fallback catches up or semantic divergence appears
+
 #[cfg(target_arch = "x86")]
 use core::arch::x86::*;
 #[cfg(target_arch = "x86_64")]

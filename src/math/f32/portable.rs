@@ -8,6 +8,30 @@ pub(super) const F32_MANTISSA_MASK: i32 = 0x007F_FFFF;
 pub(super) const F32_LOG_NORM_MANTISSA: i32 = 0x3F00_0000;
 pub(super) const F32_EXPONENT_BIAS_ADJUST: i32 = 126;
 
+// DECISION(2026-03-23): KEEP_SIMD_PORTABLE
+// Function(s): f32 log2_u35 portable fallback / exp2_u35
+// Why kept:
+// - local benches show both kernels materially ahead of native scalar on this host
+// - scalar patching already contains non-finite, zero, and subnormal edge lanes
+// Revisit when:
+// - a new approximation family lands or non-x86 evidence disagrees sharply
+
+// DECISION(2026-03-23): KEEP_SIMD_PORTABLE
+// Function(s): f32 sin_u35 / cos_u35 / tan_u35
+// Why kept:
+// - runtime-selected throughput is far above native scalar on the local machine
+// - targeted boundary and mixed-lane tests cover current reduction and tan-pole handling
+// Revisit when:
+// - large-argument reduction strategy changes materially
+
+// DECISION(2026-03-23): KEEP_SIMD_PORTABLE
+// Function(s): f32 asinh_u35 / acosh_u35 / atanh_u35
+// Why kept:
+// - the restored inverse-hyperbolic paths beat native scalar in local benchmarks
+// - exceptional-domain lanes already fall back to scalar references
+// Revisit when:
+// - the shared log/exp kernels change enough to affect the current balance
+
 #[inline(always)]
 fn any_lane_nonzero<V>(mask: SimdI32<V>) -> bool
 where
