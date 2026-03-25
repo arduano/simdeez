@@ -192,7 +192,7 @@ mod libm_ext;
 pub mod math;
 pub use math::{SimdMathF32, SimdMathF64};
 
-mod engines;
+pub mod engines;
 
 pub use engines::scalar;
 
