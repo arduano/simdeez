@@ -429,14 +429,10 @@ impl_op! {
             _mm_round_ps(a, _MM_FROUND_TO_NEG_INF | _MM_FROUND_NO_EXC)
         }
         for Sse2(a: __m128) -> __m128 {
-            let nums_arr = core::mem::transmute::<__m128, [f32; 4]>(a);
-            let ceil = [
-                nums_arr[0].m_floor(),
-                nums_arr[1].m_floor(),
-                nums_arr[2].m_floor(),
-                nums_arr[3].m_floor(),
-            ];
-            core::mem::transmute::<[f32; 4], __m128>(ceil)
+            let rounded = Self::round(a);
+            let mask = _mm_cmpgt_ps(rounded, a);
+            let one = _mm_and_ps(mask, _mm_set1_ps(1.0));
+            _mm_sub_ps(rounded, one)
         }
         for Scalar(a: f32) -> f32 {
             a.m_floor()
@@ -462,14 +458,10 @@ impl_op! {
             _mm_round_ps(a, _MM_FROUND_TO_POS_INF | _MM_FROUND_NO_EXC)
         }
         for Sse2(a: __m128) -> __m128 {
-            let nums_arr = core::mem::transmute::<__m128, [f32; 4]>(a);
-            let ceil = [
-                nums_arr[0].m_ceil(),
-                nums_arr[1].m_ceil(),
-                nums_arr[2].m_ceil(),
-                nums_arr[3].m_ceil(),
-            ];
-            core::mem::transmute::<[f32; 4], __m128>(ceil)
+            let rounded = Self::round(a);
+            let mask = _mm_cmplt_ps(rounded, a);
+            let one = _mm_and_ps(mask, _mm_set1_ps(1.0));
+            _mm_add_ps(rounded, one)
         }
         for Scalar(a: f32) -> f32 {
             a.m_ceil()
