@@ -759,12 +759,14 @@ impl_op! {
             _mm512_reduce_add_pd(a)
         }
         for Avx2(a: __m256d) -> f64 {
+            // benches show no benefit to shuffle + add for 2-wide vectors.
             let a = _mm256_hadd_pd(a, a);
             let first = _mm_cvtsd_f64(_mm256_extractf128_pd(a, 0));
             let second = _mm_cvtsd_f64(_mm256_extractf128_pd(a, 1));
             first + second
         }
         for Sse41(a: __m128d) -> f64 {
+            // benches show no benefit to shuffle + add for 2-wide vectors.
              _mm_cvtsd_f64(_mm_hadd_pd(a, a))
         }
         for Sse2(a: __m128d) -> f64 {
