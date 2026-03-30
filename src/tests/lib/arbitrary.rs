@@ -13,27 +13,37 @@ use crate::{SimdBase, SimdBaseIo};
 
 use super::ScalarNumber;
 
-const IMPORTANT_F32: [f32; 10] = [
+const IMPORTANT_F32: [f32; 15] = [
     0.0,
+    -0.0,
     1.0,
     -1.0,
     0.5,
     -0.5,
     1.5,
     -1.5,
+    f32::MIN_POSITIVE,
+    f32::from_bits(1),
+    f32::INFINITY,
+    f32::NEG_INFINITY,
     f32::MAX,
     f32::MIN,
     f32::NAN,
 ];
 
-const IMPORTANT_F64: [f64; 10] = [
+const IMPORTANT_F64: [f64; 15] = [
     0.0,
+    -0.0,
     1.0,
     -1.0,
     0.5,
     -0.5,
     1.5,
     -1.5,
+    f64::MIN_POSITIVE,
+    f64::from_bits(1),
+    f64::INFINITY,
+    f64::NEG_INFINITY,
     f64::MAX,
     f64::MIN,
     f64::NAN,
@@ -174,6 +184,7 @@ pub struct RandSimd;
 pub struct IterRandSimdForScalar<N, I: Iterator<Item = N>, I2: Iterator<Item = N>> {
     any: Box<dyn Fn(usize) -> I>,
     blendv: Box<dyn Fn() -> I2>,
+    important_len: usize,
     scalar_size: usize,
 }
 
@@ -183,6 +194,7 @@ impl RandSimd {
         IterRandSimdForScalar {
             any: Box::new(iter_arbitrary_f32),
             blendv: Box::new(iter_arbitrary_blendv_f32),
+            important_len: IMPORTANT_F32.len(),
             scalar_size: 4,
         }
     }
@@ -191,6 +203,7 @@ impl RandSimd {
         IterRandSimdForScalar {
             any: Box::new(iter_arbitrary_f64),
             blendv: Box::new(iter_arbitrary_blendv_f64),
+            important_len: IMPORTANT_F64.len(),
             scalar_size: 8,
         }
     }
@@ -198,6 +211,7 @@ impl RandSimd {
         IterRandSimdForScalar {
             any: Box::new(iter_arbitrary_i8),
             blendv: Box::new(iter_arbitrary_blendv_i8),
+            important_len: IMPORTANT_I8.len(),
             scalar_size: 1,
         }
     }
@@ -206,6 +220,7 @@ impl RandSimd {
         IterRandSimdForScalar {
             any: Box::new(iter_arbitrary_i16),
             blendv: Box::new(iter_arbitrary_blendv_i16),
+            important_len: IMPORTANT_I16.len(),
             scalar_size: 2,
         }
     }
@@ -214,6 +229,7 @@ impl RandSimd {
         IterRandSimdForScalar {
             any: Box::new(iter_arbitrary_i32),
             blendv: Box::new(iter_arbitrary_blendv_i32),
+            important_len: IMPORTANT_I32.len(),
             scalar_size: 4,
         }
     }
@@ -222,6 +238,7 @@ impl RandSimd {
         IterRandSimdForScalar {
             any: Box::new(iter_arbitrary_i64),
             blendv: Box::new(iter_arbitrary_blendv_i64),
+            important_len: IMPORTANT_I64.len(),
             scalar_size: 8,
         }
     }
@@ -230,6 +247,10 @@ impl RandSimd {
 impl<N: ScalarNumber, I: Iterator<Item = N>, I2: Iterator<Item = N>>
     IterRandSimdForScalar<N, I, I2>
 {
+    fn periodic_interval(&self, base: usize) -> usize {
+        base.max(self.important_len + 1)
+    }
+
     /// Iterate 1000 random inputs, starting from the important numbers
     pub fn one_arg<S: SimdBase<Scalar = N>>(self) -> impl Iterator<Item = (S,)> {
         let iter = iter_as_simd((self.any)(1000));
@@ -240,16 +261,21 @@ impl<N: ScalarNumber, I: Iterator<Item = N>, I2: Iterator<Item = N>>
     /// the second arguming looping at 15 inputs, effectively putting each special number against each
     /// other one in the end.
     pub fn two_arg<S: SimdBase<Scalar = N>>(self) -> impl Iterator<Item = (S, S)> {
-        let iter1 = iter_as_simd((self.any)(14));
-        let iter2 = iter_as_simd((self.any)(15));
-        iter1.zip(iter2).take(14 * 15 * 20 * S::WIDTH)
+        let period1 = self.periodic_interval(14);
+        let period2 = self.periodic_interval(15);
+        let iter1 = iter_as_simd((self.any)(period1));
+        let iter2 = iter_as_simd((self.any)(period2));
+        iter1.zip(iter2).take(period1 * period2 * 20 * S::WIDTH)
     }
 
     /// Same as two_arg except with periods of 14, 15 and 16.
     pub fn three_arg<S: SimdBase<Scalar = N>>(self) -> impl Iterator<Item = (S, S, S)> {
-        let mut iter1 = iter_as_simd((self.any)(14));
-        let mut iter2 = iter_as_simd((self.any)(15));
-        let mut iter3 = iter_as_simd((self.any)(16));
+        let period1 = self.periodic_interval(14);
+        let period2 = self.periodic_interval(15);
+        let period3 = self.periodic_interval(16);
+        let mut iter1 = iter_as_simd((self.any)(period1));
+        let mut iter2 = iter_as_simd((self.any)(period2));
+        let mut iter3 = iter_as_simd((self.any)(period3));
 
         iter::repeat_with(move || {
             (
@@ -258,13 +284,7 @@ impl<N: ScalarNumber, I: Iterator<Item = N>, I2: Iterator<Item = N>>
                 iter3.next().unwrap(),
             )
         })
-        .take(1680 * S::WIDTH)
-    }
-
-    /// Same as one_arg, except filtering out invalid inputs for abs functions
-    pub fn one_arg_abs_filtered<S: SimdBase<Scalar = N>>(self) -> impl Iterator<Item = (S,)> {
-        let iter = iter_as_simd((self.any)(1000).filter(|v| !v.is_minimum_int()));
-        iter.map(|v| (v,)).take(1000 * S::WIDTH)
+        .take(period1 * period2 * 8 * S::WIDTH)
     }
 
     /// Same as one_arg, except without values that can cause undefined behavior when rounding
@@ -276,16 +296,18 @@ impl<N: ScalarNumber, I: Iterator<Item = N>, I2: Iterator<Item = N>>
 
     /// Same as two_arg, except filtering out NaN floats
     pub fn two_arg_nan_filtered<S: SimdBase<Scalar = N>>(self) -> impl Iterator<Item = (S, S)> {
-        let iter1 = iter_as_simd((self.any)(15).filter(|v| !v.is_float_nan()));
-        let iter2 = iter_as_simd((self.any)(16).filter(|v| !v.is_float_nan()));
-        iter1.zip(iter2).take(14 * 15 * 20 * S::WIDTH)
+        let period1 = self.periodic_interval(15);
+        let period2 = self.periodic_interval(16);
+        let iter1 = iter_as_simd((self.any)(period1).filter(|v| !v.is_float_nan()));
+        let iter2 = iter_as_simd((self.any)(period2).filter(|v| !v.is_float_nan()));
+        iter1.zip(iter2).take(period1 * period2 * 16 * S::WIDTH)
     }
 
     /// A blendv mask that's not all 0's or all 1's is undefined behavior between different architectures.
     pub fn iter_blendv_ags<S: SimdBase<Scalar = N>>(self) -> impl Iterator<Item = (S, S, S)> {
         let mut mask_iter = iter_as_simd((self.blendv)());
-        let mut iter2 = iter_as_simd((self.any)(15));
-        let mut iter3 = iter_as_simd((self.any)(16));
+        let mut iter2 = iter_as_simd((self.any)(self.periodic_interval(15)));
+        let mut iter3 = iter_as_simd((self.any)(self.periodic_interval(16)));
 
         iter::repeat_with(move || {
             (

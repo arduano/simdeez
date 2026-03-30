@@ -1,18 +1,19 @@
 //! A library that abstracts over SIMD instruction sets, including ones with differing widths.
-//! SIMDeez is designed to allow you to write a function one time and produce scalar, SSE2, SSE41, AVX2 and Neon versions of the function.
+//! SIMDeez is designed to allow you to write a function one time and produce scalar, SSE2, SSE41, AVX2, AVX-512, Neon, and WebAssembly SIMD versions of the function.
 //! You can either have the version you want selected automatically at runtime, at compiletime, or
 //! select yourself by hand.
 //!
 //! SIMDeez is currently in Beta, if there are intrinsics you need that are not currently implemented, create an issue
 //! and I'll add them. PRs to add more intrinsics are welcome. Currently things are well fleshed out for i32, i64, f32, and f64 types.
 //!
-//! As Rust stabilizes support for AVX-512 I plan to add those as well.
+//! AVX-512 support is available on x86/x86_64 targets with `avx512f`, `avx512bw`, and `avx512dq`.
+//! Runtime dispatch selects it ahead of AVX2 when those features are available.
 //!
 //! Refer to the excellent [Intel Intrinsics Guide](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#) for documentation on these functions.
 //!
 //! # Features
 //!
-//! * SSE2, SSE41, AVX2, Neon and scalar fallback
+//! * SSE2, SSE41, AVX2, AVX-512, Neon, WebAssembly SIMD, and scalar fallback
 //! * Can be used with compile time or run time selection
 //! * No runtime overhead
 //! * Uses familiar intel intrinsic naming conventions, easy to port.
@@ -23,10 +24,19 @@
 //! * Operator overloading: `let sum = va + vb` or `s *= s`
 //! * Extract or set a single lane with the index operator: `let v1 = v[1];`
 //!
-//! # Trig Functions via Sleef-sys
-//! A number of trigonometric and other common math functions are provided
-//! in vectorized form via the Sleef-sys crate. This is an optional feature `sleef` that you can enable.
-//! Doing so currently requires nightly, as well as having CMake and Clang installed.
+//! # SIMD math
+//! SIMDeez now provides a native, pure-Rust SIMD math surface via extension traits:
+//! `log2_u35`, `exp2_u35`, `ln_u35`, `exp_u35`, `sin_u35`, `cos_u35`, `tan_u35`,
+//! `asin_u35`, `acos_u35`, `atan_u35`, `atan2_u35`,
+//! `sinh_u35`, `cosh_u35`, `tanh_u35`, `asinh_u35`, `acosh_u35`, `atanh_u35`,
+//! `log10_u35`, `hypot_u35`, and `fmod`.
+//!
+//! These methods are available through `simdeez::math` and re-exported by `simdeez::prelude`.
+//! The implementation follows a layered blueprint: portable kernels first,
+//! backend-specific overrides where justified (currently a hand-tuned AVX2 `log2_u35`),
+//! and scalar fallback patching for exceptional lanes. The stabilized map is intentionally mixed:
+//! most `f32` families and the revived `f64` log/exp, inverse-trig, and binary-misc families
+//! keep SIMD defaults, while the known losing holdouts remain explicit scalar-reference mappings.
 //!
 //! # Compared to stdsimd
 //!
@@ -38,7 +48,7 @@
 //! * SIMDeez can be used with runtime selection, Faster cannot.
 //! * SIMDeez has faster fallbacks for some functions
 //! * SIMDeez does not currently work with iterators, Faster does.
-//! * SIMDeez uses more idiomatic intrinsic syntax while Faster uses more idomatic Rust syntax
+//! * SIMDeez uses more idiomatic intrinsic syntax while Faster uses more idiomatic Rust syntax
 //! * SIMDeez can be used by `#[no_std]` projects
 //! * SIMDeez builds on stable rust now, Faster does not.
 //!
@@ -129,12 +139,13 @@
 //!}
 //! ```
 //!
-//! This will generate 5 functions for you:
+//! This will generate the following functions for you:
 //! * `distance<S:Simd>` the generic version of your function
 //! * `distance_scalar`  a scalar fallback
 //! * `distance_sse2`    SSE2 version
 //! * `distance_sse41`   SSE41 version
 //! * `distance_avx2`    AVX2 version
+//! * `distance_avx512`  AVX-512 version
 //! * `distance_neon`    Neon version
 //! * `distance_runtime_select`  picks the fastest of the above at runtime
 //!
@@ -146,7 +157,7 @@
 //! produce 2 active functions via the `cfg` attribute feature:
 //!
 //! * `distance<S:Simd>`      the generic version of your function
-//! * `distance_compiletime`  the fastest instruction set availble for the given compile time
+//! * `distance_compiletime`  the fastest instruction set available for the given compile time
 //!   feature set
 //!
 //! You may also forgo the macros if you know what you are doing, just keep in mind there are lots
@@ -178,7 +189,10 @@ pub use base::*;
 
 mod libm_ext;
 
-mod engines;
+pub mod math;
+pub use math::{SimdMathF32, SimdMathF64};
+
+pub mod engines;
 
 pub use engines::scalar;
 
@@ -1283,44 +1297,5 @@ pub trait Simd: 'static + Sync + Send {
     )]
     unsafe fn shuffle_epi32<const IMM8: i32>(_a: Self::Vi32) -> Self::Vi32 {
         panic!("Deprecated")
-    }
-
-    cfg_if::cfg_if! {
-        if #[cfg(feature = "sleef")] {
-            unsafe fn sin_ps(a: Self::Vf32) -> Self::Vf32;
-            unsafe fn fast_sin_ps(a: Self::Vf32) -> Self::Vf32;
-            unsafe fn cos_ps(a: Self::Vf32) -> Self::Vf32;
-            unsafe fn fast_cos_ps(a: Self::Vf32) -> Self::Vf32;
-            unsafe fn asin_ps(a: Self::Vf32) -> Self::Vf32;
-            unsafe fn fast_asin_ps(a: Self::Vf32) -> Self::Vf32;
-            unsafe fn acos_ps(a: Self::Vf32) -> Self::Vf32;
-            unsafe fn fast_acos_ps(a: Self::Vf32) -> Self::Vf32;
-            unsafe fn tan_ps(a: Self::Vf32) -> Self::Vf32;
-            unsafe fn fast_tan_ps(a: Self::Vf32) -> Self::Vf32;
-            unsafe fn atan_ps(a: Self::Vf32) -> Self::Vf32;
-            unsafe fn fast_atan_ps(a: Self::Vf32) -> Self::Vf32;
-
-            //hyperbolic
-            unsafe fn sinh_ps(a: Self::Vf32) -> Self::Vf32;
-            unsafe fn fast_sinh_ps(a: Self::Vf32) -> Self::Vf32;
-            unsafe fn cosh_ps(a: Self::Vf32) -> Self::Vf32;
-            unsafe fn fast_cosh_ps(a: Self::Vf32) -> Self::Vf32;
-            unsafe fn asinh_ps(a: Self::Vf32) -> Self::Vf32;
-            unsafe fn acosh_ps(a: Self::Vf32) -> Self::Vf32;
-            unsafe fn tanh_ps(a: Self::Vf32) -> Self::Vf32;
-            unsafe fn fast_tanh_ps(a: Self::Vf32) -> Self::Vf32;
-            unsafe fn atanh_ps(a: Self::Vf32) -> Self::Vf32;
-
-            unsafe fn atan2_ps(a: Self::Vf32,b: Self::Vf32) -> Self::Vf32;
-            unsafe fn fast_atan2_ps(a: Self::Vf32,b: Self::Vf32) -> Self::Vf32;
-            unsafe fn ln_ps(a:Self::Vf32) -> Self::Vf32;
-            unsafe fn fast_ln_ps(a:Self::Vf32) -> Self::Vf32;
-            unsafe fn log2_ps(a:Self::Vf32) -> Self::Vf32;
-            unsafe fn log10_ps(a:Self::Vf32) -> Self::Vf32;
-            unsafe fn hypot_ps(a:Self::Vf32,b:Self::Vf32) -> Self::Vf32;
-            unsafe fn fast_hypot_ps(a:Self::Vf32,b:Self::Vf32) -> Self::Vf32;
-
-            unsafe fn fmod_ps(a:Self::Vf32,b:Self::Vf32) -> Self::Vf32;
-        }
     }
 }

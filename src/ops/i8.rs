@@ -1,7 +1,15 @@
 use super::*;
 
+#[inline(always)]
+fn wrapping_shift_count(rhs: i32) -> i32 {
+    rhs & 7
+}
+
 impl_op! {
     fn add<i8> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            _mm512_add_epi8(a, b)
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             _mm256_add_epi8(a, b)
         }
@@ -25,6 +33,9 @@ impl_op! {
 
 impl_op! {
     fn sub<i8> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            _mm512_sub_epi8(a, b)
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             _mm256_sub_epi8(a, b)
         }
@@ -48,29 +59,52 @@ impl_op! {
 
 impl_op! {
     fn mul<i8> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            // x86 has no native epi8 multiply. Compute per-byte wrapping products by multiplying
+            // widened even/odd bytes independently in epi16 lanes, then packing their low bytes back.
+            let low_byte_mask = _mm512_set1_epi16(0x00FF);
+
+            let even_products = _mm512_mullo_epi16(a, b);
+            let even_bytes = _mm512_and_si512(even_products, low_byte_mask);
+
+            let odd_a = _mm512_srli_epi16(a, 8);
+            let odd_b = _mm512_srli_epi16(b, 8);
+            let odd_products = _mm512_mullo_epi16(odd_a, odd_b);
+            let odd_bytes_shifted = _mm512_slli_epi16(odd_products, 8);
+            let odd_bytes = _mm512_andnot_si512(low_byte_mask, odd_bytes_shifted);
+
+            _mm512_or_si512(even_bytes, odd_bytes)
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
-            let mut arr1 = core::mem::transmute::<__m256i, [i8; 32]>(a);
-            let arr2 = core::mem::transmute::<__m256i, [i8; 32]>(b);
-            for i in 0..32 {
-                arr1[i] = arr1[i].wrapping_mul(arr2[i]);
-            }
-            core::mem::transmute::<_, _>(arr1)
+            let low_byte_mask = _mm256_set1_epi16(0x00FF);
+
+            let even_products = _mm256_mullo_epi16(a, b);
+            let even_bytes = _mm256_and_si256(even_products, low_byte_mask);
+
+            let odd_a = _mm256_srli_epi16(a, 8);
+            let odd_b = _mm256_srli_epi16(b, 8);
+            let odd_products = _mm256_mullo_epi16(odd_a, odd_b);
+            let odd_bytes_shifted = _mm256_slli_epi16(odd_products, 8);
+            let odd_bytes = _mm256_andnot_si256(low_byte_mask, odd_bytes_shifted);
+
+            _mm256_or_si256(even_bytes, odd_bytes)
         }
         for Sse41(a: __m128i, b: __m128i) -> __m128i {
-            let mut arr1 = core::mem::transmute::<__m128i, [i8; 16]>(a);
-            let arr2 = core::mem::transmute::<__m128i, [i8; 16]>(b);
-            for i in 0..16 {
-                arr1[i] = arr1[i].wrapping_mul(arr2[i]);
-            }
-            core::mem::transmute::<_, _>(arr1)
+            Ops::<Sse2, i8>::mul(a, b)
         }
         for Sse2(a: __m128i, b: __m128i) -> __m128i {
-            let mut arr1 = core::mem::transmute::<__m128i, [i8; 16]>(a);
-            let arr2 = core::mem::transmute::<__m128i, [i8; 16]>(b);
-            for i in 0..16 {
-                arr1[i] = arr1[i].wrapping_mul(arr2[i]);
-            }
-            core::mem::transmute::<_, _>(arr1)
+            let low_byte_mask = _mm_set1_epi16(0x00FF);
+
+            let even_products = _mm_mullo_epi16(a, b);
+            let even_bytes = _mm_and_si128(even_products, low_byte_mask);
+
+            let odd_a = _mm_srli_epi16(a, 8);
+            let odd_b = _mm_srli_epi16(b, 8);
+            let odd_products = _mm_mullo_epi16(odd_a, odd_b);
+            let odd_bytes_shifted = _mm_slli_epi16(odd_products, 8);
+            let odd_bytes = _mm_andnot_si128(low_byte_mask, odd_bytes_shifted);
+
+            _mm_or_si128(even_bytes, odd_bytes)
         }
         for Scalar(a: i8, b: i8) -> i8 {
             a.wrapping_mul(b)
@@ -91,6 +125,9 @@ impl_op! {
 
 impl_op! {
     fn min<i8> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            _mm512_min_epi8(a, b)
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             _mm256_min_epi8(a, b)
         }
@@ -115,6 +152,9 @@ impl_op! {
 
 impl_op! {
     fn max<i8> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            _mm512_max_epi8(a, b)
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             _mm256_max_epi8(a, b)
         }
@@ -139,6 +179,9 @@ impl_op! {
 
 impl_op! {
     fn abs<i8> {
+        for Avx512(a: __m512i) -> __m512i {
+            _mm512_abs_epi8(a)
+        }
         for Avx2(a: __m256i) -> __m256i {
             _mm256_abs_epi8(a)
         }
@@ -150,7 +193,7 @@ impl_op! {
             _mm_sub_epi8(_mm_xor_si128(a, mask), mask)
         }
         for Scalar(a: i8) -> i8 {
-            a.abs()
+            a.wrapping_abs()
         }
         for Neon(a: int8x16_t) -> int8x16_t {
             vabsq_s8(a)
@@ -163,6 +206,10 @@ impl_op! {
 
 impl_op! {
     fn eq<i8> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            let k = _mm512_cmpeq_epi8_mask(a, b);
+            _mm512_movm_epi8(k)
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             _mm256_cmpeq_epi8(a, b)
         }
@@ -190,6 +237,10 @@ impl_op! {
 
 impl_op! {
     fn neq<i8> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            let k = _mm512_cmpneq_epi8_mask(a, b);
+            _mm512_movm_epi8(k)
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             let eq = _mm256_cmpeq_epi8(a, b);
             _mm256_xor_si256(eq, _mm256_set1_epi8(u32::MAX as i8))
@@ -220,6 +271,10 @@ impl_op! {
 
 impl_op! {
     fn lt<i8> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            let k = _mm512_cmplt_epi8_mask(a, b);
+            _mm512_movm_epi8(k)
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             _mm256_cmpgt_epi8(b, a)
         }
@@ -247,6 +302,10 @@ impl_op! {
 
 impl_op! {
     fn lte<i8> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            let k = _mm512_cmple_epi8_mask(a, b);
+            _mm512_movm_epi8(k)
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             let gt = _mm256_cmpgt_epi8(a, b);
             _mm256_xor_si256(gt, _mm256_set1_epi8(u32::MAX as i8))
@@ -277,6 +336,10 @@ impl_op! {
 
 impl_op! {
     fn gt<i8> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            let k = _mm512_cmpgt_epi8_mask(a, b);
+            _mm512_movm_epi8(k)
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             _mm256_cmpgt_epi8(a, b)
         }
@@ -304,6 +367,10 @@ impl_op! {
 
 impl_op! {
     fn gte<i8> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            let k = _mm512_cmpge_epi8_mask(a, b);
+            _mm512_movm_epi8(k)
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             let gt = _mm256_cmpgt_epi8(a, b);
             let eq = _mm256_cmpeq_epi8(a, b);
@@ -337,6 +404,10 @@ impl_op! {
 
 impl_op! {
     fn blendv<i8> {
+        for Avx512(a: __m512i, b: __m512i, mask: __m512i) -> __m512i {
+            let k = _mm512_movepi8_mask(mask);
+            _mm512_mask_blend_epi8(k, a, b)
+        }
         for Avx2(a: __m256i, b: __m256i, mask: __m256i) -> __m256i {
             _mm256_blendv_epi8(a, b, mask)
         }
@@ -364,7 +435,17 @@ impl_op! {
 
 impl_op! {
     fn shl<i8> {
+        for Avx512(a: __m512i, rhs: i32) -> __m512i {
+            let rhs = wrapping_shift_count(rhs);
+            let rhs2 = _mm_cvtsi32_si128(rhs);
+            let shifted_i16 = _mm512_sll_epi16(a, rhs2);
+
+            let mask = 0x00FFu16 >> (8 - rhs) << 8;
+            let mask = _mm512_set1_epi16(mask as i16);
+            _mm512_andnot_si512(mask, shifted_i16)
+        }
         for Avx2(a: __m256i, rhs: i32) -> __m256i {
+            let rhs = wrapping_shift_count(rhs);
             // Do 16 bit shifts, then mask out the bits that are shifted in.
             let rhs2 = _mm_cvtsi32_si128(rhs);
             let shifted_i16 = _mm256_sll_epi16(a, rhs2);
@@ -377,6 +458,7 @@ impl_op! {
             Ops::<Sse2, i8>::shl(a, rhs)
         }
         for Sse2(a: __m128i, rhs: i32) -> __m128i {
+            let rhs = wrapping_shift_count(rhs);
             // Do 16 bit shifts, then mask out the bits that are shifted in.
             let rhs2 = _mm_cvtsi32_si128(rhs);
             let shifted_i16 = _mm_sll_epi16(a, rhs2);
@@ -386,21 +468,31 @@ impl_op! {
             _mm_andnot_si128(mask, shifted_i16)
         }
         for Scalar(a: i8, rhs: i32) -> i8 {
-            a << rhs
+            a.wrapping_shl(wrapping_shift_count(rhs) as u32)
         }
         for Neon(a: int8x16_t, rhs: i32) -> int8x16_t {
-            let rhs = Self::set1(rhs as i8);
+            let rhs = Self::set1(wrapping_shift_count(rhs) as i8);
             vshlq_s8(a, rhs)
         }
         for Wasm(a: v128, b: i32) -> v128 {
-            i8x16_shl(a, b as u32)
+            i8x16_shl(a, wrapping_shift_count(b) as u32)
         }
     }
 }
 
 impl_op! {
     fn shr<i8> {
+        for Avx512(a: __m512i, rhs: i32) -> __m512i {
+            let rhs = wrapping_shift_count(rhs);
+            let rhs2 = _mm_cvtsi32_si128(rhs);
+            let shifted_i16 = _mm512_srl_epi16(a, rhs2);
+
+            let mask = 0xFF00u16 << (8 - rhs) >> 8;
+            let mask = _mm512_set1_epi16(mask as i16);
+            _mm512_andnot_si512(mask, shifted_i16)
+        }
         for Avx2(a: __m256i, rhs: i32) -> __m256i {
+            let rhs = wrapping_shift_count(rhs);
             // Do 16 bit shifts, then mask out the bits that are shifted in.
             let rhs2 = _mm_cvtsi32_si128(rhs);
             let shifted_i16 = _mm256_srl_epi16(a, rhs2);
@@ -413,6 +505,7 @@ impl_op! {
             Ops::<Sse2, i8>::shr(a, rhs)
         }
         for Sse2(a: __m128i, rhs: i32) -> __m128i {
+            let rhs = wrapping_shift_count(rhs);
             // Do 16 bit shifts, then mask out the bits that are shifted in.
             let rhs2 = _mm_cvtsi32_si128(rhs);
             let shifted_i16 = _mm_srl_epi16(a, rhs2);
@@ -422,20 +515,23 @@ impl_op! {
             _mm_andnot_si128(mask, shifted_i16)
         }
         for Scalar(a: i8, rhs: i32) -> i8 {
-            ((a as u8) >> rhs) as i8
+            ((a as u8).wrapping_shr(wrapping_shift_count(rhs) as u32)) as i8
         }
         for Neon(a: int8x16_t, rhs: i32) -> int8x16_t {
-            let rhs = Self::set1(-rhs as i8);
+            let rhs = Self::set1(-wrapping_shift_count(rhs) as i8);
             vreinterpretq_s8_u8(vshlq_u8(vreinterpretq_u8_s8(a), rhs))
         }
         for Wasm(a: v128, b: i32) -> v128 {
-            u8x16_shr(a, b as u32)
+            u8x16_shr(a, wrapping_shift_count(b) as u32)
         }
     }
 }
 
 impl_imm8_op! {
     fn shl_const<i8, const BY: i32> {
+        for Avx512(a: __m512i) -> __m512i {
+            Self::shl(a, BY)
+        }
         for Avx2(a: __m256i) -> __m256i {
             Self::shl(a, BY)
         }
@@ -459,6 +555,9 @@ impl_imm8_op! {
 
 impl_imm8_op! {
     fn shr_const<i8, const BY: i32> {
+        for Avx512(a: __m512i) -> __m512i {
+            Self::shr(a, BY)
+        }
         for Avx2(a: __m256i) -> __m256i {
             Self::shr(a, BY)
         }
@@ -482,6 +581,11 @@ impl_imm8_op! {
 
 impl_op! {
     fn extend_i16<i8> {
+        for Avx512(val: __m512i) -> (__m512i, __m512i) {
+            let a = _mm512_cvtepi8_epi16(_mm512_castsi512_si256(val));
+            let b = _mm512_cvtepi8_epi16(_mm512_extracti64x4_epi64::<1>(val));
+            (a, b)
+        }
         for Avx2(val: __m256i) -> (__m256i, __m256i) {
             let a = _mm256_cvtepi8_epi16(_mm256_extracti128_si256(val, 0));
             let b = _mm256_cvtepi8_epi16(_mm256_extracti128_si256(val, 1));
@@ -534,6 +638,11 @@ impl_op! {
 
 impl_op! {
     fn unsigned_extend_i16<i8> {
+        for Avx512(val: __m512i) -> (__m512i, __m512i) {
+            let a = _mm512_cvtepu8_epi16(_mm512_castsi512_si256(val));
+            let b = _mm512_cvtepu8_epi16(_mm512_extracti64x4_epi64::<1>(val));
+            (a, b)
+        }
         for Avx2(val: __m256i) -> (__m256i, __m256i) {
             let a = _mm256_cvtepu8_epi16(_mm256_extracti128_si256(val, 0));
             let b = _mm256_cvtepu8_epi16(_mm256_extracti128_si256(val, 1));
@@ -586,6 +695,10 @@ impl_op! {
 
 impl_op! {
     fn get_mask<i8> {
+        for Avx512(val: __m512i) -> [u32; 2] {
+            let mask = _mm512_movepi8_mask(val);
+            [mask as u32, (mask >> 32) as u32]
+        }
         for Avx2(val: __m256i) -> u32 {
             _mm256_movemask_epi8(val) as u32
         }
@@ -622,6 +735,9 @@ impl_op! {
 
 impl_op! {
     fn zeroes<i8> {
+        for Avx512() -> __m512i {
+            _mm512_setzero_si512()
+        }
         for Avx2() -> __m256i {
             _mm256_setzero_si256()
         }
@@ -645,6 +761,9 @@ impl_op! {
 
 impl_op! {
     fn set1<i8> {
+        for Avx512(val: i8) -> __m512i {
+            _mm512_set1_epi8(val)
+        }
         for Avx2(val: i8) -> __m256i {
             _mm256_set1_epi8(val)
         }
@@ -668,6 +787,9 @@ impl_op! {
 
 impl_op! {
     fn load_unaligned<i8> {
+        for Avx512(ptr: *const i8) -> __m512i {
+            _mm512_loadu_si512(ptr as *const __m512i)
+        }
         for Avx2(ptr: *const i8) -> __m256i {
             _mm256_loadu_si256(ptr as *const __m256i)
         }
@@ -684,13 +806,16 @@ impl_op! {
             vld1q_s8(ptr)
         }
         for Wasm(ptr: *const i8) -> v128 {
-            *(ptr as *const v128)
+            unsafe { v128_load(ptr as *const v128) }
         }
     }
 }
 
 impl_op! {
     fn load_aligned<i8> {
+        for Avx512(ptr: *const i8) -> __m512i {
+            _mm512_load_si512(ptr as *const __m512i)
+        }
         for Avx2(ptr: *const i8) -> __m256i {
             _mm256_load_si256(ptr as *const __m256i)
         }
@@ -714,6 +839,9 @@ impl_op! {
 
 impl_op! {
     fn store_unaligned<i8> {
+        for Avx512(ptr: *mut i8, a: __m512i) {
+            _mm512_storeu_si512(ptr as *mut __m512i, a)
+        }
         for Avx2(ptr: *mut i8, a: __m256i) {
             _mm256_storeu_si256(ptr as *mut __m256i, a)
         }
@@ -730,13 +858,16 @@ impl_op! {
             vst1q_s8(ptr, a)
         }
         for Wasm(ptr: *mut i8, a: v128) {
-            *(ptr as *mut v128) = a;
+            unsafe { v128_store(ptr as *mut v128, a) }
         }
     }
 }
 
 impl_op! {
     fn store_aligned<i8> {
+        for Avx512(ptr: *mut i8, a: __m512i) {
+            _mm512_store_si512(ptr as *mut __m512i, a)
+        }
         for Avx2(ptr: *mut i8, a: __m256i) {
             _mm256_store_si256(ptr as *mut __m256i, a)
         }
@@ -760,13 +891,17 @@ impl_op! {
 
 impl_op! {
     fn is_truthy<i8> {
+        for Avx512(a: __m512i) -> bool {
+            let cmp = _mm512_cmpeq_epi8_mask(a, _mm512_setzero_si512());
+            cmp == 0
+        }
         for Avx2(a: __m256i) -> bool {
             let cmp = _mm256_cmpeq_epi8(a, _mm256_setzero_si256());
-            _mm256_testz_si256(cmp, cmp) == 0
+            _mm256_testz_si256(cmp, cmp) != 0
         }
         for Sse41(a: __m128i) -> bool {
             let cmp = _mm_cmpeq_epi8(a, _mm_setzero_si128());
-            _mm_testz_si128(cmp, cmp) == 0
+            _mm_testz_si128(cmp, cmp) != 0
         }
         for Sse2(a: __m128i) -> bool {
             _mm_movemask_epi8(_mm_cmpeq_epi8(a, _mm_setzero_si128())) == 0

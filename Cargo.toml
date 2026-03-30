@@ -1,13 +1,13 @@
 [package]
 name = "simdeez"
-version = "2.0.0"
+version = "3.0.1"
 authors = ["Jack Mott <jack.mott@gmail.com>", "Arduano"]
 description = "SIMD library to abstract over different instruction sets and widths"
 license = "Apache-2.0/MIT"
 documentation = "https://docs.rs/simdeez/"
 readme = "README.md"
 keywords = ["SIMD", "avx2", "sse", "performance", "no_std"]
-repository = "https://github.com/jackmott/simdeez"
+repository = "https://github.com/arduano/simdeez"
 categories = ["hardware-support", "science", "game-engines"]
 edition = "2021"
 
@@ -16,13 +16,10 @@ doctest = true
 
 [features]
 default = []
-sleef = ["sleef-sys"]
 no_std = ["dep:libm"]
 
 [dependencies]
 paste = "1.0.15"
-# To build this, we need nightly, cmake installed, and clang dlls in the clang dll path
-sleef-sys = { version = "0.1.2", optional = true }
 cfg-if = "1.0.0"
 libm = { version = "0.2.11", optional = true }
 
@@ -41,4 +38,12 @@ features = ["plotters", "cargo_bench_support"]
 
 [[bench]]
 name = "numparse"
+harness = false
+
+[[bench]]
+name = "simd_math"
+harness = false
+
+[[bench]]
+name = "simd_math_remaining_baseline"
 harness = false

@@ -1,7 +1,15 @@
 use super::*;
 
+#[inline(always)]
+fn wrapping_shift_count(rhs: i32) -> i32 {
+    rhs & 31
+}
+
 impl_op! {
     fn add<i32> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            _mm512_add_epi32(a, b)
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             _mm256_add_epi32(a, b)
         }
@@ -25,6 +33,9 @@ impl_op! {
 
 impl_op! {
     fn sub<i32> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            _mm512_sub_epi32(a, b)
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             _mm256_sub_epi32(a, b)
         }
@@ -48,6 +59,9 @@ impl_op! {
 
 impl_op! {
     fn mul<i32> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            _mm512_mullo_epi32(a, b)
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             _mm256_mullo_epi32(a, b)
         }
@@ -79,6 +93,9 @@ impl_op! {
 
 impl_op! {
     fn min<i32> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            _mm512_min_epi32(a, b)
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             _mm256_min_epi32(a, b)
         }
@@ -103,6 +120,9 @@ impl_op! {
 
 impl_op! {
     fn max<i32> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            _mm512_max_epi32(a, b)
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             _mm256_max_epi32(a, b)
         }
@@ -127,6 +147,9 @@ impl_op! {
 
 impl_op! {
     fn abs<i32> {
+        for Avx512(a: __m512i) -> __m512i {
+            _mm512_abs_epi32(a)
+        }
         for Avx2(a: __m256i) -> __m256i {
             _mm256_abs_epi32(a)
         }
@@ -138,7 +161,7 @@ impl_op! {
             _mm_sub_epi32(_mm_xor_si128(a, mask), mask)
         }
         for Scalar(a: i32) -> i32 {
-            a.abs()
+            a.wrapping_abs()
         }
         for Neon(a: int32x4_t) -> int32x4_t {
             vabsq_s32(a)
@@ -151,6 +174,10 @@ impl_op! {
 
 impl_op! {
     fn eq<i32> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            let k = _mm512_cmpeq_epi32_mask(a, b);
+            _mm512_movm_epi32(k)
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             _mm256_cmpeq_epi32(a, b)
         }
@@ -178,6 +205,10 @@ impl_op! {
 
 impl_op! {
     fn neq<i32> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            let k = _mm512_cmpneq_epi32_mask(a, b);
+            _mm512_movm_epi32(k)
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             let eq = _mm256_cmpeq_epi32(a, b);
             _mm256_xor_si256(eq, _mm256_set1_epi32(u32::MAX as i32))
@@ -208,6 +239,10 @@ impl_op! {
 
 impl_op! {
     fn lt<i32> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            let k = _mm512_cmplt_epi32_mask(a, b);
+            _mm512_movm_epi32(k)
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             _mm256_cmpgt_epi32(b, a)
         }
@@ -235,6 +270,10 @@ impl_op! {
 
 impl_op! {
     fn lte<i32> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            let k = _mm512_cmple_epi32_mask(a, b);
+            _mm512_movm_epi32(k)
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             let gt = _mm256_cmpgt_epi32(a, b);
             _mm256_xor_si256(gt, _mm256_set1_epi32(u32::MAX as i32))
@@ -265,6 +304,10 @@ impl_op! {
 
 impl_op! {
     fn gt<i32> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            let k = _mm512_cmpgt_epi32_mask(a, b);
+            _mm512_movm_epi32(k)
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             _mm256_cmpgt_epi32(a, b)
         }
@@ -292,6 +335,10 @@ impl_op! {
 
 impl_op! {
     fn gte<i32> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            let k = _mm512_cmpge_epi32_mask(a, b);
+            _mm512_movm_epi32(k)
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             let gt = _mm256_cmpgt_epi32(a, b);
             let eq = _mm256_cmpeq_epi32(a, b);
@@ -325,6 +372,10 @@ impl_op! {
 
 impl_op! {
     fn blendv<i32> {
+        for Avx512(a: __m512i, b: __m512i, mask: __m512i) -> __m512i {
+            let k = _mm512_movepi32_mask(mask);
+            _mm512_mask_blend_epi32(k, a, b)
+        }
         for Avx2(a: __m256i, b: __m256i, mask: __m256i) -> __m256i {
             _mm256_blendv_epi8(a, b, mask)
         }
@@ -352,54 +403,71 @@ impl_op! {
 
 impl_op! {
     fn shl<i32> {
+        for Avx512(a: __m512i, rhs: i32) -> __m512i {
+            let rhs = wrapping_shift_count(rhs);
+            _mm512_sll_epi32(a, _mm_cvtsi32_si128(rhs))
+        }
         for Avx2(a: __m256i, rhs: i32) -> __m256i {
+            let rhs = wrapping_shift_count(rhs);
             _mm256_sll_epi32(a, _mm_cvtsi32_si128(rhs))
         }
         for Sse41(a: __m128i, rhs: i32) -> __m128i {
+            let rhs = wrapping_shift_count(rhs);
             _mm_sll_epi32(a, _mm_cvtsi32_si128(rhs))
         }
         for Sse2(a: __m128i, rhs: i32) -> __m128i {
+            let rhs = wrapping_shift_count(rhs);
             _mm_sll_epi32(a, _mm_cvtsi32_si128(rhs))
         }
         for Scalar(a: i32, rhs: i32) -> i32 {
-            a << rhs
+            a.wrapping_shl(wrapping_shift_count(rhs) as u32)
         }
         for Neon(a: int32x4_t, rhs: i32) -> int32x4_t {
-            let rhs = Self::set1(rhs as i32);
+            let rhs = Self::set1(wrapping_shift_count(rhs));
             vshlq_s32(a, rhs)
         }
         for Wasm(a: v128, rhs: i32) -> v128 {
-            i32x4_shl(a, rhs as u32)
+            i32x4_shl(a, wrapping_shift_count(rhs) as u32)
         }
     }
 }
 
 impl_op! {
     fn shr<i32> {
+        for Avx512(a: __m512i, rhs: i32) -> __m512i {
+            let rhs = wrapping_shift_count(rhs);
+            _mm512_srl_epi32(a, _mm_cvtsi32_si128(rhs))
+        }
         for Avx2(a: __m256i, rhs: i32) -> __m256i {
+            let rhs = wrapping_shift_count(rhs);
             _mm256_srl_epi32(a, _mm_cvtsi32_si128(rhs))
         }
         for Sse41(a: __m128i, rhs: i32) -> __m128i {
+            let rhs = wrapping_shift_count(rhs);
             _mm_srl_epi32(a, _mm_cvtsi32_si128(rhs))
         }
         for Sse2(a: __m128i, rhs: i32) -> __m128i {
+            let rhs = wrapping_shift_count(rhs);
             _mm_srl_epi32(a, _mm_cvtsi32_si128(rhs))
         }
         for Scalar(a: i32, rhs: i32) -> i32 {
-            ((a as u32) >> rhs) as i32
+            ((a as u32).wrapping_shr(wrapping_shift_count(rhs) as u32)) as i32
         }
         for Neon(a: int32x4_t, rhs: i32) -> int32x4_t {
-            let rhs = Self::set1(-rhs);
+            let rhs = Self::set1(-wrapping_shift_count(rhs));
             vreinterpretq_s32_u32(vshlq_u32(vreinterpretq_u32_s32(a), rhs))
         }
         for Wasm(a: v128, rhs: i32) -> v128 {
-            u32x4_shr(a, rhs as u32)
+            u32x4_shr(a, wrapping_shift_count(rhs) as u32)
         }
     }
 }
 
 impl_imm8_op! {
     fn shl_const<i32, const BY: i32> {
+        for Avx512(a: __m512i) -> __m512i {
+            _mm512_sll_epi32(a, _mm_cvtsi32_si128(BY))
+        }
         for Avx2(a: __m256i) -> __m256i {
             _mm256_slli_epi32(a, BY)
         }
@@ -423,6 +491,9 @@ impl_imm8_op! {
 
 impl_imm8_op! {
     fn shr_const<i32, const BY: i32> {
+        for Avx512(a: __m512i) -> __m512i {
+            _mm512_srl_epi32(a, _mm_cvtsi32_si128(BY))
+        }
         for Avx2(a: __m256i) -> __m256i {
             _mm256_srli_epi32(a, BY)
         }
@@ -446,6 +517,9 @@ impl_imm8_op! {
 
 impl_op! {
     fn cast_f32<i32> {
+        for Avx512(a: __m512i) -> __m512 {
+            _mm512_cvtepi32_ps(a)
+        }
         for Avx2(a: __m256i) -> __m256 {
             _mm256_cvtepi32_ps(a)
         }
@@ -469,6 +543,9 @@ impl_op! {
 
 impl_op! {
     fn bitcast_f32<i32> {
+        for Avx512(a: __m512i) -> __m512 {
+            _mm512_castsi512_ps(a)
+        }
         for Avx2(a: __m256i) -> __m256 {
             _mm256_castsi256_ps(a)
         }
@@ -492,6 +569,11 @@ impl_op! {
 
 impl_op! {
     fn extend_i64<i32> {
+        for Avx512(val: __m512i) -> (__m512i, __m512i) {
+            let a = _mm512_cvtepi32_epi64(_mm512_castsi512_si256(val));
+            let b = _mm512_cvtepi32_epi64(_mm512_extracti64x4_epi64::<1>(val));
+            (a, b)
+        }
         for Avx2(val: __m256i) -> (__m256i, __m256i) {
             let a = _mm256_cvtepi32_epi64(_mm256_extracti128_si256(val, 0));
             let b = _mm256_cvtepi32_epi64(_mm256_extracti128_si256(val, 1));
@@ -527,6 +609,11 @@ impl_op! {
 
 impl_op! {
     fn unsigned_extend_i64<i32> {
+        for Avx512(val: __m512i) -> (__m512i, __m512i) {
+            let a = _mm512_cvtepu32_epi64(_mm512_castsi512_si256(val));
+            let b = _mm512_cvtepu32_epi64(_mm512_extracti64x4_epi64::<1>(val));
+            (a, b)
+        }
         for Avx2(val: __m256i) -> (__m256i, __m256i) {
             let a = _mm256_cvtepu32_epi64(_mm256_extracti128_si256(val, 0));
             let b = _mm256_cvtepu32_epi64(_mm256_extracti128_si256(val, 1));
@@ -559,6 +646,9 @@ impl_op! {
 
 impl_op! {
     fn zeroes<i32> {
+        for Avx512() -> __m512i {
+            _mm512_setzero_si512()
+        }
         for Avx2() -> __m256i {
             _mm256_setzero_si256()
         }
@@ -582,6 +672,9 @@ impl_op! {
 
 impl_op! {
     fn set1<i32> {
+        for Avx512(val: i32) -> __m512i {
+            _mm512_set1_epi32(val)
+        }
         for Avx2(val: i32) -> __m256i {
             _mm256_set1_epi32(val)
         }
@@ -605,6 +698,9 @@ impl_op! {
 
 impl_op! {
     fn load_unaligned<i32> {
+        for Avx512(ptr: *const i32) -> __m512i {
+            _mm512_loadu_si512(ptr as *const __m512i)
+        }
         for Avx2(ptr: *const i32) -> __m256i {
             _mm256_loadu_si256(ptr as *const __m256i)
         }
@@ -621,13 +717,16 @@ impl_op! {
             vld1q_s32(ptr)
         }
         for Wasm(ptr: *const i32) -> v128 {
-            *(ptr as *const v128)
+            unsafe { v128_load(ptr as *const v128) }
         }
     }
 }
 
 impl_op! {
     fn load_aligned<i32> {
+        for Avx512(ptr: *const i32) -> __m512i {
+            _mm512_load_si512(ptr as *const __m512i)
+        }
         for Avx2(ptr: *const i32) -> __m256i {
             _mm256_load_si256(ptr as *const __m256i)
         }
@@ -651,6 +750,9 @@ impl_op! {
 
 impl_op! {
     fn store_unaligned<i32> {
+        for Avx512(ptr: *mut i32, a: __m512i) {
+            _mm512_storeu_si512(ptr as *mut __m512i, a)
+        }
         for Avx2(ptr: *mut i32, a: __m256i) {
             _mm256_storeu_si256(ptr as *mut __m256i, a)
         }
@@ -667,13 +769,16 @@ impl_op! {
             vst1q_s32(ptr, a)
         }
         for Wasm(ptr: *mut i32, a: v128) {
-            *(ptr as *mut v128) = a;
+            unsafe { v128_store(ptr as *mut v128, a) }
         }
     }
 }
 
 impl_op! {
     fn store_aligned<i32> {
+        for Avx512(ptr: *mut i32, a: __m512i) {
+            _mm512_store_si512(ptr as *mut __m512i, a)
+        }
         for Avx2(ptr: *mut i32, a: __m256i) {
             _mm256_store_si256(ptr as *mut __m256i, a)
         }

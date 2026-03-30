@@ -13,6 +13,9 @@ pub trait FloatExt: private::Sealed + Sized {
 
     fn m_round(self) -> Self;
 
+    /// Rounds to nearest integer value with ties-to-even semantics.
+    fn m_round_ties_even(self) -> Self;
+
     fn m_trunc(self) -> Self;
 
     fn m_fract(self) -> Self;

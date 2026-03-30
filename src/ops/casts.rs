@@ -2,6 +2,9 @@ use super::*;
 
 impl_op! {
     fn bitcast_binary<f32> {
+        for Avx512(a: __m512) -> __m512 {
+            a
+        }
         for Avx2(a: __m256) -> __m256 {
             a
         }
@@ -25,6 +28,9 @@ impl_op! {
 
 impl_op! {
     fn bitcast_f32<binary> {
+        for Avx512(a: __m512) -> __m512 {
+            a
+        }
         for Avx2(a: __m256) -> __m256 {
             a
         }
@@ -48,6 +54,9 @@ impl_op! {
 
 impl_op! {
     fn bitcast_binary<f64> {
+        for Avx512(a: __m512d) -> __m512 {
+            _mm512_castpd_ps(a)
+        }
         for Avx2(a: __m256d) -> __m256 {
             _mm256_castpd_ps(a)
         }
@@ -71,6 +80,9 @@ impl_op! {
 
 impl_op! {
     fn bitcast_f64<binary> {
+        for Avx512(a: __m512) -> __m512d {
+            _mm512_castps_pd(a)
+        }
         for Avx2(a: __m256) -> __m256d {
             _mm256_castps_pd(a)
         }
@@ -94,6 +106,9 @@ impl_op! {
 
 impl_op! {
     fn bitcast_binary<i8> {
+        for Avx512(a: __m512i) -> __m512 {
+            _mm512_castsi512_ps(a)
+        }
         for Avx2(a: __m256i) -> __m256 {
             _mm256_castsi256_ps(a)
         }
@@ -117,6 +132,9 @@ impl_op! {
 
 impl_op! {
     fn bitcast_i8<binary> {
+        for Avx512(a: __m512) -> __m512i {
+            _mm512_castps_si512(a)
+        }
         for Avx2(a: __m256) -> __m256i {
             _mm256_castps_si256(a)
         }
@@ -140,6 +158,9 @@ impl_op! {
 
 impl_op! {
     fn bitcast_binary<i16> {
+        for Avx512(a: __m512i) -> __m512 {
+            _mm512_castsi512_ps(a)
+        }
         for Avx2(a: __m256i) -> __m256 {
             _mm256_castsi256_ps(a)
         }
@@ -163,6 +184,9 @@ impl_op! {
 
 impl_op! {
     fn bitcast_i16<binary> {
+        for Avx512(a: __m512) -> __m512i {
+            _mm512_castps_si512(a)
+        }
         for Avx2(a: __m256) -> __m256i {
             _mm256_castps_si256(a)
         }
@@ -186,6 +210,9 @@ impl_op! {
 
 impl_op! {
     fn bitcast_binary<i32> {
+        for Avx512(a: __m512i) -> __m512 {
+            _mm512_castsi512_ps(a)
+        }
         for Avx2(a: __m256i) -> __m256 {
             _mm256_castsi256_ps(a)
         }
@@ -209,6 +236,9 @@ impl_op! {
 
 impl_op! {
     fn bitcast_i32<binary> {
+        for Avx512(a: __m512) -> __m512i {
+            _mm512_castps_si512(a)
+        }
         for Avx2(a: __m256) -> __m256i {
             _mm256_castps_si256(a)
         }
@@ -232,6 +262,9 @@ impl_op! {
 
 impl_op! {
     fn bitcast_binary<i64> {
+        for Avx512(a: __m512i) -> __m512 {
+            _mm512_castsi512_ps(a)
+        }
         for Avx2(a: __m256i) -> __m256 {
             _mm256_castsi256_ps(a)
         }
@@ -255,6 +288,9 @@ impl_op! {
 
 impl_op! {
     fn bitcast_i64<binary> {
+        for Avx512(a: __m512) -> __m512i {
+            _mm512_castps_si512(a)
+        }
         for Avx2(a: __m256) -> __m256i {
             _mm256_castps_si256(a)
         }

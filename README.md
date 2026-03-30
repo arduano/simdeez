@@ -1,18 +1,18 @@
 A library that abstracts over SIMD instruction sets, including ones with differing widths.
-SIMDeez is designed to allow you to write a function one time and produce SSE2, SSE41, AVX2, Neon and WebAssembly SIMD versions of the function.
+SIMDeez is designed to allow you to write a function one time and produce SSE2, SSE41, AVX2, AVX-512, Neon and WebAssembly SIMD versions of the function.
 You can either have the version you want chosen at compile time or automatically at runtime.
 
-Originally developed by @jackmott, however I volunteered to take over ownership.
+Originally developed by @jackmott. Active maintenance and releases now happen from this repository.
 
 If there are intrinsics you need that are not currently implemented, create an issue and I'll add them. PRs to add more intrinsics are welcome. Currently things are well fleshed out for i32, i64, f32, and f64 types.
 
-As Rust stabilizes support for AVX-512 I plan to add those as well. However, I currently don't own any hardware that supports AVX-512, so contributions to add and test those would be appreciated.
+AVX-512 support is now included for x86/x86_64 targets with `avx512f`, `avx512bw`, and `avx512dq`. Runtime dispatch will select it ahead of AVX2 when those features are available.
 
 Refer to the excellent [Intel Intrinsics Guide](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#) for documentation on these functions:
 
 # Features
 
-* SSE2, SSE41, AVX2, Neon, WebAssembly SIMD and scalar fallback
+* SSE2, SSE41, AVX2, AVX-512, Neon, WebAssembly SIMD and scalar fallback
 * Can be used with compile time or run time selection
 * No runtime overhead
 * Uses familiar intel intrinsic naming conventions, easy to port.
@@ -24,15 +24,28 @@ Refer to the excellent [Intel Intrinsics Guide](https://software.intel.com/sites
 * Extract or set a single lane with the index operator: `let v1 = v[1];`
 * Falls all the way back to scalar code for platforms with no SIMD or unsupported SIMD
 
-# Trig Functions via Sleef-sys
+# SIMD math
 
-~~A number of trigonometric and other common math functions are provided~~
-~~in vectorized form via the Sleef-sys crate. This is an optional feature `sleef` that you can enable.~~
-~~Doing so currently requires nightly, as well as having CMake and Clang installed.~~
+SIMDeez includes a native, pure-Rust SIMD math surface exposed through `simdeez::math` and re-exported in `simdeez::prelude`.
 
-⚠️ In simdeez V2.0, sleef is temporarily deprecated due to the maintenance complexity involved around it. We are open to contributions, and are undecided on whether we:
-- Resume sleef support via the existing sleef-sys crate
-- Re-implement sleef via simdeez primitives
+Covered families include:
+- core log/exp: `log2_u35`, `exp2_u35`, `ln_u35`, `exp_u35`
+- trig and inverse trig: `sin_u35`, `cos_u35`, `tan_u35`, `asin_u35`, `acos_u35`, `atan_u35`, `atan2_u35`
+- hyperbolic and inverse hyperbolic: `sinh_u35`, `cosh_u35`, `tanh_u35`, `asinh_u35`, `acosh_u35`, `atanh_u35`
+- binary misc: `log10_u35`, `hypot_u35`, `fmod`
+
+For implementation notes and benchmark guidance, see [SIMD_MATH.md](SIMD_MATH.md).
+
+Example:
+
+```rust
+use simdeez::prelude::*;
+
+fn apply_math<S: Simd>(x: S::Vf32) -> S::Vf32 {
+    let y = x.log2_u35();
+    y.exp2_u35() + x.ln_u35() + x.exp_u35() + x.sin_u35() + x.cos_u35() + x.tan_u35()
+}
+```
 
 # Compared to packed_simd
 
@@ -44,7 +57,7 @@ Refer to the excellent [Intel Intrinsics Guide](https://software.intel.com/sites
 * SIMDeez can be used with runtime selection, Faster cannot.
 * SIMDeez has faster fallbacks for some functions
 * SIMDeez does not currently work with iterators, Faster does.
-* SIMDeez uses more idiomatic intrinsic syntax while Faster uses more idomatic Rust syntax
+* SIMDeez uses more idiomatic intrinsic syntax while Faster uses more idiomatic Rust syntax
 * SIMDeez builds on stable rust now, Faster does not.
 
 All of the above could change! Faster seems to generally have the same
@@ -143,6 +156,7 @@ This will generate the following functions for you:
 * `distance_sse2`    SSE2 version
 * `distance_sse41`   SSE41 version
 * `distance_avx2`    AVX2 version
+* `distance_avx512`  AVX-512 version
 * `distance_neon`    Neon version
 * `distance_wasm`    WebAssembly SIMD version
 * `distance_runtime_select`  // picks the fastest of the above at runtime

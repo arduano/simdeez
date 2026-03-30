@@ -1,7 +1,51 @@
 use super::*;
 
+#[inline(always)]
+fn wrapping_shift_count(rhs: i32) -> i32 {
+    rhs & 63
+}
+
+#[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+#[inline(always)]
+unsafe fn sse_i64_hi32_splat(v: __m128i) -> __m128i {
+    _mm_shuffle_epi32(v, 0b11_11_01_01)
+}
+
+#[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+#[inline(always)]
+unsafe fn sse_i64_lo32_splat(v: __m128i) -> __m128i {
+    _mm_shuffle_epi32(v, 0b10_10_00_00)
+}
+
+#[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+#[inline(always)]
+unsafe fn sse_cmpeq_epi64_compat(a: __m128i, b: __m128i) -> __m128i {
+    let hi_eq = _mm_cmpeq_epi32(sse_i64_hi32_splat(a), sse_i64_hi32_splat(b));
+    let lo_eq = _mm_cmpeq_epi32(sse_i64_lo32_splat(a), sse_i64_lo32_splat(b));
+    _mm_and_si128(hi_eq, lo_eq)
+}
+
+#[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+#[inline(always)]
+unsafe fn sse_cmpgt_epi64_compat(a: __m128i, b: __m128i) -> __m128i {
+    let hi_a = sse_i64_hi32_splat(a);
+    let hi_b = sse_i64_hi32_splat(b);
+    let hi_gt = _mm_cmpgt_epi32(hi_a, hi_b);
+    let hi_eq = _mm_cmpeq_epi32(hi_a, hi_b);
+
+    let sign_bit = _mm_set1_epi32(i32::MIN);
+    let lo_a = _mm_xor_si128(sse_i64_lo32_splat(a), sign_bit);
+    let lo_b = _mm_xor_si128(sse_i64_lo32_splat(b), sign_bit);
+    let lo_gt = _mm_cmpgt_epi32(lo_a, lo_b);
+
+    _mm_or_si128(hi_gt, _mm_and_si128(hi_eq, lo_gt))
+}
+
 impl_op! {
     fn add<i64> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            _mm512_add_epi64(a, b)
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             _mm256_add_epi64(a, b)
         }
@@ -25,6 +69,9 @@ impl_op! {
 
 impl_op! {
     fn sub<i64> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            _mm512_sub_epi64(a, b)
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             _mm256_sub_epi64(a, b)
         }
@@ -48,6 +95,9 @@ impl_op! {
 
 impl_op! {
     fn mul<i64> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            _mm512_mullo_epi64(a, b)
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             let a_arr = core::mem::transmute::<__m256i, [i64; 4]>(a);
             let b_arr = core::mem::transmute::<__m256i, [i64; 4]>(b);
@@ -97,16 +147,19 @@ impl_op! {
 
 impl_op! {
     fn min<i64> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            _mm512_min_epi64(a, b)
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             let mask = _mm256_cmpgt_epi64(a, b);
             _mm256_or_si256(_mm256_and_si256(mask, b), _mm256_andnot_si256(mask, a))
         }
         for Sse41(a: __m128i, b: __m128i) -> __m128i {
-            let mask = _mm_cmpgt_epi64(a, b);
+            let mask = sse_cmpgt_epi64_compat(a, b);
             _mm_or_si128(_mm_and_si128(mask, b), _mm_andnot_si128(mask, a))
         }
         for Sse2(a: __m128i, b: __m128i) -> __m128i {
-            let mask = _mm_cmpgt_epi64(a, b);
+            let mask = sse_cmpgt_epi64_compat(a, b);
             _mm_or_si128(_mm_and_si128(mask, b), _mm_andnot_si128(mask, a))
         }
         for Scalar(a: i64, b: i64) -> i64 {
@@ -126,16 +179,19 @@ impl_op! {
 
 impl_op! {
     fn max<i64> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            _mm512_max_epi64(a, b)
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             let mask = _mm256_cmpgt_epi64(a, b);
             _mm256_or_si256(_mm256_and_si256(mask, a), _mm256_andnot_si256(mask, b))
         }
         for Sse41(a: __m128i, b: __m128i) -> __m128i {
-            let mask = _mm_cmpgt_epi64(a, b);
+            let mask = sse_cmpgt_epi64_compat(a, b);
             _mm_or_si128(_mm_and_si128(mask, a), _mm_andnot_si128(mask, b))
         }
         for Sse2(a: __m128i, b: __m128i) -> __m128i {
-            let mask = _mm_cmpgt_epi64(a, b);
+            let mask = sse_cmpgt_epi64_compat(a, b);
             _mm_or_si128(_mm_and_si128(mask, a), _mm_andnot_si128(mask, b))
         }
         for Scalar(a: i64, b: i64) -> i64 {
@@ -155,20 +211,23 @@ impl_op! {
 
 impl_op! {
     fn abs<i64> {
+        for Avx512(a: __m512i) -> __m512i {
+            _mm512_abs_epi64(a)
+        }
         for Avx2(a: __m256i) -> __m256i {
             let mask = _mm256_cmpgt_epi64(_mm256_setzero_si256(), a);
             _mm256_sub_epi64(_mm256_xor_si256(a, mask), mask)
         }
         for Sse41(a: __m128i) -> __m128i {
-            let mask = _mm_cmpgt_epi64(_mm_setzero_si128(), a);
+            let mask = sse_cmpgt_epi64_compat(_mm_setzero_si128(), a);
             _mm_sub_epi64(_mm_xor_si128(a, mask), mask)
         }
         for Sse2(a: __m128i) -> __m128i {
-            let mask = _mm_cmpgt_epi64(_mm_setzero_si128(), a);
+            let mask = sse_cmpgt_epi64_compat(_mm_setzero_si128(), a);
             _mm_sub_epi64(_mm_xor_si128(a, mask), mask)
         }
         for Scalar(a: i64) -> i64 {
-            a.abs()
+            a.wrapping_abs()
         }
         for Neon(a: int64x2_t) -> int64x2_t {
             vabsq_s64(a)
@@ -181,14 +240,18 @@ impl_op! {
 
 impl_op! {
     fn eq<i64> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            let k = _mm512_cmpeq_epi64_mask(a, b);
+            _mm512_movm_epi64(k)
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             _mm256_cmpeq_epi64(a, b)
         }
         for Sse41(a: __m128i, b: __m128i) -> __m128i {
-            _mm_cmpeq_epi64(a, b)
+            sse_cmpeq_epi64_compat(a, b)
         }
         for Sse2(a: __m128i, b: __m128i) -> __m128i {
-            _mm_cmpeq_epi64(a, b)
+            sse_cmpeq_epi64_compat(a, b)
         }
         for Scalar(a: i64, b: i64) -> i64 {
             if a == b {
@@ -208,16 +271,20 @@ impl_op! {
 
 impl_op! {
     fn neq<i64> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            let k = _mm512_cmpneq_epi64_mask(a, b);
+            _mm512_movm_epi64(k)
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             let eq = _mm256_cmpeq_epi64(a, b);
             _mm256_xor_si256(eq, _mm256_set1_epi64x(u64::MAX as i64))
         }
         for Sse41(a: __m128i, b: __m128i) -> __m128i {
-            let eq = _mm_cmpeq_epi64(a, b);
+            let eq = sse_cmpeq_epi64_compat(a, b);
             _mm_xor_si128(eq, _mm_set1_epi64x(u64::MAX as i64))
         }
         for Sse2(a: __m128i, b: __m128i) -> __m128i {
-            let eq = _mm_cmpeq_epi64(a, b);
+            let eq = sse_cmpeq_epi64_compat(a, b);
             _mm_xor_si128(eq, _mm_set1_epi64x(u64::MAX as i64))
         }
         for Scalar(a: i64, b: i64) -> i64 {
@@ -238,6 +305,10 @@ impl_op! {
 
 impl_op! {
     fn lt<i64> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            let k = _mm512_cmplt_epi64_mask(a, b);
+            _mm512_movm_epi64(k)
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             _mm256_cmpgt_epi64(b, a)
         }
@@ -265,16 +336,20 @@ impl_op! {
 
 impl_op! {
     fn lte<i64> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            let k = _mm512_cmple_epi64_mask(a, b);
+            _mm512_movm_epi64(k)
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             let gt = _mm256_cmpgt_epi64(a, b);
             _mm256_xor_si256(gt, _mm256_set1_epi64x(u64::MAX as i64))
         }
         for Sse41(a: __m128i, b: __m128i) -> __m128i {
-            let gt = _mm_cmpgt_epi64(a, b);
+            let gt = sse_cmpgt_epi64_compat(a, b);
             _mm_xor_si128(gt, _mm_set1_epi64x(u64::MAX as i64))
         }
         for Sse2(a: __m128i, b: __m128i) -> __m128i {
-            let gt = _mm_cmpgt_epi64(a, b);
+            let gt = sse_cmpgt_epi64_compat(a, b);
             _mm_xor_si128(gt, _mm_set1_epi64x(u64::MAX as i64))
         }
         for Scalar(a: i64, b: i64) -> i64 {
@@ -295,14 +370,18 @@ impl_op! {
 
 impl_op! {
     fn gt<i64> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            let k = _mm512_cmpgt_epi64_mask(a, b);
+            _mm512_movm_epi64(k)
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             _mm256_cmpgt_epi64(a, b)
         }
         for Sse41(a: __m128i, b: __m128i) -> __m128i {
-            _mm_cmpgt_epi64(a, b)
+            sse_cmpgt_epi64_compat(a, b)
         }
         for Sse2(a: __m128i, b: __m128i) -> __m128i {
-            _mm_cmpgt_epi64(a, b)
+            sse_cmpgt_epi64_compat(a, b)
         }
         for Scalar(a: i64, b: i64) -> i64 {
             if a > b {
@@ -322,19 +401,23 @@ impl_op! {
 
 impl_op! {
     fn gte<i64> {
+        for Avx512(a: __m512i, b: __m512i) -> __m512i {
+            let k = _mm512_cmpge_epi64_mask(a, b);
+            _mm512_movm_epi64(k)
+        }
         for Avx2(a: __m256i, b: __m256i) -> __m256i {
             let gt = _mm256_cmpgt_epi64(a, b);
             let eq = _mm256_cmpeq_epi64(a, b);
             _mm256_or_si256(gt, eq)
         }
         for Sse41(a: __m128i, b: __m128i) -> __m128i {
-            let gt = _mm_cmpgt_epi64(a, b);
-            let eq = _mm_cmpeq_epi64(a, b);
+            let gt = sse_cmpgt_epi64_compat(a, b);
+            let eq = sse_cmpeq_epi64_compat(a, b);
             _mm_or_si128(gt, eq)
         }
         for Sse2(a: __m128i, b: __m128i) -> __m128i {
-            let gt = _mm_cmpgt_epi64(a, b);
-            let eq = _mm_cmpeq_epi64(a, b);
+            let gt = sse_cmpgt_epi64_compat(a, b);
+            let eq = sse_cmpeq_epi64_compat(a, b);
             _mm_or_si128(gt, eq)
         }
         for Scalar(a: i64, b: i64) -> i64 {
@@ -355,6 +438,10 @@ impl_op! {
 
 impl_op! {
     fn blendv<i64> {
+        for Avx512(a: __m512i, b: __m512i, mask: __m512i) -> __m512i {
+            let k = _mm512_movepi64_mask(mask);
+            _mm512_mask_blend_epi64(k, a, b)
+        }
         for Avx2(a: __m256i, b: __m256i, mask: __m256i) -> __m256i {
             _mm256_blendv_epi8(a, b, mask)
         }
@@ -382,54 +469,63 @@ impl_op! {
 
 impl_op! {
     fn shl<i64> {
+        for Avx512(a: __m512i, rhs: i32) -> __m512i {
+            _mm512_sll_epi64(a, _mm_cvtsi32_si128(wrapping_shift_count(rhs)))
+        }
         for Avx2(a: __m256i, rhs: i32) -> __m256i {
-            _mm256_sll_epi64(a, _mm_cvtsi32_si128(rhs))
+            _mm256_sll_epi64(a, _mm_cvtsi32_si128(wrapping_shift_count(rhs)))
         }
-        for Sse41(a: __m128i, b: i32) -> __m128i {
-            _mm_sll_epi64(a, _mm_cvtsi32_si128(b))
+        for Sse41(a: __m128i, rhs: i32) -> __m128i {
+            _mm_sll_epi64(a, _mm_cvtsi32_si128(wrapping_shift_count(rhs)))
         }
-        for Sse2(a: __m128i, b: i32) -> __m128i {
-            _mm_sll_epi64(a, _mm_cvtsi32_si128(b))
+        for Sse2(a: __m128i, rhs: i32) -> __m128i {
+            _mm_sll_epi64(a, _mm_cvtsi32_si128(wrapping_shift_count(rhs)))
         }
-        for Scalar(a: i64, b: i32) -> i64 {
-            a << b
+        for Scalar(a: i64, rhs: i32) -> i64 {
+            a.wrapping_shl(wrapping_shift_count(rhs) as u32)
         }
         for Neon(a: int64x2_t, rhs: i32) -> int64x2_t {
-            let rhs = Self::set1(rhs as i64);
+            let rhs = Self::set1(wrapping_shift_count(rhs) as i64);
             vshlq_s64(a, rhs)
         }
         for Wasm(a: v128, rhs: i32) -> v128 {
-            i64x2_shl(a, rhs as u32)
+            i64x2_shl(a, wrapping_shift_count(rhs) as u32)
         }
     }
 }
 
 impl_op! {
     fn shr<i64> {
+        for Avx512(a: __m512i, rhs: i32) -> __m512i {
+            _mm512_srl_epi64(a, _mm_cvtsi32_si128(wrapping_shift_count(rhs)))
+        }
         for Avx2(a: __m256i, rhs: i32) -> __m256i {
-            _mm256_srl_epi64(a, _mm_cvtsi32_si128(rhs))
+            _mm256_srl_epi64(a, _mm_cvtsi32_si128(wrapping_shift_count(rhs)))
         }
         for Sse41(a: __m128i, rhs: i32) -> __m128i {
-            _mm_srl_epi64(a, _mm_cvtsi32_si128(rhs))
+            _mm_srl_epi64(a, _mm_cvtsi32_si128(wrapping_shift_count(rhs)))
         }
         for Sse2(a: __m128i, rhs: i32) -> __m128i {
-            _mm_srl_epi64(a, _mm_cvtsi32_si128(rhs))
+            _mm_srl_epi64(a, _mm_cvtsi32_si128(wrapping_shift_count(rhs)))
         }
         for Scalar(a: i64, rhs: i32) -> i64 {
-            ((a as u64) >> rhs) as i64
+            ((a as u64).wrapping_shr(wrapping_shift_count(rhs) as u32)) as i64
         }
         for Neon(a: int64x2_t, rhs: i32) -> int64x2_t {
-            let rhs = Self::set1(-rhs as i64);
+            let rhs = Self::set1(-wrapping_shift_count(rhs) as i64);
             vreinterpretq_s64_u64(vshlq_u64(vreinterpretq_u64_s64(a), rhs))
         }
         for Wasm(a: v128, rhs: i32) -> v128 {
-            u64x2_shr(a, rhs as u32)
+            u64x2_shr(a, wrapping_shift_count(rhs) as u32)
         }
     }
 }
 
 impl_imm8_op! {
     fn shl_const<i64, const BY: i32> {
+        for Avx512(a: __m512i) -> __m512i {
+            _mm512_sll_epi64(a, _mm_cvtsi32_si128(BY))
+        }
         for Avx2(a: __m256i) -> __m256i {
             _mm256_slli_epi64(a, BY)
         }
@@ -453,6 +549,9 @@ impl_imm8_op! {
 
 impl_imm8_op! {
     fn shr_const<i64, const BY: i32> {
+        for Avx512(a: __m512i) -> __m512i {
+            _mm512_srl_epi64(a, _mm_cvtsi32_si128(BY))
+        }
         for Avx2(a: __m256i) -> __m256i {
             _mm256_srli_epi64(a, BY)
         }
@@ -476,6 +575,9 @@ impl_imm8_op! {
 
 impl_op! {
     fn cast_f64<i64> {
+        for Avx512(a: __m512i) -> __m512d {
+            _mm512_cvtepi64_pd(a)
+        }
         for Avx2(a: __m256i) -> __m256d {
             let arr = core::mem::transmute::<__m256i, [i64; 4]>(a);
             let result = [
@@ -521,6 +623,9 @@ impl_op! {
 
 impl_op! {
     fn bitcast_f64<i64> {
+        for Avx512(a: __m512i) -> __m512d {
+            _mm512_castsi512_pd(a)
+        }
         for Avx2(a: __m256i) -> __m256d {
             _mm256_castsi256_pd(a)
         }
@@ -544,9 +649,12 @@ impl_op! {
 
 impl_op! {
     fn horizontal_add<i64> {
+        for Avx512(val: __m512i) -> i64 {
+            _mm512_reduce_add_epi64(val)
+        }
         for Avx2(val: __m256i) -> i64 {
             let a = val;
-            let b = _mm256_permute4x64_epi64(a, 0b00_01_10_11); // Shuffle [0, 1, 2, 3]
+            let b = _mm256_permute4x64_epi64(a, 0b00_01_10_11);
             let c = _mm256_add_epi64(a, b);
             let val1 = _mm256_extract_epi64(c, 0);
             let val2 = _mm256_extract_epi64(c, 1);
@@ -581,6 +689,9 @@ impl_op! {
 
 impl_op! {
     fn zeroes<i64> {
+        for Avx512() -> __m512i {
+            _mm512_setzero_si512()
+        }
         for Avx2() -> __m256i {
             _mm256_setzero_si256()
         }
@@ -604,6 +715,9 @@ impl_op! {
 
 impl_op! {
     fn set1<i64> {
+        for Avx512(val: i64) -> __m512i {
+            _mm512_set1_epi64(val)
+        }
         for Avx2(val: i64) -> __m256i {
             _mm256_set1_epi64x(val)
         }
@@ -627,6 +741,9 @@ impl_op! {
 
 impl_op! {
     fn load_unaligned<i64> {
+        for Avx512(ptr: *const i64) -> __m512i {
+            _mm512_loadu_si512(ptr as *const __m512i)
+        }
         for Avx2(ptr: *const i64) -> __m256i {
             _mm256_loadu_si256(ptr as *const __m256i)
         }
@@ -643,13 +760,16 @@ impl_op! {
             vld1q_s64(ptr)
         }
         for Wasm(ptr: *const i64) -> v128 {
-            *(ptr as *const v128)
+            unsafe { v128_load(ptr as *const v128) }
         }
     }
 }
 
 impl_op! {
     fn load_aligned<i64> {
+        for Avx512(ptr: *const i64) -> __m512i {
+            _mm512_load_si512(ptr as *const __m512i)
+        }
         for Avx2(ptr: *const i64) -> __m256i {
             _mm256_load_si256(ptr as *const __m256i)
         }
@@ -673,6 +793,9 @@ impl_op! {
 
 impl_op! {
     fn store_unaligned<i64> {
+        for Avx512(ptr: *mut i64, a: __m512i) {
+            _mm512_storeu_si512(ptr as *mut __m512i, a)
+        }
         for Avx2(ptr: *mut i64, a: __m256i) {
             _mm256_storeu_si256(ptr as *mut __m256i, a)
         }
@@ -689,13 +812,16 @@ impl_op! {
             vst1q_s64(ptr, a)
         }
         for Wasm(ptr: *mut i64, a: v128) {
-            *(ptr as *mut v128) = a;
+            unsafe { v128_store(ptr as *mut v128, a) }
         }
     }
 }
 
 impl_op! {
     fn store_aligned<i64> {
+        for Avx512(ptr: *mut i64, a: __m512i) {
+            _mm512_store_si512(ptr as *mut __m512i, a)
+        }
         for Avx2(ptr: *mut i64, a: __m256i) {
             _mm256_store_si256(ptr as *mut __m256i, a)
         }
