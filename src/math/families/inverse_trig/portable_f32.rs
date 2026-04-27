@@ -17,11 +17,11 @@ const F32_SIGN_MASK: i32 = i32::MIN;
 const ASIN_SQRT_FALLBACK_BOUND_BITS: u32 = 0x3F7F_F000;
 
 const FRAC_PI_2_HI: f32 = f32::from_bits(0x3FC9_0F80);
-const FRAC_PI_2_LO: f32 = std::f32::consts::FRAC_PI_2 - FRAC_PI_2_HI;
+const FRAC_PI_2_LO: f32 = core::f32::consts::FRAC_PI_2 - FRAC_PI_2_HI;
 const FRAC_PI_4_HI: f32 = f32::from_bits(0x3F49_0F80);
-const FRAC_PI_4_LO: f32 = std::f32::consts::FRAC_PI_4 - FRAC_PI_4_HI;
+const FRAC_PI_4_LO: f32 = core::f32::consts::FRAC_PI_4 - FRAC_PI_4_HI;
 const PI_HI: f32 = f32::from_bits(0x4049_0F80);
-const PI_LO: f32 = std::f32::consts::PI - PI_HI;
+const PI_LO: f32 = core::f32::consts::PI - PI_HI;
 
 const TAN_PI_8: f32 = 0.414_213_57;
 const TAN_3PI_8: f32 = 2.414_213_7;
